@@ -1,0 +1,15 @@
+# Frame/debug dumps
+*.ppm
+*.dmp
+*.pgm
+[0-9]*.txt
+
+# Test scratch outputs
+*.txt.tmp
+
+# Objects and local build outputs
+*.o
+__pycache__/
+*.pyc
+port/tests/t_*
+port/ar_port
