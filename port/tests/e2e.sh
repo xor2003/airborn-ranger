@@ -1,6 +1,7 @@
 #!/bin/sh
-# e2e smoke: boot the port headless, drive to the POD screen, verify the
-# intro animates (multiple distinct frames) and the game reaches POD.
+# e2e smoke: boot the port headless, drive through the menu flow to the POD
+# screen, then cycle arrows+Enter until DONE launches the airdrop; verify the
+# intro animates, POD is reached, and the parafoil descent renders.
 # Run from the port dir; binary expects game data in the parent dir.
 set -e
 cd "$(dirname "$0")/.."
@@ -9,10 +10,16 @@ rm -f "$T".*.ppm "$T".*.txt "$T".log
 mkdir -p /tmp
 
 cd ..
+# Flow: 4=VGA/MCGA at the device menu, 2=keyboard-directional. Enters walk the
+# title->credits->mission-select->difficulty->briefing chain. On the POD screen
+# the divert mask only consumes arrows+Enter, so cycle focus over the item grid
+# and the CLEAR/STANDARD/DONE row until Enter lands on DONE. Then idle so the
+# airdrop (Osprey -> pod drop -> parafoil descent) runs on its own.
 SDL_VIDEODRIVER=dummy SDL_AUDIODRIVER=dummy \
 M2C_DUMP="$T" M2C_DUMP_EVERY=120 \
-M2C_KEYS="4..2..\r\r\r\r\r\r\r\r\r\r\r\r" M2C_KEYS_DELAY=8 \
-timeout 90 ./port/ar_port 2>"$T".log || true
+M2C_KEYS="4..2..\r\r\r\r\r\r\r\r\r\r\r\r\r\r..\R..\d..\r..\R..\d..\r..\l..\d..\r..\R..\d..\r..\u..\r..\R..\R..\d..\r..\R..\l..\u..\r..\R..\d..\r............................................................................................................................................................................................................................................................................................" \
+M2C_KEYS_DELAY=10 \
+timeout 150 ./port/ar_port 2>"$T".log || true
 
 cd port
 python3 - "$T" <<'EOF'
@@ -23,12 +30,12 @@ hashes = {hashlib.md5(open(f,'rb').read()).hexdigest() for f in frames}
 log = open(tag + ".log", errors='replace').read()
 
 def rgb_count(path, rgb):
-    # P6 ppm: count pixels matching rgb in a frame
+    # P6 ppm: approximate count of pixels matching rgb via substring scan.
+    # Solid-color regions are long contiguous runs, so non-overlap counting is
+    # exact for them; thresholds are set far from boundary cases anyway.
     d = open(path, 'rb').read()
     i = d.index(b'\n255\n') + 5
-    px = d[i:]
-    return sum(1 for j in range(0, len(px) - 2, 3)
-               if px[j:j+3] == bytes(rgb))
+    return d[i:].count(bytes(rgb))
 
 ok = True
 if len(frames) < 10:            print("FAIL: too few frames:", len(frames)); ok = False
@@ -40,6 +47,12 @@ for f in reversed(frames):           # POD is reached late; stop at first hit
     red = rgb_count(f, (168, 0, 0))
     if red >= 2000: break
 if red < 2000:                  print(f"FAIL: POD screen not reached (red px={red})"); ok = False
+# Airdrop signature: the parafoil descent is >90% teal sky (0,168,168).
+teal = 0
+for f in reversed(frames):
+    teal = rgb_count(f, (0, 168, 168))
+    if teal >= 150000: break
+if teal < 150000:               print(f"FAIL: airdrop not reached (teal px={teal})"); ok = False
 if "unresolved ind" in log:     print("FAIL: unresolved indirect calls"); ok = False
 print(("e2e: PASS" if ok else "e2e: FAIL"),
       f"({len(frames)} frames, {len(hashes)} distinct)")

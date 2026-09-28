@@ -166,8 +166,25 @@ void rt_script_feed(void){
         if (xs < 0){                            /* pause token: just wait a window */
             script = next; sdel = 0; goto out;
         }
-        int diverted = *(dw*)&mem[DS_BASE + 0xad7] == 1 &&
+        int divert_flag = *(dw*)&mem[DS_BASE + 0xad7] == 1;
+        int diverted = divert_flag &&
                        *(dw*)&mem[DS_BASE + 0x950 + (xs & 0x7f) * 2] != 0;
+        if (getenv("M2C_MASKDUMP") && divert_flag){
+            /* Print which scancodes the current screen consumes via the int9
+             * held-mask (the "divert" table), once per mask-content change. */
+            static uint64_t last_mh; static char buf[1024];
+            uint64_t mh = 1469598103934665603ULL;
+            for (int i = 0; i < 0x80; i++)
+                mh = (mh ^ *(dw*)&mem[DS_BASE + 0x950 + i*2]) * 1099511628211ULL;
+            if (mh != last_mh){
+                last_mh = mh; int n = 0;
+                for (int i = 0; i < 0x80; i++){
+                    dw v = *(dw*)&mem[DS_BASE + 0x950 + i*2];
+                    if (v) n += snprintf(buf+n, sizeof(buf)-n, "%02x:%x ", i, v);
+                }
+                fprintf(stderr, "mask: %s\n", buf);
+            }
+        }
         static int gate_open;
         if (diverted && !gate_open && delay < 1000000){
             /* Held-mask keys are consumed by whatever screen is currently up.
@@ -202,7 +219,8 @@ void rt_script_feed(void){
             wait_poll0 = -1;
             gate_open = 0;
             int d = int9_update(xs, 1);
-            if (getenv("M2C_KTRACE")) fprintf(stderr, "feed %02x div=%d\n", xs, d);
+            if (getenv("M2C_KTRACE")) fprintf(stderr, "feed %02x div=%d scr=%x\n", xs, d,
+                                              *(dw*)&mem[DS_BASE + 0xa94]);
             if (!d) kpush((dw)((xs << 8) | asc));
             pend_scan = xs;
         }

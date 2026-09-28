@@ -2,8 +2,22 @@ UPDATE 2026-09-28 — port/ stability verified; formal comparator is reference-o
 
 - port/ar_port builds clean (gcc -O2, no errors) and passes `make check`
   (320 unit checks: rt/dos/input/snd/video/game harnesses).
-- e2e smoke (tests/e2e.sh): headless boot -> key-driven to POD screen,
-  411 frames / 7 distinct, no unresolved indirect calls. PASS.
+- e2e smoke (tests/e2e.sh): headless boot -> key-driven through the menu
+  chain (title -> credits -> mission select -> difficulty -> mission
+  briefing) -> SUPPLY POD SELECTION -> DONE via arrow+Enter navigation ->
+  airdrop sequence (parafoil descent renders). PASS.
+  Verified flow detail: the controls menu's "2" = KEYBOARD-DIRECTIONAL
+  ("1" is joystick, waits on gameport 0x201 forever headless). The POD
+  screen consumes only the int9 held-mask (arrows+Enter, bit-coded as a
+  joystick abstraction in word_1D959); digits/letters go to the int16
+  queue it never reads there. NEW in input.c: M2C_MASKDUMP=1 prints which
+  scancodes the current screen arms — the tool for driving any future
+  scripted-input checks.
+- Manual triage of the comparator's real-looking diffs (sub_106a7,
+  sub_15f09, sub_169b6, sub_1b23d, sub_1bcaa): all five are faithful
+  instruction-level translations; diffs traced to comparator asymmetries
+  (oracle disp_unres extra return paths, boundary-summary UF shapes,
+  image-byte resolution on cand only). No port bugs found.
 - The clean C port at port/gen/*.c + port/*.c is the stable, readable
   deliverable. The masm2c oracle (build_sdl/ar_m2c) remains the reference.
 
