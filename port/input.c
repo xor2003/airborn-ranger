@@ -184,10 +184,13 @@ void rt_script_feed(void){
         fprintf(stderr, "fs: polls=%d pend=%d sdel=%d next=%c\n", kbd_polls, pend_scan, sdel, script && *script ? *script : '-'); }
     if (pend_scan >= 0){                        /* release the pending press */
         if (getenv("M2C_MASKDUMP"))
-            fprintf(stderr, "hold x=%04x y=%04x held=%04x in=%04x ca2=%04x\n",
+            fprintf(stderr, "hold x=%04x y=%04x held=%04x in=%04x ca2=%04x "
+                    "gate=%d tick=%d\n",
                     *(dw*)&mem[0xf71f], *(dw*)&mem[0xf75f],
                     *(dw*)&mem[DS_BASE + 0xad9], *(dw*)&mem[0x18804],
-                    *(dw*)&mem[0xf6c2]);   /* word_1DCA2 */
+                    *(dw*)&mem[0xf6c2],   /* word_1DCA2 */
+                    *(dw*)&mem[0xf36d],   /* word_1D94D sampler gate */
+                    *(dw*)&mem[0xf102]);  /* word_1D6E2 int1c tick count */
         if (++sdel >= delay){                   /* hold for a full delay window */
             sdel = 0;
             int9_update(pend_scan, 0);
