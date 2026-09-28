@@ -27,6 +27,16 @@ UPDATE 2026-09-28 — port/ stability verified; formal comparator is reference-o
   -> word_1D959 -> sub_1231C -> word_1DCA2 -> word_26DE4 -> cursor at
   word_1DCFF/1DD3F (the red arrow sprite, object slot 0, moves 4px per
   55ms tick — deliberately joystick-paced, same as the original).
+- DECOMPILER BUGFIX (root cause of dead POD/menu input): sub_1245A's tail
+  folds `mov ax, word_1D8D4; mov word_1DCA2, ax` into
+  `word_1dca2 = (word_1d8d4)` — dropping the `ax` load, so the next
+  `mov byte ptr word_26DE4, al` stored STALE al (always 0xFF = neutral).
+  Every screen fed by the controller sampler saw a frozen input byte.
+  Fixed to `ax = word_1dca2 = word_1d8d4` in lifted/ + port/gen/ (4 sites:
+  sub_1245a + loc_12466/12474/1247F entry stubs). A scan of all lifted/gen
+  C for the same dropped-load fold pattern found no other instances.
+  Verified: unit probe moves cursor a0->b0 under held RIGHT; make check
+  320/320; e2e PASS with 32 distinct screens (input now live everywhere).
 - Manual triage of the comparator's real-looking diffs (sub_106a7,
   sub_15f09, sub_169b6, sub_1b23d, sub_1bcaa): all five are faithful
   instruction-level translations; diffs traced to comparator asymmetries

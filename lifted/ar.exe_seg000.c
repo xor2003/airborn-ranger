@@ -15128,7 +15128,7 @@ loc_1247f:
     } while (word_1d94d != 0);
     /* mov     ax, word_1D8D4 ;~ 01A2:2486 */
     /* mov     word_1DCA2, ax ;~ 01A2:2489 */
-    word_1dca2 = (word_1d8d4);
+    ax = word_1dca2 = word_1d8d4;
     /* mov     byte ptr word_26DE4, al ;~ 01A2:248C */
     *(db*)(&word_26de4) = al;
     /* mov     ax, word_1D8D6 ;~ 01A2:248F */
@@ -15158,7 +15158,7 @@ loc_1247f:
             if (word_1d94d == 0) {
                 /* mov     ax, word_1D8D4 ;~ 01A2:2486 */
                 /* mov     word_1DCA2, ax ;~ 01A2:2489 */
-                word_1dca2 = (word_1d8d4);
+                ax = word_1dca2 = word_1d8d4;
                 /* mov     byte ptr word_26DE4, al ;~ 01A2:248C */
                 *(db*)(&word_26de4) = al;
                 /* mov     ax, word_1D8D6 ;~ 01A2:248F */
@@ -15191,7 +15191,7 @@ loc_1247f:
             if (word_1d94d == 0) {
                 /* mov     ax, word_1D8D4 ;~ 01A2:2486 */
                 /* mov     word_1DCA2, ax ;~ 01A2:2489 */
-                word_1dca2 = (word_1d8d4);
+                ax = word_1dca2 = word_1d8d4;
                 /* mov     byte ptr word_26DE4, al ;~ 01A2:248C */
                 *(db*)(&word_26de4) = al;
                 /* mov     ax, word_1D8D6 ;~ 01A2:248F */
@@ -15259,7 +15259,7 @@ loc_1247f:
     } while (word_1d94d != 0);
     /* mov     ax, word_1D8D4 ;~ 01A2:2486 */
     /* mov     word_1DCA2, ax ;~ 01A2:2489 */
-    word_1dca2 = (word_1d8d4);
+    ax = word_1dca2 = word_1d8d4;
     /* mov     byte ptr word_26DE4, al ;~ 01A2:248C */
     *(db*)(&word_26de4) = al;
     /* mov     ax, word_1D8D6 ;~ 01A2:248F */
