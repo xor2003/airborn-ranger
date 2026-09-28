@@ -12,7 +12,21 @@ UPDATE 2026-09-28 — port/ stability verified; formal comparator is reference-o
   joystick abstraction in word_1D959); digits/letters go to the int16
   queue it never reads there. NEW in input.c: M2C_MASKDUMP=1 prints which
   scancodes the current screen arms — the tool for driving any future
-  scripted-input checks.
+  scripted-input checks. M2C_KEYDBG=1 logs every real SDL key event
+  (xt code, diverted?, held-mask, cursor pos) — use it to diagnose any
+  "keys not working" report at the real-keyboard path.
+- INPUT FIX (real keyboards): the POD screen samples the int9 held-mask
+  inside a tick-gated loop (sub_1245A waits for an int1c decrement, ~55ms
+  windows). A physical tap shorter than one event-pump interval could
+  set+clear the bit inside a single SDL_PollEvent drain — invisible to
+  the guest. Diverted key releases are now deferred so every press holds
+  for >=60ms (input.c rel_pend/rel_defer/rel_expire). Verified: synthetic
+  SDL events through rt_pump_events set/hold/clear mask bits correctly,
+  and a direct sub_159ff unit probe moves the POD cursor +4px per poll
+  for a held arrow. Full mechanism: SDL event -> xt_scan -> int9_update
+  -> word_1D959 -> sub_1231C -> word_1DCA2 -> word_26DE4 -> cursor at
+  word_1DCFF/1DD3F (the red arrow sprite, object slot 0, moves 4px per
+  55ms tick — deliberately joystick-paced, same as the original).
 - Manual triage of the comparator's real-looking diffs (sub_106a7,
   sub_15f09, sub_169b6, sub_1b23d, sub_1bcaa): all five are faithful
   instruction-level translations; diffs traced to comparator asymmetries

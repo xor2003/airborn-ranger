@@ -92,6 +92,38 @@ static int int9_update(int scan, int pressed){
     return 1;
 }
 
+/* The game's diverted keys land in a held-bitmask which menu/screens sample
+ * from inside a tick-gated polling loop (~55ms windows, int1c-paced). A real
+ * key tap shorter than one event-pump interval would set+clear the bit within
+ * a single SDL_PollEvent drain — invisible to the guest. Diverted releases are
+ * therefore deferred so every press stays visible for at least MIN_HOLD ms. */
+#define MIN_HOLD 60
+static struct { int scan; Uint32 at; } rel_pend[16];
+static int rel_n;
+static Uint32 down_at[128];                      /* last KEYDOWN tick per scan */
+
+static void rel_expire(void){
+    Uint32 now = SDL_GetTicks();
+    int i = 0;
+    while (i < rel_n){
+        if ((Sint32)(now - rel_pend[i].at) >= 0){
+            int9_update(rel_pend[i].scan, 0);
+            rel_pend[i] = rel_pend[--rel_n];
+        } else i++;
+    }
+}
+static void rel_defer(int scan){
+    rel_expire();
+    Uint32 deadline = down_at[scan & 0x7f] + MIN_HOLD;
+    if ((Sint32)(SDL_GetTicks() - deadline) >= 0){ int9_update(scan, 0); return; }
+    if (rel_n < 16){ rel_pend[rel_n].scan = scan; rel_pend[rel_n].at = deadline; rel_n++; }
+    else int9_update(scan, 0);                    /* table full: release now */
+}
+static void rel_cancel(int scan){
+    for (int i = 0; i < rel_n; i++)
+        if (rel_pend[i].scan == scan){ rel_pend[i] = rel_pend[--rel_n]; return; }
+}
+
 /* scripted key feeder for headless testing: M2C_KEYS="1245 " drips one
  * keypress per M2C_KEYS_DELAY pump calls. Escapes: \r enter \e esc
  * \u \d \l \r2 arrows (up/down/left/right). Each key press is followed by
@@ -151,6 +183,11 @@ void rt_script_feed(void){
     if (getenv("M2C_KTRACE")){ static int lp; if (++lp % 400 == 0)
         fprintf(stderr, "fs: polls=%d pend=%d sdel=%d next=%c\n", kbd_polls, pend_scan, sdel, script && *script ? *script : '-'); }
     if (pend_scan >= 0){                        /* release the pending press */
+        if (getenv("M2C_MASKDUMP"))
+            fprintf(stderr, "hold x=%04x y=%04x held=%04x in=%04x ca2=%04x\n",
+                    *(dw*)&mem[0xf71f], *(dw*)&mem[0xf75f],
+                    *(dw*)&mem[DS_BASE + 0xad9], *(dw*)&mem[0x18804],
+                    *(dw*)&mem[0xf6c2]);   /* word_1DCA2 */
         if (++sdel >= delay){                   /* hold for a full delay window */
             sdel = 0;
             int9_update(pend_scan, 0);
@@ -184,6 +221,14 @@ void rt_script_feed(void){
                 }
                 fprintf(stderr, "mask: %s\n", buf);
             }
+            fprintf(stderr, "cur x=%04x y=%04x held=%04x in=%04x "
+                    "s0x=%04x s0y=%04x s0i=%04x s0f=%04x s0e=%02x m=%08lx\n",
+                    *(dw*)&mem[0xf71f], *(dw*)&mem[0xf75f],
+                    *(dw*)&mem[DS_BASE + 0xad9], *(dw*)&mem[0x18804],
+                    *(dw*)&mem[DS_BASE + 0xe7f], *(dw*)&mem[DS_BASE + 0xebf],
+                    *(dw*)&mem[DS_BASE + 0xedf], *(dw*)&mem[DS_BASE + 0xeff],
+                    *(db*)&mem[DS_BASE + 0xdd5],
+                    (unsigned long)*(dd*)&mem[DS_BASE + 0xf1f]);
         }
         static int gate_open;
         if (diverted && !gate_open && delay < 1000000){
@@ -241,15 +286,33 @@ void rt_pump_events(void){
         }
     }
     rt_script_feed();
+    rel_expire();
     SDL_Event e;
     while (SDL_PollEvent(&e)){
         if (e.type == SDL_QUIT) rt_exit(0);
         if (e.type == SDL_KEYDOWN || e.type == SDL_KEYUP){
             int xs = xt_scan(e.key.keysym.scancode);
             if (!xs) continue;
-            port60 = xs | (e.type == SDL_KEYUP ? 0x80 : 0);
-            int diverted = int9_update(xs & 0x7f, e.type == SDL_KEYDOWN);
-            if (e.type == SDL_KEYDOWN && !diverted){
+            int down = e.type == SDL_KEYDOWN;
+            if (down){ rel_cancel(xs & 0x7f); down_at[xs & 0x7f] = SDL_GetTicks(); }
+            port60 = xs | (down ? 0 : 0x80);
+            /* A diverted release is deferred (see rel_pend) so the guest's
+             * tick-gated held-mask sampler can't miss sub-frame taps. A press
+             * that diverted nothing still releases immediately. */
+            int diverted;
+            if (down) diverted = int9_update(xs & 0x7f, 1);
+            else {
+                diverted = *(dw*)&mem[DS_BASE + 0xad7] == 1 &&
+                           *(dw*)&mem[DS_BASE + 0x950 + (xs & 0x7f) * 2] != 0;
+                if (diverted) rel_defer(xs & 0x7f);
+            }
+            if (getenv("M2C_KEYDBG"))
+                fprintf(stderr, "key %s sdl=%d xt=%02x div=%d held=%04x cur=%x,%x\n",
+                        down ? "dn" : "up",
+                        e.key.keysym.scancode, xs, diverted,
+                        *(dw*)&mem[DS_BASE + 0xad9],
+                        *(db*)&mem[0xf71f], *(db*)&mem[0xf75f]);
+            if (down && !diverted){
                 char a = ascii_of(e.key.keysym.sym);
                 kpush((dw)((xs<<8)|a));
             }
