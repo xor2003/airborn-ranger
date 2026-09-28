@@ -1,3 +1,28 @@
+UPDATE 2026-09-28 — port/ stability verified; formal comparator is reference-only.
+
+- port/ar_port builds clean (gcc -O2, no errors) and passes `make check`
+  (320 unit checks: rt/dos/input/snd/video/game harnesses).
+- e2e smoke (tests/e2e.sh): headless boot -> key-driven to POD screen,
+  411 frames / 7 distinct, no unresolved indirect calls. PASS.
+- The clean C port at port/gen/*.c + port/*.c is the stable, readable
+  deliverable. The masm2c oracle (build_sdl/ar_m2c) remains the reference.
+
+COMPARATOR (artifacts/airborn-z3cmp/, informational only):
+- Z3/SSA per-function cross-ABI equivalence checker; 479/479 AR.EXE
+  functions processed: 26 passed, 57 failed, 35 refused, 342 timeout,
+  19 incomplete. Merged report: aircmp-results.json.
+- Most "failed" verdicts are comparator-modeling noise (lazy x86 flag
+  materialization, esp/segment bookkeeping conventions, I/O-port width
+  granularity, oracle-only symbolic-dispatch path asymmetry), NOT proven
+  port bugs. A small set (e.g. data+reg combos like sub_106a7,
+  sub_15f09, sub_169b6, sub_1b23d, sub_1bcaa) would reward manual triage
+  if deeper assurance is ever needed.
+- Known comparator gaps: unresolved dispatches -> indirect_call (honest),
+  guest-image bytes resolve on cand but not oracle (BSS vs embedded img),
+  label-entry callsite inlining expands path budget (timeouts).
+- straightline_ssa.py exits are now (guard,dst,jumpkind) triples —
+  aircmp.py adapted accordingly.
+
 UPDATE 2026-09-24 — MCGA blocker fixed; stopped at user request.
 
 - build_sdl/ar_m2c rebuilt successfully from the corrected generated C++.
