@@ -95,6 +95,13 @@ class Lifter:
             if jcc in SIGNED:   return f"{signedcast(a, w)} {SIGNED[jcc]} 0"
         return FLAGREAD.get(jcc, '0')
 
+    def zsf(self, res, w):
+        """ZF/SF materialization for a flag-producing op's result. Flags live in
+        globals so they survive call boundaries (asm returns flags via retn)."""
+        T = 'db' if w == 'b' else 'dw'
+        s = 7 if w == 'b' else 15
+        return f"ZF = (({T})({res}) == 0); SF = ((({T})({res})) >> {s});"
+
     def op(self, inner, asm=''):
         inner = inner.strip()
         out = []
@@ -145,13 +152,17 @@ class Lifter:
         elif op == 'CMP' and len(args) == 2:
             a0 = widthcast(args[0], args[0])
             b = widthcast(args[1], args[0])
-            self.pending = (a0, b, 'cmp', opwidth(a0))
-            out.append(f"CF = (dd){a0} < (dd){b};")
+            w_ = opwidth(a0)
+            self.pending = (a0, b, 'cmp', w_)
+            out.append(f"CF = (dd){a0} < (dd){b}; " + self.zsf(f"({a0}) - ({b})", w_))
         elif op == 'TEST' and len(args) == 2:
             a0 = widthcast(args[0], args[0])
-            if args[0] == args[1]: self.pending = (a0, '0', 'result', opwidth(a0))
-            else: self.pending = (f"({a0} & {widthcast(args[1], args[0])})", '0', 'result', opwidth(args[0]))
-            out.append("CF = 0;")
+            if args[0] == args[1]:
+                self.pending = (a0, '0', 'result', opwidth(a0)); res = a0
+            else:
+                res = f"({a0} & {widthcast(args[1], args[0])})"
+                self.pending = (res, '0', 'result', opwidth(args[0]))
+            out.append("CF = 0; OF = 0; " + self.zsf(res, opwidth(args[0])))
         elif op in ('ADD','SUB','AND','OR','XOR','ADC','SBB'):
             sym = {'ADD':'+','SUB':'-','AND':'&','OR':'|','XOR':'^','ADC':'+','SBB':'-'}[op]
             a0 = widthcast(args[0], args[0])
@@ -159,31 +170,31 @@ class Lifter:
             M = wmask(args[0])
             if op == 'XOR' and args[0] == args[1]:
                 self.pending = ('0', '0', 'result', 'w')
-                out.append(f"{a0} = 0; CF = 0;")
+                out.append(f"{a0} = 0; CF = 0; OF = 0; ZF = 1; SF = 0;")
             elif op == 'ADD':
                 self.pending = (a0, '0', 'result', opwidth(a0))
-                out.append(f"{{ dd t_ = (dd){a0} + (dd){b}; CF = t_ > {M}; {a0} = t_; }}")
+                out.append(f"{{ dd t_ = (dd){a0} + (dd){b}; CF = t_ > {M}; {a0} = t_; " + self.zsf(a0, opwidth(a0)) + " }")
             elif op == 'ADC':
                 self.pending = (a0, '0', 'result', opwidth(a0))
-                out.append(f"{{ dd t_ = (dd){a0} + (dd){b} + CF; CF = t_ > {M}; {a0} = t_; }}")
+                out.append(f"{{ dd t_ = (dd){a0} + (dd){b} + CF; CF = t_ > {M}; {a0} = t_; " + self.zsf(a0, opwidth(a0)) + " }")
             elif op == 'SUB':
                 self.pending = (a0, '0', 'result', opwidth(a0))
-                out.append(f"{{ dd t_ = (dd){a0} - (dd){b}; CF = (dd){a0} < (dd){b}; {a0} = t_; }}")
+                out.append(f"{{ dd t_ = (dd){a0} - (dd){b}; CF = (dd){a0} < (dd){b}; {a0} = t_; " + self.zsf(a0, opwidth(a0)) + " }")
             elif op == 'SBB':
                 self.pending = (a0, '0', 'result', opwidth(a0))
-                out.append(f"{{ dd t_ = (dd){a0} - (dd){b} - CF; CF = (dd){a0} < (dd){b} + CF; {a0} = t_; }}")
+                out.append(f"{{ dd t_ = (dd){a0} - (dd){b} - CF; CF = (dd){a0} < (dd){b} + CF; {a0} = t_; " + self.zsf(a0, opwidth(a0)) + " }")
             else:
                 self.pending = (a0, '0', 'result', opwidth(a0))   # flags reflect stored result
-                out.append(f"{a0} {sym}= {b}; CF = 0;")
+                out.append(f"{a0} {sym}= {b}; CF = 0; OF = 0; " + self.zsf(a0, opwidth(a0)))
         elif op in ('INC','DEC'):
             a0 = widthcast(args[0], args[0])
             d = '+' if op=='INC' else '-'
             self.pending = (a0, '0', 'result', opwidth(a0))
-            out.append(f"({a0}){d}{d};")
+            out.append(f"({a0}){d}{d}; " + self.zsf(a0, opwidth(a0)))
         elif op == 'NEG':
             a0 = widthcast(args[0], args[0])
             self.pending = (a0, '0', 'result', opwidth(a0))
-            out.append(f"{a0} = -({a0}); CF = ({a0} != 0);")
+            out.append(f"{a0} = -({a0}); CF = ({a0} != 0); " + self.zsf(a0, opwidth(a0)))
         elif op == 'NOT':
             a0 = widthcast(args[0], args[0])
             out.append(f"{a0} = ~{a0};")
@@ -195,9 +206,9 @@ class Lifter:
             self.pending = (a0, '0', 'result', opwidth(a0))
             n = args[1]
             if op == 'SHL':
-                out.append(f"{{ if ({n}) {{ CF = (((dd){a0} << ({n})) >> {bits}) & 1; {a0} <<= {n}; }} }}")
+                out.append(f"{{ if ({n}) {{ CF = (((dd){a0} << ({n})) >> {bits}) & 1; {a0} <<= {n}; " + self.zsf(a0, opwidth(a0)) + " } }}")
             else:
-                out.append(f"{{ if ({n}) {{ CF = ({a0} >> (({n})-1)) & 1; {a0} = {cast}{a0} >> {n}; }} }}")
+                out.append(f"{{ if ({n}) {{ CF = ({a0} >> (({n})-1)) & 1; {a0} = {cast}{a0} >> {n}; " + self.zsf(a0, opwidth(a0)) + " } }}")
         elif op in ('ROL','ROR','RCL','RCR'):
             a0 = widthcast(args[0], 'ax')  # rotates are word ops here
             out.append(f"{a0} = {op.lower()}16({a0}, {args[1]});")

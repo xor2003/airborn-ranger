@@ -37,6 +37,34 @@ UPDATE 2026-09-28 — port/ stability verified; formal comparator is reference-o
   C for the same dropped-load fold pattern found no other instances.
   Verified: unit probe moves cursor a0->b0 under held RIGHT; make check
   320/320; e2e PASS with 32 distinct screens (input now live everywhere).
+- DECOMPILER BUGFIX (POD Enter/dispatch): two flag-return defects.
+  sub_159FF's `or al,0FFh` (fire) and `and al,10h` (no-fire) must leave
+  SF for the caller's jns — lifted emit wrote only CF, so fire never
+  dispatched. And the DONE hotspot unwinds via `pop di`+retn past the
+  indirect-call return — a host func_at() call has no guest return addr,
+  so `di = pop()` ate guest stack and the loop resumed forever. Modeled
+  with a file-static `pod_done` latch: loc_15CBC sets it, the three POD
+  loop copies (sub_15996 + loc_159DF/159EE stubs) check it after
+  dispatch, POD entries reset it.
+- DECOMPILER BUGFIX (systemic — the big one): lift.py's `pending` flag
+  fold clears on CALL/RETN and NOTHING ever wrote the ZF/SF/OF globals —
+  every `if (ZF)`/`if (SF)` fallback read stale flags. Any function that
+  returns flags to a caller (`or/test; retn` boolean idiom) was broken:
+  sub_159FF (SF=fire), sub_1B993 (ZF=cell free) — the latter hung the
+  post-POD map generator in an infinite random-placement retry while the
+  screen sat frozen on stale POD pixels. Fix: tools/fixflags.py
+  materializes ZF/SF(/OF=0 for logic ops) at every flag-defining emitted
+  statement — 21,550 sites in both lifted/ and port/gen/. lift.py itself
+  now emits the same flags natively (self.zsf) so regen converges.
+  Verified: 320/320 checks; e2e PASS with 364 frames / 173 distinct —
+  full mission loop: title->controls->mission->difficulty->briefing->
+  POD->DONE->deploy->parafoil descent->landing->MISSION ASSESSMENT.
+- DECOMPILER BUGFIX (backward self-jumps emitted as recursion): asm
+  `jz/jns sub_X` to a function's own entry were emitted as
+  `sub_X(); return;` — unbounded host recursion in wait-loops (e.g.
+  sub_12432's fire-release spin). Converted to `goto sub_X;` at 8 sites
+  (sub_10a19, sub_12432, sub_124d1, sub_154d7, sub_157be, sub_17316,
+  sub_1b8c3) in lifted/ + port/gen/.
 - Manual triage of the comparator's real-looking diffs (sub_106a7,
   sub_15f09, sub_169b6, sub_1b23d, sub_1bcaa): all five are faithful
   instruction-level translations; diffs traced to comparator asymmetries
