@@ -307,10 +307,13 @@ void rt_pump_events(void){
                 if (diverted) rel_defer(xs & 0x7f);
             }
             if (getenv("M2C_KEYDBG"))
-                fprintf(stderr, "key %s sdl=%d xt=%02x div=%d held=%04x cur=%x,%x\n",
+                fprintf(stderr, "key %s sdl=%d xt=%02x div=%d held=%04x in=%02x "
+                        "gate=%d cur=%x,%x\n",
                         down ? "dn" : "up",
                         e.key.keysym.scancode, xs, diverted,
                         *(dw*)&mem[DS_BASE + 0xad9],
+                        *(db*)&mem[0x18804],
+                        *(dw*)&mem[0xf36d],
                         *(db*)&mem[0xf71f], *(db*)&mem[0xf75f]);
             if (down && !diverted){
                 char a = ascii_of(e.key.keysym.sym);
