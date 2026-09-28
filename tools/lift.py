@@ -352,6 +352,22 @@ RE_CASE = re.compile(r'case\s+m2c::k(\w+):\s*goto\s+(\w+)')
 SKIP_PREFIX = ('X86_REGREF','__disp','if (__disp','else goto','__dispatch_call',
                'switch','default:','assert','S_(','{','}','DD tt;','struct m2c')
 
+def _code_part(ln):
+    """Line prefix before any `//` comment, honoring char/string literals."""
+    out = []; i = 0; n = len(ln); sq = dq = False
+    while i < n:
+        c = ln[i]
+        if sq or dq:
+            if c == '\\': i += 2; continue
+            if c == "'" and sq: sq = False
+            elif c == '"' and dq: dq = False
+        elif c == "'": sq = True
+        elif c == '"': dq = True
+        elif c == '/' and i + 1 < n and ln[i + 1] == '/':
+            break
+        out.append(c); i += 1
+    return ''.join(out)
+
 def parse_func(lines, i):
     """Parse one function body → (blocks, entries). blocks: [(label,[(stmt,asm)])], entries: [labels]"""
     blocks, cur, entries, aliases = [], None, [], {}
@@ -360,7 +376,9 @@ def parse_func(lines, i):
     while i < n and depth > 0:
         ln = lines[i]; i += 1
         if not ln.lstrip().startswith('//'):
-            depth += ln.count('{') - ln.count('}')
+            # brace depth on code only: trailing `//` asm comments may quote
+            # braces (e.g. `mov ax, 7Dh ; '}'`), which would corrupt depth
+            depth += _code_part(ln).count('{') - _code_part(ln).count('}')
         s = ln.strip()
         if s.startswith('case '):
             cm = RE_CASE.search(ln)

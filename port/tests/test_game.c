@@ -164,6 +164,19 @@ int main(void){
     CHECK(ndtx > 20);                              /* really exercised the corpus */
     fprintf(stderr, "  (%d DTX files decoded identically)\n", ndtx);
 
+    /* ---- status-panel digit patcher: WOUNDS field ds:0xB93F <- byte_29712
+     * template lives in the image with literal "XX" placeholders; sub_1BBB9
+     * converts al to two ASCII digits and stores at ds:[si]/ds:[si+1]. ---- */
+    ds = *(dw*)&mem[0x1a20];                     /* seg_10000: relocated data seg */
+    int wslot = (ds << 4) + 0xB93F;
+    CHECK(mem[wslot] == 'X' && mem[wslot+1] == 'X');   /* unpatched template */
+    al = 7; si = 0xB93F; sub_1bbb9();
+    CHECK(mem[wslot] == '0' && mem[wslot+1] == '7');
+    al = 0; si = 0xB964; sub_1bbb9();            /* FIRST AID slot */
+    CHECK(mem[(ds<<4)+0xB964] == '0' && mem[(ds<<4)+0xB965] == '0');
+    al = 42; si = 0xB930; sub_1bbb9();           /* CARBINE MAGS slot */
+    CHECK(mem[(ds<<4)+0xB930] == '4' && mem[(ds<<4)+0xB931] == '2');
+
     fprintf(stderr, "test_game: %d checks, %d failures\n", checks, fails);
     return fails ? 1 : 0;
 }

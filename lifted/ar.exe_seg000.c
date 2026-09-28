@@ -178937,6 +178937,172 @@ loc_1bae4:
     /* retn ;~ 01A2:BB09 */
     return;
 }
+void loc_1bb51(void) {
+    /* inc     al ;~ 01A2:BB51 */
+    (al)++; ZF = ((db)(al) == 0); SF = (((db)(al)) >> 7);
+    /* mov     word_2B0C8, 1 ;~ 01A2:BB53 */
+    word_2b0c8 = 1;
+loc_1bb59:
+    /* mov     si, 0B930h ;~ 01A2:BB59 */
+    si = 0x0B930;
+    /* call    sub_1BBB9 ;~ 01A2:BB5C */
+    sub_1bbb9();
+    /* mov     al, byte_29716 ;~ 01A2:BB5F */
+    al = byte_29716;
+    /* mov     si, 0B955h ;~ 01A2:BB62 */
+    si = 0x0B955;
+    /* call    sub_1BBB9 ;~ 01A2:BB65 */
+    sub_1bbb9();
+    /* mov     al, byte_29717 ;~ 01A2:BB68 */
+    al = byte_29717;
+    /* mov     si, 0B97Ah ;~ 01A2:BB6B */
+    si = 0x0B97A;
+    /* call    sub_1BBB9 ;~ 01A2:BB6E */
+    sub_1bbb9();
+    /* mov     al, byte_29718 ;~ 01A2:BB71 */
+    al = byte_29718;
+    /* mov     si, 0B99Fh ;~ 01A2:BB74 */
+    si = 0x0B99F;
+    /* call    sub_1BBB9 ;~ 01A2:BB77 */
+    sub_1bbb9();
+    /* mov     al, byte_29712 ;~ 01A2:BB7A */
+    al = byte_29712;
+    /* mov     si, 0B93Fh ;~ 01A2:BB7D */
+    si = 0x0B93F;
+    /* call    sub_1BBB9 ;~ 01A2:BB80 */
+    sub_1bbb9();
+    /* mov     al, byte_2971A ;~ 01A2:BB83 */
+    al = byte_2971a;
+    /* mov     si, 0B964h ;~ 01A2:BB86 */
+    si = 0x0B964;
+    /* call    sub_1BBB9 ;~ 01A2:BB89 */
+    sub_1bbb9();
+    /* call    sub_16D4E ;~ 01A2:BB8C */
+    sub_16d4e();
+    /* mov     ax, word_298C2 ;~ 01A2:BB8F */
+    ax = word_298c2;
+    /* add     ax, word_2B0C8 ;~ 01A2:BB92 */
+    { dd t_ = (dd)ax + (dd)word_2b0c8; CF = t_ > 0xFFFF; ax = t_; ZF = ((dw)(ax) == 0); SF = (((dw)(ax)) >> 15); }
+    /* mov     si, 0B989h ;~ 01A2:BB96 */
+    si = 0x0B989;
+    /* call    sub_1BBB9 ;~ 01A2:BB99 */
+    sub_1bbb9();
+    /* mov     si, 2 ;~ 01A2:BB9C */
+    si = 2;
+loc_1bb9f:
+    do {
+        /* mov     al, [si-41ACh] ;~ 01A2:BB9F */
+        al = *(db*)raddr(ds,si-0x41AC);
+        /* or      al, 30h ;~ 01A2:BBA3 */
+        al |= 0x30; CF = 0; OF = 0; ZF = ((db)(al) == 0); SF = (((db)(al)) >> 7);
+        /* mov     [si-4653h], al ;~ 01A2:BBA5 */
+        *(db*)raddr(ds,si-0x4653) = al;
+        /* dec     si ;~ 01A2:BBA9 */
+        (si)--; ZF = ((dw)(si) == 0); SF = (((dw)(si)) >> 15);
+        /* jns     short loc_1BB9F ;~ 01A2:BBAA */
+    } while ((short)(si) >= 0);
+    /* mov     ax, word_20D58 ;~ 01A2:BBAC */
+    /* mov     word_1D92E, ax ;~ 01A2:BBAF */
+    word_1d92e = (word_20d58);
+    /* mov     ax, 20h ; ' ' ;~ 01A2:BBB2 */
+    ax = 0x20;
+    /* call    sub_14DA2 ;~ 01A2:BBB5 */
+    sub_14da2();
+    /* retn ;~ 01A2:BBB8 */
+    return;
+}
+void loc_1bb59(void) {
+    /* mov     si, 0B930h ;~ 01A2:BB59 */
+    si = 0x0B930;
+    /* call    sub_1BBB9 ;~ 01A2:BB5C */
+    sub_1bbb9();
+    /* mov     al, byte_29716 ;~ 01A2:BB5F */
+    al = byte_29716;
+    /* mov     si, 0B955h ;~ 01A2:BB62 */
+    si = 0x0B955;
+    /* call    sub_1BBB9 ;~ 01A2:BB65 */
+    sub_1bbb9();
+    /* mov     al, byte_29717 ;~ 01A2:BB68 */
+    al = byte_29717;
+    /* mov     si, 0B97Ah ;~ 01A2:BB6B */
+    si = 0x0B97A;
+    /* call    sub_1BBB9 ;~ 01A2:BB6E */
+    sub_1bbb9();
+    /* mov     al, byte_29718 ;~ 01A2:BB71 */
+    al = byte_29718;
+    /* mov     si, 0B99Fh ;~ 01A2:BB74 */
+    si = 0x0B99F;
+    /* call    sub_1BBB9 ;~ 01A2:BB77 */
+    sub_1bbb9();
+    /* mov     al, byte_29712 ;~ 01A2:BB7A */
+    al = byte_29712;
+    /* mov     si, 0B93Fh ;~ 01A2:BB7D */
+    si = 0x0B93F;
+    /* call    sub_1BBB9 ;~ 01A2:BB80 */
+    sub_1bbb9();
+    /* mov     al, byte_2971A ;~ 01A2:BB83 */
+    al = byte_2971a;
+    /* mov     si, 0B964h ;~ 01A2:BB86 */
+    si = 0x0B964;
+    /* call    sub_1BBB9 ;~ 01A2:BB89 */
+    sub_1bbb9();
+    /* call    sub_16D4E ;~ 01A2:BB8C */
+    sub_16d4e();
+    /* mov     ax, word_298C2 ;~ 01A2:BB8F */
+    ax = word_298c2;
+    /* add     ax, word_2B0C8 ;~ 01A2:BB92 */
+    { dd t_ = (dd)ax + (dd)word_2b0c8; CF = t_ > 0xFFFF; ax = t_; ZF = ((dw)(ax) == 0); SF = (((dw)(ax)) >> 15); }
+    /* mov     si, 0B989h ;~ 01A2:BB96 */
+    si = 0x0B989;
+    /* call    sub_1BBB9 ;~ 01A2:BB99 */
+    sub_1bbb9();
+    /* mov     si, 2 ;~ 01A2:BB9C */
+    si = 2;
+loc_1bb9f:
+    do {
+        /* mov     al, [si-41ACh] ;~ 01A2:BB9F */
+        al = *(db*)raddr(ds,si-0x41AC);
+        /* or      al, 30h ;~ 01A2:BBA3 */
+        al |= 0x30; CF = 0; OF = 0; ZF = ((db)(al) == 0); SF = (((db)(al)) >> 7);
+        /* mov     [si-4653h], al ;~ 01A2:BBA5 */
+        *(db*)raddr(ds,si-0x4653) = al;
+        /* dec     si ;~ 01A2:BBA9 */
+        (si)--; ZF = ((dw)(si) == 0); SF = (((dw)(si)) >> 15);
+        /* jns     short loc_1BB9F ;~ 01A2:BBAA */
+    } while ((short)(si) >= 0);
+    /* mov     ax, word_20D58 ;~ 01A2:BBAC */
+    /* mov     word_1D92E, ax ;~ 01A2:BBAF */
+    word_1d92e = (word_20d58);
+    /* mov     ax, 20h ; ' ' ;~ 01A2:BBB2 */
+    ax = 0x20;
+    /* call    sub_14DA2 ;~ 01A2:BBB5 */
+    sub_14da2();
+    /* retn ;~ 01A2:BBB8 */
+    return;
+}
+void loc_1bb9f(void) {
+loc_1bb9f:
+    do {
+        /* mov     al, [si-41ACh] ;~ 01A2:BB9F */
+        al = *(db*)raddr(ds,si-0x41AC);
+        /* or      al, 30h ;~ 01A2:BBA3 */
+        al |= 0x30; CF = 0; OF = 0; ZF = ((db)(al) == 0); SF = (((db)(al)) >> 7);
+        /* mov     [si-4653h], al ;~ 01A2:BBA5 */
+        *(db*)raddr(ds,si-0x4653) = al;
+        /* dec     si ;~ 01A2:BBA9 */
+        (si)--; ZF = ((dw)(si) == 0); SF = (((dw)(si)) >> 15);
+        /* jns     short loc_1BB9F ;~ 01A2:BBAA */
+    } while ((short)(si) >= 0);
+    /* mov     ax, word_20D58 ;~ 01A2:BBAC */
+    /* mov     word_1D92E, ax ;~ 01A2:BBAF */
+    word_1d92e = (word_20d58);
+    /* mov     ax, 20h ; ' ' ;~ 01A2:BBB2 */
+    ax = 0x20;
+    /* call    sub_14DA2 ;~ 01A2:BBB5 */
+    sub_14da2();
+    /* retn ;~ 01A2:BBB8 */
+    return;
+}
 void sub_1bb0a(void) {
     /* mov     word_1D92C, 0FFFFh ;~ 01A2:BB0A */
     word_1d92c = 0x0FFFF;
@@ -178946,6 +179112,110 @@ void sub_1bb0a(void) {
     word_1d91c = 2;
     /* mov     ax, 7Dh ; '}' ;~ 01A2:BB1C */
     ax = 0x7D;
+    /* mov     word_1D902, 98h ;~ 01A2:BB1F */
+    word_1d902 = 0x98;
+    /* call    sub_1BADE ;~ 01A2:BB25 */
+    sub_1bade();
+    /* mov     ax, 81h ;~ 01A2:BB28 */
+    ax = 0x81;
+    /* call    sub_1BADE ;~ 01A2:BB2B */
+    sub_1bade();
+    /* call    sub_1BADE ;~ 01A2:BB2E */
+    sub_1bade();
+    /* call    sub_1BADE ;~ 01A2:BB31 */
+    sub_1bade();
+    /* call    sub_1BADE ;~ 01A2:BB34 */
+    sub_1bade();
+    /* mov     ax, 7Eh ; '~' ;~ 01A2:BB37 */
+    ax = 0x7E;
+    /* call    sub_1BADE ;~ 01A2:BB3A */
+    sub_1bade();
+    /* mov     word_2B0C8, 0 ;~ 01A2:BB3D */
+    word_2b0c8 = 0;
+    /* mov     al, byte_29715 ;~ 01A2:BB43 */
+    al = byte_29715;
+    /* or      al, al ;~ 01A2:BB46 */
+    al |= al; CF = 0; OF = 0; ZF = ((db)(al) == 0); SF = (((db)(al)) >> 7);
+    /* jnz     short loc_1BB51 ;~ 01A2:BB48 */
+    if (al == 0) {
+        /* cmp     byte_29714, 0 ;~ 01A2:BB4A */
+        CF = (dd)byte_29714 < (dd)0; ZF = ((db)((byte_29714) - (0)) == 0); SF = (((db)((byte_29714) - (0))) >> 7);
+        /* jl      short loc_1BB59 ;~ 01A2:BB4F */
+        if ((signed char)byte_29714 < (signed char)0) goto loc_1bb59;
+    }
+loc_1bb51:
+    /* inc     al ;~ 01A2:BB51 */
+    (al)++; ZF = ((db)(al) == 0); SF = (((db)(al)) >> 7);
+    /* mov     word_2B0C8, 1 ;~ 01A2:BB53 */
+    word_2b0c8 = 1;
+loc_1bb59:
+    /* mov     si, 0B930h ;~ 01A2:BB59 */
+    si = 0x0B930;
+    /* call    sub_1BBB9 ;~ 01A2:BB5C */
+    sub_1bbb9();
+    /* mov     al, byte_29716 ;~ 01A2:BB5F */
+    al = byte_29716;
+    /* mov     si, 0B955h ;~ 01A2:BB62 */
+    si = 0x0B955;
+    /* call    sub_1BBB9 ;~ 01A2:BB65 */
+    sub_1bbb9();
+    /* mov     al, byte_29717 ;~ 01A2:BB68 */
+    al = byte_29717;
+    /* mov     si, 0B97Ah ;~ 01A2:BB6B */
+    si = 0x0B97A;
+    /* call    sub_1BBB9 ;~ 01A2:BB6E */
+    sub_1bbb9();
+    /* mov     al, byte_29718 ;~ 01A2:BB71 */
+    al = byte_29718;
+    /* mov     si, 0B99Fh ;~ 01A2:BB74 */
+    si = 0x0B99F;
+    /* call    sub_1BBB9 ;~ 01A2:BB77 */
+    sub_1bbb9();
+    /* mov     al, byte_29712 ;~ 01A2:BB7A */
+    al = byte_29712;
+    /* mov     si, 0B93Fh ;~ 01A2:BB7D */
+    si = 0x0B93F;
+    /* call    sub_1BBB9 ;~ 01A2:BB80 */
+    sub_1bbb9();
+    /* mov     al, byte_2971A ;~ 01A2:BB83 */
+    al = byte_2971a;
+    /* mov     si, 0B964h ;~ 01A2:BB86 */
+    si = 0x0B964;
+    /* call    sub_1BBB9 ;~ 01A2:BB89 */
+    sub_1bbb9();
+    /* call    sub_16D4E ;~ 01A2:BB8C */
+    sub_16d4e();
+    /* mov     ax, word_298C2 ;~ 01A2:BB8F */
+    ax = word_298c2;
+    /* add     ax, word_2B0C8 ;~ 01A2:BB92 */
+    { dd t_ = (dd)ax + (dd)word_2b0c8; CF = t_ > 0xFFFF; ax = t_; ZF = ((dw)(ax) == 0); SF = (((dw)(ax)) >> 15); }
+    /* mov     si, 0B989h ;~ 01A2:BB96 */
+    si = 0x0B989;
+    /* call    sub_1BBB9 ;~ 01A2:BB99 */
+    sub_1bbb9();
+    /* mov     si, 2 ;~ 01A2:BB9C */
+    si = 2;
+loc_1bb9f:
+    do {
+        /* mov     al, [si-41ACh] ;~ 01A2:BB9F */
+        al = *(db*)raddr(ds,si-0x41AC);
+        /* or      al, 30h ;~ 01A2:BBA3 */
+        al |= 0x30; CF = 0; OF = 0; ZF = ((db)(al) == 0); SF = (((db)(al)) >> 7);
+        /* mov     [si-4653h], al ;~ 01A2:BBA5 */
+        *(db*)raddr(ds,si-0x4653) = al;
+        /* dec     si ;~ 01A2:BBA9 */
+        (si)--; ZF = ((dw)(si) == 0); SF = (((dw)(si)) >> 15);
+        /* jns     short loc_1BB9F ;~ 01A2:BBAA */
+    } while ((short)(si) >= 0);
+    /* mov     ax, word_20D58 ;~ 01A2:BBAC */
+    /* mov     word_1D92E, ax ;~ 01A2:BBAF */
+    word_1d92e = (word_20d58);
+    /* mov     ax, 20h ; ' ' ;~ 01A2:BBB2 */
+    ax = 0x20;
+    /* call    sub_14DA2 ;~ 01A2:BBB5 */
+    sub_14da2();
+    /* retn ;~ 01A2:BBB8 */
+    return;
 }
 void loc_1bbbb(void) {
 loc_1bbbb:

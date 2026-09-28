@@ -368,3 +368,50 @@ uses `(signed char)`. `js` after a non-zero `cmp` now tests the subtraction
 result, not the left operand. ~1300 sites in `ar.exe_seg000.c` affected; POD
 right edge now renders the correct "6"/"3" digits and labels, matching DOSBox
 pixel-for-pixel. `make check` green.
+
+## Status-screen truncation fix (verified) — '}' in asm comment corrupted brace depth
+
+`parse_func` in `tools/lift.py` counted `{`/`}` across the entire source line,
+including the trailing `//` asm comment. `sub_1BB0A` contains
+`mov ax, 7Dh ; '}'` — the quoted `}` decremented depth to 0 mid-function, so
+parsing stopped and everything from `BB1F` on was silently dropped: the entire
+status-panel field patcher plus the `call sub_14DA2` doc render and `retn`.
+The mid-entry stubs `loc_1BB51`/`loc_1BB59`/`loc_1BB9F` never emitted either.
+
+Effect: the equipment/status screen (doc program #32, `ds:0xB914`) never ran —
+the game jumped POD → deploy with the screen skipped and the `XX` stat slots
+unpatched.
+
+Fix: `parse_func` now counts braces on `_code_part()` — the line prefix before
+any `//` outside char/string literals. `sub_1bb0a` + the three stubs re-emitted
+into `lifted/` and `port/gen/` (verified byte-for-instruction against the lst).
+Only site in the whole .cpp: `grep "'[{}]'"` → 1 hit.
+
+## WOUNDS variable = `byte_29712`
+
+The status panel is a template at `ds:0xB91D` with `\x1fXX` fields — `0x1F` is
+a literal glyph; the two `XX` bytes are patched in place by `sub_1BBB9`
+(al → 2 ASCII digits at `ds:[si]`). `sub_1BB0A` loads each stat and calls it:
+
+| slot ds:off | label        | source |
+|-------------|--------------|--------|
+| 0xB930      | CARBINE MAGS | `byte_29715` (+`word_2B0C8` bonus) |
+| 0xB93F      | **WOUNDS**   | **`byte_29712`** = `seg002:C892` = `mem[0x1B132]` |
+| 0xB955      | GRENADES     | `byte_29716` |
+| 0xB964      | FIRST AID    | `byte_2971A` |
+| 0xB97A      | LAW ROCKETS  | `byte_29717` |
+| 0xB989      | WEIGHT       | `word_298C2 + word_2B0C8` |
+| 0xB99F      | TIME BOMBS   | `byte_29718` |
+|             | TIME         | `word_20D58` → `word_1D92E` |
+
+Wound writes: `sub_148B3` zeroes at mission start; `inc` at `sub_16BD2`+0x86
+(hit severity ≥0xF0), `sub_16C71`+0x57 (random severity add) and +0x81
+(probabilistic, gated by `byte_28CC1` = mission type & 3); forced 5 wounds at
+`sub_16B72`+0x14, 4 at `sub_1A8EC`+0x1C; first-aid key `8` does
+`dec byte_2971A; dec byte_29712` when `0 < wounds < 3` (`sub_15F09`+0x12A).
+`sub_17B10`+0x8B.. compares 0/1/2 for wound-level sprite/status rows.
+
+Verified: unit probe drives `sub_1bbb9` → `ds:0xB93F` reads 'XX'→'07';
+`M2C_WPOLL=0x1a1df` on a scripted run shows `58 -> 30` ('X'→'0') with
+`ds=0E8A` during the post-POD status screen. `make check` 320/320, e2e
+468 frames / 168 distinct.
