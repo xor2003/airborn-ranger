@@ -34,6 +34,10 @@ check: tests/t_rt tests/t_dos tests/t_input tests/t_snd tests/t_video tests/t_ga
 		$$t || fail=1; done; \
 	[ $$fail = 0 ] && echo "ALL TESTS PASSED" || { echo "TESTS FAILED"; exit 1; }
 
+OPT_CFLAGS ?= -O3 -g -march=native -fcommon -Wno-implicit-function-declaration -fno-strict-aliasing
+opt: clean
+	$(MAKE) CFLAGS="$(OPT_CFLAGS)" ar_port
+
 clean:
 	rm -f $(OBJS) ar_port tests/t_rt tests/t_dos tests/t_input tests/t_snd tests/t_video tests/t_game
-.PHONY: clean check
+.PHONY: clean check opt
