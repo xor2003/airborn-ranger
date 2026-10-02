@@ -170,11 +170,11 @@ int main(void){
     ds = *(dw*)&mem[0x1a20];                     /* seg_10000: relocated data seg */
     int wslot = (ds << 4) + 0xB93F;
     CHECK(mem[wslot] == 'X' && mem[wslot+1] == 'X');   /* unpatched template */
-    al = 7; si = 0xB93F; sub_1bbb9();
+    al = 7; si = 0xB93F; fmt_2digit();
     CHECK(mem[wslot] == '0' && mem[wslot+1] == '7');
-    al = 0; si = 0xB964; sub_1bbb9();            /* FIRST AID slot */
+    al = 0; si = 0xB964; fmt_2digit();            /* FIRST AID slot */
     CHECK(mem[(ds<<4)+0xB964] == '0' && mem[(ds<<4)+0xB965] == '0');
-    al = 42; si = 0xB930; sub_1bbb9();           /* CARBINE MAGS slot */
+    al = 42; si = 0xB930; fmt_2digit();           /* CARBINE MAGS slot */
     CHECK(mem[(ds<<4)+0xB930] == '4' && mem[(ds<<4)+0xB931] == '2');
 
     fprintf(stderr, "test_game: %d checks, %d failures\n", checks, fails);

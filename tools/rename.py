@@ -25,11 +25,16 @@ import re, os, glob
 AR = '/home/xor/games/airborn'
 MAP = os.path.join(AR, 'tools', 'names.map')
 
-main_map, tnd_map = {}, {}
+main_map, tnd_map, var_map = {}, {}, {}
 for ln in open(MAP):
     f = ln.split('#')[0].split()
     if len(f) >= 2:
-        (tnd_map if 'tnd' in f[2:] else main_map)[f[0]] = f[1]
+        if 'var' in f[2:]:
+            var_map[f[0]] = f[1]
+        elif 'tnd' in f[2:]:
+            tnd_map[f[0]] = f[1]
+        else:
+            main_map[f[0]] = f[1]
 
 def combined(map_):
     """One regex matching any old name; longest alternatives first."""
@@ -67,6 +72,16 @@ for f in glob.glob(f'{AR}/lifted/ar.exe*.c') + glob.glob(f'{AR}/port/gen/ar.exe*
     hits += patch(f, lambda s: sub_call(s, main_pat, main_map))
 for f in (f'{AR}/lifted/lifted_procs.h', f'{AR}/port/procs.h'):
     hits += patch(f, lambda s: sub_call(s, main_pat, main_map))
+
+# Variable renames: whole-word replace covers uses in code, the `extern` decls
+# and the `#define` aliases. Asm comments keep `word_1D955`-style uppercase and
+# are untouched (case-sensitive match).
+var_pat = combined(var_map)
+if var_pat:
+    for f in (glob.glob(f'{AR}/lifted/ar.exe*.c') + glob.glob(f'{AR}/port/gen/ar.exe*.c')
+              + [f'{AR}/lifted/lifted_data.h', f'{AR}/lifted/lifted_defs.c',
+                 f'{AR}/port/data_syms.h']):
+        hits += patch(f, lambda s: sub_word(s, var_pat, var_map))
 for f in (f'{AR}/port/memimg.c', f'{AR}/tools/gen_port.py'):
     hits += patch(f, lambda s: sub_word(s, main_pat, main_map))
 for f in glob.glob(f'{AR}/port/tests/*.[ch]'):

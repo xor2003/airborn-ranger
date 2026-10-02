@@ -189,3 +189,34 @@ pacing floor), `tools/gen_port.py`, `tools/rename.py`,
 `mv_probe`, `walk_probe`, `col_probe`, `tbl_probe`, `replay_probe`,
 `dump_dir`), `port/gen/*.c` (generated — do not hand-edit),
 `lifted/*.c` (generated).
+
+## Naming pass (evidence-driven, applied)
+
+`tools/names.map` now carries ~500 AR.EXE renames + ~90 `var`-tagged
+variable renames; `tools/rename.py` gained a `var` path (whole-word,
+case-sensitive — asm comments keep `word_XXXX` uppercase by design).
+
+Coverage: **0 unnamed `sub_*` remain** in seg000. Evidence sources:
+jump-table contents decoded from `port/memimg.c` `img[]` +
+`port/data_syms.h` aliases (`jpt_*`/`funcs_*` resolve to owner locs).
+
+Major decoded families:
+- adapter order everywhere: 0=CGA 1=Tandy 2=EGA 3=MCGA 4=Hercules
+- `funcs_11d52` (15) = sprrow_*_[abc] x adapters; `funcs_11cb8` =
+  tile_row_* x adapters; `jpt_1171c` same set inlined
+- `funcs_13bf8..141ce` = 8 scroll directions x 5 adapters = the
+  `scroll_[a-h]_<adapter>` family; `jpt_16ab9` (action_dispatch) cases
+  1,2,4,5,6,8,9,A -> `scroll_go_[a-h]` locs -> `scroll_edge_*` fixups
+- `jpt_126d5` = clip_go_<adapter> -> clip_blit/clip_rest pairs
+- `funcs_1892f` = ~36 objtype_NN_tick handlers indexed by obj type
+- `funcs_1b3e2`/`funcs_1b41f` = mission6/7/8_setup + _populate
+- `jpt_126d5`-adjacent `sub_12250/123a6/123ec/124fe` = joystick port
+  0x201 readers; `sub_1148c/114b7/1152f/12543-12628` = IVT install/
+  restore (int8/int9/int0/int1c)
+- `cam_pan_detect`/`cam_pan_apply` = the stale-cmp camera chain;
+  `player_input_tick` = combat input (word_26de4 -> move_intent);
+  `route_map_screen` = the planning map; `mapgen_*` = mission populate
+
+Weak-evidence symbols intentionally left as word_/byte_/loc_ names.
+Pipeline verified: rename.py -> make clean build, 342/342, e2e PASS
+(292 frames, 203 distinct).

@@ -1,4 +1,4 @@
-/* Direct probe of the object-path player handler sub_189e2 (funcs_1892F[1]).
+/* Direct probe of the object-path player handler objtype_01_tick (funcs_1892F[1]).
  * Sets a fake ranger object at slot bx, feeds each held-direction nibble via
  * word_26DE4 (active-low), ticks the handler, and reports the 24-bit fixed-point
  * position (X=[4041]:[4085]:[4151], Y=[401F]:[4063]:[412F]).
@@ -9,7 +9,7 @@
 #include <stdio.h>
 #include <string.h>
 
-extern void sub_189e2(void);   /* player tick (object type 1) */
+extern void objtype_01_tick(void);   /* player tick (object type 1) */
 
 #define O(off) (*(volatile db*)raddr(ds, (unsigned)(bx - (off))))
 
@@ -34,7 +34,7 @@ static void setup(unsigned b){
     byte_26de6 = 0; byte_26de7 = 0;
     byte_28cc0 = 0; byte_28ca2 = 0; byte_28cd2 = 0;
     word_265aa = 0;
-    byte_2aa63 = 0x0B;   /* makes sub_16b72 early-path benign */
+    byte_2aa63 = 0x0B;   /* makes obj_alive_mark early-path benign */
     byte_2aa5c = 0; byte_2aa60 = 0; byte_2aa62 = 0;
     /* object record */
     bx = b;
@@ -64,7 +64,7 @@ static void run(const char *name, unsigned held){
     int moved=0;
     for (int i=0;i<120;i++){
         byte_2a7aa=0; /* handler clears/reads this */
-        sub_189e2();
+        objtype_01_tick();
         unsigned x=getx(0),y=gety(0);
         if (x!=x0||y!=y0) moved=1;
         /* keep it alive: reassert clean walk state each tick */

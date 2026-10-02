@@ -222,3 +222,509 @@ edummylabel10 uninstall_timer  tnd  # restores int8 + PIT reload 0
 edummylabel9  install_timer_2  tnd  # second install entry (same tail)
 loc_1046b     timer_isr_chain  tnd  # every-3rd-tick: reset cnt, jmp old int8
 seg001_4_proc module_init      tnd  # overlay entry: ds=cs, call install
+
+# --- per-adapter glyph/tile blitters (adapter idx: 0=cga 1=tandy 2=ega 3=mcga 4=herc) ---
+sub_10ccb glyph_blit_cga       # jpt_10BEF[0]: banked writes +0x2000
+sub_10d0e glyph_blit_tandy     # jpt_10BEF[1]: out 3DFh page select
+sub_10d6e glyph_blit_mcga      # jpt_10BEF[3]: x-shift via LUT pair
+sub_10f78 glyph_blit_herc      # jpt_10BEF[4]: rowptr tbl 0xC600
+sub_10f40 glyph_blit_herc_b    # jpt_10C4F[4]: alt-dest herc variant
+sub_10bd6 glyph_put_backbuf    # funcs_115E7[0]: char blit -> es=seg_1000e
+sub_10c36 glyph_put_flipbuf    # funcs_115E7[1]: char blit -> es=seg_10010
+sub_10c7c glyph_put_drawbuf    # funcs_115E7[2]: char blit -> es=seg_10012
+sub_116eb tile_blit_flipbuf    # di=seg_10010 -> shared loc_1170B blitter
+sub_11782 tile_row_cga         # funcs_11CB8[0]/jpt_1171C[0] tile row, +20F0h bank
+sub_117ca tile_row_tandy       # funcs_11CB8[1]: +60A2h far bank store
+sub_118a3 tile_row_mcga        # funcs_11CB8[3]: 320B row step (+140h)
+sub_1190a tile_row_herc        # funcs_11CB8[4]: rowptr-table variant
+sub_11d82 sprrow_cga           # funcs_11D52[0]: lodsw -> +20F0h banked rows
+sub_11df8 sprrow_tandy         # funcs_11D52[1]: +60A2h bank
+sub_11e5c sprrow_ega           # funcs_11D52[2]: 3CEh bitmask loop
+sub_11f09 sprrow_herc          # funcs_11D52[4]: +230h planar store
+sub_11f7f sprrow_cga_b         # funcs_11D52[5]: group-B variant
+sub_11fc5 sprrow_tandy_b       # funcs_11D52[6]
+sub_11ff9 sprrow_ega_b         # funcs_11D52[7]: 3CEh bitmask
+sub_1203b sprrow_mcga_b        # funcs_11D52[8]: es=seg_10010, +140h rows
+sub_12091 sprrow_herc_b        # funcs_11D52[9]
+sub_120d7 sprrow_cga_c         # funcs_11D52[10]: +8 src offset group
+sub_12123 sprrow_tandy_c       # funcs_11D52[11]
+sub_1215a sprrow_ega_c         # funcs_11D52[12]: 3CEh bitmask
+sub_1219f sprrow_mcga_c        # funcs_11D52[13]
+sub_121f8 sprrow_herc_c        # funcs_11D52[14]
+
+# --- row-table builders + font convert (gated on word_1D934 adapter) ---
+sub_10171 rowtab_init_cga      # adapter==0: fill ds:0xBD5 row tbl, +2 step
+sub_1012f rowtab_init_tandy    # adapter==1: +4 step
+sub_101a8 rowtab_init_ega      # adapter==2: +1 step (planar rows)
+sub_1020c rowtab_init_herc     # adapter==4: +2 step, rowptr layout
+sub_10282 glyph_unpack_ega     # jpt_107B6[2]: 1bpp -> 4-plane rcl expand
+sub_10797 glyph_conv_dispatch  # jpt_107B6[word_1D934] font format conv
+sub_1034f palette_sel          # word_1cea0 = 0xE8|0xF8 by adapter
+
+# --- text output (dispatch via sub_115D1 char emit) ---
+sub_10ff3 text_cursor_next     # word_1d900 col<0x28, word_1d902 row+=8 wrap 0xC0
+sub_1101e text_put_space       # emits ' ' via glyph_put
+sub_112f5 print_str            # emits [si] chars until 0/0xFF
+sub_1120c print_dec_u16        # div-10 digit loop -> dispatch_a9c
+sub_111f7 print_dec_s16        # '-' + abs(ax) -> print_dec_u16
+sub_111df print_dec_s8         # '-' + sign-ext al -> print_dec_u16
+sub_11091 print_2nums          # prints ax then dx
+sub_1126f print_hex8           # nibbles via [si+820h] hex tbl -> emit
+sub_109f0 wparm_a_load         # word_1d92c = ds:0x3E82[bx*2]
+sub_109fa wparm_b_load         # word_1d92e = ds:0x3E82[bx*2]
+sub_10b89 beep_5x              # 5x speaker_beep (error signal)
+
+# --- interrupt vector install/restore (IVT: int8=0x20, int9=0x24, int1c=0x70) ---
+sub_1152f int8_vec_save        # IVT 0x20 -> cs:0x1488
+sub_1148c int1c_install        # save IVT 0x70 -> cs:0x1484, hook new
+sub_114b7 int1c_restore        # restore IVT 0x70 from cs:0x1484
+sub_12543 input_vecs_install   # save IVT 0x24 -> cs:0x2599 + int0 hook
+sub_12578 input_vecs_restore   # restore IVT 0x24 + int0 restore
+sub_125fe int0_vec_save        # IVT 0x00 -> cs:0x259D
+sub_12628 int0_vec_restore     # IVT 0x00 <- cs:0x259D
+
+# --- joystick / input hardware ---
+sub_12250 joy_pos_read         # cli + out 0x201 + count axes -> word_1dc88
+sub_123a6 joy_btn_a_read       # in 0x201 bits 0x10/0x20 -> si mask
+sub_123ec joy_btn_b_read       # in 0x201 bits 0x40/0x80 -> si mask
+sub_124fe joy_stick_chk        # in 0x201 & byte_1dcaa mask; SF=absent
+sub_124d1 joy_btn_wait         # spin until stick bit + 4-tick delay
+sub_157be joy_release_wait     # same + reload after (settle loop)
+sub_15783 joy_settle           # release wait + zero joy accum, word_26dc0=4
+sub_124e4 joy_axes_fetch       # byte_1dcb0==2 picks alt axis pair
+sub_18388 joy_tabs_sel         # byte_1dcb0 -> calib tbl ptrs 0xD4FB/0xD515
+sub_1231c input_mask_xform     # word_1d959 -> split dir/btn masks (inverted)
+sub_122ac key_sound_test       # key_poll loop, 'V' -> out 0x62 PPI toggle
+
+# --- scroll-copy family (funcs_13bf8..141ce = 8 dirs x 5 adapters; jpt_16AB9 cases) ---
+sub_13c34 scroll_a_cga         # funcs_13BF8[0] fwd band copy; case2 via loc_13bea
+sub_13c06 scroll_a_tandy       # funcs_13BF8[1]
+sub_13c62 scroll_a_ega         # funcs_13BF8[2]: EGA seq 3C4h/3CEh setup
+sub_13c84 scroll_a_mcga        # funcs_13BF8[3]: ds=es=seg_10010
+sub_13c99 scroll_a_herc        # funcs_13BF8[4]
+sub_13d06 scroll_b_cga         # funcs_13CC9[0] std reverse copy; case4 via loc_13cbb
+sub_13cd7 scroll_b_tandy       # funcs_13CC9[1]
+sub_13d35 scroll_b_ega         # funcs_13CC9[2]
+sub_13d5a scroll_b_mcga        # funcs_13CC9[3]
+sub_13d70 scroll_b_herc        # funcs_13CC9[4]
+sub_13ddd scroll_c_cga         # funcs_13DA1[0]; case8 via loc_13d93
+sub_13daf scroll_c_tandy       # funcs_13DA1[1]
+sub_13e0b scroll_c_ega         # funcs_13DA1[2]
+sub_13e2d scroll_c_mcga        # funcs_13DA1[3]
+sub_13e42 scroll_c_herc        # funcs_13DA1[4]
+sub_13eaf scroll_d_cga         # funcs_13E72[0]; case1 via loc_13e64
+sub_13e80 scroll_d_tandy       # funcs_13E72[1]
+sub_13ede scroll_d_ega         # funcs_13E72[2]
+sub_13f01 scroll_d_mcga        # funcs_13E72[3]
+sub_13f17 scroll_d_herc        # funcs_13E72[4]
+sub_13f88 scroll_e_cga         # funcs_13F48[0]; case5 via loc_13f3a
+sub_13f59 scroll_e_tandy       # funcs_13F48[1]
+sub_13fb7 scroll_e_ega         # funcs_13F48[2]
+sub_13fda scroll_e_mcga        # funcs_13F48[3]
+sub_13ff0 scroll_e_herc        # funcs_13F48[4]
+sub_14061 scroll_f_cga         # funcs_14021[0]; case9 via loc_14013
+sub_14032 scroll_f_tandy       # funcs_14021[1]
+sub_14090 scroll_f_ega         # funcs_14021[2]
+sub_140b3 scroll_f_mcga        # funcs_14021[3]
+sub_140c9 scroll_f_herc        # funcs_14021[4]
+sub_14139 scroll_g_cga         # funcs_140FA[0]; case6 via loc_140ec
+sub_1410b scroll_g_tandy       # funcs_140FA[1]
+sub_14167 scroll_g_ega         # funcs_140FA[2]
+sub_14189 scroll_g_mcga        # funcs_140FA[3]
+sub_1419e scroll_g_herc        # funcs_140FA[4]
+sub_1420d scroll_h_cga         # funcs_141CE[0]; case0xA via loc_141c0
+sub_141df scroll_h_tandy       # funcs_141CE[1]
+sub_1423b scroll_h_ega         # funcs_141CE[2]
+sub_1425d scroll_h_mcga        # funcs_141CE[3]
+sub_14272 scroll_h_herc        # funcs_141CE[4]
+sub_1428a scroll_edge_a        # tail of scroll_a: cols fix, ds:0C7FD&4 gate
+sub_142da scroll_edge_d        # tail of scroll_d
+sub_14320 scroll_edge_c        # tail of scroll_c/f/h dirs (cx=8 loop)
+sub_143ac scroll_edge_b        # tail of scroll_b/e/g dirs
+loc_13bea scroll_go_a          # jpt_16AB9 case2 -> funcs_13BF8[adapter]
+loc_13cbb scroll_go_b          # jpt_16AB9 case4 -> funcs_13CC9
+loc_13d93 scroll_go_c          # jpt_16AB9 case8 -> funcs_13DA1
+loc_13e64 scroll_go_d          # jpt_16AB9 case1 -> funcs_13E72
+loc_13f3a scroll_go_e          # jpt_16AB9 case5 -> funcs_13F48
+loc_14013 scroll_go_f          # jpt_16AB9 case9 -> funcs_14021
+loc_140ec scroll_go_g          # jpt_16AB9 case6 -> funcs_140FA
+loc_141c0 scroll_go_h          # jpt_16AB9 caseA -> funcs_141CE
+loc_16a15 scroll_nop           # jpt_16AB9 cases 0,3,7,B+ -> retn
+
+# --- clipped sprite blitters (jpt_126D5 dispatch, dirty-band registry write) ---
+loc_126de clip_go_cga          # case0: clip setup -> 1276B/12854
+sub_1276b clip_blit_cga        # sprite blit + band mark [di+0F67..1197]
+sub_12854 clip_blit_cga_b      # variant b
+loc_1294d clip_go_tandy        # case1 -> 129E2/12AC3
+sub_129e2 clip_blit_tandy
+sub_12ac3 clip_blit_tandy_b
+loc_12ba9 clip_go_ega          # case2 -> 12C36/12D8F (3CEh/3C4h ports)
+sub_12c36 clip_blit_ega
+sub_12d8f clip_blit_ega_b
+loc_1302e clip_go_mcga         # case3 -> 130BA/13242 (rep movsw restore)
+sub_130ba clip_rest_mcga
+sub_13242 clip_rest_mcga_b
+loc_133d2 clip_go_herc         # case4 -> 13467/13548
+sub_13467 clip_blit_herc
+sub_13548 clip_blit_herc_b
+loc_13708 blitflag_go_cga      # jpt_1367D[0] in sprite_blit_flagged
+loc_13682 blitflag_go_tandy    # jpt_1367D[1]
+loc_1378a blitflag_go_ega      # jpt_1367D[2]
+loc_1382e blitflag_go_mcga     # jpt_1367D[3]
+loc_138ae blitflag_go_herc     # jpt_1367D[4]
+
+# --- misc video/init ---
+sub_11354 video_init_once      # word_1d6d8 guard -> video_hw_init
+sub_115ec scr_cell_mark        # writes 2/0x80 via rowptr into seg_1000e
+sub_126a0 blit_dst_patch       # cs:0x126DA/DC <- seg_10012 (self-mod ptrs)
+sub_12656 border_sel           # picks border color val -> set_border_color
+sub_100ea ovl_farcall_b        # far call via runtime-patched slot 1E810/24
+sub_1010e ovl_farcall_a        # far call via slot 1E81A
+sub_13a49 sprtab_init_a        # sprite hdr lodsw + fill 0x800-entry tbl 0x67F0
+sub_13a55 sprtab_init_b        # entry b: same fill loop, FFFFh
+sub_14433 cell_tile_compose    # map probe + rowhdr + draw_tile_compose
+sub_144d5 scroll_d_direct      # es=s12 -> funcs_13E72[ds:0AB4] + s0000 restore
+sub_1aa01 rdr_copy_cga         # funcs_1A9C8[0] fullscreen present copy
+sub_1a9d4 rdr_copy_tandy       # funcs_1A9C8[1]
+sub_1aa18 rdr_copy_ega         # funcs_1A9C8[2]: EGA seq setup
+sub_1aa39 rdr_copy_mcga        # funcs_1A9C8[3]: 0x7A80w
+sub_1aa45 rdr_copy_herc        # funcs_1A9C8[4]
+
+# --- dialog/script + roster ---
+sub_14e9d script_step          # bytecode interp via word_26de0 cursor, 0x80 esc
+sub_152aa dlg_cursor_init      # byte_26de8/9 -> 26dd6/7, idx 0
+sub_1532b dlg_cursor_draw      # '_' at cursor + tbl_row_fetch + flip
+sub_1545d rec_row_fetch        # 0x48*idx + 0x8EF2 row rec -> si
+sub_154ce tile_draw_3f22       # tile_blit(0x3F22) wrapper
+sub_154d7 rand_0_22            # rand&0x1F retry >=0x17 (rejection)
+sub_15a57 screen15_enter       # tail -> screen15_set
+sub_15dac screen15_set         # word_1d91e=0x15 + farcall_ptr_a9e
+sub_15aa4 roster_parms_init    # wparm 0xB/0xC + 12-rec field init + member_rec_load
+sub_15b24 roster_apply         # iterates byte_28ad0 members, sets [-43AD] fields
+sub_15c3c roster_walk_prev     # backward idx -> roster_apply -> funcs_159E9
+sub_15c66 roster_sel_kind      # si class ranges -> dispatch
+sub_15cde member_rec_load      # word_1d91c=2 + [si] -> word_1d902 + wparm_b
+sub_15d90 unitlist_init        # byte_28a50=0x15 + clear [-43AD] x0x18
+sub_15ddc sum_accum            # byte_27154 += al, carry -> +hi, byte_27158++
+sub_15dee sum_accum_b          # same pair, carry -> byte_27156++
+sub_1bbb9 fmt_2digit           # al -> 2 ascii digits at [si]
+
+# --- object/sprite engine helpers (bx/si = slot idx, [-4173]=type) ---
+sub_15e00 obj_pos_pack         # ax<<5+0x10 -> [-4085]/[-4041], dl -> [-4063]/[-401F]
+sub_161c8 objs_each_34         # bx=0x22 loop -> obj_rec_clear
+sub_161e0 obj_prio_scan        # slots w/ [-3D55]>=4 -> find_free_slot_b path
+sub_16377 obj_find_type        # scan [si-3A25]&0x7F==bx x20; CF=found
+sub_1630e obj_link0_clear      # [bx-3D33] -> clear_sub_obj + [-3D11]=FF
+sub_16339 obj_link_kill        # [bx-3D33]<0 -> aux_slot_mark; CF gate
+sub_16354 obj_links_clear      # both link fields
+sub_16537 slot20_find_free     # scan [si-3A25]==0 si<0x14
+sub_165f0 obj_pos_mirror       # obj_xy_save + halves slot -> writes both
+sub_16671 obj_xy_save          # [bx-3A11/-39E9/-3999] -> word_2aa69/6b
+sub_16694 aux_slot_mark        # si in 3..8: [si-3949] flag set
+sub_166d0 aux_slot7_init       # si=7 defaults + byte_29538/9
+sub_167fb draw_rec_fill        # obj pos -> draw rec [bx+0E3F..0EFF]
+sub_1686e obj_scratch_clear    # al=0 entry -> obj_scratch_load tail
+sub_16872 obj_scratch_load     # obj fields -> byte_2984c..4f scratch
+sub_16955 obj_x_clamp          # [-38F8] pos x clamp -0x30..0xA0
+sub_16974 obj_y_clamp          # [-38E8] pos y clamp -0x15..0xC8
+sub_16989 obj_px_step          # byte_2984f gate -> [si-38E0]++ path
+sub_169b6 cam_pan_detect       # tgt vs cam_px thresholds -> byte_2967a pan bits
+sub_16b1e cam_pan_apply        # snap_to_cell + sprite_param_set + clear pan
+sub_16b72 obj_alive_mark       # byte_2aa63==0xB + [-3FFD]<0xEE -> [-3B79]=1
+sub_16bd2 ai_state_eval        # [-3A69] gate + byte_2aa63 + byte_2970d out
+sub_16c71 item_pick_chk        # byte_28cdc gate + [-3C67] cmp
+sub_16d73 hitflash_dec         # byte_29715-- ; reload byte_29714=0x1E
+sub_16e2b rand_tbl_pick        # rand -> [si-34F5] tbl fetch (byte_28cc2 idx)
+sub_16e9c slot_find_type       # scan si<0x22 [si-4173]==byte_29750
+sub_16f0e slot_scan_excl       # scan [si-4173]==al, skip byte_29999 idx
+sub_16f2d tgt_acquire          # slot scans + update_obj_max(0x38)
+sub_16fe1 ai_drive             # main per-obj AI driver (ticks/fields)
+sub_170e4 pri_fields_load      # byte_29764-66 -> [-3C01]/-3BDF/-3B35
+sub_17114 ai_seek_tgt          # arrive_chk + update_obj_max(0x38)
+sub_17221 dormant_chk          # [-3AAD]<0 + byte_2976b gate
+sub_17316 ai_dir_pick          # rand&0xF*2 -> [-34D0] dir tbl
+sub_173ab tgt_vec_a            # word_2966a=0x26 + delta eval
+sub_173b2 tgt_vec_b            # word_2966a=8 + delta eval vs word_265b0
+sub_17444 tgt_delta_calc       # rel delta vs cam_tgt -> word_29b44
+sub_174d2 obj_move_peek        # move scout: byte_29b50/51 scratch
+sub_174f2 obj_move_step        # input-driven move executor (ranger tick path)
+sub_1786e obj_anim_dec2        # [-3A47]-=2 anim timer -> frame step
+sub_178cb obj_follow_move      # [-3ECB] parity vs byte_298c4 -> pos adc
+sub_1794b alert_raise          # bl==0 && [-3E65]==0 -> byte_2a7ad=0xFF
+sub_1797e facing_calc          # ([-3ECB]&1)<<1 -> [-3F97]/[-3F75]
+sub_179b0 obj_dx_abs           # |byte_2aa5c-[-3FFD]| -> si sign flag
+sub_17a05 dmg_class_sel        # byte_29b5a=8 or 0x1C by [-3ECB]&3
+sub_17a2c objpos_to_scratch    # obj pos -> byte_29b5b..62
+sub_17a6d scratch_to_objpos    # byte_29b5b..62 -> obj pos fields
+sub_17aa6 rec6_clear           # zero [di-375F] x6
+sub_17ab2 rec6_restore         # [di-374D]->[di-375F] x6 + slot_weight_sum
+sub_17ac0 weight_pick          # slot_weight_sum + word_2b0c4 gate scan
+sub_17c11 fld304a_store        # [si-304A]=cx or ax helper
+sub_17c27 tile_variant_sel     # si 0/1/2 by byte_2a7ae/2a7ad -> [bp+1B]|8
+sub_17d71 meter_add_cap50      # word_2a7b0 clamp 0x32 -> pos field add
+sub_17dc5 obj_anim2_step       # word_2a8a2 0->1->2 + sprite 0x114/6 sel
+sub_18749 slotflag_clear       # [si-26F3]=0
+sub_1875d dmg_deal_8           # al=8 -> shared dmg entry
+sub_18761 dmg_deal_0b          # al=0xB -> byte_2a74b + slot write [-3E21]
+sub_18681 sfx_emit             # byte_2a6be=al, ch 0xF -> obj_delta_apply
+sub_1886f obj_expire_chk       # byte_2a6af gate + byte_29718-- -> word_1d91e=0
+sub_18f30 obj_rand_mask        # rand&1 -> [-3E21]+8, [-3B57]|0x81
+sub_193ef obj_wake             # [-3DFF]=1 + word_2a8a2=1 + byte_2a7aa=1
+sub_19440 meter_over_chk       # [-3DFF]==0: word_2a7b0+3 vs 0x32
+sub_19580 obj_spot_chk         # [-3B79]==0: byte_29750=1 + obj_overlap_test
+sub_195ce obj_seen_mark        # [-3B79]=1 if clear
+sub_1975c objpair_scan         # word_2a89c idx walk, [-260E] vs [-3C89]
+sub_198f8 player_input_tick    # word_26de4 mask -> word_2a8a0 move intent (+byte_26dd5 gate)
+sub_1a029 ai_decay_tick        # [-3AAD]-- -> byte_28cc1 slot + update_obj_max(0x38)
+sub_1a086 aim_delta_eval       # byte_2a90a vs [-3E21] facing, sign branches
+sub_1a399 obj_turn_step        # [-3E21] steps toward [-3DFF] +-1 + pos add
+sub_1a7b0 linked_flag_clear    # [bx-3CEF]->si; [si-4173]==2 -> [si-2555]=0
+sub_1a7e9 type2_find           # slot_scan_excl(2) -> read [si-2555]
+sub_1a96e type12_find_mark     # slot_scan_excl(0x12) -> byte_27153=1
+sub_1aef1 map_exit_probe       # 8-way cell scan; blocked -> word_2aa0d=3
+sub_1b1f0 map_probe_cell       # px_to_cell + probe + scr col fetch
+sub_1b228 px_to_cell           # word_2aa65/2aa67 >>3 -> byte_2a960/61
+sub_1b2b7 cell_to_col          # (word_2aa65 - word_29683) -> word_1d900 0..0x28
+sub_1b2e7 map_rowhdr_get       # row tbl 0x3F22 + byte_2aa67 -> word_2aa40
+
+# --- per-type obj tick handlers (funcs_1892F[type] dispatch via obj_tick_all) ---
+loc_18960 objtype_00_tick      # funcs_1892F[0]
+sub_189e2 objtype_01_tick
+sub_18d74 objtype_02_tick
+sub_18f93 objtype_03_tick
+sub_1906b objtype_04_tick
+sub_19165 objtype_05_tick      # jmp objtype_0d_tick
+sub_19168 objtype_06_tick      # jmp objtype_07_tick
+sub_1916b objtype_07_tick
+sub_19274 objtype_08_tick      # jmp objtype_0b_tick
+sub_19277 objtype_09_tick      # jmp objtype_0d_tick
+sub_1927a objtype_0a_tick
+sub_19468 objtype_0b_tick
+sub_195e0 objtype_0c_tick
+sub_19659 objtype_0d_tick
+sub_197b0 objtype_0e_tick
+sub_1980a objtype_0f_tick
+sub_19950 objtype_10_tick
+sub_19a8f objtype_11_tick
+sub_19b26 objtype_12_tick
+sub_19b59 objtype_13_tick
+sub_19c43 objtype_14_tick
+sub_19d0b objtype_15_tick
+sub_19d45 objtype_16_tick
+sub_19e74 objtype_17_tick
+sub_19f65 objtype_18_tick
+sub_1a0f0 objtype_19_tick
+sub_1a145 objtype_1a_tick
+sub_1a1b5 objtype_1b_tick
+sub_1a234 objtype_1c_tick
+sub_1a402 objtype_1d_tick
+sub_1a4f9 objtype_1e_tick
+sub_1a61a objtype_1f_tick
+sub_1a6af objtype_20_tick
+sub_1a833 objtype_21_tick
+sub_1a8b8 objtype_22_tick
+sub_1a8ec objtype_23_tick
+sub_1a96b objtype_24_tick      # jmp objtype_20_tick
+
+# --- route-map screen + mission generator ---
+sub_1bbcd route_map_screen     # planning map: draw + scroll loop + fire to exit
+sub_1bc59 routemap_render      # word_2b070 row base -> 19x32 tile draw + flip
+sub_1bcaa mapband_src          # word_1d8f8&7 -> row band tbl [-24F3]+0x7F
+sub_1bcbe maprow_4             # 4x tile_blit_flip of band row
+sub_1bccf mapcols_draw         # 32 cols x 40 tiles dispatch (loc_11752 path)
+sub_1bade maprow_emit          # col walk + glyph_put_draw -> next row
+sub_1bb0a legend_render        # map legend: rows + draw_menu_screen(0x20)
+sub_1bd0a cursor_res_sel       # word_27150 idx -> select_resource_c/d pair
+sub_1493b combat_setup         # clears + switch word_2aa0d -> populate vs state
+sub_1bd58 mission7_setup       # funcs_1B3E2[1]: ds:0x18E='7' + res 0x14/0x28
+sub_1c1a0 mission6_setup       # funcs_1B3E2[0]: ds:0x18E='6' + res 0x13/0x27
+sub_1c680 mission8_setup       # funcs_1B3E2[2]: ds:0x18E='8' + res 6/0x29
+sub_1bd92 mission7_populate    # funcs_1B41F[1]: mapgen calls + si=0xE49C
+sub_1c1da mission6_populate    # funcs_1B41F[0]
+sub_1c6ba mission8_populate    # funcs_1B41F[2]
+sub_1b47a mapgen_fill_a        # byte_2b0c6=0x1F bound -> fill loop
+sub_1b481 mapgen_fill_b        # byte_2b0c6=7, 0x20 iters rand fill 2b12a/b
+sub_1b4f0 mapgen_place_a       # rand&0xF + rand&7 -> pos pick retry <0x40
+sub_1b562 mapgen_emit          # rand<0xB0 gate + word_2b0cb rec -> cell write
+sub_1b5f0 mapgen_pick_b        # bounds 8/2 + rand&0x1F -> pos retry
+sub_1b64d mapgen_place_c       # save 2b118/b/11b + rand&0x1F <0x3F
+sub_1b688 mapgen_place_d       # same family, bound 0x40
+sub_1b6c3 mapgen_pick_e        # rect ptr 0xE313, bounds 0xC0/0xE0, cnt 6
+sub_1b6fc mapgen_retry         # bounds 0x10/4 + mapgen_test + rand<0x2b127
+sub_1b741 mapgen_test          # [bp+si] occupancy test -> byte_2b12b
+sub_1b7c3 mapgen_fill_6        # bound 6 grid fill + rand pos
+sub_1b85f mapgen_fill_8        # bound 8 grid fill + rand pos
+sub_1b8d6 maprect_apply        # word_265b0=0xE3B6 -> map_rect_write
+sub_1c162 mapgen_cells_a       # ds:0E45D=6 + rand pos <0x3C
+sub_1c63b mapgen_obj           # cell_to_px + obj_alloc from ds:0E574 rec
+sub_1ca01 mapgen_cells_b       # ds:0E606=6 + rand pos <0x3E
+sub_1bd50 ds_wrap_a            # push ds/jmp/pop ds thunk
+sub_1c66b ds_wrap_b
+sub_1c9f9 ds_wrap_c
+sub_16404 count_negate         # word_28cac = -word_28cac
+sub_18295 bitpos_accum         # word_2a5a7 sum of set-bit positions -> 2a5a5
+sub_182cb accum_add_half       # word_2a5a7 += word_2a5a7>>1 + >>2 (x1.75)
+sub_18306 rec5_cmp             # 5-byte field cmp [si]-[di] -> byte_2a506
+sub_1833e rec5_sub             # 5-byte field subtract w/ borrow flag
+sub_183b0 arrive_chk_b         # si==0 fast path of arrive_chk
+sub_183b3 arrive_chk           # word_2a5b4/b6 range test -> CF=arrived
+sub_1843e route_plan           # path eval over slots -> byte_2a605/6
+
+# --- variables (word_/byte_ -> semantic) — evidence-backed only ---
+word_1d934 adapter_id        var  # selects blitter dispatch 0=cga 1=tandy 2=ega 3=mcga 4=herc
+word_1d955 timer_cnt         var  # vsync-paced countdown; waited on in redraw_frame
+word_1d94d delay_cnt         var  # tick countdown target set before waits
+word_1d900 draw_col          var  # text/tile cursor col (0..0x27, wraps)
+word_1d902 draw_row          var  # text/tile cursor row (+=8, clamps 0xC0)
+word_1cea0 palette_ptr       var  # -> palette tbl (0xE8/0xF8 by adapter)
+word_1cea2 gfx_choice        var  # gfx_mode_menu pick 1..5
+word_1cea3 textbuf_seg       var  # es seg for text buffer ops
+word_1d6d8 video_inited      var  # once-guard for video_hw_init
+word_1d008 res_cache_a       var  # resource id cache slot A
+word_1d00a res_cache_b       var
+word_1d00c res_cache_c       var
+word_1d00e res_cache_d       var
+word_1d010 res_ptr           var  # current resource offset
+word_1d012 res_seg           var  # current resource segment
+word_1d016 res_handle        var  # DOS file handle
+word_1d018 res_name_ptr      var  # -> res filename
+word_1d91e screen_state      var  # mode var: 9/0xB/0xD/0x15 screen ids
+word_1d91c print_width       var  # set 2 before numeric prints
+word_1dcb0 input_device      var  # 0/1/2 device pick (menu 1/2/3)
+word_1d959 held_keys         var  # raw held-key bitmask (kbd divert)
+word_26de4 input_mask        var  # combat input mask (dir bits + fire 0x10)
+byte_26dd5 alt_control       var  # '2' sets 1 (mouse), '3' clears; 'K' toggles
+byte_1dcaa joy_mask          var  # stick-present bit mask vs port 0x201
+word_1dc80 joy_ax            var  # joystick axes (pair A)
+word_1dc82 joy_ay            var
+word_1dc86 joy_bx            var  # joystick axes (pair B, alt device)
+word_1dc88 joy_by            var
+word_1dca2 input_a           var  # polled input mask A (fire bit 0x10)
+word_1dca4 input_b           var  # polled input mask B
+word_265aa frame_cnt         var  # post_mission_loop iteration counter
+word_2aa0d mission_state     var  # 0=live,2=?,3=edge-blocked exit
+word_1d945 exit_flag         var  # post_mission_loop exit condition
+byte_2a9ca drift_flag        var  # !=0: descent auto-drift (no steer input)
+word_2967b cam_tgt_x         var  # camera target = ranger px x + ofs
+word_2967d cam_tgt_y         var  # camera target = ranger px y + ofs
+word_29814 cam_px_x          var  # last-rendered cam pos x (>>2 units)
+word_29816 cam_px_y          var  # last-rendered cam pos y
+byte_2967a pan_flags         var  # pan-detect bits -> action_dispatch case
+word_2a968 scroll_cnt        var  # scroll step counter (per dir)
+word_29683 cam_org_x         var  # camera origin px (col = px - org)
+byte_2a960 cell_x            var  # map probe cell coords
+byte_2a961 cell_y            var
+word_2aa65 probe_px          var  # pixel coords fed to px_to_cell
+word_2aa67 probe_py          var
+word_265b4 cell_base         var  # map probe cell base ptr
+word_265b0 rec_ptr_a         var  # record ptr A (5-wide field groups)
+word_265b2 rec_ptr_b         var  # record ptr B
+word_26de0 script_ptr        var  # script_step bytecode cursor
+word_26de2 dlg_buf           var  # dialog line buffer base
+byte_26de8 dlg_col           var
+byte_26de9 dlg_row           var
+byte_26dd6 cur_col           var  # dlg cursor pos
+byte_26dd7 cur_row           var
+word_26dd8 cur_idx           var  # dlg cursor index
+word_26dda cur_end           var  # dlg cursor limit
+byte_26de6 accept_latch      var  # sel_accept_poll output
+word_28343 menu_sel          var  # menu cursor index
+word_26dd3 title_shown       var  # once-guard for title screen
+word_26582 speed_sel         var  # battle_key_check +-0 keys
+byte_28cc0 space_flag        var  # SPC key -> battle flag
+byte_29711 weapon_sel        var  # digit keys -> weapon select
+word_297f3 spawn_budget      var  # spawn_tick drains+reloads
+byte_2974f enemy_cnt         var  # live enemy cap (<2 gate)
+byte_28cc2 spawn_level       var  # difficulty ramp counter
+byte_28cc1 diff_parm         var  # spawn difficulty param
+byte_29715 hit_flash         var  # countdown timer (hit flash)
+byte_29714 flash_period      var  # reload value 0x1E
+word_2a8a0 move_intent       var  # player_input_tick sets 1 = forward
+word_2a8a2 move_phase        var  # anim/move state 0->1->2
+byte_29718 fade_cnt          var  # obj_expire_chk decrement
+byte_2a6af expire_flag       var  # gates obj_expire_chk
+byte_2a74b dmg_amt           var  # 8/0xB damage amount
+byte_2a6be sfx_id            var  # sfx_emit index
+byte_28cd1 sfx_ch            var  # sfx channel (0xF)
+word_297e1 state_b           var  # ai_state_eval clears
+byte_2970d ai_flag_out       var  # ai_state_eval result flag
+byte_2976b trk_flag          var  # dormant_chk gate
+byte_29769 trk_flag_b        var  # tgt_delta_calc clears
+byte_2976a hit_flag          var  # objtype_1c entry test
+word_29b44 rel_y             var  # tgt_delta_calc: pos - cam_tgt_y
+byte_29b50 mv_lo             var  # obj_move_step scratch
+byte_29b51 mv_hi             var
+byte_29b5a dmg_kind          var  # dmg_class_sel: 8 or 0x1C
+byte_29b5b oscr_a            var  # objpos_to_scratch fields
+byte_29b5c oscr_b            var
+byte_29b5d oscr_c            var
+byte_29b5f oscr_d            var
+byte_29b62 oscr_e            var
+word_29b63 tmp_si            var  # obj_dx_abs slot save
+word_298c2 weight_sum        var  # slot_weight_sum output
+word_298c4 parity_ref        var  # obj_follow_move parity ref
+byte_28cc8 cool_gate         var  # target_pri_decay gate
+word_29b95 ai_parm_a         var  # ai_param_fetch outputs
+word_29b97 ai_parm_b         var
+byte_29750 scan_tgt          var  # slot_find_type search value
+byte_2998f scan_a            var  # slot_scan_excl scratch
+byte_29999 self_id           var  # slot_scan_excl skip idx
+byte_2999a scan_c            var
+word_29668 scan_id           var  # obj_find_type needle
+byte_29763 pri_best          var  # update_obj_max watermark
+byte_29764 pri_a             var  # pri_fields_load sources
+byte_29765 pri_b             var
+byte_29766 pri_c             var
+byte_2976c aux_msg           var  # event aux field
+byte_2984c oscr_0            var  # obj_scratch_load scratch
+byte_2984d oscr_1            var
+byte_2984e oscr_2            var
+byte_2984f oscr_3            var
+byte_2aa63 map_kind          var  # ==0xB gate in obj_alive_mark/ai_state_eval
+byte_27153 alarm_flag        var  # set 1/0x80 by find/event paths
+byte_2a7ad alert_lvl         var  # alert_raise sets 0xFF
+byte_2a7ae alert_aux         var  # tile_variant_sel input
+byte_28cdc carry_blk         var  # item_pick_chk gate
+word_2b070 map_scroll        var  # route map row base (clamped -8 top)
+word_1d8f8 map_base          var  # routemap render's scroll-row copy
+word_2a99d maprow_base       var  # 0x7F + band row tbl entry
+word_1ddb0 dirtyrect_ptr     var  # mcga_dirty_update walks rect list here
+word_1ddb9 rectreg_base      var  # dirty-band registry base
+word_1ddd3 rectreg_off       var  # registry cursor offset
+word_27150 mission_idx       var  # mission_select idx -> jpt_1B475 dispatch
+byte_27149 member_idx        var  # member_sel_scan iterator
+word_27154 sum_acc           var  # sum_accum 16-bit accumulator
+byte_27156 sum_ovf_b         var  # overflow counter (carry)
+byte_27158 sum_ovf_a         var
+word_2a5a3 sel_mask          var  # walk_set_bits iterates this bitmask
+word_2a5a5 accum_a           var  # bitpos_accum result
+word_2a5a7 accum_b           var  # running accumulation
+word_2aa48 probe_save_bx     var  # map_probe_cell saves bx/si
+word_2aa4a probe_save_si     var
+byte_2a9fb probe_flag        var  # map_exit_probe clears
+byte_2a9e0 exit_dir          var  # map_exit_probe result dir
+word_2a5b4 arr_bx            var  # arrive_chk saved regs
+word_2a5b6 arr_si            var
+byte_2a5b0 arr_flag          var  # arrive_chk flag
+word_1d92c wparm_a           var  # wparm_a_load dest
+word_1d92e wparm_b           var
+word_1d8d0 modal_flag        var  # gates key_sound_test loop
+word_26dc0 input_wait        var  # joy_settle sets 4
+word_1dcac joy_acc_x         var  # zeroed by joy_settle
+word_1dcae joy_acc_y         var
+word_1d949 stage_parm_a      var  # load_stage_parms target
+word_1d94b stage_parm_b      var
+word_1dd9f clip_mask_a       var  # unit_draw_emit merges into clip masks
+word_1dda3 clip_mask_b       var
+word_1ddb2 compose_gate      var  # frame_compose_flip gate
+byte_28cb3 mark_col          var  # grid_cell_mark cell index
+byte_28cb4 mark_row          var
+word_2aa40 row_meta          var  # map_rowhdr_get result
+word_2aa42 maprow_idx        var
+word_29818 burst_dir         var  # burst_spawn rand dir
+word_298ae burst_src         var  # burst_spawn src slot
+word_298ac burst_cnt         var  # burst_spawn countdown
+word_298b2 place_x           var  # obj_place_16 x<<4
+word_1d930 extkey_mode       var  # toggle_mode_flag flips bit0
+sub_1640d burst_spawn          # word_1d91e=9 + rand dir + 0xF emit loop via word_298ac
+sub_164ce obj_place_16         # x<<4 -> word_298b2 + slot20_find_free + [-395D] write

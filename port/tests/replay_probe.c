@@ -1,5 +1,5 @@
 /* Replay probe: load a live-combat mem[] snapshot (M2C_SNAP dump), then drive
- * the real player handler sub_189e2 (bx=0) with each held direction via
+ * the real player handler objtype_01_tick (bx=0) with each held direction via
  * word_26DE4 (active-low). Reports the ranger's 24-bit X/Y plus the collision
  * decision inputs (staged xy, cell, terrain, flag bytes) each tick so LEFT
  * rollback can be compared against RIGHT on identical state. */
@@ -9,7 +9,7 @@
 #include <stdio.h>
 #include <string.h>
 
-extern void sub_189e2(void);   /* player tick (object type 1) */
+extern void objtype_01_tick(void);   /* player tick (object type 1) */
 
 #define O(off) (*(volatile db*)raddr(ds, (unsigned)(bx - (off))))
 
@@ -44,7 +44,7 @@ static void run(const char *name, unsigned held, unsigned face){
     unsigned x0 = getx(0), y0 = gety(0);
     printf("== %-5s held=%02x face=%02x start X=%x Y=%x\n", name, held, face, x0, y0);
     for (int i = 0; i < 8; i++){
-        sub_189e2();
+        objtype_01_tick();
         printf("   t%d X=%x Y=%x nib=%02x face=%02x tgt=%02x gate=%02x | staged=%04x,%04x cell=%02x,%02x "
                "terr=%02x attr=%02x f5e=%02x f5f=%02x f62=%02x f64=%02x f63=%02x sf9=%02x\n",
                i, getx(0), gety(0), byte_2976c,
