@@ -2387,3 +2387,479 @@ loc_1c9ff  ds_wrap_c_e1c9ff  # entry ds_wrap_c
 loc_1ca06  mapgen_cells_b_e1ca06  # entry mapgen_cells_b
 loc_10630    tandy_detect      # F000:FFFE==FF + F000:C000==21 -> byte_1D93B
 loc_1064a    gfx_menu_init     # byte_1D93B=0, BDA equip, textbuf B800, menu
+
+# --- format-selector far stubs: word_1D91C=fmt; call print_dec_* (evidence: body) ---
+ret_1a2_102a	fmt0_dec_u16
+ret_1a2_103d	fmt1_dec_u16
+ret_1a2_1050	fmt2_dec_u16
+ret_1a2_1063	fmt0_dec_u16_zx	# ah=dx=0 before print
+ret_1a2_107a	fmt1_dec_u16_zx
+ret_1a2_10bf	fmt3_dec_s8	# call print_dec_s8
+ret_1a2_10d2	fmt0_dec_s8
+ret_1a2_10e5	fmt1_dec_s8
+ret_1a2_10f8	fmt2_dec_s8
+ret_1a2_110b	fmt0_dec_u16_d0	# dx=0
+ret_1a2_1120	fmt1_dec_u16_d0
+ret_1a2_1135	fmt2_dec_u16_d0
+ret_1a2_114a	fmt3_dec_u16_d0
+ret_1a2_115f	fmt3_dec_s16	# call print_dec_s16
+ret_1a2_1172	fmt0_dec_s16
+ret_1a2_1185	fmt1_dec_s16
+ret_1a2_1198	fmt2_dec_s16
+ret_1a2_11ab	fmt8_dec_u16	# word_1D6DE=si; fmt=8
+ret_1a2_11c6	fmt8_dec_u16_b	# same body, alt entry
+seg000_10a8_proc	fmt3_dec_u16_zx
+seg000_1024_proc	emit_dash	# al=0x2D -> glyph_put_backbuf
+seg000_129a_proc	hex16_pair	# print_hex8 twice (hi,lo)
+ret_1a2_129c	hex16_hi	# al=ah -> print_hex8
+ret_1a2_12a5	emit_idx0	# ds:0A9C=0 -> dispatch_a9c body
+ret_1a2_12ae	emit_idx1	# ds:0A9C=1
+ret_1a2_12b7	emit_idx2	# ds:0A9C=2
+seg000_1263_proc	print_hex_dlr	# emit '$' then print_hex8
+seg000_1346_proc	rand_mul	# cl=al; rand_next; mul cl
+# --- input/joystick ---
+seg000_2496_proc	joy_calib4	# 4x joy_axes_fetch accumulate -> 1DCAC/E
+seg000_2522_proc	joy_btn_scan	# in 0x201 mask bits -> si flags
+e_12446		joy_wait_pair	# poll_input until 1DCA2&20h & 1DCA4&20h
+# --- irq/system ---
+seg000_2643_proc	irq_stub_eoi	# out 20h,20h EOI + reg set + iret
+seg000_14d6_proc	tick_isr	# int1c entry (label timer_tick_isr inside)
+seg000_144e_proc	ega_reg_setup	# 3CE/3C4 writes gated by ds:0ACDh
+ret_1a2_46d	cga_mode_fix	# CGA only: BDA 40:65 |=4, out 3D8
+# --- memory/dos ---
+seg000_3baf_proc	mem_free_chk	# int21 49h + err string on fail
+ret_1a2_714	blk_free	# int21 49h free word_1CE96
+seg000_708_proc	blk_alloc	# int21 48h word_1CE98 paras -> word_1CE96
+# --- startup/farcall ---
+seg000_a1_proc	vid_init	# int10 set mode from ds:10h; far init call
+seg000_10c_proc	farcall_ovl_a	# far call via farjmp_ptr_10245 + ds:0AB0h chk
+seg000_114_proc	farcall_ovl_b	# same family, alt entry
+seg000_25f_proc	hdr_walk	# [bx+0FEh] chain; es=seg_data; dx=[bx+100h]
+ret_1a2_488	rec_walk	# [di] si/bx/dx triples walk in seg_data
+ret_1a2_16f6	farcall_seg0e	# di=seg_1000E, bx=1 -> loc_1170B
+
+# --- misc placeholder procs (evidence in body) ---
+ret_1a2_22dc	keytest_f2	# word_1D8D2=2 -> key_sound_test
+ret_1a2_22ec	keytest_f1	# word_1D945=1 -> key_sound_test
+ret_1a2_1b9e	spr_state_copy	# clear_backbuf + 20D4E->20D52 copy -> spr tail
+ret_1a2_4f8b	delay2_fmt2	# word_1D94D=2 x2; checks word_1D91C==2
+ret_1a2_4f8e	script_next	# stream word_26DE0 -> byte_26DE8; 0x80=mark
+seg000_53aa_proc	mode4_load	# byte_281ED gate; 1D920=4; res+tilemap
+ret_1a2_5dd0	cksum_add	# carry-add into sum_acc/sum_ovf_a chain
+seg000_606a_proc	char_route	# switch on '/','?','>',0xB1,0xB2
+ret_1a2_60dd	objid_scan	# si<0x22 bound; scan [si-4173h] id table
+seg000_b9f9_proc	objid_scan_b	# same id-table scan, bx entry
+seg000_6838_proc	objblk_init	# fill 8B [si-41E8h]; word_1DD9F=0xFFFF
+ret_1a2_6abf	objfld_load_a	# [bx-4085h]->word_2AA69 field loads
+ret_1a2_6ac8	objfld_load_b	# same field-load tail, mid entry
+seg000_6abe_proc	objfld_load	# [bx-40xx]->word_2AA69 field block load
+seg000_6a5a_proc	cam_org_init	# 28DFB/28E3F -0x50 >>2 -> cam_org_x/y
+seg000_6bb9_proc	stat_min6	# min([si-376B],[si-3753]) x6 loop
+seg000_6f0b_proc	obj_peer_scan	# id-table scan; match != self_id
+ret_1a2_98f4	objup_0b	# [bx-3C23h] gate; 1D91E=0xB; update_obj_max
+seg000_a12f_proc	objup_0d	# field writes; 29722=2; 1D91E=0xD
+seg000_abf1_proc	menu_b_run	# clear bufs; menu_screen_run; res 0x11
+ret_1a2_b1fe	map_probe_pair	# save bx,si; map_probe_cell+xy; restore
+seg000_b336_proc	map_probe_pair2	# save bx,si; px_to_cell+probes; restore
+
+# --- family-private vars (evidence: accessor exclusivity) ---
+byte_1d6dc	eblit_d6dc	var	# ega_blit_planar_b
+byte_1d6dd	eblit_d6dd	var	# ega_blit_planar_b
+byte_1d936	cellgfx__d936	var	# cellgfx_ega
+byte_1d93e	keytest_d93e	var	# key_sound_test
+byte_1dc65	inmenu_dc65	var	# input_device_menu
+byte_1dc79	inmenu_dc79	var	# input_device_menu
+byte_1dc7a	inmenu_dc7a	var	# input_device_menu
+byte_1dcc1	drawadv_dcc1	var	# draw_pos_advance
+byte_1dcdd	find_fil_dcdd	var	# find_files
+byte_1dce1	drawadv_dce1	var	# draw_pos_advance
+byte_1dd01	mdir_dd01	var	# move_dir_tick
+byte_1dd05	phase_dd05	var	# phase_state_step
+byte_1dd21	mdir_dd21	var	# move_dir_tick
+byte_1dd25	phase_dd25	var	# phase_state_step
+byte_1dd41	mdir_dd41	var	# move_dir_tick
+byte_1dd45	phase_dd45	var	# phase_state_step
+byte_1dd80	select_dd80	var	# mission_select
+byte_1e0a3	cframe_e0a3	var	# compose_frame_cond
+byte_1e12f	cframe_e12f	var	# compose_frame_cond
+byte_1e1c9	cblit_e1c9	var	# clip_blit_ega
+byte_1e1ca	cblit_e1ca	var	# clip_blit_ega
+byte_1e1cd	cblit_e1cd	var	# clip_blit_ega
+byte_20d4c	seg000_1_0d4c	var	# seg000_1b8a_proc
+byte_20d50	spcopy_0d50	var	# spr_state_copy
+byte_24e71	dcomp_4e71	var	# decompress_res
+byte_24e76	dcomp_4e76	var	# decompress_res
+byte_24e7b	dcomp_4e7b	var	# decompress_res
+byte_26dcd	find_fil_6dcd	var	# find_files
+byte_26de7	run_6de7	var	# mission_run
+byte_26def	rowf_6def	var	# tbl_row_fetch
+byte_26df0	rowf_6df0	var	# tbl_row_fetch
+byte_26df3	csnap_6df3	var	# cursor_snap
+byte_26dfa	csnap_6dfa	var	# cursor_snap
+byte_271d5	mselprep_71d5	var	# member_sel_prep
+byte_281ed	mode4_81ed	var	# mode4_load
+byte_281ee	mode4_81ee	var	# mode4_load
+byte_28677	inmenu_8677	var	# input_device_menu
+byte_289e2	file_fie_89e2	var	# file_field_copy
+byte_289e3	file_fie_89e3	var	# file_field_copy
+byte_28c94	objblk_i_8c94	var	# objblk_init
+byte_28c95	objblk_i_8c95	var	# objblk_init
+byte_28c96	objblk_i_8c96	var	# objblk_init
+byte_28c97	objblk_i_8c97	var	# objblk_init
+byte_28ca1	post_loo_8ca1	var	# post_mission_loop
+byte_28ca2	ot01_8ca2	var	# objtype_01_tick
+byte_28ca3	csetup_8ca3	var	# combat_setup
+byte_28cb1	apply_sc_8cb1	var	# apply_obj_scratch
+byte_28cc4	call_fn_8cc4	var	# call_mission_fn
+byte_28cc5	call_fn_8cc5	var	# call_mission_fn
+byte_28cca	ot01_8cca	var	# objtype_01_tick
+byte_28cd9	rstate_8cd9	var	# reset_run_state
+byte_28cdb	bkey_8cdb	var	# battle_key_check
+byte_28d0d	csetup_8d0d	var	# combat_setup
+byte_28d0e	csetup_8d0e	var	# combat_setup
+byte_28d51	csetup_8d51	var	# combat_setup
+byte_28e83	owake_8e83	var	# obj_wake
+byte_28f2d	csetup_8f2d	var	# combat_setup
+byte_2901b	owake_901b	var	# obj_wake
+byte_2903d	owake_903d	var	# obj_wake
+byte_290a3	ot17_tick_90a3	var	#	objtype_17_tick
+byte_2914d	csetup_914d	var	# combat_setup
+byte_2914e	csetup_914e	var	# combat_setup
+byte_2916f	csetup_916f	var	# combat_setup
+byte_29170	csetup_9170	var	# combat_setup
+byte_291b3	csetup_91b3	var	# combat_setup
+byte_291d5	csetup_91d5	var	# combat_setup
+byte_2923b	csetup_923b	var	# combat_setup
+byte_29307	ot23_tick_9307	var	#	objtype_23_tick
+byte_29537	aux7_9537	var	# aux_slot7_init
+byte_29538	aux7_9538	var	# aux_slot7_init
+byte_29539	aux7_9539	var	# aux_slot7_init
+byte_29567	rstate_9567	var	# reset_run_state
+byte_295ea	objblk_i_95ea	var	# objblk_init
+byte_295ef	csetup_95ef	var	# combat_setup
+byte_2970e	bkey_970e	var	# battle_key_check
+byte_2970f	bkey_970f	var	# battle_key_check
+byte_29721	ot13_tick_9721	var	#	objtype_13_tick
+byte_29723	ot13_tick_9723	var	#	objtype_13_tick
+byte_29724	ot14_tick_9724	var	#	objtype_14_tick
+byte_29733	roster_9733	var	# roster_sel_kind
+byte_29734	roster_9734	var	# roster_sel_kind
+byte_29735	roster_9735	var	# roster_sel_kind
+byte_29736	roster_9736	var	# roster_sel_kind
+byte_29738	roster_9738	var	# roster_sel_kind
+byte_29762	ai_seek__9762	var	# ai_seek_tgt
+byte_29767	pri_fiel_9767	var	# pri_fields_load
+byte_29768	ai_drive_9768	var	# ai_drive
+byte_29847	udraw_9847	var	# unit_draw_walk
+byte_29848	udraw_9848	var	# unit_draw_walk
+byte_2984b	unit_dra_984b	var	# unit_draw_emit
+byte_298a6	mcell_98a6	var	# map_cell_write
+byte_298c4	follow_m_98c4	var	# obj_follow_move
+byte_299af	ai_dir_p_99af	var	# ai_dir_pick
+byte_29b4f	move_ste_9b4f	var	# obj_move_step
+byte_29b5e	objpos_t_9b5e	var	# objpos_to_scratch
+byte_29b60	objpos_t_9b60	var	# objpos_to_scratch
+byte_29b61	objpos_t_9b61	var	# objpos_to_scratch
+byte_29f5e	fx_overl_9f5e	var	# fx_overlay_fill
+byte_29f76	select_9f76	var	# mission_select
+byte_29f77	select_9f77	var	# mission_select
+byte_2a30d	select_a30d	var	# mission_select
+byte_2a33f	select_a33f	var	# mission_select
+byte_2a3b0	select_a3b0	var	# mission_select
+byte_2a400	select_a400	var	# mission_select
+byte_2a441	select_a441	var	# mission_select
+byte_2a4ca	select_a4ca	var	# mission_select
+byte_2a506	rec5_cmp_a506	var	# rec5_cmp
+byte_2a5f6	rplan_a5f6	var	# route_plan
+byte_2a5f7	rplan_a5f7	var	# route_plan
+byte_2a5f8	rplan_a5f8	var	# route_plan
+byte_2a5f9	rplan_a5f9	var	# route_plan
+byte_2a5fa	rplan_a5fa	var	# route_plan
+byte_2a5fb	rplan_a5fb	var	# route_plan
+byte_2a5fc	rplan_a5fc	var	# route_plan
+byte_2a601	rplan_a601	var	# route_plan
+byte_2a602	ai_seek__a602	var	# ai_seek_tgt
+byte_2a603	rplan_a603	var	# route_plan
+byte_2a604	rplan_a604	var	# route_plan
+byte_2a612	spawn_a612	var	# pick_spawn_xy
+byte_2a613	spawn_a613	var	# pick_spawn_xy
+byte_2a614	spawn_a614	var	# pick_spawn_xy
+byte_2a615	spawn_a615	var	# pick_spawn_xy
+byte_2a6b0	cellpx_a6b0	var	# cell_to_px
+byte_2a6b1	cellpx_a6b1	var	# cell_to_px
+byte_2a6b2	cellpx_a6b2	var	# cell_to_px
+byte_2a6b3	cellpx_a6b3	var	# cell_to_px
+byte_2a6b4	oalloc_a6b4	var	# obj_alloc
+byte_2a6b5	oalloc_a6b5	var	# obj_alloc
+byte_2a6c1	delta_a6c1	var	# obj_delta_apply
+byte_2a6c2	delta_a6c2	var	# obj_delta_apply
+byte_2a6c3	delta_a6c3	var	# obj_delta_apply
+byte_2a6c4	delta_a6c4	var	# obj_delta_apply
+byte_2a6c5	delta_a6c5	var	# obj_delta_apply
+byte_2a6c6	delta_a6c6	var	# obj_delta_apply
+byte_2a7ab	ot01_a7ab	var	# objtype_01_tick
+byte_2a86b	ot0d_a86b	var	# objtype_0d_tick
+byte_2a86c	ot0d_a86c	var	# objtype_0d_tick
+byte_2a8b0	type12_f_a8b0	var	# type12_find_mark
+byte_2a90a	aim_delt_a90a	var	# aim_delta_eval
+byte_2a96c	descent__a96c	var	# descent_steer
+byte_2a99f	descent__a99f	var	# descent_steer
+byte_2a9cb	run_a9cb	var	# mission_run
+byte_2a9cd	run_a9cd	var	# mission_run
+byte_2a9d3	run_a9d3	var	# mission_run
+byte_2a9d8	view_pan_a9d8	var	# view_pan_step
+byte_2a9df	csetup_a9df	var	# combat_setup
+byte_2a9e1	drawadv_a9e1	var	# draw_pos_advance
+byte_2a9e2	drawadv_a9e2	var	# draw_pos_advance
+byte_2a9e3	drawadv_a9e3	var	# draw_pos_advance
+byte_2a9e4	drawadv_a9e4	var	# draw_pos_advance
+byte_2a9f9	drawadv_a9f9	var	# draw_pos_advance
+byte_2a9fa	map_mark_a9fa	var	# map_mark_cell
+byte_2aa5d	rplan_aa5d	var	# route_plan
+byte_2aa60	motion_t_aa60	var	# obj_motion_tick
+byte_2aa61	ot0d_aa61	var	# objtype_0d_tick
+byte_2b076	route_ma_b076	var	# route_map_screen
+byte_2b0c3	ot16_b0c3	var	# objtype_16_tick
+byte_2b0c6	fill_a_b0c6	var	# mapgen_fill_a
+byte_2b0c7	fill_b_b0c7	var	# mapgen_fill_b
+byte_2b0ca	mgen_b0ca	var	# mapgen_emit
+byte_2b0cf	mgena_b0cf	var	# mapgen_place_a
+byte_2b0d0	mgena_b0d0	var	# mapgen_place_a
+byte_2b0d1	mgena_b0d1	var	# mapgen_place_a
+byte_2b0d2	mgena_b0d2	var	# mapgen_place_a
+byte_2b0d3	mgen_b0d3	var	# mapgen_emit
+byte_2b0d4	mgen_b0d4	var	# mapgen_emit
+byte_2b115	mgenb_b115	var	# mapgen_pick_b
+byte_2b116	mgenb_b116	var	# mapgen_pick_b
+byte_2b117	mgenb_b117	var	# mapgen_pick_b
+byte_2b118	mgenc_b118	var	# mapgen_place_c
+byte_2b119	mgenc_b119	var	# mapgen_place_c
+byte_2b11a	mgenc_b11a	var	# mapgen_place_c
+byte_2b11d	oalloc_b11d	var	# obj_alloc
+byte_2b11e	mgend_b11e	var	# mapgen_place_d
+byte_2b11f	mgend_b11f	var	# mapgen_place_d
+byte_2b120	mgend_b120	var	# mapgen_place_d
+byte_2b123	pick_e_b123	var	# mapgen_pick_e
+byte_2b126	retry_b126	var	# mapgen_retry
+byte_2b129	retry_b129	var	# mapgen_retry
+byte_2b12c	spawn_b12c	var	# obj_spawn
+byte_2b12d	mgen6_b12d	var	# mapgen_fill_6
+byte_2b12e	mgen6_b12e	var	# mapgen_fill_6
+byte_2b12f	mgen6_b12f	var	# mapgen_fill_6
+byte_2b130	mgen6_b130	var	# mapgen_fill_6
+byte_2b131	fill_8_b131	var	# mapgen_fill_8
+byte_2b132	fill_8_b132	var	# mapgen_fill_8
+byte_2b23c	mrect_b23c	var	# map_rect_write
+byte_2b23d	mrect_b23d	var	# map_rect_write
+byte_2b242	mrect_b242	var	# map_rect_write
+byte_2b24d	ot1b_tick_b24d	var	#	objtype_1b_tick
+byte_2b2ce	ot1a_tick_b2ce	var	#	objtype_1a_tick
+byte_2b3f6	ot16_b3f6	var	# objtype_16_tick
+byte_2b3f7	ot16_b3f7	var	# objtype_16_tick
+word_13a90	ovl_3a90	var	# load_overlay
+word_13a92	ovl_3a92	var	# load_overlay
+word_1ce80	resize_p_ce80	var	# resize_prog_block
+word_1ce92	start_ce92	var	# start
+word_1ce94	start_ce94	var	# start
+word_1ce96	blk_ce96	var	# blk_alloc
+word_1ce98	blk_ce98	var	# blk_alloc
+word_1ceb2	gconv_ceb2	var	# glyph_conv_cga
+word_1ceb4	gconv_ceb4	var	# glyph_conv_cga
+word_1ceb6	gconv_ceb6	var	# glyph_conv_cga
+word_1d004	load_res_d004	var	# load_resource
+word_1d6da	keytest_d6da	var	# key_sound_test
+word_1d6de	fmt8_dec_d6de	var	# fmt8_dec_u16
+word_1d7c0	tile_bli_d7c0	var	# tile_blit_tandy
+word_1d8d4	fwait_d8d4	var	# frame_wait
+word_1d8d6	fwait_d8d6	var	# frame_wait
+word_1d8d8	joy_cali_d8d8	var	# joy_calib4
+word_1d8ea	otick_d8ea	var	# obj_tick_all
+word_1d8ec	otick_d8ec	var	# obj_tick_all
+word_1d8f6	routemap_d8f6	var	# routemap_render
+word_1d943	eblit_d943	var	# ega_blit_planar_b
+word_1d94f	tick_isr_d94f	var	# tick_isr
+word_1d95d	print_de_d95d	var	# print_dec_u16
+word_1d965	seg000_1_d965	var	# seg000_1cd9_proc
+word_1d969	seg000_1_d969	var	# seg000_1cd9_proc
+word_1dbdd	draw_cel_dbdd	var	# draw_cell_strip
+word_1dc67	devmenu_dc67	var	# show_device_menu
+word_1dc69	devmenu_dc69	var	# show_device_menu
+word_1dc6b	devmenu_dc6b	var	# show_device_menu
+word_1dc6d	devmenu_dc6d	var	# show_device_menu
+word_1dc6f	devmenu_dc6f	var	# show_device_menu
+word_1dc71	devmenu_dc71	var	# show_device_menu
+word_1dc73	devmenu_dc73	var	# show_device_menu
+word_1dc75	devmenu_dc75	var	# show_device_menu
+word_1dc77	inmenu_dc77	var	# input_device_menu
+word_1dc8c	joya_dc8c	var	# joy_btn_a_read
+word_1dc8e	joyb_dc8e	var	# joy_btn_b_read
+word_1dc92	joya_dc92	var	# joy_btn_a_read
+word_1dc94	joyb_dc94	var	# joy_btn_b_read
+word_1dc98	joya_dc98	var	# joy_btn_a_read
+word_1dc9a	joyb_dc9a	var	# joy_btn_b_read
+word_1dc9e	joya_dc9e	var	# joy_btn_a_read
+word_1dca0	joyb_dca0	var	# joy_btn_b_read
+word_1dcb1	poll_dcb1	var	# poll_input
+word_1dcb3	poll_dcb3	var	# poll_input
+word_1e1bf	crest_e1bf	var	# clip_rest_mcga
+word_1e1c1	crest_e1c1	var	# clip_rest_mcga
+word_1e840	ovl_e840	var	# load_overlay
+word_1e842	ovl_e842	var	# load_overlay
+word_1e844	ovl_e844	var	# load_overlay
+word_1e846	ovl_e846	var	# load_overlay
+word_209e0	start_09e0	var	# start
+word_209e2	start_09e2	var	# start
+word_20d38	select_r_0d38	var	# select_resource_d
+word_20d4a	seg000_1_0d4a	var	# seg000_1b8a_proc
+word_20d4e	spcopy_0d4e	var	# spr_state_copy
+word_20d58	legend_0d58	var	# legend_render
+word_24e74	dcomp_4e74	var	# decompress_res
+word_24e77	dcomp_4e77	var	# decompress_res
+word_24e79	dcomp_4e79	var	# decompress_res
+word_26564	intro_6564	var	# intro_animation
+word_26566	tmframe_6566	var	# draw_tilemap_frame
+word_2656a	intro_656a	var	# intro_animation
+word_26570	tmframe_6570	var	# draw_tilemap_frame
+word_26574	intro_6574	var	# intro_animation
+word_265a8	game_mai_65a8	var	# game_main
+word_265ac	ot0a_tick_65ac	var	#	objtype_0a_tick
+word_26ddc	main_men_6ddc	var	# main_menu
+word_26ded	rowf_6ded	var	# tbl_row_fetch
+word_26df4	csnap_6df4	var	# cursor_snap
+word_26df6	csnap_6df6	var	# cursor_snap
+word_26df8	csnap_6df8	var	# cursor_snap
+word_27169	mselprep_7169	var	# member_sel_prep
+word_2732f	screen_c_732f	var	# screen_compose
+word_27403	main_men_7403	var	# main_menu
+word_2762f	brief_sc_762f	var	# brief_screen
+word_27634	brief_sc_7634	var	# brief_screen
+word_2824b	mode4_824b	var	# mode4_load
+word_28341	mseloop_8341	var	# menu_select_loop
+word_28345	menu_nav_8345	var	# menu_nav_step
+word_28347	mseloop_8347	var	# menu_select_loop
+word_28349	mseloop_8349	var	# menu_select_loop
+word_2860a	devmenu_860a	var	# show_device_menu
+word_28730	menu_scr_8730	var	# menu_screen_run
+word_28c83	pod_hit__8c83	var	# pod_hit_test
+word_28c90	objblk_i_8c90	var	# objblk_init
+word_28c92	objblk_i_8c92	var	# objblk_init
+word_28cac	count_ne_8cac	var	# count_negate
+word_2966c	dmg_deal_966c	var	# dmg_deal_0b
+word_29670	apply_sc_9670	var	# apply_obj_scratch
+word_29845	udraw_9845	var	# unit_draw_walk
+word_298a2	mcell_98a2	var	# map_cell_write
+word_298a4	mcell_98a4	var	# map_cell_write
+word_29955	facing_c_9955	var	# facing_calc
+word_29b42	tgt_delt_9b42	var	# tgt_delta_calc
+word_29e36	wpn_9e36	var	# hud_weapon_update
+word_29e38	wpn_9e38	var	# hud_weapon_update
+word_29e3a	wpn_9e3a	var	# hud_weapon_update
+word_29e3c	wpn_9e3c	var	# hud_weapon_update
+word_29e3e	wpn_9e3e	var	# hud_weapon_update
+word_29e40	wpn_9e40	var	# hud_weapon_update
+word_29f60	fx_overl_9f60	var	# fx_overlay_fill
+word_29f64	anim2_st_9f64	var	# obj_anim2_step
+word_29f66	anim2_st_9f66	var	# obj_anim2_step
+word_29f78	select_9f78	var	# mission_select
+word_2a0dd	select_a0dd	var	# mission_select
+word_2a0ea	joytabs_a0ea	var	# joy_tabs_sel
+word_2a10d	joytabs_a10d	var	# joy_tabs_sel
+word_2a12a	joytabs_a12a	var	# joy_tabs_sel
+word_2a147	joytabs_a147	var	# joy_tabs_sel
+word_2a507	select_a507	var	# mission_select
+word_2a509	select_a509	var	# mission_select
+word_2a5b2	delta_a5b2	var	# obj_delta_apply
+word_2a5fd	rplan_a5fd	var	# route_plan
+word_2a5ff	rplan_a5ff	var	# route_plan
+word_2a610	spawn_a610	var	# pick_spawn_xy
+word_2a6bf	delta_a6bf	var	# obj_delta_apply
+word_2a7a8	otick_a7a8	var	# obj_tick_all
+word_2a89c	objpair__a89c	var	# objpair_scan
+word_2a89e	ot0f_tick_a89e	var	#	objtype_0f_tick
+word_2a933	ot20_tick_a933	var	#	objtype_20_tick
+word_2a962	run_a962	var	# mission_run
+word_2a96a	ground_m_a96a	var	# ground_map_draw
+word_2a9d0	run_a9d0	var	# mission_run
+word_2a9d4	map_mark_a9d4	var	# map_mark_cell
+word_2a9d6	run_a9d6	var	# mission_run
+word_2a9fb	map_exit_a9fb	var	# map_exit_probe
+word_2aa44	map_rowh_aa44	var	# map_rowhdr_get
+word_2aa46	map_rowh_aa46	var	# map_rowhdr_get
+word_2aa56	map_prob_aa56	var	# map_probe_pair2
+word_2aa58	map_prob_aa58	var	# map_probe_pair2
+word_2b074	route_ma_b074	var	# route_map_screen
+word_2b0c8	legend_b0c8	var	# legend_render
+word_2b0cb	mgen_b0cb	var	# mapgen_emit
+word_2b0cd	mgen_b0cd	var	# mapgen_emit
+word_2b11b	mgenc_b11b	var	# mapgen_place_c
+word_2b121	mgend_b121	var	# mapgen_place_d
+word_2b23e	mrect_b23e	var	# map_rect_write
+word_2b240	mrect_b240	var	# map_rect_write
+word_2b245	cellpx_b245	var	# cell_to_px
+word_2b247	cellpx_b247	var	# cell_to_px
+word_2b24f	tile_loo_b24f	var	# tile_lookup
+word_2b251	tile_loo_b251	var	# tile_lookup
+word_2b253	map_exit_b253	var	# map_exit_probe
+
+# --- final placeholder procs ---
+seg000_1cd9_proc	tilemap_init	# sets word_1D916=0x3F22 rows / 1D918=0x8722 tiles
+seg000_4c72_proc	color_sel	# byte_26DFC -> [si-5D27h] -> byte_27166/67
+seg000_4d51_proc	color_step	# byte_27152 idx; byte_27166+[bx-5B60h] -> 27167
+seg000_1b8a_proc	spr_state_copy_b	# clear_backbuf + 20D4A->20D52 -> spr tail
+ret_1a2_686c	objblk_init_e	# entry into objblk_init body
+rec5_sub	bcd_sub_digits	# 6-digit borrow chain; +0x30
+# --- stale owner prefixes: ret_1a2_XXXX renamed, _e entries follow ---
+ret_1a2_129c_e112c0	hex16_hi_e112c0
+ret_1a2_129c_e112d9	hex16_hi_e112d9
+ret_1a2_129c_e112e3	hex16_hi_e112e3
+ret_1a2_16f6_e1170b	farcall_seg0e_e1170b
+ret_1a2_16f6_e1175b	farcall_seg0e_e1175b
+ret_1a2_16f6_e1177f	farcall_seg0e_e1177f
+ret_1a2_488_e10491	rec_walk_e10491
+ret_1a2_4f8b_e14eed	delay2_fmt2_e14eed
+ret_1a2_4f8b_e14f10	delay2_fmt2_e14f10
+ret_1a2_4f8b_e14f24	delay2_fmt2_e14f24
+ret_1a2_4f8b_e14f43	delay2_fmt2_e14f43
+ret_1a2_4f8b_e14f5f	delay2_fmt2_e14f5f
+ret_1a2_4f8b_e14f85	delay2_fmt2_e14f85
+ret_1a2_4f8b_e14f8f	delay2_fmt2_e14f8f
+ret_1a2_4f8b_e14fa4	delay2_fmt2_e14fa4
+ret_1a2_5dd0_e15de9	cksum_add_e15de9
+
+# --- stale-owner _e fixes ---
+rec5_sub_e1834f	bcd_sub_digits_e1834f
+rec5_sub_e1836e	bcd_sub_digits_e1836e
+rec5_sub_e18381	bcd_sub_digits_e18381
+rec5_sub_e18386	bcd_sub_digits_e18386
+seg000_144e_proc_e11451	ega_reg_setup_e11451
+seg000_14d6_proc_e114f5	tick_isr_e114f5
+seg000_14d6_proc_e11500	tick_isr_e11500
+seg000_14d6_proc_e1150b	tick_isr_e1150b
+seg000_14d6_proc_e11516	tick_isr_e11516
+seg000_14d6_proc_e11521	tick_isr_e11521
+seg000_14d6_proc_e1152b	tick_isr_e1152b
+seg000_2496_proc_e12499	joy_calib4_e12499
+seg000_2496_proc_e124b0	joy_calib4_e124b0
+seg000_2522_proc_e12535	joy_btn_scan_e12535
+seg000_2522_proc_e1253f	joy_btn_scan_e1253f
+seg000_25f_proc_e10262	hdr_walk_e10262
+seg000_53aa_proc_e153b2	mode4_load_e153b2
+seg000_53aa_proc_e153d1	mode4_load_e153d1
+seg000_53aa_proc_e153db	mode4_load_e153db
+seg000_53aa_proc_e153fc	mode4_load_e153fc
+seg000_53aa_proc_e1540c	mode4_load_e1540c
+seg000_53aa_proc_e15447	mode4_load_e15447
+seg000_53aa_proc_e1545b	mode4_load_e1545b
+seg000_606a_proc_e16083	char_route_e16083
+seg000_606a_proc_e16091	char_route_e16091
+seg000_606a_proc_e16098	char_route_e16098
+seg000_606a_proc_e160b2	char_route_e160b2
+seg000_606a_proc_e160ca	char_route_e160ca
+seg000_606a_proc_e160d0	char_route_e160d0
+seg000_606a_proc_e160d6	char_route_e160d6
+seg000_6838_proc_e16843	objblk_init_e16843
+seg000_6bb9_proc_e16bbc	stat_min6_e16bbc
+seg000_6bb9_proc_e16bce	stat_min6_e16bce
+seg000_6f0b_proc_e16f15	obj_peer_scan_e16f15
+seg000_6f0b_proc_e16f25	obj_peer_scan_e16f25
+seg000_4741_proc	beep40_key	# 8x beep_5x + read_key (fatal prompt)

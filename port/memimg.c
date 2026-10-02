@@ -10649,7 +10649,7 @@ extern void rowtab_init_herc_e10224(void);
 extern void rowtab_init_herc_e10238(void);
 extern void rowtab_init_herc_e1023b(void);
 extern void rowtab_init_herc_e10258(void);
-extern void seg000_25f_proc_e10262(void);
+extern void hdr_walk_e10262(void);
 extern void glyph_unpack_ega_e1028a(void);
 extern void glyph_unpack_ega_e1033b(void);
 extern void palette_sel_e10366(void);
@@ -10663,7 +10663,7 @@ extern void pal_upload_ega_e103d6(void);
 extern void pal_upload_cga(void);
 extern void pal_upload_mcga(void);
 extern void pal_upload_mcga_e10421(void);
-extern void ret_1a2_488_e10491(void);
+extern void rec_walk_e10491(void);
 extern void glyph_conv_herc(void);
 extern void glyph_conv_cga(void);
 extern void glyph_conv_herc_e104db(void);
@@ -10741,9 +10741,9 @@ extern void print_dec_u16_e11220(void);
 extern void print_dec_u16_e1123d(void);
 extern void print_dec_u16_e1124f(void);
 extern void scan_cnt_init(void);
-extern void ret_1a2_129c_e112c0(void);
-extern void ret_1a2_129c_e112d9(void);
-extern void ret_1a2_129c_e112e3(void);
+extern void hex16_hi_e112c0(void);
+extern void hex16_hi_e112d9(void);
+extern void hex16_hi_e112e3(void);
 extern void rand_next_e11326(void);
 extern void rand_next_e1133c(void);
 extern void video_init_once_e1138b(void);
@@ -10758,16 +10758,16 @@ extern void vidmode_herc(void);
 extern void vidmode_herc_e11428(void);
 extern void vidmode_ega(void);
 extern void set_video_mode_e11448(void);
-extern void seg000_144e_proc_e11451(void);
+extern void ega_reg_setup_e11451(void);
 extern void e_1145f_e11459(void);
 extern void e_11459_e1145f(void);
 extern void timer_tick_isr(void);
-extern void seg000_14d6_proc_e114f5(void);
-extern void seg000_14d6_proc_e11500(void);
-extern void seg000_14d6_proc_e1150b(void);
-extern void seg000_14d6_proc_e11516(void);
-extern void seg000_14d6_proc_e11521(void);
-extern void seg000_14d6_proc_e1152b(void);
+extern void tick_isr_e114f5(void);
+extern void tick_isr_e11500(void);
+extern void tick_isr_e1150b(void);
+extern void tick_isr_e11516(void);
+extern void tick_isr_e11521(void);
+extern void tick_isr_e1152b(void);
 extern void printer_out(void);
 extern void printer_out_e11582(void);
 extern void glyph_put_wrap(void);
@@ -10780,7 +10780,7 @@ extern void bufsel_herc(void);
 extern void bufsel_cga(void);
 extern void bufsel_tandy(void);
 extern void bufsel_ega(void);
-extern void ret_1a2_16f6_e1170b(void);
+extern void farcall_seg0e_e1170b(void);
 extern void tile_blit_cga(void);
 extern void tile_blit_tandy(void);
 extern void tile_blit_tandy_e11738(void);
@@ -10788,8 +10788,8 @@ extern void tile_blit_tandy_e11749(void);
 extern void tile_blit_ega(void);
 extern void tile_blit_mcga(void);
 extern void tile_blit_herc(void);
-extern void ret_1a2_16f6_e1175b(void);
-extern void ret_1a2_16f6_e1177f(void);
+extern void farcall_seg0e_e1175b(void);
+extern void farcall_seg0e_e1177f(void);
 extern void ega_blit_planar_e11862(void);
 extern void tile_row_mcga_e118c6(void);
 extern void compose_frame_cond_e11962(void);
@@ -10859,19 +10859,19 @@ extern void joy_btn_b_read_e1240f(void);
 extern void joy_btn_b_read_e12418(void);
 extern void joy_btn_b_read_e12426(void);
 extern void joy_btn_b_read_e1242f(void);
-extern void e_12446(void);
+extern void joy_wait_pair(void);
 extern void frame_wait_e12466(void);
 extern void frame_wait_e12474(void);
 extern void frame_wait_e1247f(void);
-extern void seg000_2496_proc_e12499(void);
-extern void seg000_2496_proc_e124b0(void);
+extern void joy_calib4_e12499(void);
+extern void joy_calib4_e124b0(void);
 extern void joy_btn_wait_e124dc(void);
 extern void joy_axes_fetch_e124f6(void);
 extern void joy_stick_chk_e12501(void);
 extern void joy_stick_chk_e12514(void);
 extern void joy_stick_chk_e1251e(void);
-extern void seg000_2522_proc_e12535(void);
-extern void seg000_2522_proc_e1253f(void);
+extern void joy_btn_scan_e12535(void);
+extern void joy_btn_scan_e1253f(void);
 extern void border_sel_e12664(void);
 extern void border_sel_e12672(void);
 extern void border_sel_e12675(void);
@@ -11132,14 +11132,14 @@ extern void cursor_snap_e14e6d(void);
 extern void cursor_snap_e14e93(void);
 extern void script_step_e14eb4(void);
 extern void script_step_e14ee4(void);
-extern void ret_1a2_4f8b_e14eed(void);
-extern void ret_1a2_4f8b_e14f10(void);
-extern void ret_1a2_4f8b_e14f24(void);
-extern void ret_1a2_4f8b_e14f43(void);
-extern void ret_1a2_4f8b_e14f5f(void);
-extern void ret_1a2_4f8b_e14f85(void);
-extern void ret_1a2_4f8b_e14f8f(void);
-extern void ret_1a2_4f8b_e14fa4(void);
+extern void delay2_fmt2_e14eed(void);
+extern void delay2_fmt2_e14f10(void);
+extern void delay2_fmt2_e14f24(void);
+extern void delay2_fmt2_e14f43(void);
+extern void delay2_fmt2_e14f5f(void);
+extern void delay2_fmt2_e14f85(void);
+extern void delay2_fmt2_e14f8f(void);
+extern void delay2_fmt2_e14fa4(void);
 extern void tbl_row_fetch_e14fdc(void);
 extern void tbl_row_fetch_e14ff3(void);
 extern void tbl_row_fetch_e14ffa(void);
@@ -11181,13 +11181,13 @@ extern void dlg_cursor_init_e15308(void);
 extern void dlg_cursor_draw_e1533f(void);
 extern void dlg_cursor_draw_e15351(void);
 extern void brief_screen_e15391(void);
-extern void seg000_53aa_proc_e153b2(void);
-extern void seg000_53aa_proc_e153d1(void);
-extern void seg000_53aa_proc_e153db(void);
-extern void seg000_53aa_proc_e153fc(void);
-extern void seg000_53aa_proc_e1540c(void);
-extern void seg000_53aa_proc_e15447(void);
-extern void seg000_53aa_proc_e1545b(void);
+extern void mode4_load_e153b2(void);
+extern void mode4_load_e153d1(void);
+extern void mode4_load_e153db(void);
+extern void mode4_load_e153fc(void);
+extern void mode4_load_e1540c(void);
+extern void mode4_load_e15447(void);
+extern void mode4_load_e1545b(void);
 extern void rec_row_fetch_e15480(void);
 extern void rec_row_fetch_e15497(void);
 extern void rec_row_fetch_e154bc(void);
@@ -11272,7 +11272,7 @@ extern void copy_draw_params_e15d39(void);
 extern void unitlist_init_e15da4(void);
 extern void state_set(void);
 extern void state_set_e15dbe(void);
-extern void ret_1a2_5dd0_e15de9(void);
+extern void cksum_add_e15de9(void);
 extern void sum_accum_b_e15dfb(void);
 extern void spawn_tick_e15e29(void);
 extern void spawn_tick_e15e2c(void);
@@ -11305,13 +11305,13 @@ extern void battle_key_check_e16020(void);
 extern void battle_key_check_e16029(void);
 extern void battle_key_check_e16039(void);
 extern void battle_key_check_e16060(void);
-extern void seg000_606a_proc_e16083(void);
-extern void seg000_606a_proc_e16091(void);
-extern void seg000_606a_proc_e16098(void);
-extern void seg000_606a_proc_e160b2(void);
-extern void seg000_606a_proc_e160ca(void);
-extern void seg000_606a_proc_e160d0(void);
-extern void seg000_606a_proc_e160d6(void);
+extern void char_route_e16083(void);
+extern void char_route_e16091(void);
+extern void char_route_e16098(void);
+extern void char_route_e160b2(void);
+extern void char_route_e160ca(void);
+extern void char_route_e160d0(void);
+extern void char_route_e160d6(void);
 extern void find_free_slot_b_e160e9(void);
 extern void find_free_slot_b_e160f9(void);
 extern void objs_each_34_e161ce(void);
@@ -11361,7 +11361,7 @@ extern void unit_draw_emit_e167d8(void);
 extern void unit_draw_emit_e167e0(void);
 extern void unit_draw_emit_e167f1(void);
 extern void unit_draw_emit_e167f3(void);
-extern void seg000_6838_proc_e16843(void);
+extern void objblk_init_e16843(void);
 extern void obj_scratch_load_e16876(void);
 extern void apply_obj_scratch_e168b5(void);
 extern void apply_obj_scratch_e168c3(void);
@@ -11379,8 +11379,8 @@ extern void map_cell_write_e16b0a(void);
 extern void target_pri_decay_e16b64(void);
 extern void obj_alive_mark_e16b8b(void);
 extern void obj_flags_and_e16bb2(void);
-extern void seg000_6bb9_proc_e16bbc(void);
-extern void seg000_6bb9_proc_e16bce(void);
+extern void stat_min6_e16bbc(void);
+extern void stat_min6_e16bce(void);
 extern void ai_state_eval_e16be3(void);
 extern void ai_state_eval_e16c0a(void);
 extern void ai_state_eval_e16c12(void);
@@ -11413,8 +11413,8 @@ extern void rand_tbl_pick_e16e90(void);
 extern void obj_overlap_test_e16ea2(void);
 extern void obj_overlap_test_e16f03(void);
 extern void obj_overlap_test_e16f09(void);
-extern void seg000_6f0b_proc_e16f15(void);
-extern void seg000_6f0b_proc_e16f25(void);
+extern void obj_peer_scan_e16f15(void);
+extern void obj_peer_scan_e16f25(void);
 extern void tgt_acquire_e16f36(void);
 extern void tgt_acquire_e16f5b(void);
 extern void tgt_acquire_e16f68(void);
@@ -11592,10 +11592,10 @@ extern void render_bit_row_e182ec(void);
 extern void render_bit_row_e18302(void);
 extern void rec5_cmp_e1831b(void);
 extern void rec5_cmp_e18339(void);
-extern void rec5_sub_e1834f(void);
-extern void rec5_sub_e1836e(void);
-extern void rec5_sub_e18381(void);
-extern void rec5_sub_e18386(void);
+extern void bcd_sub_digits_e1834f(void);
+extern void bcd_sub_digits_e1836e(void);
+extern void bcd_sub_digits_e18381(void);
+extern void bcd_sub_digits_e18386(void);
 extern void joy_tabs_sel_e18395(void);
 extern void arrive_chk_e183c7(void);
 extern void arrive_chk_e18436(void);
@@ -12295,81 +12295,81 @@ extern void nullsub_6(void);
 extern void nullsub_7(void);
 extern void nullsub_8(void);
 extern void nullsub_9(void);
-extern void ret_1a2_102a(void);
-extern void ret_1a2_103d(void);
-extern void ret_1a2_1050(void);
-extern void ret_1a2_1063(void);
-extern void ret_1a2_107a(void);
-extern void ret_1a2_10bf(void);
-extern void ret_1a2_10d2(void);
-extern void ret_1a2_10e5(void);
-extern void ret_1a2_10f8(void);
-extern void ret_1a2_110b(void);
-extern void ret_1a2_1120(void);
-extern void ret_1a2_1135(void);
-extern void ret_1a2_114a(void);
-extern void ret_1a2_115f(void);
-extern void ret_1a2_1172(void);
-extern void ret_1a2_1185(void);
-extern void ret_1a2_1198(void);
-extern void ret_1a2_11ab(void);
-extern void ret_1a2_11c6(void);
-extern void ret_1a2_129c(void);
-extern void ret_1a2_12a5(void);
-extern void ret_1a2_12ae(void);
-extern void ret_1a2_12b7(void);
-extern void ret_1a2_16f6(void);
-extern void ret_1a2_1b9e(void);
-extern void ret_1a2_22dc(void);
-extern void ret_1a2_22ec(void);
-extern void ret_1a2_46d(void);
-extern void ret_1a2_488(void);
-extern void ret_1a2_4f8b(void);
-extern void ret_1a2_4f8e(void);
-extern void ret_1a2_5dd0(void);
-extern void ret_1a2_60dd(void);
-extern void ret_1a2_686c(void);
-extern void ret_1a2_6abf(void);
-extern void ret_1a2_6ac8(void);
-extern void ret_1a2_714(void);
-extern void ret_1a2_98f4(void);
-extern void ret_1a2_b1fe(void);
+extern void fmt0_dec_u16(void);
+extern void fmt1_dec_u16(void);
+extern void fmt2_dec_u16(void);
+extern void fmt0_dec_u16_zx(void);
+extern void fmt1_dec_u16_zx(void);
+extern void fmt3_dec_s8(void);
+extern void fmt0_dec_s8(void);
+extern void fmt1_dec_s8(void);
+extern void fmt2_dec_s8(void);
+extern void fmt0_dec_u16_d0(void);
+extern void fmt1_dec_u16_d0(void);
+extern void fmt2_dec_u16_d0(void);
+extern void fmt3_dec_u16_d0(void);
+extern void fmt3_dec_s16(void);
+extern void fmt0_dec_s16(void);
+extern void fmt1_dec_s16(void);
+extern void fmt2_dec_s16(void);
+extern void fmt8_dec_u16(void);
+extern void fmt8_dec_u16_b(void);
+extern void hex16_hi(void);
+extern void emit_idx0(void);
+extern void emit_idx1(void);
+extern void emit_idx2(void);
+extern void farcall_seg0e(void);
+extern void spr_state_copy(void);
+extern void keytest_f2(void);
+extern void keytest_f1(void);
+extern void cga_mode_fix(void);
+extern void rec_walk(void);
+extern void delay2_fmt2(void);
+extern void script_next(void);
+extern void cksum_add(void);
+extern void objid_scan(void);
+extern void objblk_init_e(void);
+extern void objfld_load_a(void);
+extern void objfld_load_b(void);
+extern void blk_free(void);
+extern void objup_0b(void);
+extern void map_probe_pair(void);
 extern void ret_e8a_cb30(void);
 extern void ret_e8a_d28f(void);
 extern void ret_e8a_d796(void);
 extern void ret_e8a_dab5(void);
-extern void seg000_1024_proc(void);
-extern void seg000_10a8_proc(void);
-extern void seg000_10c_proc(void);
-extern void seg000_114_proc(void);
-extern void seg000_1263_proc(void);
-extern void seg000_129a_proc(void);
-extern void seg000_1346_proc(void);
-extern void seg000_144e_proc(void);
-extern void seg000_14d6_proc(void);
-extern void seg000_1b8a_proc(void);
-extern void seg000_1cd9_proc(void);
-extern void seg000_2496_proc(void);
-extern void seg000_2522_proc(void);
-extern void seg000_25f_proc(void);
-extern void seg000_2643_proc(void);
-extern void seg000_3baf_proc(void);
-extern void seg000_4741_proc(void);
-extern void seg000_4c72_proc(void);
-extern void seg000_4d51_proc(void);
-extern void seg000_53aa_proc(void);
-extern void seg000_606a_proc(void);
-extern void seg000_6838_proc(void);
-extern void seg000_6a5a_proc(void);
-extern void seg000_6abe_proc(void);
-extern void seg000_6bb9_proc(void);
-extern void seg000_6f0b_proc(void);
-extern void seg000_708_proc(void);
-extern void seg000_a12f_proc(void);
-extern void seg000_a1_proc(void);
-extern void seg000_abf1_proc(void);
-extern void seg000_b336_proc(void);
-extern void seg000_b9f9_proc(void);
+extern void emit_dash(void);
+extern void fmt3_dec_u16_zx(void);
+extern void farcall_ovl_a(void);
+extern void farcall_ovl_b(void);
+extern void print_hex_dlr(void);
+extern void hex16_pair(void);
+extern void rand_mul(void);
+extern void ega_reg_setup(void);
+extern void tick_isr(void);
+extern void spr_state_copy_b(void);
+extern void tilemap_init(void);
+extern void joy_calib4(void);
+extern void joy_btn_scan(void);
+extern void hdr_walk(void);
+extern void irq_stub_eoi(void);
+extern void mem_free_chk(void);
+extern void beep40_key(void);
+extern void color_sel(void);
+extern void color_step(void);
+extern void mode4_load(void);
+extern void char_route(void);
+extern void objblk_init(void);
+extern void cam_org_init(void);
+extern void objfld_load(void);
+extern void stat_min6(void);
+extern void obj_peer_scan(void);
+extern void blk_alloc(void);
+extern void objup_0d(void);
+extern void vid_init(void);
+extern void menu_b_run(void);
+extern void map_probe_pair2(void);
+extern void objid_scan_b(void);
 extern void seg001_f_proc(void);
 extern void seg002_29e_proc(void);
 extern void seg002_b8b2_proc(void);
@@ -12707,7 +12707,7 @@ extern void bitpos_accum(void);
 extern void accum_add_half(void);
 extern void render_bit_row(void);
 extern void rec5_cmp(void);
-extern void rec5_sub(void);
+extern void bcd_sub_digits(void);
 extern void joy_tabs_sel(void);
 extern void arrive_chk_b(void);
 extern void arrive_chk(void);
@@ -13158,7 +13158,7 @@ static const fent fmap[] = {
   {0x1c58, rowtab_init_herc_e10238},
   {0x1c5b, rowtab_init_herc_e1023b},
   {0x1c78, rowtab_init_herc_e10258},
-  {0x1c82, seg000_25f_proc_e10262},
+  {0x1c82, hdr_walk_e10262},
   {0x1caa, glyph_unpack_ega_e1028a},
   {0x1d5b, glyph_unpack_ega_e1033b},
   {0x1d86, palette_sel_e10366},
@@ -13172,7 +13172,7 @@ static const fent fmap[] = {
   {0x1e04, pal_upload_cga},
   {0x1e3e, pal_upload_mcga},
   {0x1e41, pal_upload_mcga_e10421},
-  {0x1eb1, ret_1a2_488_e10491},
+  {0x1eb1, rec_walk_e10491},
   {0x1ed2, glyph_conv_herc},
   {0x1ed8, glyph_conv_cga},
   {0x1efb, glyph_conv_herc_e104db},
@@ -13250,9 +13250,9 @@ static const fent fmap[] = {
   {0x2c5d, print_dec_u16_e1123d},
   {0x2c6f, print_dec_u16_e1124f},
   {0x2c81, scan_cnt_init},
-  {0x2ce0, ret_1a2_129c_e112c0},
-  {0x2cf9, ret_1a2_129c_e112d9},
-  {0x2d03, ret_1a2_129c_e112e3},
+  {0x2ce0, hex16_hi_e112c0},
+  {0x2cf9, hex16_hi_e112d9},
+  {0x2d03, hex16_hi_e112e3},
   {0x2d46, rand_next_e11326},
   {0x2d5c, rand_next_e1133c},
   {0x2dab, video_init_once_e1138b},
@@ -13267,16 +13267,16 @@ static const fent fmap[] = {
   {0x2e48, vidmode_herc_e11428},
   {0x2e63, vidmode_ega},
   {0x2e68, set_video_mode_e11448},
-  {0x2e71, seg000_144e_proc_e11451},
+  {0x2e71, ega_reg_setup_e11451},
   {0x2e79, e_1145f_e11459},
   {0x2e7f, e_11459_e1145f},
   {0x2f0a, timer_tick_isr},
-  {0x2f15, seg000_14d6_proc_e114f5},
-  {0x2f20, seg000_14d6_proc_e11500},
-  {0x2f2b, seg000_14d6_proc_e1150b},
-  {0x2f36, seg000_14d6_proc_e11516},
-  {0x2f41, seg000_14d6_proc_e11521},
-  {0x2f4b, seg000_14d6_proc_e1152b},
+  {0x2f15, tick_isr_e114f5},
+  {0x2f20, tick_isr_e11500},
+  {0x2f2b, tick_isr_e1150b},
+  {0x2f36, tick_isr_e11516},
+  {0x2f41, tick_isr_e11521},
+  {0x2f4b, tick_isr_e1152b},
   {0x2f91, printer_out},
   {0x2fa2, printer_out_e11582},
   {0x2fb9, glyph_put_wrap},
@@ -13289,7 +13289,7 @@ static const fent fmap[] = {
   {0x30ab, bufsel_cga},
   {0x30c5, bufsel_tandy},
   {0x30dc, bufsel_ega},
-  {0x312b, ret_1a2_16f6_e1170b},
+  {0x312b, farcall_seg0e_e1170b},
   {0x3141, tile_blit_cga},
   {0x3147, tile_blit_tandy},
   {0x3158, tile_blit_tandy_e11738},
@@ -13297,8 +13297,8 @@ static const fent fmap[] = {
   {0x316c, tile_blit_ega},
   {0x3172, tile_blit_mcga},
   {0x3178, tile_blit_herc},
-  {0x317b, ret_1a2_16f6_e1175b},
-  {0x319f, ret_1a2_16f6_e1177f},
+  {0x317b, farcall_seg0e_e1175b},
+  {0x319f, farcall_seg0e_e1177f},
   {0x3282, ega_blit_planar_e11862},
   {0x32e6, tile_row_mcga_e118c6},
   {0x3382, compose_frame_cond_e11962},
@@ -13368,19 +13368,19 @@ static const fent fmap[] = {
   {0x3e38, joy_btn_b_read_e12418},
   {0x3e46, joy_btn_b_read_e12426},
   {0x3e4f, joy_btn_b_read_e1242f},
-  {0x3e66, e_12446},
+  {0x3e66, joy_wait_pair},
   {0x3e86, frame_wait_e12466},
   {0x3e94, frame_wait_e12474},
   {0x3e9f, frame_wait_e1247f},
-  {0x3eb9, seg000_2496_proc_e12499},
-  {0x3ed0, seg000_2496_proc_e124b0},
+  {0x3eb9, joy_calib4_e12499},
+  {0x3ed0, joy_calib4_e124b0},
   {0x3efc, joy_btn_wait_e124dc},
   {0x3f16, joy_axes_fetch_e124f6},
   {0x3f21, joy_stick_chk_e12501},
   {0x3f34, joy_stick_chk_e12514},
   {0x3f3e, joy_stick_chk_e1251e},
-  {0x3f55, seg000_2522_proc_e12535},
-  {0x3f5f, seg000_2522_proc_e1253f},
+  {0x3f55, joy_btn_scan_e12535},
+  {0x3f5f, joy_btn_scan_e1253f},
   {0x4084, border_sel_e12664},
   {0x4092, border_sel_e12672},
   {0x4095, border_sel_e12675},
@@ -13641,14 +13641,14 @@ static const fent fmap[] = {
   {0x68b3, cursor_snap_e14e93},
   {0x68d4, script_step_e14eb4},
   {0x6904, script_step_e14ee4},
-  {0x690d, ret_1a2_4f8b_e14eed},
-  {0x6930, ret_1a2_4f8b_e14f10},
-  {0x6944, ret_1a2_4f8b_e14f24},
-  {0x6963, ret_1a2_4f8b_e14f43},
-  {0x697f, ret_1a2_4f8b_e14f5f},
-  {0x69a5, ret_1a2_4f8b_e14f85},
-  {0x69af, ret_1a2_4f8b_e14f8f},
-  {0x69c4, ret_1a2_4f8b_e14fa4},
+  {0x690d, delay2_fmt2_e14eed},
+  {0x6930, delay2_fmt2_e14f10},
+  {0x6944, delay2_fmt2_e14f24},
+  {0x6963, delay2_fmt2_e14f43},
+  {0x697f, delay2_fmt2_e14f5f},
+  {0x69a5, delay2_fmt2_e14f85},
+  {0x69af, delay2_fmt2_e14f8f},
+  {0x69c4, delay2_fmt2_e14fa4},
   {0x69fc, tbl_row_fetch_e14fdc},
   {0x6a13, tbl_row_fetch_e14ff3},
   {0x6a1a, tbl_row_fetch_e14ffa},
@@ -13690,13 +13690,13 @@ static const fent fmap[] = {
   {0x6d5f, dlg_cursor_draw_e1533f},
   {0x6d71, dlg_cursor_draw_e15351},
   {0x6db1, brief_screen_e15391},
-  {0x6dd2, seg000_53aa_proc_e153b2},
-  {0x6df1, seg000_53aa_proc_e153d1},
-  {0x6dfb, seg000_53aa_proc_e153db},
-  {0x6e1c, seg000_53aa_proc_e153fc},
-  {0x6e2c, seg000_53aa_proc_e1540c},
-  {0x6e67, seg000_53aa_proc_e15447},
-  {0x6e7b, seg000_53aa_proc_e1545b},
+  {0x6dd2, mode4_load_e153b2},
+  {0x6df1, mode4_load_e153d1},
+  {0x6dfb, mode4_load_e153db},
+  {0x6e1c, mode4_load_e153fc},
+  {0x6e2c, mode4_load_e1540c},
+  {0x6e67, mode4_load_e15447},
+  {0x6e7b, mode4_load_e1545b},
   {0x6ea0, rec_row_fetch_e15480},
   {0x6eb7, rec_row_fetch_e15497},
   {0x6edc, rec_row_fetch_e154bc},
@@ -13781,7 +13781,7 @@ static const fent fmap[] = {
   {0x77c4, unitlist_init_e15da4},
   {0x77d5, state_set},
   {0x77de, state_set_e15dbe},
-  {0x7809, ret_1a2_5dd0_e15de9},
+  {0x7809, cksum_add_e15de9},
   {0x781b, sum_accum_b_e15dfb},
   {0x7849, spawn_tick_e15e29},
   {0x784c, spawn_tick_e15e2c},
@@ -13814,13 +13814,13 @@ static const fent fmap[] = {
   {0x7a49, battle_key_check_e16029},
   {0x7a59, battle_key_check_e16039},
   {0x7a80, battle_key_check_e16060},
-  {0x7aa3, seg000_606a_proc_e16083},
-  {0x7ab1, seg000_606a_proc_e16091},
-  {0x7ab8, seg000_606a_proc_e16098},
-  {0x7ad2, seg000_606a_proc_e160b2},
-  {0x7aea, seg000_606a_proc_e160ca},
-  {0x7af0, seg000_606a_proc_e160d0},
-  {0x7af6, seg000_606a_proc_e160d6},
+  {0x7aa3, char_route_e16083},
+  {0x7ab1, char_route_e16091},
+  {0x7ab8, char_route_e16098},
+  {0x7ad2, char_route_e160b2},
+  {0x7aea, char_route_e160ca},
+  {0x7af0, char_route_e160d0},
+  {0x7af6, char_route_e160d6},
   {0x7b09, find_free_slot_b_e160e9},
   {0x7b19, find_free_slot_b_e160f9},
   {0x7bee, objs_each_34_e161ce},
@@ -13870,7 +13870,7 @@ static const fent fmap[] = {
   {0x8200, unit_draw_emit_e167e0},
   {0x8211, unit_draw_emit_e167f1},
   {0x8213, unit_draw_emit_e167f3},
-  {0x8263, seg000_6838_proc_e16843},
+  {0x8263, objblk_init_e16843},
   {0x8296, obj_scratch_load_e16876},
   {0x82d5, apply_obj_scratch_e168b5},
   {0x82e3, apply_obj_scratch_e168c3},
@@ -13888,8 +13888,8 @@ static const fent fmap[] = {
   {0x8584, target_pri_decay_e16b64},
   {0x85ab, obj_alive_mark_e16b8b},
   {0x85d2, obj_flags_and_e16bb2},
-  {0x85dc, seg000_6bb9_proc_e16bbc},
-  {0x85ee, seg000_6bb9_proc_e16bce},
+  {0x85dc, stat_min6_e16bbc},
+  {0x85ee, stat_min6_e16bce},
   {0x8603, ai_state_eval_e16be3},
   {0x862a, ai_state_eval_e16c0a},
   {0x8632, ai_state_eval_e16c12},
@@ -13922,8 +13922,8 @@ static const fent fmap[] = {
   {0x88c2, obj_overlap_test_e16ea2},
   {0x8923, obj_overlap_test_e16f03},
   {0x8929, obj_overlap_test_e16f09},
-  {0x8935, seg000_6f0b_proc_e16f15},
-  {0x8945, seg000_6f0b_proc_e16f25},
+  {0x8935, obj_peer_scan_e16f15},
+  {0x8945, obj_peer_scan_e16f25},
   {0x8956, tgt_acquire_e16f36},
   {0x897b, tgt_acquire_e16f5b},
   {0x8988, tgt_acquire_e16f68},
@@ -14101,10 +14101,10 @@ static const fent fmap[] = {
   {0x9d22, render_bit_row_e18302},
   {0x9d3b, rec5_cmp_e1831b},
   {0x9d59, rec5_cmp_e18339},
-  {0x9d6f, rec5_sub_e1834f},
-  {0x9d8e, rec5_sub_e1836e},
-  {0x9da1, rec5_sub_e18381},
-  {0x9da6, rec5_sub_e18386},
+  {0x9d6f, bcd_sub_digits_e1834f},
+  {0x9d8e, bcd_sub_digits_e1836e},
+  {0x9da1, bcd_sub_digits_e18381},
+  {0x9da6, bcd_sub_digits_e18386},
   {0x9db5, joy_tabs_sel_e18395},
   {0x9de7, arrive_chk_e183c7},
   {0x9e56, arrive_chk_e18436},
@@ -14803,38 +14803,38 @@ static const fent fmap[] = {
   {0xa387, nullsub_7},
   {0x21a9, nullsub_8},
   {0xbb64, nullsub_9},
-  {0x2a44, seg000_1024_proc},
-  {0x2ac8, seg000_10a8_proc},
-  {0x1b2c, seg000_10c_proc},
-  {0x1b34, seg000_114_proc},
-  {0x2c83, seg000_1263_proc},
-  {0x2cba, seg000_129a_proc},
-  {0x2d66, seg000_1346_proc},
-  {0x2e6e, seg000_144e_proc},
-  {0x2ef6, seg000_14d6_proc},
-  {0x35aa, seg000_1b8a_proc},
-  {0x36f9, seg000_1cd9_proc},
-  {0x3eb6, seg000_2496_proc},
-  {0x3f42, seg000_2522_proc},
-  {0x1c7f, seg000_25f_proc},
-  {0x4063, seg000_2643_proc},
-  {0x55cf, seg000_3baf_proc},
-  {0x6161, seg000_4741_proc},
-  {0x6692, seg000_4c72_proc},
-  {0x6771, seg000_4d51_proc},
-  {0x6dca, seg000_53aa_proc},
-  {0x7a8a, seg000_606a_proc},
-  {0x8258, seg000_6838_proc},
-  {0x847a, seg000_6a5a_proc},
-  {0x84de, seg000_6abe_proc},
-  {0x85d9, seg000_6bb9_proc},
-  {0x892b, seg000_6f0b_proc},
-  {0x2128, seg000_708_proc},
-  {0xbb4f, seg000_a12f_proc},
-  {0x1ac1, seg000_a1_proc},
-  {0xc611, seg000_abf1_proc},
-  {0xcd56, seg000_b336_proc},
-  {0xd419, seg000_b9f9_proc},
+  {0x2a44, emit_dash},
+  {0x2ac8, fmt3_dec_u16_zx},
+  {0x1b2c, farcall_ovl_a},
+  {0x1b34, farcall_ovl_b},
+  {0x2c83, print_hex_dlr},
+  {0x2cba, hex16_pair},
+  {0x2d66, rand_mul},
+  {0x2e6e, ega_reg_setup},
+  {0x2ef6, tick_isr},
+  {0x35aa, spr_state_copy_b},
+  {0x36f9, tilemap_init},
+  {0x3eb6, joy_calib4},
+  {0x3f42, joy_btn_scan},
+  {0x1c7f, hdr_walk},
+  {0x4063, irq_stub_eoi},
+  {0x55cf, mem_free_chk},
+  {0x6161, beep40_key},
+  {0x6692, color_sel},
+  {0x6771, color_step},
+  {0x6dca, mode4_load},
+  {0x7a8a, char_route},
+  {0x8258, objblk_init},
+  {0x847a, cam_org_init},
+  {0x84de, objfld_load},
+  {0x85d9, stat_min6},
+  {0x892b, obj_peer_scan},
+  {0x2128, blk_alloc},
+  {0xbb4f, objup_0d},
+  {0x1ac1, vid_init},
+  {0xc611, menu_b_run},
+  {0xcd56, map_probe_pair2},
+  {0xd419, objid_scan_b},
   {0xe46e, seg001_f_proc},
   {0xeb3e, seg002_29e_proc},
   {0x1a152, seg002_b8b2_proc},
@@ -15172,7 +15172,7 @@ static const fent fmap[] = {
   {0x9ceb, accum_add_half},
   {0x9cfa, render_bit_row},
   {0x9d26, rec5_cmp},
-  {0x9d5e, rec5_sub},
+  {0x9d5e, bcd_sub_digits},
   {0x9da8, joy_tabs_sel},
   {0x9dd0, arrive_chk_b},
   {0x9dd3, arrive_chk},
