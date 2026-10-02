@@ -728,3 +728,153 @@ word_298b2 place_x           var  # obj_place_16 x<<4
 word_1d930 extkey_mode       var  # toggle_mode_flag flips bit0
 sub_1640d burst_spawn          # word_1d91e=9 + rand dir + 0xF emit loop via word_298ac
 sub_164ce obj_place_16         # x<<4 -> word_298b2 + slot20_find_free + [-395D] write
+
+# --- TANDYSND sequencer core (SN76489 @ port 0xC0; 3 ch recs ds:0x2F/3C/49, stride 0xD) ---
+sub_104a4     snd_all_off      tnd  # latch 9F/BF/DF/FF = mute all SN channels
+sub_10889     snd_reg_write    tnd  # ds:0x67==0xFF absent gate; ax=bx val, ah<=BF
+loc_108bd     snd_reg_out      tnd  # out 0xC0: bh|E0 latch + bl|F0 data pair
+sub_1051f     chan_tick        tnd  # per-voice: cnt--, dur--, freq repack [di+2]
+loc_10502     chans_tick_gate  tnd  # ds:0x66 tick divider -> chans_tick
+loc_10506     chans_tick       tnd  # chan_tick over di=0x2F,0x3C,0x49 (3 voices)
+sub_1059b     note_out         tnd  # bx=[di+2] freq -> snd_reg_write (bl|0xF)
+loc_1058c     note_out_tail    tnd  # bx=[di+2] -> note_write tail
+sub_105c4     voice_update     tnd  # di=ax chan rec, save/rest around note_out
+loc_10694     chan3_update     tnd  # voice_update(0x3C) w/ cli
+sub_105b0     stream_start     tnd  # [bx]&3 event dispatch (entry to sequencer)
+loc_105a8     evt_seek         tnd  # bx=di+cx stream walk entry
+loc_105d2     evt_read         tnd  # al=[bx++]&0x7F, 0x88 flags split
+loc_105f6     evt_maybe_dur    tnd  # al&0x84 -> duration word -> [di+2]
+loc_10615     evt_maybe_att    tnd  # al&0xA0 -> byte -> [di+4] (attack/vol)
+loc_1061f     evt_maybe_rel    tnd  # al&0x90 -> byte -> [di+5] (release)
+loc_10629     evt_loop_word    tnd  # word -> [di+6]
+loc_10630     evt_maybe_rpt    tnd  # al&0xC0 -> loop count [di+8]
+loc_10642     evt_loop_set     tnd  # [di+9]=bx return ptr
+loc_1064a     evt_rpt_set      tnd  # [di+8]=cl count
+loc_105fa     evt_commit       tnd  # [di+0xB]=bx save stream pos
+loc_105fd     evt_commit_b     tnd  # same + [di]=cl next delay
+loc_10566     env_step         tnd  # al&0xF -> [di+5]-- envelope decay
+loc_10592     chan_init        tnd  # bx=[di+0xB] stream resume -> note_out
+loc_106a9     music_go         tnd  # ds:0x63 = music stream ptr + play
+sub_1069e     music_play_a     tnd  # bx=0x1BB -> music_go
+sub_106a5     music_play_b     tnd  # bx=0x1C3 -> music_go
+sub_106b0     music_stop       tnd  # ds:0x63=0 + voice flag clear
+sub_106d7     seq_tempo_on     tnd  # ds:0x66=0x1E divider, 0x65=FF enable
+sub_106e2     seq_tempo_off    tnd  # ds:0x65=0
+sub_107b2     sfx_play_pri     tnd  # ds:0x30=priority + cli + stream_start
+sub_107b5     sfx_play         tnd  # cli + stream_start(bx) + sti
+sub_107fa     sfx_pair_ae_da   tnd  # sfx_play(0xAE)+sfx_play(0xDA)
+sub_10801     sfx_pair_c4_da   tnd  # sfx_play(0xC4)+sfx_play(0xDA)
+loc_106f4     sfx_pair_143     tnd  # sfx_play + bx=0x143 tail
+loc_10735     sfx_pair_163     tnd  # sfx_play + bx=0x163 tail
+loc_1074a     sfx_pair_165     tnd  # pri>=0x28 gate + bx=0x165 tail
+loc_1079c     sfx_pair_133     tnd  # sfx_play + bx=0x133 tail
+loc_10805     sfx_pair_da      tnd  # sfx_play + bx=0xDA tail
+sub_10833     sfx3_1ef_23d     tnd  # ch0 stream ds:0x38=0x1DF + 0x23D/0x235 plays
+sub_10851     sfx3_26b_2fd     tnd  # ch2 stream ds:0x52=0x26B + 0x2FD play
+sub_10867     sfx3_210_246     tnd  # multi-ch streams 0x210/0x246/0x2AC
+sub_10652     sfx_0f0          tnd  # pri 0x32 gate -> desc 0x0F0
+sub_10661     sfx_108_100      tnd  # pri 0x1E -> descs 0x108+0x100
+sub_10677     sfx_09d          tnd  # desc 0x09D no gate
+sub_1067e     sfx_198_1a7      tnd  # pri 0x64 -> 0x198+0x1A7
+sub_106e8     sfx_153_143      tnd  # pri 0x4B -> 0x153(+0x143 tail)
+sub_106fe     sfx_08d          tnd  # pri 0x32 -> 0x08D
+sub_1070d     sfx_11f          tnd  # pri 0x32 -> 0x11F
+sub_1071c     sfx_15b_143      tnd  # pri 0x41 -> 0x15B(+0x143 tail)
+sub_1072a     sfx_16a_163      tnd  # descs 0x16A+0x163
+sub_10731     sfx_174_163      tnd  # descs 0x174+0x163
+sub_1073f     sfx_16c_165      tnd  # pri 0x28 -> 0x16C(+0x165 tail)
+sub_10746     sfx_176_165      tnd  # pri 0x28 -> 0x176(+0x165)
+sub_1075c     sfx_0a6          tnd  # pri 0x3C -> 0x0A6
+sub_1076b     sfx_187_17e      tnd  # pri 0x63 -> 0x187+0x17E
+sub_10781     sfx_0f8_133      tnd  # pri 0x46 -> 0x0F8(+0x133)
+sub_10790     sfx_13b_133      tnd  # pri 0x5F -> 0x13B(+0x133)
+sub_107a6     sfx_126          tnd  # pri 0x2E -> 0x126
+sub_107bb     sfx_12e          tnd  # pri 0x2D -> 0x12E
+sub_107c9     sfx_190          tnd  # pri 0x55 -> 0x190
+sub_107d7     sfx_117          tnd  # pri 0x32 -> 0x117
+sub_107e5     sfx_14b_153      tnd  # pri 0x50 -> 0x14B+0x153
+sub_1080e     sfx_0e1          tnd  # desc 0x0E1
+sub_10814     sfx_1d0          tnd  # desc 0x1D0
+sub_1081a     sfx_1cb          tnd  # desc 0x1CB
+sub_10820     sfx_06a          tnd  # desc 0x06A
+sub_10826     sfx_110_84       tnd  # descs 0x110+0x84
+sub_106c3     sfx_74           tnd  # stream stop + desc 0x74
+sub_106d0     sfx_72           tnd  # desc 0x72
+seg001_33e_proc irq8_chain     tnd  # every-3rd: reset cnt, chain old int8
+
+# --- dispatch table globals (decode evidence: memimg img[] entries) ---
+funcs_1892f  objtype_tbl       var  # per-type tick handlers (obj_tick_all)
+funcs_1a9c8  rdr_copy_tbl      var  # present-copy dispatch per adapter
+funcs_11d52  sprrow_tbl        var  # sprrow_* 3 groups x 5 adapters
+funcs_11cb8  tilerow_tbl       var  # tile_row_* x 5 adapters
+funcs_115e7  glyph_put_tbl     var  # dest-seg glyph emitters
+funcs_13bf8  scroll_tbl_a      var  # scroll dir A x adapters
+funcs_13cc9  scroll_tbl_b      var
+funcs_13da1  scroll_tbl_c      var
+funcs_13e72  scroll_tbl_d      var
+funcs_13f48  scroll_tbl_e      var
+funcs_14021  scroll_tbl_f      var
+funcs_140fa  scroll_tbl_g      var
+funcs_141ce  scroll_tbl_h      var
+funcs_1b3e2  mission_setup_tbl var  # funcs_1B3E2[kind] -> mission6/7/8_setup
+funcs_1b41f  mission_pop_tbl   var  # -> mission6/7/8_populate
+jpt_16ab9    pan_jt            var  # action_dispatch scroll-case table
+jpt_1171c    tileblit_jt       var  # tile_blit per-adapter
+jpt_11a25    flip_jt           var  # flip_frame per-adapter
+jpt_11999    present_jt        var  # compose_frame present blits
+jpt_126d5    clip_jt           var  # clipped sprite blit dispatch
+jpt_1367d    blitflag_jt       var  # sprite_blit_flagged cases
+jpt_1b475    mission_jt        var  # mission_init_dispatch cases
+jpt_1b098    cellgfx_jt        var  # cell_glyph_fetch variants
+jpt_107b6    glyphconv_jt      var  # glyph_conv_dispatch cases
+jpt_10bef    glyphblit_jt      var  # glyph_put_backbuf blits
+jpt_10c4f    glyphblit2_jt     var  # glyph_put_flipbuf blits
+jpt_1164f    bufsel_jt         var  # present-buf seg pick per adapter
+jpt_11bc9    compose_jt        var  # compose dispatch cases
+jpt_11c4e    compose2_jt       var  # compose_flip cases
+seg_10000    seg_data          var  # game data segment base
+seg_1000e    seg_screen        var  # 0xA000 direct video seg
+seg_10010    seg_flip          var  # present/flip buffer seg
+seg_10012    seg_draw          var  # compose/draw buffer seg
+seg_10004    seg_resbuf        var  # resource scratch seg (MCGA LUT home)
+seg_10014    seg_aux           var  # alt buffer (jpt_1164F case4/5)
+dword_103de  old_int8          var  # saved int8 vector (tnd overlay)
+loc_104bb     memfill_dn       tnd  # ax=0; fill cx bytes at ds:bx backwards
+loc_104bf     memfill_dn_loop  tnd  # the [bx--]=al fill loop
+loc_104e1     music_tick_restart tnd  # tempo divider -> voice0 idle -> stream 0x1B6
+loc_10605     evt_dur          tnd  # cx=[bx++];[di+2]=cx duration word
+loc_1062d     evt_loop_store   tnd  # [di+6]=cx store tail of evt_loop_word
+loc_1064d     evt_loop_back    tnd  # cx=[di+9] saved ptr -> evt_commit_b
+
+# --- remaining dispatch tables + their owner procs (adapter x5 / call tbls) ---
+jpt_1039D    pal_jt            var  # loc_10397 adapter jt -> int10 palette uploads
+loc_10397    pal_upload        # per-adapter palette write (int10 ax=10xx cases)
+funcs_1083A  modecall_tbl      var  # bx=ds:0x194 idx -> call table
+loc_10834    mode_call         # indexed call on ds:0x194 mode field
+jpt_10AD3    clrflip_jt        var  # clear_flipbuf adapter jt
+jpt_10B34    clrdraw_jt        var  # clear_drawbuf adapter jt
+jpt_10B57    clrback_jt        var  # clear_backbuf adapter jt
+jpt_113E3    vidmode_jt        var  # set_video_mode adapter jt
+funcs_159E9  podhit_tbl        var  # bx=pod_hit_test result -> call tbl
+loc_159df    podhit_dispatch   # pod_hit_test -> podhit_tbl -> present loop
+jpt_17C64    bar_jt            var  # loc_17c3e adapter jt
+loc_17c3e    bar_draw          # fills row buf 0xDD pattern, height byte_2A7AD>>4
+byte_2a7ad   bar_val           var  # value >>4 -> bar height in bar_draw
+
+# --- rand LFSR state (rand_next: rol/xor 8787/1D1D pair) ---
+word_1d95f   rand_s0           var
+word_1d961   rand_s1           var
+
+# --- single-function state (accessor evidence) ---
+word_265ae   render_cnt        var  # render_tick countdown (dec; >=0 ret)
+byte_2a9d2   phase_cnt         var  # phase_state_step decrement counter
+byte_1ce90   gfx_sel           var  # gfx_mode_menu selection store
+byte_26df1   snap_v            var  # cursor_snap value store
+word_1cff4   res_stg_seg           var  # load_resource staging -> es
+word_1cff6   res_off           var  # load_resource staging -> di
+word_1cff2   res_parm          var  # load_resource ax store, checked vs 0
+word_1d014   res_tmp           var  # load_resource ax store
+word_29b52   follow_sav_a      var  # obj_follow_move ax spill
+word_29b54   follow_sav_d      var  # obj_follow_move dx spill
+word_29b56   follow_sav_a2     var  # obj_follow_move ax spill 2
+word_29b58   follow_sav_d2     var  # obj_follow_move dx spill 2

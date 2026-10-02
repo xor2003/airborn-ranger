@@ -10654,7 +10654,7 @@ extern void loc_1028a(void);
 extern void loc_1033b(void);
 extern void loc_10366(void);
 extern void loc_10369(void);
-extern void loc_10397(void);
+extern void pal_upload(void);
 extern void loc_103a2(void);
 extern void loc_103a5(void);
 extern void loc_103bf(void);
@@ -10679,7 +10679,7 @@ extern void loc_106cb(void);
 extern void loc_106df(void);
 extern void loc_10704(void);
 extern void loc_10730(void);
-extern void loc_10834(void);
+extern void mode_call(void);
 extern void loc_10846(void);
 extern void loc_10849(void);
 extern void loc_108c1(void);
@@ -11233,7 +11233,7 @@ extern void loc_15953(void);
 extern void loc_15960(void);
 extern void loc_1597c(void);
 extern void loc_15980(void);
-extern void loc_159df(void);
+extern void podhit_dispatch(void);
 extern void loc_159ee(void);
 extern void loc_15a34(void);
 extern void loc_15a48(void);
@@ -11533,7 +11533,7 @@ extern void loc_17b38(void);
 extern void loc_17b4a(void);
 extern void loc_17bc5(void);
 extern void loc_17c18(void);
-extern void loc_17c3e(void);
+extern void bar_draw(void);
 extern void loc_17c69(void);
 extern void loc_17c77(void);
 extern void loc_17c87(void);
@@ -12906,36 +12906,36 @@ extern void tnd_edummylabel7(void);
 extern void tnd_timer_isr(void);
 extern void tnd_install_timer_2(void);
 extern void tnd_timer_isr_chain(void);
-extern void tnd_loc_104bb(void);
-extern void tnd_loc_104bf(void);
-extern void tnd_loc_104e1(void);
-extern void tnd_loc_10502(void);
-extern void tnd_loc_10506(void);
-extern void tnd_loc_10566(void);
-extern void tnd_loc_1058c(void);
-extern void tnd_loc_10592(void);
-extern void tnd_loc_105a8(void);
-extern void tnd_loc_105d2(void);
-extern void tnd_loc_105f6(void);
-extern void tnd_loc_105fa(void);
-extern void tnd_loc_105fd(void);
-extern void tnd_loc_10605(void);
-extern void tnd_loc_10615(void);
-extern void tnd_loc_1061f(void);
-extern void tnd_loc_10629(void);
-extern void tnd_loc_1062d(void);
-extern void tnd_loc_10630(void);
-extern void tnd_loc_10642(void);
-extern void tnd_loc_1064a(void);
-extern void tnd_loc_1064d(void);
-extern void tnd_loc_10694(void);
-extern void tnd_loc_106a9(void);
-extern void tnd_loc_106f4(void);
-extern void tnd_loc_10735(void);
-extern void tnd_loc_1074a(void);
-extern void tnd_loc_1079c(void);
-extern void tnd_loc_10805(void);
-extern void tnd_loc_108bd(void);
+extern void tnd_memfill_dn(void);
+extern void tnd_memfill_dn_loop(void);
+extern void tnd_music_tick_restart(void);
+extern void tnd_chans_tick_gate(void);
+extern void tnd_chans_tick(void);
+extern void tnd_env_step(void);
+extern void tnd_note_out_tail(void);
+extern void tnd_chan_init(void);
+extern void tnd_evt_seek(void);
+extern void tnd_evt_read(void);
+extern void tnd_evt_maybe_dur(void);
+extern void tnd_evt_commit(void);
+extern void tnd_evt_commit_b(void);
+extern void tnd_evt_dur(void);
+extern void tnd_evt_maybe_att(void);
+extern void tnd_evt_maybe_rel(void);
+extern void tnd_evt_loop_word(void);
+extern void tnd_evt_loop_store(void);
+extern void tnd_evt_maybe_rpt(void);
+extern void tnd_evt_loop_set(void);
+extern void tnd_evt_rpt_set(void);
+extern void tnd_evt_loop_back(void);
+extern void tnd_chan3_update(void);
+extern void tnd_music_go(void);
+extern void tnd_sfx_pair_143(void);
+extern void tnd_sfx_pair_163(void);
+extern void tnd_sfx_pair_165(void);
+extern void tnd_sfx_pair_133(void);
+extern void tnd_sfx_pair_da(void);
+extern void tnd_snd_reg_out(void);
 extern void tnd_locret_1008c(void);
 extern void tnd_locret_103dd(void);
 extern void tnd_locret_1040a(void);
@@ -12947,56 +12947,56 @@ extern void tnd_locret_106c2(void);
 extern void tnd_locret_106e7(void);
 extern void tnd_locret_107ba(void);
 extern void tnd_locret_108bc(void);
-extern void tnd_seg001_33e_proc(void);
+extern void tnd_irq8_chain(void);
 extern void tnd_module_init(void);
 extern void tnd_install_timer(void);
-extern void tnd_sub_104a4(void);
+extern void tnd_snd_all_off(void);
 extern void tnd_seq_tick(void);
-extern void tnd_sub_1051f(void);
-extern void tnd_sub_1059b(void);
-extern void tnd_sub_105b0(void);
-extern void tnd_sub_105c4(void);
-extern void tnd_sub_10652(void);
-extern void tnd_sub_10661(void);
-extern void tnd_sub_10677(void);
-extern void tnd_sub_1067e(void);
-extern void tnd_sub_1069e(void);
-extern void tnd_sub_106a5(void);
-extern void tnd_sub_106b0(void);
-extern void tnd_sub_106c3(void);
-extern void tnd_sub_106d0(void);
-extern void tnd_sub_106d7(void);
-extern void tnd_sub_106e2(void);
-extern void tnd_sub_106e8(void);
-extern void tnd_sub_106fe(void);
-extern void tnd_sub_1070d(void);
-extern void tnd_sub_1071c(void);
-extern void tnd_sub_1072a(void);
-extern void tnd_sub_10731(void);
-extern void tnd_sub_1073f(void);
-extern void tnd_sub_10746(void);
-extern void tnd_sub_1075c(void);
-extern void tnd_sub_1076b(void);
-extern void tnd_sub_10781(void);
-extern void tnd_sub_10790(void);
-extern void tnd_sub_107a6(void);
-extern void tnd_sub_107b2(void);
-extern void tnd_sub_107b5(void);
-extern void tnd_sub_107bb(void);
-extern void tnd_sub_107c9(void);
-extern void tnd_sub_107d7(void);
-extern void tnd_sub_107e5(void);
-extern void tnd_sub_107fa(void);
-extern void tnd_sub_10801(void);
-extern void tnd_sub_1080e(void);
-extern void tnd_sub_10814(void);
-extern void tnd_sub_1081a(void);
-extern void tnd_sub_10820(void);
-extern void tnd_sub_10826(void);
-extern void tnd_sub_10833(void);
-extern void tnd_sub_10851(void);
-extern void tnd_sub_10867(void);
-extern void tnd_sub_10889(void);
+extern void tnd_chan_tick(void);
+extern void tnd_note_out(void);
+extern void tnd_stream_start(void);
+extern void tnd_voice_update(void);
+extern void tnd_sfx_0f0(void);
+extern void tnd_sfx_108_100(void);
+extern void tnd_sfx_09d(void);
+extern void tnd_sfx_198_1a7(void);
+extern void tnd_music_play_a(void);
+extern void tnd_music_play_b(void);
+extern void tnd_music_stop(void);
+extern void tnd_sfx_74(void);
+extern void tnd_sfx_72(void);
+extern void tnd_seq_tempo_on(void);
+extern void tnd_seq_tempo_off(void);
+extern void tnd_sfx_153_143(void);
+extern void tnd_sfx_08d(void);
+extern void tnd_sfx_11f(void);
+extern void tnd_sfx_15b_143(void);
+extern void tnd_sfx_16a_163(void);
+extern void tnd_sfx_174_163(void);
+extern void tnd_sfx_16c_165(void);
+extern void tnd_sfx_176_165(void);
+extern void tnd_sfx_0a6(void);
+extern void tnd_sfx_187_17e(void);
+extern void tnd_sfx_0f8_133(void);
+extern void tnd_sfx_13b_133(void);
+extern void tnd_sfx_126(void);
+extern void tnd_sfx_play_pri(void);
+extern void tnd_sfx_play(void);
+extern void tnd_sfx_12e(void);
+extern void tnd_sfx_190(void);
+extern void tnd_sfx_117(void);
+extern void tnd_sfx_14b_153(void);
+extern void tnd_sfx_pair_ae_da(void);
+extern void tnd_sfx_pair_c4_da(void);
+extern void tnd_sfx_0e1(void);
+extern void tnd_sfx_1d0(void);
+extern void tnd_sfx_1cb(void);
+extern void tnd_sfx_06a(void);
+extern void tnd_sfx_110_84(void);
+extern void tnd_sfx3_1ef_23d(void);
+extern void tnd_sfx3_26b_2fd(void);
+extern void tnd_sfx3_210_246(void);
+extern void tnd_snd_reg_write(void);
 static void tw_tnd_edummylabel1(void){ dw _ocs = cs; cs = tnd_cseg; tnd_edummylabel1(); cs = _ocs; }
 static void tw_tnd_uninstall_timer(void){ dw _ocs = cs; cs = tnd_cseg; tnd_uninstall_timer(); cs = _ocs; }
 static void tw_tnd_edummylabel11(void){ dw _ocs = cs; cs = tnd_cseg; tnd_edummylabel11(); cs = _ocs; }
@@ -13049,36 +13049,36 @@ static void tw_tnd_edummylabel7(void){ dw _ocs = cs; cs = tnd_cseg; tnd_edummyla
 static void tw_tnd_timer_isr(void){ dw _ocs = cs; cs = tnd_cseg; tnd_timer_isr(); cs = _ocs; }
 static void tw_tnd_install_timer_2(void){ dw _ocs = cs; cs = tnd_cseg; tnd_install_timer_2(); cs = _ocs; }
 static void tw_tnd_timer_isr_chain(void){ dw _ocs = cs; cs = tnd_cseg; tnd_timer_isr_chain(); cs = _ocs; }
-static void tw_tnd_loc_104bb(void){ dw _ocs = cs; cs = tnd_cseg; tnd_loc_104bb(); cs = _ocs; }
-static void tw_tnd_loc_104bf(void){ dw _ocs = cs; cs = tnd_cseg; tnd_loc_104bf(); cs = _ocs; }
-static void tw_tnd_loc_104e1(void){ dw _ocs = cs; cs = tnd_cseg; tnd_loc_104e1(); cs = _ocs; }
-static void tw_tnd_loc_10502(void){ dw _ocs = cs; cs = tnd_cseg; tnd_loc_10502(); cs = _ocs; }
-static void tw_tnd_loc_10506(void){ dw _ocs = cs; cs = tnd_cseg; tnd_loc_10506(); cs = _ocs; }
-static void tw_tnd_loc_10566(void){ dw _ocs = cs; cs = tnd_cseg; tnd_loc_10566(); cs = _ocs; }
-static void tw_tnd_loc_1058c(void){ dw _ocs = cs; cs = tnd_cseg; tnd_loc_1058c(); cs = _ocs; }
-static void tw_tnd_loc_10592(void){ dw _ocs = cs; cs = tnd_cseg; tnd_loc_10592(); cs = _ocs; }
-static void tw_tnd_loc_105a8(void){ dw _ocs = cs; cs = tnd_cseg; tnd_loc_105a8(); cs = _ocs; }
-static void tw_tnd_loc_105d2(void){ dw _ocs = cs; cs = tnd_cseg; tnd_loc_105d2(); cs = _ocs; }
-static void tw_tnd_loc_105f6(void){ dw _ocs = cs; cs = tnd_cseg; tnd_loc_105f6(); cs = _ocs; }
-static void tw_tnd_loc_105fa(void){ dw _ocs = cs; cs = tnd_cseg; tnd_loc_105fa(); cs = _ocs; }
-static void tw_tnd_loc_105fd(void){ dw _ocs = cs; cs = tnd_cseg; tnd_loc_105fd(); cs = _ocs; }
-static void tw_tnd_loc_10605(void){ dw _ocs = cs; cs = tnd_cseg; tnd_loc_10605(); cs = _ocs; }
-static void tw_tnd_loc_10615(void){ dw _ocs = cs; cs = tnd_cseg; tnd_loc_10615(); cs = _ocs; }
-static void tw_tnd_loc_1061f(void){ dw _ocs = cs; cs = tnd_cseg; tnd_loc_1061f(); cs = _ocs; }
-static void tw_tnd_loc_10629(void){ dw _ocs = cs; cs = tnd_cseg; tnd_loc_10629(); cs = _ocs; }
-static void tw_tnd_loc_1062d(void){ dw _ocs = cs; cs = tnd_cseg; tnd_loc_1062d(); cs = _ocs; }
-static void tw_tnd_loc_10630(void){ dw _ocs = cs; cs = tnd_cseg; tnd_loc_10630(); cs = _ocs; }
-static void tw_tnd_loc_10642(void){ dw _ocs = cs; cs = tnd_cseg; tnd_loc_10642(); cs = _ocs; }
-static void tw_tnd_loc_1064a(void){ dw _ocs = cs; cs = tnd_cseg; tnd_loc_1064a(); cs = _ocs; }
-static void tw_tnd_loc_1064d(void){ dw _ocs = cs; cs = tnd_cseg; tnd_loc_1064d(); cs = _ocs; }
-static void tw_tnd_loc_10694(void){ dw _ocs = cs; cs = tnd_cseg; tnd_loc_10694(); cs = _ocs; }
-static void tw_tnd_loc_106a9(void){ dw _ocs = cs; cs = tnd_cseg; tnd_loc_106a9(); cs = _ocs; }
-static void tw_tnd_loc_106f4(void){ dw _ocs = cs; cs = tnd_cseg; tnd_loc_106f4(); cs = _ocs; }
-static void tw_tnd_loc_10735(void){ dw _ocs = cs; cs = tnd_cseg; tnd_loc_10735(); cs = _ocs; }
-static void tw_tnd_loc_1074a(void){ dw _ocs = cs; cs = tnd_cseg; tnd_loc_1074a(); cs = _ocs; }
-static void tw_tnd_loc_1079c(void){ dw _ocs = cs; cs = tnd_cseg; tnd_loc_1079c(); cs = _ocs; }
-static void tw_tnd_loc_10805(void){ dw _ocs = cs; cs = tnd_cseg; tnd_loc_10805(); cs = _ocs; }
-static void tw_tnd_loc_108bd(void){ dw _ocs = cs; cs = tnd_cseg; tnd_loc_108bd(); cs = _ocs; }
+static void tw_tnd_memfill_dn(void){ dw _ocs = cs; cs = tnd_cseg; tnd_memfill_dn(); cs = _ocs; }
+static void tw_tnd_memfill_dn_loop(void){ dw _ocs = cs; cs = tnd_cseg; tnd_memfill_dn_loop(); cs = _ocs; }
+static void tw_tnd_music_tick_restart(void){ dw _ocs = cs; cs = tnd_cseg; tnd_music_tick_restart(); cs = _ocs; }
+static void tw_tnd_chans_tick_gate(void){ dw _ocs = cs; cs = tnd_cseg; tnd_chans_tick_gate(); cs = _ocs; }
+static void tw_tnd_chans_tick(void){ dw _ocs = cs; cs = tnd_cseg; tnd_chans_tick(); cs = _ocs; }
+static void tw_tnd_env_step(void){ dw _ocs = cs; cs = tnd_cseg; tnd_env_step(); cs = _ocs; }
+static void tw_tnd_note_out_tail(void){ dw _ocs = cs; cs = tnd_cseg; tnd_note_out_tail(); cs = _ocs; }
+static void tw_tnd_chan_init(void){ dw _ocs = cs; cs = tnd_cseg; tnd_chan_init(); cs = _ocs; }
+static void tw_tnd_evt_seek(void){ dw _ocs = cs; cs = tnd_cseg; tnd_evt_seek(); cs = _ocs; }
+static void tw_tnd_evt_read(void){ dw _ocs = cs; cs = tnd_cseg; tnd_evt_read(); cs = _ocs; }
+static void tw_tnd_evt_maybe_dur(void){ dw _ocs = cs; cs = tnd_cseg; tnd_evt_maybe_dur(); cs = _ocs; }
+static void tw_tnd_evt_commit(void){ dw _ocs = cs; cs = tnd_cseg; tnd_evt_commit(); cs = _ocs; }
+static void tw_tnd_evt_commit_b(void){ dw _ocs = cs; cs = tnd_cseg; tnd_evt_commit_b(); cs = _ocs; }
+static void tw_tnd_evt_dur(void){ dw _ocs = cs; cs = tnd_cseg; tnd_evt_dur(); cs = _ocs; }
+static void tw_tnd_evt_maybe_att(void){ dw _ocs = cs; cs = tnd_cseg; tnd_evt_maybe_att(); cs = _ocs; }
+static void tw_tnd_evt_maybe_rel(void){ dw _ocs = cs; cs = tnd_cseg; tnd_evt_maybe_rel(); cs = _ocs; }
+static void tw_tnd_evt_loop_word(void){ dw _ocs = cs; cs = tnd_cseg; tnd_evt_loop_word(); cs = _ocs; }
+static void tw_tnd_evt_loop_store(void){ dw _ocs = cs; cs = tnd_cseg; tnd_evt_loop_store(); cs = _ocs; }
+static void tw_tnd_evt_maybe_rpt(void){ dw _ocs = cs; cs = tnd_cseg; tnd_evt_maybe_rpt(); cs = _ocs; }
+static void tw_tnd_evt_loop_set(void){ dw _ocs = cs; cs = tnd_cseg; tnd_evt_loop_set(); cs = _ocs; }
+static void tw_tnd_evt_rpt_set(void){ dw _ocs = cs; cs = tnd_cseg; tnd_evt_rpt_set(); cs = _ocs; }
+static void tw_tnd_evt_loop_back(void){ dw _ocs = cs; cs = tnd_cseg; tnd_evt_loop_back(); cs = _ocs; }
+static void tw_tnd_chan3_update(void){ dw _ocs = cs; cs = tnd_cseg; tnd_chan3_update(); cs = _ocs; }
+static void tw_tnd_music_go(void){ dw _ocs = cs; cs = tnd_cseg; tnd_music_go(); cs = _ocs; }
+static void tw_tnd_sfx_pair_143(void){ dw _ocs = cs; cs = tnd_cseg; tnd_sfx_pair_143(); cs = _ocs; }
+static void tw_tnd_sfx_pair_163(void){ dw _ocs = cs; cs = tnd_cseg; tnd_sfx_pair_163(); cs = _ocs; }
+static void tw_tnd_sfx_pair_165(void){ dw _ocs = cs; cs = tnd_cseg; tnd_sfx_pair_165(); cs = _ocs; }
+static void tw_tnd_sfx_pair_133(void){ dw _ocs = cs; cs = tnd_cseg; tnd_sfx_pair_133(); cs = _ocs; }
+static void tw_tnd_sfx_pair_da(void){ dw _ocs = cs; cs = tnd_cseg; tnd_sfx_pair_da(); cs = _ocs; }
+static void tw_tnd_snd_reg_out(void){ dw _ocs = cs; cs = tnd_cseg; tnd_snd_reg_out(); cs = _ocs; }
 static void tw_tnd_locret_1008c(void){ dw _ocs = cs; cs = tnd_cseg; tnd_locret_1008c(); cs = _ocs; }
 static void tw_tnd_locret_103dd(void){ dw _ocs = cs; cs = tnd_cseg; tnd_locret_103dd(); cs = _ocs; }
 static void tw_tnd_locret_1040a(void){ dw _ocs = cs; cs = tnd_cseg; tnd_locret_1040a(); cs = _ocs; }
@@ -13092,53 +13092,53 @@ static void tw_tnd_locret_107ba(void){ dw _ocs = cs; cs = tnd_cseg; tnd_locret_1
 static void tw_tnd_locret_108bc(void){ dw _ocs = cs; cs = tnd_cseg; tnd_locret_108bc(); cs = _ocs; }
 static void tw_tnd_module_init(void){ dw _ocs = cs; cs = tnd_cseg; tnd_module_init(); cs = _ocs; }
 static void tw_tnd_install_timer(void){ dw _ocs = cs; cs = tnd_cseg; tnd_install_timer(); cs = _ocs; }
-static void tw_tnd_sub_104a4(void){ dw _ocs = cs; cs = tnd_cseg; tnd_sub_104a4(); cs = _ocs; }
+static void tw_tnd_snd_all_off(void){ dw _ocs = cs; cs = tnd_cseg; tnd_snd_all_off(); cs = _ocs; }
 static void tw_tnd_seq_tick(void){ dw _ocs = cs; cs = tnd_cseg; tnd_seq_tick(); cs = _ocs; }
-static void tw_tnd_sub_1051f(void){ dw _ocs = cs; cs = tnd_cseg; tnd_sub_1051f(); cs = _ocs; }
-static void tw_tnd_sub_1059b(void){ dw _ocs = cs; cs = tnd_cseg; tnd_sub_1059b(); cs = _ocs; }
-static void tw_tnd_sub_105b0(void){ dw _ocs = cs; cs = tnd_cseg; tnd_sub_105b0(); cs = _ocs; }
-static void tw_tnd_sub_105c4(void){ dw _ocs = cs; cs = tnd_cseg; tnd_sub_105c4(); cs = _ocs; }
-static void tw_tnd_sub_10652(void){ dw _ocs = cs; cs = tnd_cseg; tnd_sub_10652(); cs = _ocs; }
-static void tw_tnd_sub_10661(void){ dw _ocs = cs; cs = tnd_cseg; tnd_sub_10661(); cs = _ocs; }
-static void tw_tnd_sub_10677(void){ dw _ocs = cs; cs = tnd_cseg; tnd_sub_10677(); cs = _ocs; }
-static void tw_tnd_sub_1067e(void){ dw _ocs = cs; cs = tnd_cseg; tnd_sub_1067e(); cs = _ocs; }
-static void tw_tnd_sub_1069e(void){ dw _ocs = cs; cs = tnd_cseg; tnd_sub_1069e(); cs = _ocs; }
-static void tw_tnd_sub_106a5(void){ dw _ocs = cs; cs = tnd_cseg; tnd_sub_106a5(); cs = _ocs; }
-static void tw_tnd_sub_106b0(void){ dw _ocs = cs; cs = tnd_cseg; tnd_sub_106b0(); cs = _ocs; }
-static void tw_tnd_sub_106c3(void){ dw _ocs = cs; cs = tnd_cseg; tnd_sub_106c3(); cs = _ocs; }
-static void tw_tnd_sub_106d0(void){ dw _ocs = cs; cs = tnd_cseg; tnd_sub_106d0(); cs = _ocs; }
-static void tw_tnd_sub_106d7(void){ dw _ocs = cs; cs = tnd_cseg; tnd_sub_106d7(); cs = _ocs; }
-static void tw_tnd_sub_106e2(void){ dw _ocs = cs; cs = tnd_cseg; tnd_sub_106e2(); cs = _ocs; }
-static void tw_tnd_sub_106e8(void){ dw _ocs = cs; cs = tnd_cseg; tnd_sub_106e8(); cs = _ocs; }
-static void tw_tnd_sub_106fe(void){ dw _ocs = cs; cs = tnd_cseg; tnd_sub_106fe(); cs = _ocs; }
-static void tw_tnd_sub_1070d(void){ dw _ocs = cs; cs = tnd_cseg; tnd_sub_1070d(); cs = _ocs; }
-static void tw_tnd_sub_1071c(void){ dw _ocs = cs; cs = tnd_cseg; tnd_sub_1071c(); cs = _ocs; }
-static void tw_tnd_sub_1072a(void){ dw _ocs = cs; cs = tnd_cseg; tnd_sub_1072a(); cs = _ocs; }
-static void tw_tnd_sub_10731(void){ dw _ocs = cs; cs = tnd_cseg; tnd_sub_10731(); cs = _ocs; }
-static void tw_tnd_sub_1073f(void){ dw _ocs = cs; cs = tnd_cseg; tnd_sub_1073f(); cs = _ocs; }
-static void tw_tnd_sub_10746(void){ dw _ocs = cs; cs = tnd_cseg; tnd_sub_10746(); cs = _ocs; }
-static void tw_tnd_sub_1075c(void){ dw _ocs = cs; cs = tnd_cseg; tnd_sub_1075c(); cs = _ocs; }
-static void tw_tnd_sub_1076b(void){ dw _ocs = cs; cs = tnd_cseg; tnd_sub_1076b(); cs = _ocs; }
-static void tw_tnd_sub_10781(void){ dw _ocs = cs; cs = tnd_cseg; tnd_sub_10781(); cs = _ocs; }
-static void tw_tnd_sub_10790(void){ dw _ocs = cs; cs = tnd_cseg; tnd_sub_10790(); cs = _ocs; }
-static void tw_tnd_sub_107a6(void){ dw _ocs = cs; cs = tnd_cseg; tnd_sub_107a6(); cs = _ocs; }
-static void tw_tnd_sub_107b2(void){ dw _ocs = cs; cs = tnd_cseg; tnd_sub_107b2(); cs = _ocs; }
-static void tw_tnd_sub_107b5(void){ dw _ocs = cs; cs = tnd_cseg; tnd_sub_107b5(); cs = _ocs; }
-static void tw_tnd_sub_107bb(void){ dw _ocs = cs; cs = tnd_cseg; tnd_sub_107bb(); cs = _ocs; }
-static void tw_tnd_sub_107c9(void){ dw _ocs = cs; cs = tnd_cseg; tnd_sub_107c9(); cs = _ocs; }
-static void tw_tnd_sub_107d7(void){ dw _ocs = cs; cs = tnd_cseg; tnd_sub_107d7(); cs = _ocs; }
-static void tw_tnd_sub_107e5(void){ dw _ocs = cs; cs = tnd_cseg; tnd_sub_107e5(); cs = _ocs; }
-static void tw_tnd_sub_107fa(void){ dw _ocs = cs; cs = tnd_cseg; tnd_sub_107fa(); cs = _ocs; }
-static void tw_tnd_sub_10801(void){ dw _ocs = cs; cs = tnd_cseg; tnd_sub_10801(); cs = _ocs; }
-static void tw_tnd_sub_1080e(void){ dw _ocs = cs; cs = tnd_cseg; tnd_sub_1080e(); cs = _ocs; }
-static void tw_tnd_sub_10814(void){ dw _ocs = cs; cs = tnd_cseg; tnd_sub_10814(); cs = _ocs; }
-static void tw_tnd_sub_1081a(void){ dw _ocs = cs; cs = tnd_cseg; tnd_sub_1081a(); cs = _ocs; }
-static void tw_tnd_sub_10820(void){ dw _ocs = cs; cs = tnd_cseg; tnd_sub_10820(); cs = _ocs; }
-static void tw_tnd_sub_10826(void){ dw _ocs = cs; cs = tnd_cseg; tnd_sub_10826(); cs = _ocs; }
-static void tw_tnd_sub_10833(void){ dw _ocs = cs; cs = tnd_cseg; tnd_sub_10833(); cs = _ocs; }
-static void tw_tnd_sub_10851(void){ dw _ocs = cs; cs = tnd_cseg; tnd_sub_10851(); cs = _ocs; }
-static void tw_tnd_sub_10867(void){ dw _ocs = cs; cs = tnd_cseg; tnd_sub_10867(); cs = _ocs; }
-static void tw_tnd_sub_10889(void){ dw _ocs = cs; cs = tnd_cseg; tnd_sub_10889(); cs = _ocs; }
+static void tw_tnd_chan_tick(void){ dw _ocs = cs; cs = tnd_cseg; tnd_chan_tick(); cs = _ocs; }
+static void tw_tnd_note_out(void){ dw _ocs = cs; cs = tnd_cseg; tnd_note_out(); cs = _ocs; }
+static void tw_tnd_stream_start(void){ dw _ocs = cs; cs = tnd_cseg; tnd_stream_start(); cs = _ocs; }
+static void tw_tnd_voice_update(void){ dw _ocs = cs; cs = tnd_cseg; tnd_voice_update(); cs = _ocs; }
+static void tw_tnd_sfx_0f0(void){ dw _ocs = cs; cs = tnd_cseg; tnd_sfx_0f0(); cs = _ocs; }
+static void tw_tnd_sfx_108_100(void){ dw _ocs = cs; cs = tnd_cseg; tnd_sfx_108_100(); cs = _ocs; }
+static void tw_tnd_sfx_09d(void){ dw _ocs = cs; cs = tnd_cseg; tnd_sfx_09d(); cs = _ocs; }
+static void tw_tnd_sfx_198_1a7(void){ dw _ocs = cs; cs = tnd_cseg; tnd_sfx_198_1a7(); cs = _ocs; }
+static void tw_tnd_music_play_a(void){ dw _ocs = cs; cs = tnd_cseg; tnd_music_play_a(); cs = _ocs; }
+static void tw_tnd_music_play_b(void){ dw _ocs = cs; cs = tnd_cseg; tnd_music_play_b(); cs = _ocs; }
+static void tw_tnd_music_stop(void){ dw _ocs = cs; cs = tnd_cseg; tnd_music_stop(); cs = _ocs; }
+static void tw_tnd_sfx_74(void){ dw _ocs = cs; cs = tnd_cseg; tnd_sfx_74(); cs = _ocs; }
+static void tw_tnd_sfx_72(void){ dw _ocs = cs; cs = tnd_cseg; tnd_sfx_72(); cs = _ocs; }
+static void tw_tnd_seq_tempo_on(void){ dw _ocs = cs; cs = tnd_cseg; tnd_seq_tempo_on(); cs = _ocs; }
+static void tw_tnd_seq_tempo_off(void){ dw _ocs = cs; cs = tnd_cseg; tnd_seq_tempo_off(); cs = _ocs; }
+static void tw_tnd_sfx_153_143(void){ dw _ocs = cs; cs = tnd_cseg; tnd_sfx_153_143(); cs = _ocs; }
+static void tw_tnd_sfx_08d(void){ dw _ocs = cs; cs = tnd_cseg; tnd_sfx_08d(); cs = _ocs; }
+static void tw_tnd_sfx_11f(void){ dw _ocs = cs; cs = tnd_cseg; tnd_sfx_11f(); cs = _ocs; }
+static void tw_tnd_sfx_15b_143(void){ dw _ocs = cs; cs = tnd_cseg; tnd_sfx_15b_143(); cs = _ocs; }
+static void tw_tnd_sfx_16a_163(void){ dw _ocs = cs; cs = tnd_cseg; tnd_sfx_16a_163(); cs = _ocs; }
+static void tw_tnd_sfx_174_163(void){ dw _ocs = cs; cs = tnd_cseg; tnd_sfx_174_163(); cs = _ocs; }
+static void tw_tnd_sfx_16c_165(void){ dw _ocs = cs; cs = tnd_cseg; tnd_sfx_16c_165(); cs = _ocs; }
+static void tw_tnd_sfx_176_165(void){ dw _ocs = cs; cs = tnd_cseg; tnd_sfx_176_165(); cs = _ocs; }
+static void tw_tnd_sfx_0a6(void){ dw _ocs = cs; cs = tnd_cseg; tnd_sfx_0a6(); cs = _ocs; }
+static void tw_tnd_sfx_187_17e(void){ dw _ocs = cs; cs = tnd_cseg; tnd_sfx_187_17e(); cs = _ocs; }
+static void tw_tnd_sfx_0f8_133(void){ dw _ocs = cs; cs = tnd_cseg; tnd_sfx_0f8_133(); cs = _ocs; }
+static void tw_tnd_sfx_13b_133(void){ dw _ocs = cs; cs = tnd_cseg; tnd_sfx_13b_133(); cs = _ocs; }
+static void tw_tnd_sfx_126(void){ dw _ocs = cs; cs = tnd_cseg; tnd_sfx_126(); cs = _ocs; }
+static void tw_tnd_sfx_play_pri(void){ dw _ocs = cs; cs = tnd_cseg; tnd_sfx_play_pri(); cs = _ocs; }
+static void tw_tnd_sfx_play(void){ dw _ocs = cs; cs = tnd_cseg; tnd_sfx_play(); cs = _ocs; }
+static void tw_tnd_sfx_12e(void){ dw _ocs = cs; cs = tnd_cseg; tnd_sfx_12e(); cs = _ocs; }
+static void tw_tnd_sfx_190(void){ dw _ocs = cs; cs = tnd_cseg; tnd_sfx_190(); cs = _ocs; }
+static void tw_tnd_sfx_117(void){ dw _ocs = cs; cs = tnd_cseg; tnd_sfx_117(); cs = _ocs; }
+static void tw_tnd_sfx_14b_153(void){ dw _ocs = cs; cs = tnd_cseg; tnd_sfx_14b_153(); cs = _ocs; }
+static void tw_tnd_sfx_pair_ae_da(void){ dw _ocs = cs; cs = tnd_cseg; tnd_sfx_pair_ae_da(); cs = _ocs; }
+static void tw_tnd_sfx_pair_c4_da(void){ dw _ocs = cs; cs = tnd_cseg; tnd_sfx_pair_c4_da(); cs = _ocs; }
+static void tw_tnd_sfx_0e1(void){ dw _ocs = cs; cs = tnd_cseg; tnd_sfx_0e1(); cs = _ocs; }
+static void tw_tnd_sfx_1d0(void){ dw _ocs = cs; cs = tnd_cseg; tnd_sfx_1d0(); cs = _ocs; }
+static void tw_tnd_sfx_1cb(void){ dw _ocs = cs; cs = tnd_cseg; tnd_sfx_1cb(); cs = _ocs; }
+static void tw_tnd_sfx_06a(void){ dw _ocs = cs; cs = tnd_cseg; tnd_sfx_06a(); cs = _ocs; }
+static void tw_tnd_sfx_110_84(void){ dw _ocs = cs; cs = tnd_cseg; tnd_sfx_110_84(); cs = _ocs; }
+static void tw_tnd_sfx3_1ef_23d(void){ dw _ocs = cs; cs = tnd_cseg; tnd_sfx3_1ef_23d(); cs = _ocs; }
+static void tw_tnd_sfx3_26b_2fd(void){ dw _ocs = cs; cs = tnd_cseg; tnd_sfx3_26b_2fd(); cs = _ocs; }
+static void tw_tnd_sfx3_210_246(void){ dw _ocs = cs; cs = tnd_cseg; tnd_sfx3_210_246(); cs = _ocs; }
+static void tw_tnd_snd_reg_write(void){ dw _ocs = cs; cs = tnd_cseg; tnd_snd_reg_write(); cs = _ocs; }
 static void tnd_e0002(void){ dw _ocs = cs; cs = tnd_cseg; push(cs); ds = pop(); tnd_module_init(); cs = _ocs; }
 static void rt_nullfn(void){}
 static const fent fmap[] = {
@@ -13163,7 +13163,7 @@ static const fent fmap[] = {
   {0x1d5b, loc_1033b},
   {0x1d86, loc_10366},
   {0x1d89, loc_10369},
-  {0x1db7, loc_10397},
+  {0x1db7, pal_upload},
   {0x1dc2, loc_103a2},
   {0x1dc5, loc_103a5},
   {0x1ddf, loc_103bf},
@@ -13188,7 +13188,7 @@ static const fent fmap[] = {
   {0x20ff, loc_106df},
   {0x2124, loc_10704},
   {0x2150, loc_10730},
-  {0x2254, loc_10834},
+  {0x2254, mode_call},
   {0x2266, loc_10846},
   {0x2269, loc_10849},
   {0x22e1, loc_108c1},
@@ -13742,7 +13742,7 @@ static const fent fmap[] = {
   {0x7380, loc_15960},
   {0x739c, loc_1597c},
   {0x73a0, loc_15980},
-  {0x73ff, loc_159df},
+  {0x73ff, podhit_dispatch},
   {0x740e, loc_159ee},
   {0x7454, loc_15a34},
   {0x7468, loc_15a48},
@@ -14042,7 +14042,7 @@ static const fent fmap[] = {
   {0x956a, loc_17b4a},
   {0x95e5, loc_17bc5},
   {0x9638, loc_17c18},
-  {0x965e, loc_17c3e},
+  {0x965e, bar_draw},
   {0x9689, loc_17c69},
   {0x9697, loc_17c77},
   {0x96a7, loc_17c87},
@@ -15371,36 +15371,36 @@ static const fent fmap[] = {
   {0x303e3, tw_tnd_timer_isr},
   {0x30410, tw_tnd_install_timer_2},
   {0x3046b, tw_tnd_timer_isr_chain},
-  {0x304bb, tw_tnd_loc_104bb},
-  {0x304bf, tw_tnd_loc_104bf},
-  {0x304e1, tw_tnd_loc_104e1},
-  {0x30502, tw_tnd_loc_10502},
-  {0x30506, tw_tnd_loc_10506},
-  {0x30566, tw_tnd_loc_10566},
-  {0x3058c, tw_tnd_loc_1058c},
-  {0x30592, tw_tnd_loc_10592},
-  {0x305a8, tw_tnd_loc_105a8},
-  {0x305d2, tw_tnd_loc_105d2},
-  {0x305f6, tw_tnd_loc_105f6},
-  {0x305fa, tw_tnd_loc_105fa},
-  {0x305fd, tw_tnd_loc_105fd},
-  {0x30605, tw_tnd_loc_10605},
-  {0x30615, tw_tnd_loc_10615},
-  {0x3061f, tw_tnd_loc_1061f},
-  {0x30629, tw_tnd_loc_10629},
-  {0x3062d, tw_tnd_loc_1062d},
-  {0x30630, tw_tnd_loc_10630},
-  {0x30642, tw_tnd_loc_10642},
-  {0x3064a, tw_tnd_loc_1064a},
-  {0x3064d, tw_tnd_loc_1064d},
-  {0x30694, tw_tnd_loc_10694},
-  {0x306a9, tw_tnd_loc_106a9},
-  {0x306f4, tw_tnd_loc_106f4},
-  {0x30735, tw_tnd_loc_10735},
-  {0x3074a, tw_tnd_loc_1074a},
-  {0x3079c, tw_tnd_loc_1079c},
-  {0x30805, tw_tnd_loc_10805},
-  {0x308bd, tw_tnd_loc_108bd},
+  {0x304bb, tw_tnd_memfill_dn},
+  {0x304bf, tw_tnd_memfill_dn_loop},
+  {0x304e1, tw_tnd_music_tick_restart},
+  {0x30502, tw_tnd_chans_tick_gate},
+  {0x30506, tw_tnd_chans_tick},
+  {0x30566, tw_tnd_env_step},
+  {0x3058c, tw_tnd_note_out_tail},
+  {0x30592, tw_tnd_chan_init},
+  {0x305a8, tw_tnd_evt_seek},
+  {0x305d2, tw_tnd_evt_read},
+  {0x305f6, tw_tnd_evt_maybe_dur},
+  {0x305fa, tw_tnd_evt_commit},
+  {0x305fd, tw_tnd_evt_commit_b},
+  {0x30605, tw_tnd_evt_dur},
+  {0x30615, tw_tnd_evt_maybe_att},
+  {0x3061f, tw_tnd_evt_maybe_rel},
+  {0x30629, tw_tnd_evt_loop_word},
+  {0x3062d, tw_tnd_evt_loop_store},
+  {0x30630, tw_tnd_evt_maybe_rpt},
+  {0x30642, tw_tnd_evt_loop_set},
+  {0x3064a, tw_tnd_evt_rpt_set},
+  {0x3064d, tw_tnd_evt_loop_back},
+  {0x30694, tw_tnd_chan3_update},
+  {0x306a9, tw_tnd_music_go},
+  {0x306f4, tw_tnd_sfx_pair_143},
+  {0x30735, tw_tnd_sfx_pair_163},
+  {0x3074a, tw_tnd_sfx_pair_165},
+  {0x3079c, tw_tnd_sfx_pair_133},
+  {0x30805, tw_tnd_sfx_pair_da},
+  {0x308bd, tw_tnd_snd_reg_out},
   {0x3008c, tw_tnd_locret_1008c},
   {0x303dd, tw_tnd_locret_103dd},
   {0x3040a, tw_tnd_locret_1040a},
@@ -15414,53 +15414,53 @@ static const fent fmap[] = {
   {0x308bc, tw_tnd_locret_108bc},
   {0x30074, tw_tnd_module_init},
   {0x3040b, tw_tnd_install_timer},
-  {0x304a4, tw_tnd_sub_104a4},
+  {0x304a4, tw_tnd_snd_all_off},
   {0x304c5, tw_tnd_seq_tick},
-  {0x3051f, tw_tnd_sub_1051f},
-  {0x3059b, tw_tnd_sub_1059b},
-  {0x305b0, tw_tnd_sub_105b0},
-  {0x305c4, tw_tnd_sub_105c4},
-  {0x30652, tw_tnd_sub_10652},
-  {0x30661, tw_tnd_sub_10661},
-  {0x30677, tw_tnd_sub_10677},
-  {0x3067e, tw_tnd_sub_1067e},
-  {0x3069e, tw_tnd_sub_1069e},
-  {0x306a5, tw_tnd_sub_106a5},
-  {0x306b0, tw_tnd_sub_106b0},
-  {0x306c3, tw_tnd_sub_106c3},
-  {0x306d0, tw_tnd_sub_106d0},
-  {0x306d7, tw_tnd_sub_106d7},
-  {0x306e2, tw_tnd_sub_106e2},
-  {0x306e8, tw_tnd_sub_106e8},
-  {0x306fe, tw_tnd_sub_106fe},
-  {0x3070d, tw_tnd_sub_1070d},
-  {0x3071c, tw_tnd_sub_1071c},
-  {0x3072a, tw_tnd_sub_1072a},
-  {0x30731, tw_tnd_sub_10731},
-  {0x3073f, tw_tnd_sub_1073f},
-  {0x30746, tw_tnd_sub_10746},
-  {0x3075c, tw_tnd_sub_1075c},
-  {0x3076b, tw_tnd_sub_1076b},
-  {0x30781, tw_tnd_sub_10781},
-  {0x30790, tw_tnd_sub_10790},
-  {0x307a6, tw_tnd_sub_107a6},
-  {0x307b2, tw_tnd_sub_107b2},
-  {0x307b5, tw_tnd_sub_107b5},
-  {0x307bb, tw_tnd_sub_107bb},
-  {0x307c9, tw_tnd_sub_107c9},
-  {0x307d7, tw_tnd_sub_107d7},
-  {0x307e5, tw_tnd_sub_107e5},
-  {0x307fa, tw_tnd_sub_107fa},
-  {0x30801, tw_tnd_sub_10801},
-  {0x3080e, tw_tnd_sub_1080e},
-  {0x30814, tw_tnd_sub_10814},
-  {0x3081a, tw_tnd_sub_1081a},
-  {0x30820, tw_tnd_sub_10820},
-  {0x30826, tw_tnd_sub_10826},
-  {0x30833, tw_tnd_sub_10833},
-  {0x30851, tw_tnd_sub_10851},
-  {0x30867, tw_tnd_sub_10867},
-  {0x30889, tw_tnd_sub_10889},
+  {0x3051f, tw_tnd_chan_tick},
+  {0x3059b, tw_tnd_note_out},
+  {0x305b0, tw_tnd_stream_start},
+  {0x305c4, tw_tnd_voice_update},
+  {0x30652, tw_tnd_sfx_0f0},
+  {0x30661, tw_tnd_sfx_108_100},
+  {0x30677, tw_tnd_sfx_09d},
+  {0x3067e, tw_tnd_sfx_198_1a7},
+  {0x3069e, tw_tnd_music_play_a},
+  {0x306a5, tw_tnd_music_play_b},
+  {0x306b0, tw_tnd_music_stop},
+  {0x306c3, tw_tnd_sfx_74},
+  {0x306d0, tw_tnd_sfx_72},
+  {0x306d7, tw_tnd_seq_tempo_on},
+  {0x306e2, tw_tnd_seq_tempo_off},
+  {0x306e8, tw_tnd_sfx_153_143},
+  {0x306fe, tw_tnd_sfx_08d},
+  {0x3070d, tw_tnd_sfx_11f},
+  {0x3071c, tw_tnd_sfx_15b_143},
+  {0x3072a, tw_tnd_sfx_16a_163},
+  {0x30731, tw_tnd_sfx_174_163},
+  {0x3073f, tw_tnd_sfx_16c_165},
+  {0x30746, tw_tnd_sfx_176_165},
+  {0x3075c, tw_tnd_sfx_0a6},
+  {0x3076b, tw_tnd_sfx_187_17e},
+  {0x30781, tw_tnd_sfx_0f8_133},
+  {0x30790, tw_tnd_sfx_13b_133},
+  {0x307a6, tw_tnd_sfx_126},
+  {0x307b2, tw_tnd_sfx_play_pri},
+  {0x307b5, tw_tnd_sfx_play},
+  {0x307bb, tw_tnd_sfx_12e},
+  {0x307c9, tw_tnd_sfx_190},
+  {0x307d7, tw_tnd_sfx_117},
+  {0x307e5, tw_tnd_sfx_14b_153},
+  {0x307fa, tw_tnd_sfx_pair_ae_da},
+  {0x30801, tw_tnd_sfx_pair_c4_da},
+  {0x3080e, tw_tnd_sfx_0e1},
+  {0x30814, tw_tnd_sfx_1d0},
+  {0x3081a, tw_tnd_sfx_1cb},
+  {0x30820, tw_tnd_sfx_06a},
+  {0x30826, tw_tnd_sfx_110_84},
+  {0x30833, tw_tnd_sfx3_1ef_23d},
+  {0x30851, tw_tnd_sfx3_26b_2fd},
+  {0x30867, tw_tnd_sfx3_210_246},
+  {0x30889, tw_tnd_snd_reg_write},
   {0x30072, tnd_e0002},
 };
 vfn func_at(dd addr){

@@ -3,9 +3,9 @@
 #include "lifted_procs.h"
 
 void loc_10040(void) {
-    /* mov     ax, cs:seg_10000 ;~ 01A2:0040 */
+    /* mov     ax, cs:seg_data ;~ 01A2:0040 */
     /* mov     ds, ax ;~ 01A2:0044 */
-    ds = (seg_10000);
+    ds = (seg_data);
     /* mov     ax, ss ;~ 01A2:0046 */
     ax = ss;
     /* mov     bx, sp ;~ 01A2:0048 */
@@ -39,8 +39,8 @@ void loc_10040(void) {
     word_1cea5 = ax;
     /* mov     word_209E2, 0 ;~ 01A2:0076 */
     word_209e2 = 0;
-    /* mov     ax, cs:seg_10000 ;~ 01A2:007C */
-    ax = seg_10000;
+    /* mov     ax, cs:seg_data ;~ 01A2:007C */
+    ax = seg_data;
     /* mov     word_209E0, ax ;~ 01A2:0080 */
     word_209e0 = ax;
     /* call    sub_11354 ;~ 01A2:0083 */
@@ -130,8 +130,8 @@ void start(void) {
     push(ax);
     /* push    es ;~ 01A2:0025 */
     push(es);
-    /* mov     ax, cs:seg_10000 ;~ 01A2:0026 */
-    ax = seg_10000;
+    /* mov     ax, cs:seg_data ;~ 01A2:0026 */
+    ax = seg_data;
     /* mov     es, ax ;~ 01A2:002A */
     es = ax;
     /* mov     ds, ax ;~ 01A2:002C */
@@ -143,9 +143,9 @@ void start(void) {
     /* jmp     loc_10040 ;~ 01A2:0032 */
     goto loc_10040;
 loc_10040:
-    /* mov     ax, cs:seg_10000 ;~ 01A2:0040 */
+    /* mov     ax, cs:seg_data ;~ 01A2:0040 */
     /* mov     ds, ax ;~ 01A2:0044 */
-    ds = (seg_10000);
+    ds = (seg_data);
     /* mov     ax, ss ;~ 01A2:0046 */
     ax = ss;
     /* mov     bx, sp ;~ 01A2:0048 */
@@ -179,8 +179,8 @@ loc_10040:
     word_1cea5 = ax;
     /* mov     word_209E2, 0 ;~ 01A2:0076 */
     word_209e2 = 0;
-    /* mov     ax, cs:seg_10000 ;~ 01A2:007C */
-    ax = seg_10000;
+    /* mov     ax, cs:seg_data ;~ 01A2:007C */
+    ax = seg_data;
     /* mov     word_209E0, ax ;~ 01A2:0080 */
     word_209e0 = ax;
     /* call    sub_11354 ;~ 01A2:0083 */
@@ -230,8 +230,8 @@ seg000_a1_proc:
     return;
 }
 void dispatch_phase(void) {
-    /* mov     ax, cs:seg_10000 ;~ 01A2:00C5 */
-    ax = seg_10000;
+    /* mov     ax, cs:seg_data ;~ 01A2:00C5 */
+    ax = seg_data;
     /* mov     ds, ax ;~ 01A2:00C9 */
     ds = ax;
     /* mov     es, ax ;~ 01A2:00CB */
@@ -437,8 +437,8 @@ void locret_10170(void) {
     return;
 }
 void rowtab_init_tandy(void) {
-    /* mov     ax, cs:seg_10000 ;~ 01A2:012F */
-    ax = seg_10000;
+    /* mov     ax, cs:seg_data ;~ 01A2:012F */
+    ax = seg_data;
     /* mov     ds, ax ;~ 01A2:0133 */
     ds = ax;
     /* mov     es, ax ;~ 01A2:0135 */
@@ -550,8 +550,8 @@ void locret_101a7(void) {
     return;
 }
 void rowtab_init_cga(void) {
-    /* mov     ax, cs:seg_10000 ;~ 01A2:0171 */
-    ax = seg_10000;
+    /* mov     ax, cs:seg_data ;~ 01A2:0171 */
+    ax = seg_data;
     /* mov     ds, ax ;~ 01A2:0175 */
     ds = ax;
     /* mov     es, ax ;~ 01A2:0177 */
@@ -649,8 +649,8 @@ void locret_101d8(void) {
     return;
 }
 void rowtab_init_ega(void) {
-    /* mov     ax, cs:seg_10000 ;~ 01A2:01A8 */
-    ax = seg_10000;
+    /* mov     ax, cs:seg_data ;~ 01A2:01A8 */
+    ax = seg_data;
     /* mov     ds, ax ;~ 01A2:01AC */
     ds = ax;
     /* mov     es, ax ;~ 01A2:01AE */
@@ -744,8 +744,8 @@ void locret_1020b(void) {
     return;
 }
 void build_tile_tables(void) {
-    /* mov     ax, cs:seg_10000 ;~ 01A2:01D9 */
-    ax = seg_10000;
+    /* mov     ax, cs:seg_data ;~ 01A2:01D9 */
+    ax = seg_data;
     /* mov     ds, ax ;~ 01A2:01DD */
     ds = ax;
     /* mov     es, ax ;~ 01A2:01DF */
@@ -951,8 +951,8 @@ void locret_1025e(void) {
     return;
 }
 void rowtab_init_herc(void) {
-    /* mov     ax, cs:seg_10000 ;~ 01A2:020C */
-    ax = seg_10000;
+    /* mov     ax, cs:seg_data ;~ 01A2:020C */
+    ax = seg_data;
     /* mov     ds, ax ;~ 01A2:0210 */
     ds = ax;
     /* mov     es, ax ;~ 01A2:0212 */
@@ -1037,10 +1037,10 @@ loc_10262:
         if (ax == 0x0FFFF) { return; }
         /* mov     bp, ax ;~ 01A2:026B */
         bp = ax;
-        /* mov     ax, cs:seg_10000 ;~ 01A2:026D */
+        /* mov     ax, cs:seg_data ;~ 01A2:026D */
         _sa = (ax);
-        /* mov     ax, cs:seg_10000 ;~ 01A2:026D */
-        ax = seg_10000;
+        /* mov     ax, cs:seg_data ;~ 01A2:026D */
+        ax = seg_data;
         /* mov     es, ax ;~ 01A2:0271 */
         es = ax;
         /* mov     dx, [bx+100h] ;~ 01A2:0273 */
@@ -1275,10 +1275,10 @@ loc_10262:
         if (ax == 0x0FFFF) { return; }
         /* mov     bp, ax ;~ 01A2:026B */
         bp = ax;
-        /* mov     ax, cs:seg_10000 ;~ 01A2:026D */
+        /* mov     ax, cs:seg_data ;~ 01A2:026D */
         _sa = (ax);
-        /* mov     ax, cs:seg_10000 ;~ 01A2:026D */
-        ax = seg_10000;
+        /* mov     ax, cs:seg_data ;~ 01A2:026D */
+        ax = seg_data;
         /* mov     es, ax ;~ 01A2:0271 */
         es = ax;
         /* mov     dx, [bx+100h] ;~ 01A2:0273 */
@@ -1484,18 +1484,18 @@ loc_10369:
     /* mov     word_1CEA0, ax ;~ 01A2:0369 */
     palette_ptr = ax;
     /* jmp     short loc_10397 ;~ 01A2:036C */
-    loc_10397(); return;
+    pal_upload(); return;
 }
 void loc_10369(void) {
     /* mov     word_1CEA0, ax ;~ 01A2:0369 */
     palette_ptr = ax;
     /* jmp     short loc_10397 ;~ 01A2:036C */
-    loc_10397(); return;
+    pal_upload(); return;
 }
 void palette_sel(void) {
-    /* mov     ax, cs:seg_10000 ;~ 01A2:034F */
+    /* mov     ax, cs:seg_data ;~ 01A2:034F */
     /* mov     ds, ax ;~ 01A2:0353 */
-    ds = (seg_10000);
+    ds = (seg_data);
     /* mov     ax, 0E8h ;~ 01A2:0355 */
     ax = 0x0E8;
     /* cmp     word_1D934, 0 ;~ 01A2:0358 */
@@ -1514,24 +1514,24 @@ loc_10369:
     /* mov     word_1CEA0, ax ;~ 01A2:0369 */
     palette_ptr = ax;
     /* jmp     short loc_10397 ;~ 01A2:036C */
-    loc_10397(); return;
+    pal_upload(); return;
 }
 void load_palette_b(void) {
-    /* mov     ax, cs:seg_10000 ;~ 01A2:036F */
-    ax = seg_10000;
+    /* mov     ax, cs:seg_data ;~ 01A2:036F */
+    ax = seg_data;
     /* mov     ds, ax ;~ 01A2:0373 */
     ds = ax;
     /* mov     word_1CEA0, 1972h ;~ 01A2:0375 */
     palette_ptr = 0x1972;
     /* jmp     short loc_10397 ;~ 01A2:037B */
-    loc_10397(); return;
+    pal_upload(); return;
 }
-void loc_10397(void) {
+void pal_upload(void) {
     /* mov     di, word_1D934 ;~ 01A2:0397 */
     di = adapter_id;
     /* shl     di, 1           ; switch 5 cases ;~ 01A2:039B */
     { if (1) { CF = (((dd)di << (1)) >> 16) & 1; di <<= 1; ZF = ((dw)(di) == 0); SF = (((dw)(di)) >> 15); } }
-    /* jmp     cs:jpt_1039D[di] ; switch jump ;~ 01A2:039D */
+    /* jmp     cs:pal_jt[di] ; switch jump ;~ 01A2:039D */
     { vfn f_ = func_at((dd)0x1a20 + (*(dw*)(((db*)&jpt_1039d)+di))); if (f_) f_(); else fprintf(stderr, "unresolved ind jmp %x\n", (dd)((dd)0x1a20 + (*(dw*)(((db*)&jpt_1039d)+di)))); return; }
 loc_103a2:
     /* mov     si, 0           ; jumptable 0001039D case 1 ;~ 01A2:03A2 */
@@ -1939,9 +1939,9 @@ loc_10491:
         bx = *(dw*)raddr(ds,di+2);
         /* mov     dx, [di+4] ;~ 01A2:049B */
         dx = *(dw*)raddr(ds,di+4);
-        /* mov     ax, cs:seg_10000 ;~ 01A2:049E */
+        /* mov     ax, cs:seg_data ;~ 01A2:049E */
         /* mov     es, ax ;~ 01A2:04A2 */
-        es = (seg_10000);
+        es = (seg_data);
         /* mov     ax, 0 ;~ 01A2:04A4 */
         ax = 0;
         /* add     di, 6 ;~ 01A2:04A7 */
@@ -2967,8 +2967,8 @@ locret_10487:
     return;
 }
 void ret_1a2_488(void) {
-    /* mov     ax, cs:seg_10000 ;~ 01A2:0488 */
-    ax = seg_10000;
+    /* mov     ax, cs:seg_data ;~ 01A2:0488 */
+    ax = seg_data;
     /* mov     ds, ax ;~ 01A2:048C */
     ds = ax;
     /* mov     di, 0FCh ;~ 01A2:048E */
@@ -2985,9 +2985,9 @@ loc_10491:
         bx = *(dw*)raddr(ds,di+2);
         /* mov     dx, [di+4] ;~ 01A2:049B */
         dx = *(dw*)raddr(ds,di+4);
-        /* mov     ax, cs:seg_10000 ;~ 01A2:049E */
+        /* mov     ax, cs:seg_data ;~ 01A2:049E */
         /* mov     es, ax ;~ 01A2:04A2 */
-        es = (seg_10000);
+        es = (seg_data);
         /* mov     ax, 0 ;~ 01A2:04A4 */
         ax = 0;
         /* add     di, 6 ;~ 01A2:04A7 */
@@ -3005,8 +3005,8 @@ locret_104b1:
     return;
 }
 void load_palette(void) {
-    /* mov     ax, cs:seg_10000 ;~ 01A2:037E */
-    ax = seg_10000;
+    /* mov     ax, cs:seg_data ;~ 01A2:037E */
+    ax = seg_data;
     /* mov     ds, ax ;~ 01A2:0382 */
     ds = ax;
     /* mov     word_1CEA0, 1962h ;~ 01A2:0384 */
@@ -3018,7 +3018,7 @@ loc_10397:
     di = adapter_id;
     /* shl     di, 1           ; switch 5 cases ;~ 01A2:039B */
     { if (1) { CF = (((dd)di << (1)) >> 16) & 1; di <<= 1; ZF = ((dw)(di) == 0); SF = (((dw)(di)) >> 15); } }
-    /* jmp     cs:jpt_1039D[di] ; switch jump ;~ 01A2:039D */
+    /* jmp     cs:pal_jt[di] ; switch jump ;~ 01A2:039D */
     { vfn f_ = func_at((dd)0x1a20 + (*(dw*)(((db*)&jpt_1039d)+di))); if (f_) f_(); else fprintf(stderr, "unresolved ind jmp %x\n", (dd)((dd)0x1a20 + (*(dw*)(((db*)&jpt_1039d)+di)))); return; }
 loc_103a2:
     /* mov     si, 0           ; jumptable 0001039D case 1 ;~ 01A2:03A2 */
@@ -3390,7 +3390,7 @@ void gfx_mode_menu(void) {
     /* int     10h             ; - VIDEO - GET CURRENT VIDEO MODE ;~ 01A2:0618 */
     bios_video(ax);
     /* mov     byte_1CE90, al ;~ 01A2:061A */
-    byte_1ce90 = al;
+    gfx_sel = al;
     /* mov     bx, 0 ;~ 01A2:061D */
     bx = 0;
     /* mov     es, bx ;~ 01A2:0620 */
@@ -3907,14 +3907,14 @@ void glyph_conv_dispatch(void) {
     /* shl     di, 1           ; switch 5 cases ;~ 01A2:07B4 */
     { if (1) { CF = (((dd)di << (1)) >> 16) & 1; di <<= 1; ZF = ((dw)(di) == 0); SF = (((dw)(di)) >> 15); } }
     /* jmp     cs:jpt_107B6[di] ; switch jump ;~ 01A2:07B6 */
-    { vfn f_ = func_at((dd)0x1a20 + (*(dw*)(((db*)&jpt_107b6)+di))); if (f_) f_(); else fprintf(stderr, "unresolved ind jmp %x\n", (dd)((dd)0x1a20 + (*(dw*)(((db*)&jpt_107b6)+di)))); return; }
+    { vfn f_ = func_at((dd)0x1a20 + (*(dw*)(((db*)&glyphconv_jt)+di))); if (f_) f_(); else fprintf(stderr, "unresolved ind jmp %x\n", (dd)((dd)0x1a20 + (*(dw*)(((db*)&glyphconv_jt)+di)))); return; }
 }
-void loc_10834(void) {
+void mode_call(void) {
     /* mov     bx, ds:194h ;~ 01A2:0834 */
     bx = *(dw*)raddr(ds,0x194);
     /* shl     bx, 1 ;~ 01A2:0838 */
     { if (1) { CF = (((dd)bx << (1)) >> 16) & 1; bx <<= 1; ZF = ((dw)(bx) == 0); SF = (((dw)(bx)) >> 15); } }
-    /* call    cs:funcs_1083A[bx] ;~ 01A2:083A */
+    /* call    cs:modecall_tbl[bx] ;~ 01A2:083A */
     { vfn f_ = func_at((dd)0x1a20 + (*(dw*)(((db*)&funcs_1083a)+bx))); dw sp_ = sp; if (f_) f_(); else fprintf(stderr, "unresolved ind call %x\n", (dd)((dd)0x1a20 + (*(dw*)(((db*)&funcs_1083a)+bx)))); if ((short)(sp - sp_) > 0) { sp = sp_; return; } }
     /* clc ;~ 01A2:083F */
     CF = 0;
@@ -3927,8 +3927,8 @@ void locret_10840(void) {
     return;
 }
 void load_resource(void) {
-    /* mov     ax, cs:seg_10000 ;~ 01A2:07C3 */
-    ax = seg_10000;
+    /* mov     ax, cs:seg_data ;~ 01A2:07C3 */
+    ax = seg_data;
     /* mov     ds, ax ;~ 01A2:07C7 */
     ds = ax;
     /* mov     bx, word_1D00E ;~ 01A2:07C9 */
@@ -3946,7 +3946,7 @@ void load_resource(void) {
     /* xor     ah, ah ;~ 01A2:07DE */
     ah = 0; CF = 0; OF = 0; ZF = 1; SF = 0;
     /* mov     word_1D014, ax ;~ 01A2:07E0 */
-    word_1d014 = ax;
+    res_tmp = ax;
     /* mov     ax, [si+0Eh] ;~ 01A2:07E3 */
     ax = *(dw*)raddr(ds,si+0x0E);
     /* mov     word_1D012, ax ;~ 01A2:07E6 */
@@ -3958,23 +3958,23 @@ void load_resource(void) {
     /* mov     ax, [si+12h] ;~ 01A2:07EF */
     ax = *(dw*)raddr(ds,si+0x12);
     /* mov     word_1CFF2, ax ;~ 01A2:07F2 */
-    word_1cff2 = ax;
+    res_parm = ax;
     /* mov     ax, [si+14h] ;~ 01A2:07F5 */
     ax = *(dw*)raddr(ds,si+0x14);
     /* mov     word_1CFF4, ax ;~ 01A2:07F8 */
-    word_1cff4 = ax;
+    res_stg_seg = ax;
     /* mov     ax, [si+16h] ;~ 01A2:07FB */
     ax = *(dw*)raddr(ds,si+0x16);
     /* mov     word_1CFF6, ax ;~ 01A2:07FE */
-    word_1cff6 = ax;
+    res_off = ax;
     /* call    sub_10841 ;~ 01A2:0801 */
     res_file_read();
     /* jb      short locret_10840 ;~ 01A2:0804 */
     if (CF) { return; }
     /* cmp     word_1CFF2, 0 ;~ 01A2:0806 */
-    CF = (dd)word_1cff2 < (dd)0; ZF = ((dw)((word_1cff2) - (0)) == 0); SF = (((dw)((word_1cff2) - (0))) >> 15);
+    CF = (dd)res_parm < (dd)0; ZF = ((dw)((res_parm) - (0)) == 0); SF = (((dw)((res_parm) - (0))) >> 15);
     /* jz      short loc_10834 ;~ 01A2:080B */
-    if (word_1cff2 != 0) {
+    if (res_parm != 0) {
         /* push    ds ;~ 01A2:080D */
         push(ds);
         /* push    es ;~ 01A2:080E */
@@ -3982,9 +3982,9 @@ void load_resource(void) {
         /* mov     cx, word_1D01A ;~ 01A2:080F */
         cx = word_1d01a;
         /* mov     es, word_1CFF4 ;~ 01A2:0813 */
-        es = word_1cff4;
+        es = res_stg_seg;
         /* mov     di, word_1CFF6 ;~ 01A2:0817 */
-        di = word_1cff6;
+        di = res_off;
         /* mov     si, word_1D010 ;~ 01A2:081B */
         si = res_ptr;
         /* mov     ds, word_1D012 ;~ 01A2:081F */
@@ -4009,7 +4009,7 @@ loc_10834:
     bx = *(dw*)raddr(ds,0x194);
     /* shl     bx, 1 ;~ 01A2:0838 */
     { if (1) { CF = (((dd)bx << (1)) >> 16) & 1; bx <<= 1; ZF = ((dw)(bx) == 0); SF = (((dw)(bx)) >> 15); } }
-    /* call    cs:funcs_1083A[bx] ;~ 01A2:083A */
+    /* call    cs:modecall_tbl[bx] ;~ 01A2:083A */
     { vfn f_ = func_at((dd)0x1a20 + (*(dw*)(((db*)&funcs_1083a)+bx))); dw sp_ = sp; if (f_) f_(); else fprintf(stderr, "unresolved ind call %x\n", (dd)((dd)0x1a20 + (*(dw*)(((db*)&funcs_1083a)+bx)))); if ((short)(sp - sp_) > 0) { sp = sp_; return; } }
     /* clc ;~ 01A2:083F */
     CF = 0;
@@ -4046,8 +4046,8 @@ loc_10849:
         ah = 0x3F;
         /* int     21h             ; DOS - 2+ - READ FROM FILE WITH HANDLE ;~ 01A2:0869 */
         dos_read();
-        /* mov     ax, cs:seg_10000 ;~ 01A2:086B */
-        ax = seg_10000;
+        /* mov     ax, cs:seg_data ;~ 01A2:086B */
+        ax = seg_data;
         /* mov     ds, ax ;~ 01A2:086F */
         ds = ax;
         /* mov     word_1D006, 5 ;~ 01A2:0871 */
@@ -4088,8 +4088,8 @@ loc_10849:
             ah = 0x3F;
             /* int     21h             ; DOS - 2+ - READ FROM FILE WITH HANDLE ;~ 01A2:0869 */
             dos_read();
-            /* mov     ax, cs:seg_10000 ;~ 01A2:086B */
-            ax = seg_10000;
+            /* mov     ax, cs:seg_data ;~ 01A2:086B */
+            ax = seg_data;
             /* mov     ds, ax ;~ 01A2:086F */
             ds = ax;
             /* mov     word_1D006, 5 ;~ 01A2:0871 */
@@ -4143,8 +4143,8 @@ loc_10849:
     ah = 0x3F;
     /* int     21h             ; DOS - 2+ - READ FROM FILE WITH HANDLE ;~ 01A2:0869 */
     dos_read();
-    /* mov     ax, cs:seg_10000 ;~ 01A2:086B */
-    ax = seg_10000;
+    /* mov     ax, cs:seg_data ;~ 01A2:086B */
+    ax = seg_data;
     /* mov     ds, ax ;~ 01A2:086F */
     ds = ax;
     /* mov     word_1D006, 5 ;~ 01A2:0871 */
@@ -4260,8 +4260,8 @@ void res_load_fail(void) {
     return;
 }
 void loc_108ee(void) {
-    /* mov     ax, cs:seg_10000 ;~ 01A2:08EE */
-    ax = seg_10000;
+    /* mov     ax, cs:seg_data ;~ 01A2:08EE */
+    ax = seg_data;
     /* mov     ds, ax ;~ 01A2:08F2 */
     ds = ax;
     /* mov     bx, word_1D00E ;~ 01A2:08F4 */
@@ -4342,8 +4342,8 @@ void loc_1092f(void) {
     ah = 0x40;
     /* int     21h             ; DOS - 2+ - WRITE TO FILE WITH HANDLE ;~ 01A2:0945 */
     dos_write();
-    /* mov     ax, cs:seg_10000 ;~ 01A2:0947 */
-    ax = seg_10000;
+    /* mov     ax, cs:seg_data ;~ 01A2:0947 */
+    ax = seg_data;
     /* mov     ds, ax ;~ 01A2:094B */
     ds = ax;
     /* jb      short loc_1092D ;~ 01A2:094D */
@@ -4410,8 +4410,8 @@ loc_1092f:
     ah = 0x40;
     /* int     21h             ; DOS - 2+ - WRITE TO FILE WITH HANDLE ;~ 01A2:0945 */
     dos_write();
-    /* mov     ax, cs:seg_10000 ;~ 01A2:0947 */
-    ax = seg_10000;
+    /* mov     ax, cs:seg_data ;~ 01A2:0947 */
+    ax = seg_data;
     /* mov     ds, ax ;~ 01A2:094B */
     ds = ax;
     /* jb      short loc_1092D ;~ 01A2:094D */
@@ -4825,8 +4825,8 @@ void key_poll(void) {
     dd _sa = 0, _sb = 0;
     /* push    ds ;~ 01A2:0A33 */
     push(ds);
-    /* mov     ax, cs:seg_10000 ;~ 01A2:0A34 */
-    ax = seg_10000;
+    /* mov     ax, cs:seg_data ;~ 01A2:0A34 */
+    ax = seg_data;
     /* mov     ds, ax ;~ 01A2:0A38 */
     ds = ax;
     /* call    sub_1130A ;~ 01A2:0A3A */
@@ -4974,18 +4974,18 @@ void clear_flipbuf(void) {
     push(ds);
     /* push    es ;~ 01A2:0AC0 */
     push(es);
-    /* mov     ax, cs:seg_10000 ;~ 01A2:0AC1 */
+    /* mov     ax, cs:seg_data ;~ 01A2:0AC1 */
     /* mov     ds, ax ;~ 01A2:0AC5 */
-    ds = (seg_10000);
-    /* mov     ax, cs:seg_10010 ;~ 01A2:0AC7 */
-    ax = seg_10010;
+    ds = (seg_data);
+    /* mov     ax, cs:seg_flip ;~ 01A2:0AC7 */
+    ax = seg_flip;
     /* mov     es, ax ;~ 01A2:0ACB */
     es = ax;
     /* mov     di, word_1D934 ;~ 01A2:0ACD */
     di = adapter_id;
     /* shl     di, 1           ; switch 5 cases ;~ 01A2:0AD1 */
     { if (1) { CF = (((dd)di << (1)) >> 16) & 1; di <<= 1; ZF = ((dw)(di) == 0); SF = (((dw)(di)) >> 15); } }
-    /* jmp     cs:jpt_10AD3[di] ; switch jump ;~ 01A2:0AD3 */
+    /* jmp     cs:clrflip_jt[di] ; switch jump ;~ 01A2:0AD3 */
     { vfn f_ = func_at((dd)0x1a20 + (*(dw*)(((db*)&jpt_10ad3)+di))); if (f_) f_(); else fprintf(stderr, "unresolved ind jmp %x\n", (dd)((dd)0x1a20 + (*(dw*)(((db*)&jpt_10ad3)+di)))); return; }
 loc_10ad8:
     /* mov     ax, 0           ; jumptable 00010AD3 case 0 ;~ 01A2:0AD8 */
@@ -5008,18 +5008,18 @@ void clear_drawbuf(void) {
     push(ds);
     /* push    es ;~ 01A2:0B21 */
     push(es);
-    /* mov     ax, cs:seg_10000 ;~ 01A2:0B22 */
+    /* mov     ax, cs:seg_data ;~ 01A2:0B22 */
     /* mov     ds, ax ;~ 01A2:0B26 */
-    ds = (seg_10000);
-    /* mov     ax, cs:seg_10012 ;~ 01A2:0B28 */
-    ax = seg_10012;
+    ds = (seg_data);
+    /* mov     ax, cs:seg_draw ;~ 01A2:0B28 */
+    ax = seg_draw;
     /* mov     es, ax ;~ 01A2:0B2C */
     es = ax;
     /* mov     di, word_1D934 ;~ 01A2:0B2E */
     di = adapter_id;
     /* shl     di, 1           ; switch 5 cases ;~ 01A2:0B32 */
     { if (1) { CF = (((dd)di << (1)) >> 16) & 1; di <<= 1; ZF = ((dw)(di) == 0); SF = (((dw)(di)) >> 15); } }
-    /* jmp     cs:jpt_10B34[di] ; switch jump ;~ 01A2:0B34 */
+    /* jmp     cs:clrdraw_jt[di] ; switch jump ;~ 01A2:0B34 */
     { vfn f_ = func_at((dd)0x1a20 + (*(dw*)(((db*)&jpt_10b34)+di))); if (f_) f_(); else fprintf(stderr, "unresolved ind jmp %x\n", (dd)((dd)0x1a20 + (*(dw*)(((db*)&jpt_10b34)+di)))); return; }
 }
 void loc_10b5c(void) {
@@ -5073,18 +5073,18 @@ void clear_backbuf(void) {
     push(ds);
     /* push    es ;~ 01A2:0B44 */
     push(es);
-    /* mov     ax, cs:seg_10000 ;~ 01A2:0B45 */
+    /* mov     ax, cs:seg_data ;~ 01A2:0B45 */
     /* mov     ds, ax ;~ 01A2:0B49 */
-    ds = (seg_10000);
+    ds = (seg_data);
     /* mov     ax, cs:seg_1000E ;~ 01A2:0B4B */
-    ax = seg_1000e;
+    ax = seg_screen;
     /* mov     es, ax ;~ 01A2:0B4F */
     es = ax;
     /* mov     di, word_1D934 ;~ 01A2:0B51 */
     di = adapter_id;
     /* shl     di, 1           ; switch 5 cases ;~ 01A2:0B55 */
     { if (1) { CF = (((dd)di << (1)) >> 16) & 1; di <<= 1; ZF = ((dw)(di) == 0); SF = (((dw)(di)) >> 15); } }
-    /* jmp     cs:jpt_10B57[di] ; switch jump ;~ 01A2:0B57 */
+    /* jmp     cs:clrback_jt[di] ; switch jump ;~ 01A2:0B57 */
     { vfn f_ = func_at((dd)0x1a20 + (*(dw*)(((db*)&jpt_10b57)+di))); if (f_) f_(); else fprintf(stderr, "unresolved ind jmp %x\n", (dd)((dd)0x1a20 + (*(dw*)(((db*)&jpt_10b57)+di)))); return; }
 loc_10b5c:
     /* mov     al, byte_1D93A  ; jumptable 00010B57 case 1 ;~ 01A2:0B5C */
@@ -5434,11 +5434,11 @@ void loc_10c24(void) {
 void glyph_put_backbuf(void) {
     /* push    es ;~ 01A2:0BD6 */
     push(es);
-    /* mov     di, cs:seg_10000 ;~ 01A2:0BD7 */
+    /* mov     di, cs:seg_data ;~ 01A2:0BD7 */
     /* mov     ds, di ;~ 01A2:0BDC */
-    ds = (seg_10000);
+    ds = (seg_data);
     /* mov     di, cs:seg_1000E ;~ 01A2:0BDE */
-    di = seg_1000e;
+    di = seg_screen;
     /* mov     es, di ;~ 01A2:0BE3 */
     es = di;
     /* cmp     al, 5Eh ; '^' ;~ 01A2:0BE5 */
@@ -5450,7 +5450,7 @@ void glyph_put_backbuf(void) {
         /* shl     di, 1           ; switch 5 cases ;~ 01A2:0BED */
         { if (1) { CF = (((dd)di << (1)) >> 16) & 1; di <<= 1; ZF = ((dw)(di) == 0); SF = (((dw)(di)) >> 15); } }
         /* jmp     cs:jpt_10BEF[di] ; switch jump ;~ 01A2:0BEF */
-        { vfn f_ = func_at((dd)0x1a20 + (*(dw*)(((db*)&jpt_10bef)+di))); if (f_) f_(); else fprintf(stderr, "unresolved ind jmp %x\n", (dd)((dd)0x1a20 + (*(dw*)(((db*)&jpt_10bef)+di)))); return; }
+        { vfn f_ = func_at((dd)0x1a20 + (*(dw*)(((db*)&glyphblit_jt)+di))); if (f_) f_(); else fprintf(stderr, "unresolved ind jmp %x\n", (dd)((dd)0x1a20 + (*(dw*)(((db*)&glyphblit_jt)+di)))); return; }
 loc_10bf4:
         /* call    sub_10CCB       ; jumptable 00010BEF case 0 ;~ 01A2:0BF4 */
         glyph_blit_cga();
@@ -5472,8 +5472,8 @@ loc_10c17:
 void loc_10c3c(void) {
     /* mov     es, di ;~ 01A2:0C3C */
     es = di;
-    /* mov     di, cs:seg_10000 ;~ 01A2:0C3E */
-    di = seg_10000;
+    /* mov     di, cs:seg_data ;~ 01A2:0C3E */
+    di = seg_data;
     /* mov     ds, di ;~ 01A2:0C43 */
     ds = di;
     /* cmp     al, 5Eh ; '^' ;~ 01A2:0C45 */
@@ -5485,7 +5485,7 @@ void loc_10c3c(void) {
         /* shl     di, 1           ; switch 5 cases ;~ 01A2:0C4D */
         { if (1) { CF = (((dd)di << (1)) >> 16) & 1; di <<= 1; ZF = ((dw)(di) == 0); SF = (((dw)(di)) >> 15); } }
         /* jmp     cs:jpt_10C4F[di] ; switch jump ;~ 01A2:0C4F */
-        { vfn f_ = func_at((dd)0x1a20 + (*(dw*)(((db*)&jpt_10c4f)+di))); if (f_) f_(); else fprintf(stderr, "unresolved ind jmp %x\n", (dd)((dd)0x1a20 + (*(dw*)(((db*)&jpt_10c4f)+di)))); return; }
+        { vfn f_ = func_at((dd)0x1a20 + (*(dw*)(((db*)&glyphblit2_jt)+di))); if (f_) f_(); else fprintf(stderr, "unresolved ind jmp %x\n", (dd)((dd)0x1a20 + (*(dw*)(((db*)&glyphblit2_jt)+di)))); return; }
 loc_10c54:
         /* call    sub_10D6E       ; jumptable 00010C4F case 3 ;~ 01A2:0C54 */
         glyph_blit_mcga();
@@ -5566,13 +5566,13 @@ void loc_10c74(void) {
 void glyph_put_flipbuf(void) {
     /* push    es ;~ 01A2:0C36 */
     push(es);
-    /* mov     di, cs:seg_10010 ;~ 01A2:0C37 */
-    di = seg_10010;
+    /* mov     di, cs:seg_flip ;~ 01A2:0C37 */
+    di = seg_flip;
 loc_10c3c:
     /* mov     es, di ;~ 01A2:0C3C */
     es = di;
-    /* mov     di, cs:seg_10000 ;~ 01A2:0C3E */
-    di = seg_10000;
+    /* mov     di, cs:seg_data ;~ 01A2:0C3E */
+    di = seg_data;
     /* mov     ds, di ;~ 01A2:0C43 */
     ds = di;
     /* cmp     al, 5Eh ; '^' ;~ 01A2:0C45 */
@@ -5584,7 +5584,7 @@ loc_10c3c:
         /* shl     di, 1           ; switch 5 cases ;~ 01A2:0C4D */
         { if (1) { CF = (((dd)di << (1)) >> 16) & 1; di <<= 1; ZF = ((dw)(di) == 0); SF = (((dw)(di)) >> 15); } }
         /* jmp     cs:jpt_10C4F[di] ; switch jump ;~ 01A2:0C4F */
-        { vfn f_ = func_at((dd)0x1a20 + (*(dw*)(((db*)&jpt_10c4f)+di))); if (f_) f_(); else fprintf(stderr, "unresolved ind jmp %x\n", (dd)((dd)0x1a20 + (*(dw*)(((db*)&jpt_10c4f)+di)))); return; }
+        { vfn f_ = func_at((dd)0x1a20 + (*(dw*)(((db*)&glyphblit2_jt)+di))); if (f_) f_(); else fprintf(stderr, "unresolved ind jmp %x\n", (dd)((dd)0x1a20 + (*(dw*)(((db*)&glyphblit2_jt)+di)))); return; }
 loc_10c54:
         /* call    sub_10D6E       ; jumptable 00010C4F case 3 ;~ 01A2:0C54 */
         glyph_blit_mcga();
@@ -5606,8 +5606,8 @@ loc_10c6f:
 void glyph_put_drawbuf(void) {
     /* push    es ;~ 01A2:0C7C */
     push(es);
-    /* mov     di, cs:seg_10012 ;~ 01A2:0C7D */
-    di = seg_10012;
+    /* mov     di, cs:seg_draw ;~ 01A2:0C7D */
+    di = seg_draw;
     /* jmp     short loc_10C3C ;~ 01A2:0C82 */
     loc_10c3c(); return;
 }
@@ -5618,8 +5618,8 @@ void loc_10c84(void) {
     push(es);
     /* push    ax ;~ 01A2:0C86 */
     push(ax);
-    /* mov     ax, cs:seg_10000 ;~ 01A2:0C87 */
-    ax = seg_10000;
+    /* mov     ax, cs:seg_data ;~ 01A2:0C87 */
+    ax = seg_data;
     /* mov     ds, ax ;~ 01A2:0C8B */
     ds = ax;
     /* cmp     word_1D934, 1 ;~ 01A2:0C8D */
@@ -7658,8 +7658,8 @@ void text_put_space(void) {
 void ret_1a2_102a(void) {
     /* push    ds ;~ 01A2:102A */
     push(ds);
-    /* mov     bx, cs:seg_10000 ;~ 01A2:102B */
-    bx = seg_10000;
+    /* mov     bx, cs:seg_data ;~ 01A2:102B */
+    bx = seg_data;
     /* mov     ds, bx ;~ 01A2:1030 */
     ds = bx;
     /* mov     word_1D91C, 0 ;~ 01A2:1032 */
@@ -7674,8 +7674,8 @@ void ret_1a2_102a(void) {
 void ret_1a2_103d(void) {
     /* push    ds ;~ 01A2:103D */
     push(ds);
-    /* mov     bx, cs:seg_10000 ;~ 01A2:103E */
-    bx = seg_10000;
+    /* mov     bx, cs:seg_data ;~ 01A2:103E */
+    bx = seg_data;
     /* mov     ds, bx ;~ 01A2:1043 */
     ds = bx;
     /* mov     word_1D91C, 1 ;~ 01A2:1045 */
@@ -7690,8 +7690,8 @@ void ret_1a2_103d(void) {
 void ret_1a2_1050(void) {
     /* push    ds ;~ 01A2:1050 */
     push(ds);
-    /* mov     bx, cs:seg_10000 ;~ 01A2:1051 */
-    bx = seg_10000;
+    /* mov     bx, cs:seg_data ;~ 01A2:1051 */
+    bx = seg_data;
     /* mov     ds, bx ;~ 01A2:1056 */
     ds = bx;
     /* mov     word_1D91C, 2 ;~ 01A2:1058 */
@@ -7706,8 +7706,8 @@ void ret_1a2_1050(void) {
 void ret_1a2_1063(void) {
     /* push    ds ;~ 01A2:1063 */
     push(ds);
-    /* mov     bx, cs:seg_10000 ;~ 01A2:1064 */
-    bx = seg_10000;
+    /* mov     bx, cs:seg_data ;~ 01A2:1064 */
+    bx = seg_data;
     /* mov     ds, bx ;~ 01A2:1069 */
     ds = bx;
     /* mov     word_1D91C, 0 ;~ 01A2:106B */
@@ -7726,8 +7726,8 @@ void ret_1a2_1063(void) {
 void ret_1a2_107a(void) {
     /* push    ds ;~ 01A2:107A */
     push(ds);
-    /* mov     bx, cs:seg_10000 ;~ 01A2:107B */
-    bx = seg_10000;
+    /* mov     bx, cs:seg_data ;~ 01A2:107B */
+    bx = seg_data;
     /* mov     ds, bx ;~ 01A2:1080 */
     ds = bx;
     /* mov     word_1D91C, 1 ;~ 01A2:1082 */
@@ -7754,8 +7754,8 @@ void seg000_1024_proc(void) {
 void print_2nums(void) {
     /* push    ds ;~ 01A2:1091 */
     push(ds);
-    /* mov     bx, cs:seg_10000 ;~ 01A2:1092 */
-    bx = seg_10000;
+    /* mov     bx, cs:seg_data ;~ 01A2:1092 */
+    bx = seg_data;
     /* mov     ds, bx ;~ 01A2:1097 */
     ds = bx;
     /* mov     word_1D91C, 2 ;~ 01A2:1099 */
@@ -7784,8 +7784,8 @@ void loc_111ef(void) {
 void ret_1a2_10bf(void) {
     /* push    ds ;~ 01A2:10BF */
     push(ds);
-    /* mov     bx, cs:seg_10000 ;~ 01A2:10C0 */
-    bx = seg_10000;
+    /* mov     bx, cs:seg_data ;~ 01A2:10C0 */
+    bx = seg_data;
     /* mov     ds, bx ;~ 01A2:10C5 */
     ds = bx;
     /* mov     word_1D91C, 3 ;~ 01A2:10C7 */
@@ -7800,8 +7800,8 @@ void ret_1a2_10bf(void) {
 void ret_1a2_10d2(void) {
     /* push    ds ;~ 01A2:10D2 */
     push(ds);
-    /* mov     bx, cs:seg_10000 ;~ 01A2:10D3 */
-    bx = seg_10000;
+    /* mov     bx, cs:seg_data ;~ 01A2:10D3 */
+    bx = seg_data;
     /* mov     ds, bx ;~ 01A2:10D8 */
     ds = bx;
     /* mov     word_1D91C, 0 ;~ 01A2:10DA */
@@ -7816,8 +7816,8 @@ void ret_1a2_10d2(void) {
 void ret_1a2_10e5(void) {
     /* push    ds ;~ 01A2:10E5 */
     push(ds);
-    /* mov     bx, cs:seg_10000 ;~ 01A2:10E6 */
-    bx = seg_10000;
+    /* mov     bx, cs:seg_data ;~ 01A2:10E6 */
+    bx = seg_data;
     /* mov     ds, bx ;~ 01A2:10EB */
     ds = bx;
     /* mov     word_1D91C, 1 ;~ 01A2:10ED */
@@ -7832,8 +7832,8 @@ void ret_1a2_10e5(void) {
 void ret_1a2_10f8(void) {
     /* push    ds ;~ 01A2:10F8 */
     push(ds);
-    /* mov     bx, cs:seg_10000 ;~ 01A2:10F9 */
-    bx = seg_10000;
+    /* mov     bx, cs:seg_data ;~ 01A2:10F9 */
+    bx = seg_data;
     /* mov     ds, bx ;~ 01A2:10FE */
     ds = bx;
     /* mov     word_1D91C, 2 ;~ 01A2:1100 */
@@ -7848,8 +7848,8 @@ void ret_1a2_10f8(void) {
 void ret_1a2_110b(void) {
     /* push    ds ;~ 01A2:110B */
     push(ds);
-    /* mov     bx, cs:seg_10000 ;~ 01A2:110C */
-    bx = seg_10000;
+    /* mov     bx, cs:seg_data ;~ 01A2:110C */
+    bx = seg_data;
     /* mov     ds, bx ;~ 01A2:1111 */
     ds = bx;
     /* mov     word_1D91C, 0 ;~ 01A2:1113 */
@@ -7866,8 +7866,8 @@ void ret_1a2_110b(void) {
 void ret_1a2_1120(void) {
     /* push    ds ;~ 01A2:1120 */
     push(ds);
-    /* mov     bx, cs:seg_10000 ;~ 01A2:1121 */
-    bx = seg_10000;
+    /* mov     bx, cs:seg_data ;~ 01A2:1121 */
+    bx = seg_data;
     /* mov     ds, bx ;~ 01A2:1126 */
     ds = bx;
     /* mov     word_1D91C, 1 ;~ 01A2:1128 */
@@ -7884,8 +7884,8 @@ void ret_1a2_1120(void) {
 void ret_1a2_1135(void) {
     /* push    ds ;~ 01A2:1135 */
     push(ds);
-    /* mov     bx, cs:seg_10000 ;~ 01A2:1136 */
-    bx = seg_10000;
+    /* mov     bx, cs:seg_data ;~ 01A2:1136 */
+    bx = seg_data;
     /* mov     ds, bx ;~ 01A2:113B */
     ds = bx;
     /* mov     word_1D91C, 2 ;~ 01A2:113D */
@@ -7902,8 +7902,8 @@ void ret_1a2_1135(void) {
 void ret_1a2_114a(void) {
     /* push    ds ;~ 01A2:114A */
     push(ds);
-    /* mov     bx, cs:seg_10000 ;~ 01A2:114B */
-    bx = seg_10000;
+    /* mov     bx, cs:seg_data ;~ 01A2:114B */
+    bx = seg_data;
     /* mov     ds, bx ;~ 01A2:1150 */
     ds = bx;
     /* mov     word_1D91C, 3 ;~ 01A2:1152 */
@@ -7920,8 +7920,8 @@ void ret_1a2_114a(void) {
 void ret_1a2_115f(void) {
     /* push    ds ;~ 01A2:115F */
     push(ds);
-    /* mov     bx, cs:seg_10000 ;~ 01A2:1160 */
-    bx = seg_10000;
+    /* mov     bx, cs:seg_data ;~ 01A2:1160 */
+    bx = seg_data;
     /* mov     ds, bx ;~ 01A2:1165 */
     ds = bx;
     /* mov     word_1D91C, 3 ;~ 01A2:1167 */
@@ -7936,8 +7936,8 @@ void ret_1a2_115f(void) {
 void ret_1a2_1172(void) {
     /* push    ds ;~ 01A2:1172 */
     push(ds);
-    /* mov     bx, cs:seg_10000 ;~ 01A2:1173 */
-    bx = seg_10000;
+    /* mov     bx, cs:seg_data ;~ 01A2:1173 */
+    bx = seg_data;
     /* mov     ds, bx ;~ 01A2:1178 */
     ds = bx;
     /* mov     word_1D91C, 0 ;~ 01A2:117A */
@@ -7952,8 +7952,8 @@ void ret_1a2_1172(void) {
 void ret_1a2_1185(void) {
     /* push    ds ;~ 01A2:1185 */
     push(ds);
-    /* mov     bx, cs:seg_10000 ;~ 01A2:1186 */
-    bx = seg_10000;
+    /* mov     bx, cs:seg_data ;~ 01A2:1186 */
+    bx = seg_data;
     /* mov     ds, bx ;~ 01A2:118B */
     ds = bx;
     /* mov     word_1D91C, 1 ;~ 01A2:118D */
@@ -7968,8 +7968,8 @@ void ret_1a2_1185(void) {
 void ret_1a2_1198(void) {
     /* push    ds ;~ 01A2:1198 */
     push(ds);
-    /* mov     bx, cs:seg_10000 ;~ 01A2:1199 */
-    bx = seg_10000;
+    /* mov     bx, cs:seg_data ;~ 01A2:1199 */
+    bx = seg_data;
     /* mov     ds, bx ;~ 01A2:119E */
     ds = bx;
     /* mov     word_1D91C, 2 ;~ 01A2:11A0 */
@@ -7984,8 +7984,8 @@ void ret_1a2_1198(void) {
 void ret_1a2_11ab(void) {
     /* push    ds ;~ 01A2:11AB */
     push(ds);
-    /* mov     bx, cs:seg_10000 ;~ 01A2:11AC */
-    bx = seg_10000;
+    /* mov     bx, cs:seg_data ;~ 01A2:11AC */
+    bx = seg_data;
     /* mov     ds, bx ;~ 01A2:11B1 */
     ds = bx;
     /* mov     word_1D6DE, si ;~ 01A2:11B3 */
@@ -8006,8 +8006,8 @@ void ret_1a2_11ab(void) {
 void ret_1a2_11c6(void) {
     /* push    ds ;~ 01A2:11C6 */
     push(ds);
-    /* mov     bx, cs:seg_10000 ;~ 01A2:11C7 */
-    bx = seg_10000;
+    /* mov     bx, cs:seg_data ;~ 01A2:11C7 */
+    bx = seg_data;
     /* mov     ds, bx ;~ 01A2:11CC */
     ds = bx;
     /* mov     word_1D6DE, si ;~ 01A2:11CE */
@@ -8026,8 +8026,8 @@ void ret_1a2_11c6(void) {
 void seg000_10a8_proc(void) {
     /* push    ds ;~ 01A2:10A8 */
     push(ds);
-    /* mov     bx, cs:seg_10000 ;~ 01A2:10A9 */
-    bx = seg_10000;
+    /* mov     bx, cs:seg_data ;~ 01A2:10A9 */
+    bx = seg_data;
     /* mov     ds, bx ;~ 01A2:10AE */
     ds = bx;
     /* mov     word_1D91C, 3 ;~ 01A2:10B0 */
@@ -8380,8 +8380,8 @@ void loc_11261(void) {
 void print_dec_u16(void) {
     /* push    ds ;~ 01A2:120C */
     push(ds);
-    /* mov     bx, cs:seg_10000 ;~ 01A2:120D */
-    bx = seg_10000;
+    /* mov     bx, cs:seg_data ;~ 01A2:120D */
+    bx = seg_data;
     /* mov     ds, bx ;~ 01A2:1212 */
     ds = bx;
     /* mov     si, 24h ; '$' ;~ 01A2:1214 */
@@ -8469,8 +8469,8 @@ void print_hex8(void) {
     dd _sa = 0, _sb = 0;
     /* push    ds ;~ 01A2:126F */
     push(ds);
-    /* mov     si, cs:seg_10000 ;~ 01A2:1270 */
-    si = seg_10000;
+    /* mov     si, cs:seg_data ;~ 01A2:1270 */
+    si = seg_data;
     /* mov     ds, si ;~ 01A2:1275 */
     ds = si;
     /* push    ax ;~ 01A2:1277 */
@@ -8512,8 +8512,8 @@ void loc_112c0(void) {
     dd _sa = 0, _sb = 0;
     /* mov     si, ax ;~ 01A2:12C0 */
     si = ax;
-    /* mov     ax, cs:seg_10000 ;~ 01A2:12C2 */
-    ax = seg_10000;
+    /* mov     ax, cs:seg_data ;~ 01A2:12C2 */
+    ax = seg_data;
     /* mov     ds, ax ;~ 01A2:12C6 */
     ds = ax;
     /* shl     si, 1 ;~ 01A2:12C8 */
@@ -8629,8 +8629,8 @@ ret_1a2_12a5:
 loc_112c0:
     /* mov     si, ax ;~ 01A2:12C0 */
     si = ax;
-    /* mov     ax, cs:seg_10000 ;~ 01A2:12C2 */
-    ax = seg_10000;
+    /* mov     ax, cs:seg_data ;~ 01A2:12C2 */
+    ax = seg_data;
     /* mov     ds, ax ;~ 01A2:12C6 */
     ds = ax;
     /* shl     si, 1 ;~ 01A2:12C8 */
@@ -8687,8 +8687,8 @@ void ret_1a2_12a5(void) {
 loc_112c0:
     /* mov     si, ax ;~ 01A2:12C0 */
     si = ax;
-    /* mov     ax, cs:seg_10000 ;~ 01A2:12C2 */
-    ax = seg_10000;
+    /* mov     ax, cs:seg_data ;~ 01A2:12C2 */
+    ax = seg_data;
     /* mov     ds, ax ;~ 01A2:12C6 */
     ds = ax;
     /* shl     si, 1 ;~ 01A2:12C8 */
@@ -8745,8 +8745,8 @@ void ret_1a2_12ae(void) {
 loc_112c0:
     /* mov     si, ax ;~ 01A2:12C0 */
     si = ax;
-    /* mov     ax, cs:seg_10000 ;~ 01A2:12C2 */
-    ax = seg_10000;
+    /* mov     ax, cs:seg_data ;~ 01A2:12C2 */
+    ax = seg_data;
     /* mov     ds, ax ;~ 01A2:12C6 */
     ds = ax;
     /* shl     si, 1 ;~ 01A2:12C8 */
@@ -8803,8 +8803,8 @@ void ret_1a2_12b7(void) {
 loc_112c0:
     /* mov     si, ax ;~ 01A2:12C0 */
     si = ax;
-    /* mov     ax, cs:seg_10000 ;~ 01A2:12C2 */
-    ax = seg_10000;
+    /* mov     ax, cs:seg_data ;~ 01A2:12C2 */
+    ax = seg_data;
     /* mov     ds, ax ;~ 01A2:12C6 */
     ds = ax;
     /* shl     si, 1 ;~ 01A2:12C8 */
@@ -8875,8 +8875,8 @@ ret_1a2_12a5:
 loc_112c0:
     /* mov     si, ax ;~ 01A2:12C0 */
     si = ax;
-    /* mov     ax, cs:seg_10000 ;~ 01A2:12C2 */
-    ax = seg_10000;
+    /* mov     ax, cs:seg_data ;~ 01A2:12C2 */
+    ax = seg_data;
     /* mov     ds, ax ;~ 01A2:12C6 */
     ds = ax;
     /* shl     si, 1 ;~ 01A2:12C8 */
@@ -8954,21 +8954,21 @@ locret_11309:
 }
 void loc_11326(void) {
     /* rol     word_1D95F, 1 ;~ 01A2:1326 */
-    word_1d95f = rol16(word_1d95f, 1);
+    rand_s0 = rol16(rand_s0, 1);
     /* rol     word_1D961, 1 ;~ 01A2:132A */
-    word_1d961 = rol16(word_1d961, 1);
+    rand_s1 = rol16(rand_s1, 1);
     /* jnb     short loc_1133C ;~ 01A2:132E */
     if (CF) {
         /* xor     word_1D95F, 8787h ;~ 01A2:1330 */
-        word_1d95f ^= 0x8787; CF = 0; OF = 0; ZF = ((dw)(word_1d95f) == 0); SF = (((dw)(word_1d95f)) >> 15);
+        rand_s0 ^= 0x8787; CF = 0; OF = 0; ZF = ((dw)(rand_s0) == 0); SF = (((dw)(rand_s0)) >> 15);
         /* xor     word_1D961, 1D1Dh ;~ 01A2:1336 */
-        word_1d961 ^= 0x1D1D; CF = 0; OF = 0; ZF = ((dw)(word_1d961) == 0); SF = (((dw)(word_1d961)) >> 15);
+        rand_s1 ^= 0x1D1D; CF = 0; OF = 0; ZF = ((dw)(rand_s1) == 0); SF = (((dw)(rand_s1)) >> 15);
     }
 loc_1133c:
     /* mov     ax, word_1D95F ;~ 01A2:133C */
-    ax = word_1d95f;
+    ax = rand_s0;
     /* xor     ax, word_1D961 ;~ 01A2:133F */
-    ax ^= word_1d961; CF = 0; OF = 0; ZF = ((dw)(ax) == 0); SF = (((dw)(ax)) >> 15);
+    ax ^= rand_s1; CF = 0; OF = 0; ZF = ((dw)(ax) == 0); SF = (((dw)(ax)) >> 15);
     /* pop     ds ;~ 01A2:1343 */
     ds = pop();
     /* popf ;~ 01A2:1344 */
@@ -8978,9 +8978,9 @@ loc_1133c:
 }
 void loc_1133c(void) {
     /* mov     ax, word_1D95F ;~ 01A2:133C */
-    ax = word_1d95f;
+    ax = rand_s0;
     /* xor     ax, word_1D961 ;~ 01A2:133F */
-    ax ^= word_1d961; CF = 0; OF = 0; ZF = ((dw)(ax) == 0); SF = (((dw)(ax)) >> 15);
+    ax ^= rand_s1; CF = 0; OF = 0; ZF = ((dw)(ax) == 0); SF = (((dw)(ax)) >> 15);
     /* pop     ds ;~ 01A2:1343 */
     ds = pop();
     /* popf ;~ 01A2:1344 */
@@ -8993,14 +8993,14 @@ void rand_next(void) {
     pushf();
     /* push    ds ;~ 01A2:130B */
     push(ds);
-    /* mov     ax, cs:seg_10000 ;~ 01A2:130C */
-    ax = seg_10000;
+    /* mov     ax, cs:seg_data ;~ 01A2:130C */
+    ax = seg_data;
     /* mov     ds, ax ;~ 01A2:1310 */
     ds = ax;
     /* cmp     word_1D95F, 0 ;~ 01A2:1312 */
-    CF = (dd)word_1d95f < (dd)0; ZF = ((dw)((word_1d95f) - (0)) == 0); SF = (((dw)((word_1d95f) - (0))) >> 15);
+    CF = (dd)rand_s0 < (dd)0; ZF = ((dw)((rand_s0) - (0)) == 0); SF = (((dw)((rand_s0) - (0))) >> 15);
     /* jnz     short loc_11326 ;~ 01A2:1317 */
-    if (word_1d95f == 0) {
+    if (rand_s0 == 0) {
         /* push    cx ;~ 01A2:1319 */
         push(cx);
         /* push    dx ;~ 01A2:131A */
@@ -9016,25 +9016,25 @@ void rand_next(void) {
         /* pop     cx ;~ 01A2:1322 */
         cx = pop();
         /* mov     word_1D95F, ax ;~ 01A2:1323 */
-        word_1d95f = ax;
+        rand_s0 = ax;
     }
 loc_11326:
     /* rol     word_1D95F, 1 ;~ 01A2:1326 */
-    word_1d95f = rol16(word_1d95f, 1);
+    rand_s0 = rol16(rand_s0, 1);
     /* rol     word_1D961, 1 ;~ 01A2:132A */
-    word_1d961 = rol16(word_1d961, 1);
+    rand_s1 = rol16(rand_s1, 1);
     /* jnb     short loc_1133C ;~ 01A2:132E */
     if (CF) {
         /* xor     word_1D95F, 8787h ;~ 01A2:1330 */
-        word_1d95f ^= 0x8787; CF = 0; OF = 0; ZF = ((dw)(word_1d95f) == 0); SF = (((dw)(word_1d95f)) >> 15);
+        rand_s0 ^= 0x8787; CF = 0; OF = 0; ZF = ((dw)(rand_s0) == 0); SF = (((dw)(rand_s0)) >> 15);
         /* xor     word_1D961, 1D1Dh ;~ 01A2:1336 */
-        word_1d961 ^= 0x1D1D; CF = 0; OF = 0; ZF = ((dw)(word_1d961) == 0); SF = (((dw)(word_1d961)) >> 15);
+        rand_s1 ^= 0x1D1D; CF = 0; OF = 0; ZF = ((dw)(rand_s1) == 0); SF = (((dw)(rand_s1)) >> 15);
     }
 loc_1133c:
     /* mov     ax, word_1D95F ;~ 01A2:133C */
-    ax = word_1d95f;
+    ax = rand_s0;
     /* xor     ax, word_1D961 ;~ 01A2:133F */
-    ax ^= word_1d961; CF = 0; OF = 0; ZF = ((dw)(ax) == 0); SF = (((dw)(ax)) >> 15);
+    ax ^= rand_s1; CF = 0; OF = 0; ZF = ((dw)(ax) == 0); SF = (((dw)(ax)) >> 15);
     /* pop     ds ;~ 01A2:1343 */
     ds = pop();
     /* popf ;~ 01A2:1344 */
@@ -9095,8 +9095,8 @@ void video_init_once(void) {
     dd _sa = 0, _sb = 0;
     /* push    es ;~ 01A2:1354 */
     push(es);
-    /* mov     ax, cs:seg_10000 ;~ 01A2:1355 */
-    ax = seg_10000;
+    /* mov     ax, cs:seg_data ;~ 01A2:1355 */
+    ax = seg_data;
     /* mov     ds, ax ;~ 01A2:1359 */
     ds = ax;
     /* cmp     word_1D6D8, 0 ;~ 01A2:135B */
@@ -9386,8 +9386,8 @@ void set_video_mode(void) {
     push(ds);
     /* push    es ;~ 01A2:13CD */
     push(es);
-    /* mov     ax, cs:seg_10000 ;~ 01A2:13CE */
-    ax = seg_10000;
+    /* mov     ax, cs:seg_data ;~ 01A2:13CE */
+    ax = seg_data;
     /* mov     ds, ax ;~ 01A2:13D2 */
     ds = ax;
     /* call    sub_11397 ;~ 01A2:13D4 */
@@ -9398,7 +9398,7 @@ void set_video_mode(void) {
     di = adapter_id;
     /* shl     di, 1           ; switch 5 cases ;~ 01A2:13E1 */
     { if (1) { CF = (((dd)di << (1)) >> 16) & 1; di <<= 1; ZF = ((dw)(di) == 0); SF = (((dw)(di)) >> 15); } }
-    /* jmp     cs:jpt_113E3[di] ; switch jump ;~ 01A2:13E3 */
+    /* jmp     cs:vidmode_jt[di] ; switch jump ;~ 01A2:13E3 */
     { vfn f_ = func_at((dd)0x1a20 + (*(dw*)(((db*)&jpt_113e3)+di))); if (f_) f_(); else fprintf(stderr, "unresolved ind jmp %x\n", (dd)((dd)0x1a20 + (*(dw*)(((db*)&jpt_113e3)+di)))); return; }
 loc_113e8:
     /* mov     ax, 13h         ; jumptable 000113E3 case 3 ;~ 01A2:13E8 */
@@ -9937,8 +9937,8 @@ void seg000_14d6_proc(void) {
     push(ds);
     /* push    ax ;~ 01A2:14D8 */
     push(ax);
-    /* mov     ax, cs:seg_10000 ;~ 01A2:14D9 */
-    ax = seg_10000;
+    /* mov     ax, cs:seg_data ;~ 01A2:14D9 */
+    ax = seg_data;
     /* mov     ds, ax ;~ 01A2:14DD */
     ds = ax;
     /* cmp     word_1D94D, 0 ;~ 01A2:14DF */
@@ -10178,13 +10178,13 @@ loc_115e5:
     /* shl     di, 1 ;~ 01A2:15E5 */
     { if (1) { CF = (((dd)di << (1)) >> 16) & 1; di <<= 1; ZF = ((dw)(di) == 0); SF = (((dw)(di)) >> 15); } }
     /* jmp     cs:funcs_115E7[di] ;~ 01A2:15E7 */
-    { vfn f_ = func_at((dd)0x1a20 + (*(dw*)(((db*)&funcs_115e7)+di))); if (f_) f_(); else fprintf(stderr, "unresolved ind jmp %x\n", (dd)((dd)0x1a20 + (*(dw*)(((db*)&funcs_115e7)+di)))); return; }
+    { vfn f_ = func_at((dd)0x1a20 + (*(dw*)(((db*)&glyph_put_tbl)+di))); if (f_) f_(); else fprintf(stderr, "unresolved ind jmp %x\n", (dd)((dd)0x1a20 + (*(dw*)(((db*)&glyph_put_tbl)+di)))); return; }
 }
 void loc_115e5(void) {
     /* shl     di, 1 ;~ 01A2:15E5 */
     { if (1) { CF = (((dd)di << (1)) >> 16) & 1; di <<= 1; ZF = ((dw)(di) == 0); SF = (((dw)(di)) >> 15); } }
     /* jmp     cs:funcs_115E7[di] ;~ 01A2:15E7 */
-    { vfn f_ = func_at((dd)0x1a20 + (*(dw*)(((db*)&funcs_115e7)+di))); if (f_) f_(); else fprintf(stderr, "unresolved ind jmp %x\n", (dd)((dd)0x1a20 + (*(dw*)(((db*)&funcs_115e7)+di)))); return; }
+    { vfn f_ = func_at((dd)0x1a20 + (*(dw*)(((db*)&glyph_put_tbl)+di))); if (f_) f_(); else fprintf(stderr, "unresolved ind jmp %x\n", (dd)((dd)0x1a20 + (*(dw*)(((db*)&glyph_put_tbl)+di)))); return; }
 }
 void locret_11598(void) {
     /* retn ;~ 01A2:1598 */
@@ -10209,7 +10209,7 @@ loc_115e5:
     /* shl     di, 1 ;~ 01A2:15E5 */
     { if (1) { CF = (((dd)di << (1)) >> 16) & 1; di <<= 1; ZF = ((dw)(di) == 0); SF = (((dw)(di)) >> 15); } }
     /* jmp     cs:funcs_115E7[di] ;~ 01A2:15E7 */
-    { vfn f_ = func_at((dd)0x1a20 + (*(dw*)(((db*)&funcs_115e7)+di))); if (f_) f_(); else fprintf(stderr, "unresolved ind jmp %x\n", (dd)((dd)0x1a20 + (*(dw*)(((db*)&funcs_115e7)+di)))); return; }
+    { vfn f_ = func_at((dd)0x1a20 + (*(dw*)(((db*)&glyph_put_tbl)+di))); if (f_) f_(); else fprintf(stderr, "unresolved ind jmp %x\n", (dd)((dd)0x1a20 + (*(dw*)(((db*)&glyph_put_tbl)+di)))); return; }
 }
 void loc_11612(void) {
     dd _sa = 0, _sb = 0;
@@ -10251,7 +10251,7 @@ loc_11612:
 void scr_cell_mark(void) {
     dd _sa = 0, _sb = 0;
     /* mov     ax, cs:seg_1000E ;~ 01A2:15EC */
-    ax = seg_1000e;
+    ax = seg_screen;
     /* mov     es, ax ;~ 01A2:15F0 */
     es = ax;
     /* mov     bp, 0C600h ;~ 01A2:15F2 */
@@ -10319,12 +10319,12 @@ loc_11612:
 }
 void loc_11654(void) {
     dd _sa = 0, _sb = 0;
-    /* mov     ax, cs:seg_10012 ; jumptable 0001164F case 3 ;~ 01A2:1654 */
-    ax = seg_10012;
+    /* mov     ax, cs:seg_draw ; jumptable 0001164F case 3 ;~ 01A2:1654 */
+    ax = seg_draw;
     /* add     ax, 1000h ;~ 01A2:1658 */
     { dd t_ = (dd)ax + (dd)0x1000; CF = t_ > 0xFFFF; ax = t_; ZF = ((dw)(ax) == 0); SF = (((dw)(ax)) >> 15); }
-    /* mov     cs:seg_10010, ax ;~ 01A2:165B */
-    seg_10010 = ax;
+    /* mov     cs:seg_flip, ax ;~ 01A2:165B */
+    seg_flip = ax;
     /* add     ax, 1000h ;~ 01A2:165F */
     { dd t_ = (dd)ax + (dd)0x1000; CF = t_ > 0xFFFF; ax = t_; ZF = ((dw)(ax) == 0); SF = (((dw)(ax)) >> 15); }
     /* mov     cs:seg_10018, ax ;~ 01A2:1662 */
@@ -10334,7 +10334,7 @@ void loc_11654(void) {
     /* mov     ax, 0A000h ;~ 01A2:1666 */
     ax = 0x0A000;
     /* mov     cs:seg_1000E, ax ;~ 01A2:1669 */
-    seg_1000e = ax;
+    seg_screen = ax;
     /* call    sub_101D9 ;~ 01A2:166D */
     build_tile_tables();
     /* retn ;~ 01A2:1670 */
@@ -10342,10 +10342,10 @@ void loc_11654(void) {
 }
 void loc_11671(void) {
     dd _sa = 0, _sb = 0;
-    /* mov     ax, cs:seg_10014 ; jumptable 0001164F case 4 ;~ 01A2:1671 */
-    ax = seg_10014;
-    /* mov     cs:seg_10010, ax ;~ 01A2:1675 */
-    seg_10010 = ax;
+    /* mov     ax, cs:seg_aux ; jumptable 0001164F case 4 ;~ 01A2:1671 */
+    ax = seg_aux;
+    /* mov     cs:seg_flip, ax ;~ 01A2:1675 */
+    seg_flip = ax;
     /* add     ax, 800h ;~ 01A2:1679 */
     { dd t_ = (dd)ax + (dd)0x800; CF = t_ > 0xFFFF; ax = t_; ZF = ((dw)(ax) == 0); SF = (((dw)(ax)) >> 15); }
     /* mov     cs:seg_10018, ax ;~ 01A2:167C */
@@ -10355,7 +10355,7 @@ void loc_11671(void) {
     /* mov     ax, 0B000h ;~ 01A2:1680 */
     ax = 0x0B000;
     /* mov     cs:seg_1000E, ax ;~ 01A2:1683 */
-    seg_1000e = ax;
+    seg_screen = ax;
     /* call    sub_1020C ;~ 01A2:1687 */
     rowtab_init_herc();
     /* retn ;~ 01A2:168A */
@@ -10363,10 +10363,10 @@ void loc_11671(void) {
 }
 void loc_1168b(void) {
     dd _sa = 0, _sb = 0;
-    /* mov     ax, cs:seg_10014 ; jumptable 0001164F case 0 ;~ 01A2:168B */
-    ax = seg_10014;
-    /* mov     cs:seg_10010, ax ;~ 01A2:168F */
-    seg_10010 = ax;
+    /* mov     ax, cs:seg_aux ; jumptable 0001164F case 0 ;~ 01A2:168B */
+    ax = seg_aux;
+    /* mov     cs:seg_flip, ax ;~ 01A2:168F */
+    seg_flip = ax;
     /* add     ax, 800h ;~ 01A2:1693 */
     { dd t_ = (dd)ax + (dd)0x800; CF = t_ > 0xFFFF; ax = t_; ZF = ((dw)(ax) == 0); SF = (((dw)(ax)) >> 15); }
     /* mov     cs:seg_10018, ax ;~ 01A2:1696 */
@@ -10376,7 +10376,7 @@ void loc_1168b(void) {
     /* mov     ax, 0B800h ;~ 01A2:169A */
     ax = 0x0B800;
     /* mov     cs:seg_1000E, ax ;~ 01A2:169D */
-    seg_1000e = ax;
+    seg_screen = ax;
     /* call    sub_10171 ;~ 01A2:16A1 */
     rowtab_init_cga();
     /* retn ;~ 01A2:16A4 */
@@ -10386,9 +10386,9 @@ void loc_116a5(void) {
     /* mov     ax, 0B800h      ; jumptable 0001164F case 1 ;~ 01A2:16A5 */
     ax = 0x0B800;
     /* mov     cs:seg_1000E, ax ;~ 01A2:16A8 */
-    seg_1000e = ax;
-    /* mov     cs:seg_10010, ax ;~ 01A2:16AC */
-    seg_10010 = ax;
+    seg_screen = ax;
+    /* mov     cs:seg_flip, ax ;~ 01A2:16AC */
+    seg_flip = ax;
     /* mov     ax, cs:seg_10016 ;~ 01A2:16B0 */
     ax = seg_10016;
     /* mov     cs:seg_10018, ax ;~ 01A2:16B4 */
@@ -10401,13 +10401,13 @@ void loc_116a5(void) {
 void loc_116bc(void) {
     /* mov     ax, 0A000h      ; jumptable 0001164F case 2 ;~ 01A2:16BC */
     /* mov     cs:seg_1000E, ax ;~ 01A2:16BF */
-    seg_1000e = 0x0A000;
+    seg_screen = 0x0A000;
     /* mov     ax, 0A400h ;~ 01A2:16C3 */
-    /* mov     cs:seg_10010, ax ;~ 01A2:16C6 */
-    seg_10010 = 0x0A400;
+    /* mov     cs:seg_flip, ax ;~ 01A2:16C6 */
+    seg_flip = 0x0A400;
     /* mov     ax, 0A200h ;~ 01A2:16CA */
-    /* mov     cs:seg_10012, ax ;~ 01A2:16CD */
-    seg_10012 = 0x0A200;
+    /* mov     cs:seg_draw, ax ;~ 01A2:16CD */
+    seg_draw = 0x0A200;
     /* mov     ax, cs:seg_10016 ;~ 01A2:16D1 */
     ax = seg_10016;
     /* mov     cs:seg_10018, ax ;~ 01A2:16D5 */
@@ -10419,8 +10419,8 @@ void loc_116bc(void) {
 }
 void video_bufs_init(void) {
     dd _sa = 0, _sb = 0;
-    /* mov     ax, cs:seg_10000 ;~ 01A2:1643 */
-    ax = seg_10000;
+    /* mov     ax, cs:seg_data ;~ 01A2:1643 */
+    ax = seg_data;
     /* mov     ds, ax ;~ 01A2:1647 */
     ds = ax;
     /* mov     di, word_1D934 ;~ 01A2:1649 */
@@ -10428,14 +10428,14 @@ void video_bufs_init(void) {
     /* shl     di, 1           ; switch 5 cases ;~ 01A2:164D */
     { if (1) { CF = (((dd)di << (1)) >> 16) & 1; di <<= 1; ZF = ((dw)(di) == 0); SF = (((dw)(di)) >> 15); } }
     /* jmp     cs:jpt_1164F[di] ; switch jump ;~ 01A2:164F */
-    { vfn f_ = func_at((dd)0x1a20 + (*(dw*)(((db*)&jpt_1164f)+di))); if (f_) f_(); else fprintf(stderr, "unresolved ind jmp %x\n", (dd)((dd)0x1a20 + (*(dw*)(((db*)&jpt_1164f)+di)))); return; }
+    { vfn f_ = func_at((dd)0x1a20 + (*(dw*)(((db*)&bufsel_jt)+di))); if (f_) f_(); else fprintf(stderr, "unresolved ind jmp %x\n", (dd)((dd)0x1a20 + (*(dw*)(((db*)&bufsel_jt)+di)))); return; }
 loc_11654:
-    /* mov     ax, cs:seg_10012 ; jumptable 0001164F case 3 ;~ 01A2:1654 */
-    ax = seg_10012;
+    /* mov     ax, cs:seg_draw ; jumptable 0001164F case 3 ;~ 01A2:1654 */
+    ax = seg_draw;
     /* add     ax, 1000h ;~ 01A2:1658 */
     { dd t_ = (dd)ax + (dd)0x1000; CF = t_ > 0xFFFF; ax = t_; ZF = ((dw)(ax) == 0); SF = (((dw)(ax)) >> 15); }
-    /* mov     cs:seg_10010, ax ;~ 01A2:165B */
-    seg_10010 = ax;
+    /* mov     cs:seg_flip, ax ;~ 01A2:165B */
+    seg_flip = ax;
     /* add     ax, 1000h ;~ 01A2:165F */
     { dd t_ = (dd)ax + (dd)0x1000; CF = t_ > 0xFFFF; ax = t_; ZF = ((dw)(ax) == 0); SF = (((dw)(ax)) >> 15); }
     /* mov     cs:seg_10018, ax ;~ 01A2:1662 */
@@ -10445,15 +10445,15 @@ loc_11654:
     /* mov     ax, 0A000h ;~ 01A2:1666 */
     ax = 0x0A000;
     /* mov     cs:seg_1000E, ax ;~ 01A2:1669 */
-    seg_1000e = ax;
+    seg_screen = ax;
     /* call    sub_101D9 ;~ 01A2:166D */
     build_tile_tables();
     /* retn ;~ 01A2:1670 */
     return;
 }
 void tile_blit(void) {
-    /* mov     di, cs:seg_10012 ;~ 01A2:16E0 */
-    di = seg_10012;
+    /* mov     di, cs:seg_draw ;~ 01A2:16E0 */
+    di = seg_draw;
     /* mov     bx, 0 ;~ 01A2:16E5 */
     bx = 0;
     /* jmp     short loc_1170B ;~ 01A2:16E8 */
@@ -10467,15 +10467,15 @@ void loc_1170b(void) {
     push(es);
     /* mov     es, di ;~ 01A2:170D */
     es = di;
-    /* mov     di, cs:seg_10000 ;~ 01A2:170F */
+    /* mov     di, cs:seg_data ;~ 01A2:170F */
     /* mov     ds, di ;~ 01A2:1714 */
-    ds = (seg_10000);
+    ds = (seg_data);
     /* mov     di, word_1D934 ;~ 01A2:1716 */
     di = adapter_id;
     /* shl     di, 1           ; switch 5 cases ;~ 01A2:171A */
     { if (1) { CF = (((dd)di << (1)) >> 16) & 1; di <<= 1; ZF = ((dw)(di) == 0); SF = (((dw)(di)) >> 15); } }
     /* jmp     cs:jpt_1171C[di] ; switch jump ;~ 01A2:171C */
-    { vfn f_ = func_at((dd)0x1a20 + (*(dw*)(((db*)&jpt_1171c)+di))); if (f_) f_(); else fprintf(stderr, "unresolved ind jmp %x\n", (dd)((dd)0x1a20 + (*(dw*)(((db*)&jpt_1171c)+di)))); return; }
+    { vfn f_ = func_at((dd)0x1a20 + (*(dw*)(((db*)&tileblit_jt)+di))); if (f_) f_(); else fprintf(stderr, "unresolved ind jmp %x\n", (dd)((dd)0x1a20 + (*(dw*)(((db*)&tileblit_jt)+di)))); return; }
 loc_11721:
     /* call    sub_11782       ; jumptable 0001171C case 0 ;~ 01A2:1721 */
     tile_row_cga();
@@ -10852,7 +10852,7 @@ void loc_1177f(void) {
 void ret_1a2_16f6(void) {
     dd _sa = 0, _sb = 0;
     /* mov     di, cs:seg_1000E ;~ 01A2:16F6 */
-    di = seg_1000e;
+    di = seg_screen;
     /* mov     bx, 1 ;~ 01A2:16FB */
     bx = 1;
     /* jmp     short loc_1170B ;~ 01A2:16FE */
@@ -10864,15 +10864,15 @@ loc_1170b:
     push(es);
     /* mov     es, di ;~ 01A2:170D */
     es = di;
-    /* mov     di, cs:seg_10000 ;~ 01A2:170F */
+    /* mov     di, cs:seg_data ;~ 01A2:170F */
     /* mov     ds, di ;~ 01A2:1714 */
-    ds = (seg_10000);
+    ds = (seg_data);
     /* mov     di, word_1D934 ;~ 01A2:1716 */
     di = adapter_id;
     /* shl     di, 1           ; switch 5 cases ;~ 01A2:171A */
     { if (1) { CF = (((dd)di << (1)) >> 16) & 1; di <<= 1; ZF = ((dw)(di) == 0); SF = (((dw)(di)) >> 15); } }
     /* jmp     cs:jpt_1171C[di] ; switch jump ;~ 01A2:171C */
-    { vfn f_ = func_at((dd)0x1a20 + (*(dw*)(((db*)&jpt_1171c)+di))); if (f_) f_(); else fprintf(stderr, "unresolved ind jmp %x\n", (dd)((dd)0x1a20 + (*(dw*)(((db*)&jpt_1171c)+di)))); return; }
+    { vfn f_ = func_at((dd)0x1a20 + (*(dw*)(((db*)&tileblit_jt)+di))); if (f_) f_(); else fprintf(stderr, "unresolved ind jmp %x\n", (dd)((dd)0x1a20 + (*(dw*)(((db*)&tileblit_jt)+di)))); return; }
 loc_11721:
     /* call    sub_11782       ; jumptable 0001171C case 0 ;~ 01A2:1721 */
     tile_row_cga();
@@ -10911,8 +10911,8 @@ loc_1177f:
 }
 void tile_blit_flipbuf(void) {
     dd _sa = 0, _sb = 0;
-    /* mov     di, cs:seg_10010 ;~ 01A2:16EB */
-    di = seg_10010;
+    /* mov     di, cs:seg_flip ;~ 01A2:16EB */
+    di = seg_flip;
     /* mov     bx, 0 ;~ 01A2:16F0 */
     bx = 0;
     /* jmp     short loc_1170B ;~ 01A2:16F3 */
@@ -10924,15 +10924,15 @@ loc_1170b:
     push(es);
     /* mov     es, di ;~ 01A2:170D */
     es = di;
-    /* mov     di, cs:seg_10000 ;~ 01A2:170F */
+    /* mov     di, cs:seg_data ;~ 01A2:170F */
     /* mov     ds, di ;~ 01A2:1714 */
-    ds = (seg_10000);
+    ds = (seg_data);
     /* mov     di, word_1D934 ;~ 01A2:1716 */
     di = adapter_id;
     /* shl     di, 1           ; switch 5 cases ;~ 01A2:171A */
     { if (1) { CF = (((dd)di << (1)) >> 16) & 1; di <<= 1; ZF = ((dw)(di) == 0); SF = (((dw)(di)) >> 15); } }
     /* jmp     cs:jpt_1171C[di] ; switch jump ;~ 01A2:171C */
-    { vfn f_ = func_at((dd)0x1a20 + (*(dw*)(((db*)&jpt_1171c)+di))); if (f_) f_(); else fprintf(stderr, "unresolved ind jmp %x\n", (dd)((dd)0x1a20 + (*(dw*)(((db*)&jpt_1171c)+di)))); return; }
+    { vfn f_ = func_at((dd)0x1a20 + (*(dw*)(((db*)&tileblit_jt)+di))); if (f_) f_(); else fprintf(stderr, "unresolved ind jmp %x\n", (dd)((dd)0x1a20 + (*(dw*)(((db*)&tileblit_jt)+di)))); return; }
 loc_11721:
     /* call    sub_11782       ; jumptable 0001171C case 0 ;~ 01A2:1721 */
     tile_row_cga();
@@ -11433,8 +11433,8 @@ void loc_11962(void) {
     return;
 }
 void compose_frame_cond(void) {
-    /* mov     ax, cs:seg_10000 ;~ 01A2:1952 */
-    ax = seg_10000;
+    /* mov     ax, cs:seg_data ;~ 01A2:1952 */
+    ax = seg_data;
     /* mov     ds, ax ;~ 01A2:1956 */
     ds = ax;
     /* cmp     word_1D934, 3 ;~ 01A2:1958 */
@@ -11455,22 +11455,22 @@ loc_11962:
     return;
 }
 void loc_11983(void) {
-    /* mov     ax, cs:seg_10010 ;~ 01A2:1983 */
-    ax = seg_10010;
+    /* mov     ax, cs:seg_flip ;~ 01A2:1983 */
+    ax = seg_flip;
     /* mov     es, ax ;~ 01A2:1987 */
     es = ax;
     /* mov     di, word_1D934 ;~ 01A2:1989 */
     di = adapter_id;
     /* mov     al, byte_1D939 ;~ 01A2:198D */
     al = byte_1d939;
-    /* mov     bx, cs:seg_10012 ;~ 01A2:1990 */
-    bx = seg_10012;
+    /* mov     bx, cs:seg_draw ;~ 01A2:1990 */
+    bx = seg_draw;
     /* mov     ds, bx ;~ 01A2:1995 */
     ds = bx;
     /* shl     di, 1           ; switch 5 cases ;~ 01A2:1997 */
     { if (1) { CF = (((dd)di << (1)) >> 16) & 1; di <<= 1; ZF = ((dw)(di) == 0); SF = (((dw)(di)) >> 15); } }
-    /* jmp     cs:jpt_11999[di] ; switch jump ;~ 01A2:1999 */
-    { vfn f_ = func_at((dd)0x1a20 + (*(dw*)(((db*)&jpt_11999)+di))); if (f_) f_(); else fprintf(stderr, "unresolved ind jmp %x\n", (dd)((dd)0x1a20 + (*(dw*)(((db*)&jpt_11999)+di)))); return; }
+    /* jmp     cs:present_jt[di] ; switch jump ;~ 01A2:1999 */
+    { vfn f_ = func_at((dd)0x1a20 + (*(dw*)(((db*)&present_jt)+di))); if (f_) f_(); else fprintf(stderr, "unresolved ind jmp %x\n", (dd)((dd)0x1a20 + (*(dw*)(((db*)&present_jt)+di)))); return; }
 loc_1199e:
     /* mov     di, 0           ; jumptable 00011999 case 0 ;~ 01A2:199E */
     di = 0;
@@ -11480,8 +11480,8 @@ loc_1199e:
     cx = 0x2000;
     /* rep movsw ;~ 01A2:19A7 */
     while (cx--) { *(dw*)raddr_(es,di) = *(dw*)raddr_(ds,si); si += DF?-2:2; di += DF?-2:2; }
-    /* mov     ax, cs:seg_10000 ;~ 01A2:19A9 */
-    ax = seg_10000;
+    /* mov     ax, cs:seg_data ;~ 01A2:19A9 */
+    ax = seg_data;
     /* mov     ds, ax ;~ 01A2:19AD */
     ds = ax;
     /* retn ;~ 01A2:19AF */
@@ -11496,8 +11496,8 @@ void loc_1199e(void) {
     cx = 0x2000;
     /* rep movsw ;~ 01A2:19A7 */
     while (cx--) { *(dw*)raddr_(es,di) = *(dw*)raddr_(ds,si); si += DF?-2:2; di += DF?-2:2; }
-    /* mov     ax, cs:seg_10000 ;~ 01A2:19A9 */
-    ax = seg_10000;
+    /* mov     ax, cs:seg_data ;~ 01A2:19A9 */
+    ax = seg_data;
     /* mov     ds, ax ;~ 01A2:19AD */
     ds = ax;
     /* retn ;~ 01A2:19AF */
@@ -11516,8 +11516,8 @@ void loc_119b0(void) {
     cx = 0x4000;
     /* rep movsw ;~ 01A2:19BD */
     while (cx--) { *(dw*)raddr_(es,di) = *(dw*)raddr_(ds,si); si += DF?-2:2; di += DF?-2:2; }
-    /* mov     ax, cs:seg_10000 ;~ 01A2:19BF */
-    ax = seg_10000;
+    /* mov     ax, cs:seg_data ;~ 01A2:19BF */
+    ax = seg_data;
     /* mov     ds, ax ;~ 01A2:19C3 */
     ds = ax;
     /* retn ;~ 01A2:19C5 */
@@ -11542,9 +11542,9 @@ void loc_119c6(void) {
     cx = 0x2000;
     /* rep movsb ;~ 01A2:19DB */
     while (cx--) { *(db*)raddr_(es,di) = *(db*)raddr_(ds,si); si += DF?-1:1; di += DF?-1:1; }
-    /* mov     ax, cs:seg_10000 ;~ 01A2:19DD */
+    /* mov     ax, cs:seg_data ;~ 01A2:19DD */
     /* mov     ds, ax ;~ 01A2:19E1 */
-    ds = (seg_10000);
+    ds = (seg_data);
     /* mov     ax, 0FF08h ;~ 01A2:19E3 */
     ax = 0x0FF08;
     /* mov     dx, 3CEh ;~ 01A2:19E6 */
@@ -11563,8 +11563,8 @@ void loc_119eb(void) {
     cx = 0x7D00;
     /* rep movsw ;~ 01A2:19F4 */
     while (cx--) { *(dw*)raddr_(es,di) = *(dw*)raddr_(ds,si); si += DF?-2:2; di += DF?-2:2; }
-    /* mov     ax, cs:seg_10000 ;~ 01A2:19F6 */
-    ax = seg_10000;
+    /* mov     ax, cs:seg_data ;~ 01A2:19F6 */
+    ax = seg_data;
     /* mov     ds, ax ;~ 01A2:19FA */
     ds = ax;
     /* retn ;~ 01A2:19FC */
@@ -11579,35 +11579,35 @@ void loc_119fd(void) {
     cx = 0x2000;
     /* rep movsw ;~ 01A2:1A06 */
     while (cx--) { *(dw*)raddr_(es,di) = *(dw*)raddr_(ds,si); si += DF?-2:2; di += DF?-2:2; }
-    /* mov     ax, cs:seg_10000 ;~ 01A2:1A08 */
-    ax = seg_10000;
+    /* mov     ax, cs:seg_data ;~ 01A2:1A08 */
+    ax = seg_data;
     /* mov     ds, ax ;~ 01A2:1A0C */
     ds = ax;
     /* retn ;~ 01A2:1A0E */
     return;
 }
 void compose_frame(void) {
-    /* mov     ax, cs:seg_10000 ;~ 01A2:197D */
-    ax = seg_10000;
+    /* mov     ax, cs:seg_data ;~ 01A2:197D */
+    ax = seg_data;
     /* mov     ds, ax ;~ 01A2:1981 */
     ds = ax;
 loc_11983:
-    /* mov     ax, cs:seg_10010 ;~ 01A2:1983 */
-    ax = seg_10010;
+    /* mov     ax, cs:seg_flip ;~ 01A2:1983 */
+    ax = seg_flip;
     /* mov     es, ax ;~ 01A2:1987 */
     es = ax;
     /* mov     di, word_1D934 ;~ 01A2:1989 */
     di = adapter_id;
     /* mov     al, byte_1D939 ;~ 01A2:198D */
     al = byte_1d939;
-    /* mov     bx, cs:seg_10012 ;~ 01A2:1990 */
-    bx = seg_10012;
+    /* mov     bx, cs:seg_draw ;~ 01A2:1990 */
+    bx = seg_draw;
     /* mov     ds, bx ;~ 01A2:1995 */
     ds = bx;
     /* shl     di, 1           ; switch 5 cases ;~ 01A2:1997 */
     { if (1) { CF = (((dd)di << (1)) >> 16) & 1; di <<= 1; ZF = ((dw)(di) == 0); SF = (((dw)(di)) >> 15); } }
-    /* jmp     cs:jpt_11999[di] ; switch jump ;~ 01A2:1999 */
-    { vfn f_ = func_at((dd)0x1a20 + (*(dw*)(((db*)&jpt_11999)+di))); if (f_) f_(); else fprintf(stderr, "unresolved ind jmp %x\n", (dd)((dd)0x1a20 + (*(dw*)(((db*)&jpt_11999)+di)))); return; }
+    /* jmp     cs:present_jt[di] ; switch jump ;~ 01A2:1999 */
+    { vfn f_ = func_at((dd)0x1a20 + (*(dw*)(((db*)&present_jt)+di))); if (f_) f_(); else fprintf(stderr, "unresolved ind jmp %x\n", (dd)((dd)0x1a20 + (*(dw*)(((db*)&present_jt)+di)))); return; }
 loc_1199e:
     /* mov     di, 0           ; jumptable 00011999 case 0 ;~ 01A2:199E */
     di = 0;
@@ -11617,8 +11617,8 @@ loc_1199e:
     cx = 0x2000;
     /* rep movsw ;~ 01A2:19A7 */
     while (cx--) { *(dw*)raddr_(es,di) = *(dw*)raddr_(ds,si); si += DF?-2:2; di += DF?-2:2; }
-    /* mov     ax, cs:seg_10000 ;~ 01A2:19A9 */
-    ax = seg_10000;
+    /* mov     ax, cs:seg_data ;~ 01A2:19A9 */
+    ax = seg_data;
     /* mov     ds, ax ;~ 01A2:19AD */
     ds = ax;
     /* retn ;~ 01A2:19AF */
@@ -11627,9 +11627,9 @@ loc_1199e:
 void loc_11a2a(void) {
     dd _sa = 0, _sb = 0;
     /* mov     cs:seg_1000E, 0B800h ; jumptable 00011A25 case 1 ;~ 01A2:1A2A */
-    seg_1000e = 0x0B800;
-    /* mov     cs:seg_10010, 0B800h ;~ 01A2:1A31 */
-    seg_10010 = 0x0B800;
+    seg_screen = 0x0B800;
+    /* mov     cs:seg_flip, 0B800h ;~ 01A2:1A31 */
+    seg_flip = 0x0B800;
     /* cmp     word_1D937, 0 ;~ 01A2:1A38 */
     CF = (dd)word_1d937 < (dd)0; ZF = ((dw)((word_1d937) - (0)) == 0); SF = (((dw)((word_1d937) - (0))) >> 15);
     /* jz      short loc_11A5C ;~ 01A2:1A3D */
@@ -11673,8 +11673,8 @@ loc_11a5c:
     /* jmp     loc_11B7A ;~ 01A2:1A76 */
     goto loc_11b7a;
 loc_11b7a:
-    /* mov     ax, cs:seg_10000 ;~ 01A2:1B7A */
-    ax = seg_10000;
+    /* mov     ax, cs:seg_data ;~ 01A2:1B7A */
+    ax = seg_data;
     /* mov     ds, ax ;~ 01A2:1B7E */
     ds = ax;
     /* retn ;~ 01A2:1B80 */
@@ -11699,8 +11699,8 @@ void loc_11a5c(void) {
     /* jmp     loc_11B7A ;~ 01A2:1A76 */
     goto loc_11b7a;
 loc_11b7a:
-    /* mov     ax, cs:seg_10000 ;~ 01A2:1B7A */
-    ax = seg_10000;
+    /* mov     ax, cs:seg_data ;~ 01A2:1B7A */
+    ax = seg_data;
     /* mov     ds, ax ;~ 01A2:1B7E */
     ds = ax;
     /* retn ;~ 01A2:1B80 */
@@ -11711,10 +11711,10 @@ void loc_11a79(void) {
     word_1d937 = 0;
     /* mov     ax, cs:seg_1000E ;~ 01A2:1A7F */
     /* mov     es, ax ;~ 01A2:1A83 */
-    es = (seg_1000e);
-    /* mov     ax, cs:seg_10010 ;~ 01A2:1A85 */
+    es = (seg_screen);
+    /* mov     ax, cs:seg_flip ;~ 01A2:1A85 */
     /* mov     ds, ax ;~ 01A2:1A89 */
-    ds = (seg_10010);
+    ds = (seg_flip);
     /* mov     dx, 0 ;~ 01A2:1A8B */
     dx = 0;
     /* mov     ax, 64h ; 'd' ;~ 01A2:1A8E */
@@ -11748,8 +11748,8 @@ loc_11a91:
     /* jmp     loc_11B7A ;~ 01A2:1AAE */
     goto loc_11b7a;
 loc_11b7a:
-    /* mov     ax, cs:seg_10000 ;~ 01A2:1B7A */
-    ax = seg_10000;
+    /* mov     ax, cs:seg_data ;~ 01A2:1B7A */
+    ax = seg_data;
     /* mov     ds, ax ;~ 01A2:1B7E */
     ds = ax;
     /* retn ;~ 01A2:1B80 */
@@ -11785,8 +11785,8 @@ loc_11a91:
     /* jmp     loc_11B7A ;~ 01A2:1AAE */
     goto loc_11b7a;
 loc_11b7a:
-    /* mov     ax, cs:seg_10000 ;~ 01A2:1B7A */
-    ax = seg_10000;
+    /* mov     ax, cs:seg_data ;~ 01A2:1B7A */
+    ax = seg_data;
     /* mov     ds, ax ;~ 01A2:1B7E */
     ds = ax;
     /* retn ;~ 01A2:1B80 */
@@ -11797,9 +11797,9 @@ void loc_11ab1(void) {
     *(dw*)(raddr(ds,0x0AB7)) = 0;
     /* mov     ax, cs:seg_1000E ;~ 01A2:1AB7 */
     /* mov     es, ax ;~ 01A2:1ABB */
-    es = (seg_1000e);
-    /* mov     ax, cs:seg_10010 ;~ 01A2:1ABD */
-    ax = seg_10010;
+    es = (seg_screen);
+    /* mov     ax, cs:seg_flip ;~ 01A2:1ABD */
+    ax = seg_flip;
     /* mov     ds, ax ;~ 01A2:1AC1 */
     ds = ax;
     /* xor     si, si ;~ 01A2:1AC3 */
@@ -11813,8 +11813,8 @@ void loc_11ab1(void) {
     /* jmp     loc_11B7A ;~ 01A2:1ACC */
     goto loc_11b7a;
 loc_11b7a:
-    /* mov     ax, cs:seg_10000 ;~ 01A2:1B7A */
-    ax = seg_10000;
+    /* mov     ax, cs:seg_data ;~ 01A2:1B7A */
+    ax = seg_data;
     /* mov     ds, ax ;~ 01A2:1B7E */
     ds = ax;
     /* retn ;~ 01A2:1B80 */
@@ -11831,11 +11831,11 @@ void loc_11acf(void) {
         /* mov     word ptr ds:0AB7h, 0 ;~ 01A2:1AD6 */
         *(dw*)(raddr(ds,0x0AB7)) = 0;
         /* mov     cs:seg_1000E, 0A400h ;~ 01A2:1ADC */
-        seg_1000e = 0x0A400;
-        /* mov     cs:seg_10012, 0A200h ;~ 01A2:1AE3 */
-        seg_10012 = 0x0A200;
-        /* mov     cs:seg_10010, 0A000h ;~ 01A2:1AEA */
-        seg_10010 = 0x0A000;
+        seg_screen = 0x0A400;
+        /* mov     cs:seg_draw, 0A200h ;~ 01A2:1AE3 */
+        seg_draw = 0x0A200;
+        /* mov     cs:seg_flip, 0A000h ;~ 01A2:1AEA */
+        seg_flip = 0x0A000;
         /* mov     bx, 4000h ;~ 01A2:1AF1 */
         bx = 0x4000;
         /* jmp     short loc_11B14 ;~ 01A2:1AF4 */
@@ -11845,11 +11845,11 @@ loc_11af6:
     /* mov     word ptr ds:0AB7h, 1 ;~ 01A2:1AF6 */
     *(dw*)(raddr(ds,0x0AB7)) = 1;
     /* mov     cs:seg_1000E, 0A000h ;~ 01A2:1AFC */
-    seg_1000e = 0x0A000;
-    /* mov     cs:seg_10012, 0A200h ;~ 01A2:1B03 */
-    seg_10012 = 0x0A200;
-    /* mov     cs:seg_10010, 0A400h ;~ 01A2:1B0A */
-    seg_10010 = 0x0A400;
+    seg_screen = 0x0A000;
+    /* mov     cs:seg_draw, 0A200h ;~ 01A2:1B03 */
+    seg_draw = 0x0A200;
+    /* mov     cs:seg_flip, 0A400h ;~ 01A2:1B0A */
+    seg_flip = 0x0A400;
     /* mov     bx, 0 ;~ 01A2:1B11 */
     bx = 0;
 loc_11b14:
@@ -11876,8 +11876,8 @@ loc_11b14:
     /* jmp     short loc_11B7A ;~ 01A2:1B26 */
     goto loc_11b7a;
 loc_11b7a:
-    /* mov     ax, cs:seg_10000 ;~ 01A2:1B7A */
-    ax = seg_10000;
+    /* mov     ax, cs:seg_data ;~ 01A2:1B7A */
+    ax = seg_data;
     /* mov     ds, ax ;~ 01A2:1B7E */
     ds = ax;
     /* retn ;~ 01A2:1B80 */
@@ -11887,11 +11887,11 @@ void loc_11af6(void) {
     /* mov     word ptr ds:0AB7h, 1 ;~ 01A2:1AF6 */
     *(dw*)(raddr(ds,0x0AB7)) = 1;
     /* mov     cs:seg_1000E, 0A000h ;~ 01A2:1AFC */
-    seg_1000e = 0x0A000;
-    /* mov     cs:seg_10012, 0A200h ;~ 01A2:1B03 */
-    seg_10012 = 0x0A200;
-    /* mov     cs:seg_10010, 0A400h ;~ 01A2:1B0A */
-    seg_10010 = 0x0A400;
+    seg_screen = 0x0A000;
+    /* mov     cs:seg_draw, 0A200h ;~ 01A2:1B03 */
+    seg_draw = 0x0A200;
+    /* mov     cs:seg_flip, 0A400h ;~ 01A2:1B0A */
+    seg_flip = 0x0A400;
     /* mov     bx, 0 ;~ 01A2:1B11 */
     bx = 0;
 loc_11b14:
@@ -11918,8 +11918,8 @@ loc_11b14:
     /* jmp     short loc_11B7A ;~ 01A2:1B26 */
     goto loc_11b7a;
 loc_11b7a:
-    /* mov     ax, cs:seg_10000 ;~ 01A2:1B7A */
-    ax = seg_10000;
+    /* mov     ax, cs:seg_data ;~ 01A2:1B7A */
+    ax = seg_data;
     /* mov     ds, ax ;~ 01A2:1B7E */
     ds = ax;
     /* retn ;~ 01A2:1B80 */
@@ -11949,8 +11949,8 @@ void loc_11b14(void) {
     /* jmp     short loc_11B7A ;~ 01A2:1B26 */
     goto loc_11b7a;
 loc_11b7a:
-    /* mov     ax, cs:seg_10000 ;~ 01A2:1B7A */
-    ax = seg_10000;
+    /* mov     ax, cs:seg_data ;~ 01A2:1B7A */
+    ax = seg_data;
     /* mov     ds, ax ;~ 01A2:1B7E */
     ds = ax;
     /* retn ;~ 01A2:1B80 */
@@ -11958,12 +11958,12 @@ loc_11b7a:
 }
 void loc_11b29(void) {
     dd _sa = 0, _sb = 0;
-    /* mov     ax, cs:seg_10010 ; jumptable 00011A25 case 4 ;~ 01A2:1B29 */
+    /* mov     ax, cs:seg_flip ; jumptable 00011A25 case 4 ;~ 01A2:1B29 */
     /* mov     ds, ax ;~ 01A2:1B2D */
-    ds = (seg_10010);
+    ds = (seg_flip);
     /* mov     ax, cs:seg_1000E ;~ 01A2:1B2F */
     /* mov     es, ax ;~ 01A2:1B33 */
-    es = (seg_1000e);
+    es = (seg_screen);
     /* mov     ax, 28h ; '(' ;~ 01A2:1B35 */
     ax = 0x28;
     /* mov     dx, 64h ; 'd' ;~ 01A2:1B38 */
@@ -12027,8 +12027,8 @@ loc_11b44:
         /* jnz     short loc_11B44 ;~ 01A2:1B78 */
     } while (dx != 0);
 loc_11b7a:
-    /* mov     ax, cs:seg_10000 ;~ 01A2:1B7A */
-    ax = seg_10000;
+    /* mov     ax, cs:seg_data ;~ 01A2:1B7A */
+    ax = seg_data;
     /* mov     ds, ax ;~ 01A2:1B7E */
     ds = ax;
     /* retn ;~ 01A2:1B80 */
@@ -12089,16 +12089,16 @@ loc_11b44:
         /* jnz     short loc_11B44 ;~ 01A2:1B78 */
     } while (dx != 0);
 loc_11b7a:
-    /* mov     ax, cs:seg_10000 ;~ 01A2:1B7A */
-    ax = seg_10000;
+    /* mov     ax, cs:seg_data ;~ 01A2:1B7A */
+    ax = seg_data;
     /* mov     ds, ax ;~ 01A2:1B7E */
     ds = ax;
     /* retn ;~ 01A2:1B80 */
     return;
 }
 void loc_11b7a(void) {
-    /* mov     ax, cs:seg_10000 ;~ 01A2:1B7A */
-    ax = seg_10000;
+    /* mov     ax, cs:seg_data ;~ 01A2:1B7A */
+    ax = seg_data;
     /* mov     ds, ax ;~ 01A2:1B7E */
     ds = ax;
     /* retn ;~ 01A2:1B80 */
@@ -12106,8 +12106,8 @@ void loc_11b7a(void) {
 }
 void flip_frame(void) {
     dd _sa = 0, _sb = 0;
-    /* mov     ax, cs:seg_10000 ;~ 01A2:1A19 */
-    ax = seg_10000;
+    /* mov     ax, cs:seg_data ;~ 01A2:1A19 */
+    ax = seg_data;
     /* mov     ds, ax ;~ 01A2:1A1D */
     ds = ax;
     /* mov     di, word_1D934 ;~ 01A2:1A1F */
@@ -12115,12 +12115,12 @@ void flip_frame(void) {
     /* shl     di, 1           ; switch 5 cases ;~ 01A2:1A23 */
     { if (1) { CF = (((dd)di << (1)) >> 16) & 1; di <<= 1; ZF = ((dw)(di) == 0); SF = (((dw)(di)) >> 15); } }
     /* jmp     cs:jpt_11A25[di] ; switch jump ;~ 01A2:1A25 */
-    { vfn f_ = func_at((dd)0x1a20 + (*(dw*)(((db*)&jpt_11a25)+di))); if (f_) f_(); else fprintf(stderr, "unresolved ind jmp %x\n", (dd)((dd)0x1a20 + (*(dw*)(((db*)&jpt_11a25)+di)))); return; }
+    { vfn f_ = func_at((dd)0x1a20 + (*(dw*)(((db*)&flip_jt)+di))); if (f_) f_(); else fprintf(stderr, "unresolved ind jmp %x\n", (dd)((dd)0x1a20 + (*(dw*)(((db*)&flip_jt)+di)))); return; }
 loc_11a2a:
     /* mov     cs:seg_1000E, 0B800h ; jumptable 00011A25 case 1 ;~ 01A2:1A2A */
-    seg_1000e = 0x0B800;
-    /* mov     cs:seg_10010, 0B800h ;~ 01A2:1A31 */
-    seg_10010 = 0x0B800;
+    seg_screen = 0x0B800;
+    /* mov     cs:seg_flip, 0B800h ;~ 01A2:1A31 */
+    seg_flip = 0x0B800;
     /* cmp     word_1D937, 0 ;~ 01A2:1A38 */
     CF = (dd)word_1d937 < (dd)0; ZF = ((dw)((word_1d937) - (0)) == 0); SF = (((dw)((word_1d937) - (0))) >> 15);
     /* jz      short loc_11A5C ;~ 01A2:1A3D */
@@ -12164,8 +12164,8 @@ loc_11a5c:
     /* jmp     loc_11B7A ;~ 01A2:1A76 */
     goto loc_11b7a;
 loc_11b7a:
-    /* mov     ax, cs:seg_10000 ;~ 01A2:1B7A */
-    ax = seg_10000;
+    /* mov     ax, cs:seg_data ;~ 01A2:1B7A */
+    ax = seg_data;
     /* mov     ds, ax ;~ 01A2:1B7E */
     ds = ax;
     /* retn ;~ 01A2:1B80 */
@@ -12369,8 +12369,8 @@ void seg000_1b8a_proc(void) {
     set_border_color(); return;
 }
 void set_border_color(void) {
-    /* mov     cx, cs:seg_10000 ;~ 01A2:1BBC */
-    cx = seg_10000;
+    /* mov     cx, cs:seg_data ;~ 01A2:1BBC */
+    cx = seg_data;
     /* mov     ds, cx ;~ 01A2:1BC1 */
     ds = cx;
     /* mov     di, word_1D934 ;~ 01A2:1BC3 */
@@ -12378,7 +12378,7 @@ void set_border_color(void) {
     /* shl     di, 1           ; switch 5 cases ;~ 01A2:1BC7 */
     { if (1) { CF = (((dd)di << (1)) >> 16) & 1; di <<= 1; ZF = ((dw)(di) == 0); SF = (((dw)(di)) >> 15); } }
     /* jmp     cs:jpt_11BC9[di] ; switch jump ;~ 01A2:1BC9 */
-    { vfn f_ = func_at((dd)0x1a20 + (*(dw*)(((db*)&jpt_11bc9)+di))); if (f_) f_(); else fprintf(stderr, "unresolved ind jmp %x\n", (dd)((dd)0x1a20 + (*(dw*)(((db*)&jpt_11bc9)+di)))); return; }
+    { vfn f_ = func_at((dd)0x1a20 + (*(dw*)(((db*)&compose_jt)+di))); if (f_) f_(); else fprintf(stderr, "unresolved ind jmp %x\n", (dd)((dd)0x1a20 + (*(dw*)(((db*)&compose_jt)+di)))); return; }
 loc_11bce:
     /* mov     bx, ax          ; jumptable 00011BC9 case 0 ;~ 01A2:1BCE */
     bx = ax;
@@ -12395,7 +12395,7 @@ void loc_11c4c(void) {
     /* shl     di, 1           ; switch 5 cases ;~ 01A2:1C4C */
     { if (1) { CF = (((dd)di << (1)) >> 16) & 1; di <<= 1; ZF = ((dw)(di) == 0); SF = (((dw)(di)) >> 15); } }
     /* jmp     cs:jpt_11C4E[di] ; switch jump ;~ 01A2:1C4E */
-    { vfn f_ = func_at((dd)0x1a20 + (*(dw*)(((db*)&jpt_11c4e)+di))); if (f_) f_(); else fprintf(stderr, "unresolved ind jmp %x\n", (dd)((dd)0x1a20 + (*(dw*)(((db*)&jpt_11c4e)+di)))); return; }
+    { vfn f_ = func_at((dd)0x1a20 + (*(dw*)(((db*)&compose2_jt)+di))); if (f_) f_(); else fprintf(stderr, "unresolved ind jmp %x\n", (dd)((dd)0x1a20 + (*(dw*)(((db*)&compose2_jt)+di)))); return; }
 loc_11c53:
     /* call    sub_1197D       ; jumptable 00011C4E cases 1,2 ;~ 01A2:1C53 */
     compose_frame();
@@ -12431,8 +12431,8 @@ void loc_11c59(void) {
     return;
 }
 void adapter_compose_flip(void) {
-    /* mov     ax, cs:seg_10000 ;~ 01A2:1C28 */
-    ax = seg_10000;
+    /* mov     ax, cs:seg_data ;~ 01A2:1C28 */
+    ax = seg_data;
     /* mov     ds, ax ;~ 01A2:1C2C */
     ds = ax;
     /* mov     di, word_1D934 ;~ 01A2:1C2E */
@@ -12448,7 +12448,7 @@ loc_11c4c:
     /* shl     di, 1           ; switch 5 cases ;~ 01A2:1C4C */
     { if (1) { CF = (((dd)di << (1)) >> 16) & 1; di <<= 1; ZF = ((dw)(di) == 0); SF = (((dw)(di)) >> 15); } }
     /* jmp     cs:jpt_11C4E[di] ; switch jump ;~ 01A2:1C4E */
-    { vfn f_ = func_at((dd)0x1a20 + (*(dw*)(((db*)&jpt_11c4e)+di))); if (f_) f_(); else fprintf(stderr, "unresolved ind jmp %x\n", (dd)((dd)0x1a20 + (*(dw*)(((db*)&jpt_11c4e)+di)))); return; }
+    { vfn f_ = func_at((dd)0x1a20 + (*(dw*)(((db*)&compose2_jt)+di))); if (f_) f_(); else fprintf(stderr, "unresolved ind jmp %x\n", (dd)((dd)0x1a20 + (*(dw*)(((db*)&compose2_jt)+di)))); return; }
 loc_11c53:
     /* call    sub_1197D       ; jumptable 00011C4E cases 1,2 ;~ 01A2:1C53 */
     compose_frame();
@@ -12463,8 +12463,8 @@ loc_11c59:
     return;
 }
 void compose_flip(void) {
-    /* mov     ax, cs:seg_10000 ;~ 01A2:1C42 */
-    ax = seg_10000;
+    /* mov     ax, cs:seg_data ;~ 01A2:1C42 */
+    ax = seg_data;
     /* mov     ds, ax ;~ 01A2:1C46 */
     ds = ax;
     /* mov     di, word_1D934 ;~ 01A2:1C48 */
@@ -12473,7 +12473,7 @@ loc_11c4c:
     /* shl     di, 1           ; switch 5 cases ;~ 01A2:1C4C */
     { if (1) { CF = (((dd)di << (1)) >> 16) & 1; di <<= 1; ZF = ((dw)(di) == 0); SF = (((dw)(di)) >> 15); } }
     /* jmp     cs:jpt_11C4E[di] ; switch jump ;~ 01A2:1C4E */
-    { vfn f_ = func_at((dd)0x1a20 + (*(dw*)(((db*)&jpt_11c4e)+di))); if (f_) f_(); else fprintf(stderr, "unresolved ind jmp %x\n", (dd)((dd)0x1a20 + (*(dw*)(((db*)&jpt_11c4e)+di)))); return; }
+    { vfn f_ = func_at((dd)0x1a20 + (*(dw*)(((db*)&compose2_jt)+di))); if (f_) f_(); else fprintf(stderr, "unresolved ind jmp %x\n", (dd)((dd)0x1a20 + (*(dw*)(((db*)&compose2_jt)+di)))); return; }
 loc_11c53:
     /* call    sub_1197D       ; jumptable 00011C4E cases 1,2 ;~ 01A2:1C53 */
     compose_frame();
@@ -12489,8 +12489,8 @@ loc_11c59:
 }
 void loc_11c82(void) {
     dd _sa = 0, _sb = 0;
-    /* mov     ax, cs:seg_10012 ;~ 01A2:1C82 */
-    ax = seg_10012;
+    /* mov     ax, cs:seg_draw ;~ 01A2:1C82 */
+    ax = seg_draw;
     /* mov     es, ax ;~ 01A2:1C86 */
     es = ax;
     /* mov     si, word_1D918 ;~ 01A2:1C88 */
@@ -12530,7 +12530,7 @@ loc_11c98:
             /* shl     di, 1 ;~ 01A2:1CB6 */
             { if (1) { CF = (((dd)di << (1)) >> 16) & 1; di <<= 1; ZF = ((dw)(di) == 0); SF = (((dw)(di)) >> 15); } }
             /* call    cs:funcs_11CB8[di] ;~ 01A2:1CB8 */
-            { vfn f_ = func_at((dd)0x1a20 + (*(dw*)(((db*)&funcs_11cb8)+di))); dw sp_ = sp; if (f_) f_(); else fprintf(stderr, "unresolved ind call %x\n", (dd)((dd)0x1a20 + (*(dw*)(((db*)&funcs_11cb8)+di)))); if ((short)(sp - sp_) > 0) { sp = sp_; return; } }
+            { vfn f_ = func_at((dd)0x1a20 + (*(dw*)(((db*)&tilerow_tbl)+di))); dw sp_ = sp; if (f_) f_(); else fprintf(stderr, "unresolved ind call %x\n", (dd)((dd)0x1a20 + (*(dw*)(((db*)&tilerow_tbl)+di)))); if ((short)(sp - sp_) > 0) { sp = sp_; return; } }
             /* pop     si ;~ 01A2:1CBD */
             si = pop();
             /* inc     word_1D8F6 ;~ 01A2:1CBE */
@@ -12585,7 +12585,7 @@ loc_11c98:
             /* shl     di, 1 ;~ 01A2:1CB6 */
             { if (1) { CF = (((dd)di << (1)) >> 16) & 1; di <<= 1; ZF = ((dw)(di) == 0); SF = (((dw)(di)) >> 15); } }
             /* call    cs:funcs_11CB8[di] ;~ 01A2:1CB8 */
-            { vfn f_ = func_at((dd)0x1a20 + (*(dw*)(((db*)&funcs_11cb8)+di))); dw sp_ = sp; if (f_) f_(); else fprintf(stderr, "unresolved ind call %x\n", (dd)((dd)0x1a20 + (*(dw*)(((db*)&funcs_11cb8)+di)))); if ((short)(sp - sp_) > 0) { sp = sp_; return; } }
+            { vfn f_ = func_at((dd)0x1a20 + (*(dw*)(((db*)&tilerow_tbl)+di))); dw sp_ = sp; if (f_) f_(); else fprintf(stderr, "unresolved ind call %x\n", (dd)((dd)0x1a20 + (*(dw*)(((db*)&tilerow_tbl)+di)))); if ((short)(sp - sp_) > 0) { sp = sp_; return; } }
             /* pop     si ;~ 01A2:1CBD */
             si = pop();
             /* inc     word_1D8F6 ;~ 01A2:1CBE */
@@ -12637,7 +12637,7 @@ loc_11c98:
             /* shl     di, 1 ;~ 01A2:1CB6 */
             { if (1) { CF = (((dd)di << (1)) >> 16) & 1; di <<= 1; ZF = ((dw)(di) == 0); SF = (((dw)(di)) >> 15); } }
             /* call    cs:funcs_11CB8[di] ;~ 01A2:1CB8 */
-            { vfn f_ = func_at((dd)0x1a20 + (*(dw*)(((db*)&funcs_11cb8)+di))); dw sp_ = sp; if (f_) f_(); else fprintf(stderr, "unresolved ind call %x\n", (dd)((dd)0x1a20 + (*(dw*)(((db*)&funcs_11cb8)+di)))); if ((short)(sp - sp_) > 0) { sp = sp_; return; } }
+            { vfn f_ = func_at((dd)0x1a20 + (*(dw*)(((db*)&tilerow_tbl)+di))); dw sp_ = sp; if (f_) f_(); else fprintf(stderr, "unresolved ind call %x\n", (dd)((dd)0x1a20 + (*(dw*)(((db*)&tilerow_tbl)+di)))); if ((short)(sp - sp_) > 0) { sp = sp_; return; } }
             /* pop     si ;~ 01A2:1CBD */
             si = pop();
             /* inc     word_1D8F6 ;~ 01A2:1CBE */
@@ -12673,8 +12673,8 @@ void tilemap_compose(void) {
     /* mov     word_1D965, 28h ; '(' ;~ 01A2:1C7C */
     word_1d965 = 0x28;
 loc_11c82:
-    /* mov     ax, cs:seg_10012 ;~ 01A2:1C82 */
-    ax = seg_10012;
+    /* mov     ax, cs:seg_draw ;~ 01A2:1C82 */
+    ax = seg_draw;
     /* mov     es, ax ;~ 01A2:1C86 */
     es = ax;
     /* mov     si, word_1D918 ;~ 01A2:1C88 */
@@ -12714,7 +12714,7 @@ loc_11c98:
             /* shl     di, 1 ;~ 01A2:1CB6 */
             { if (1) { CF = (((dd)di << (1)) >> 16) & 1; di <<= 1; ZF = ((dw)(di) == 0); SF = (((dw)(di)) >> 15); } }
             /* call    cs:funcs_11CB8[di] ;~ 01A2:1CB8 */
-            { vfn f_ = func_at((dd)0x1a20 + (*(dw*)(((db*)&funcs_11cb8)+di))); dw sp_ = sp; if (f_) f_(); else fprintf(stderr, "unresolved ind call %x\n", (dd)((dd)0x1a20 + (*(dw*)(((db*)&funcs_11cb8)+di)))); if ((short)(sp - sp_) > 0) { sp = sp_; return; } }
+            { vfn f_ = func_at((dd)0x1a20 + (*(dw*)(((db*)&tilerow_tbl)+di))); dw sp_ = sp; if (f_) f_(); else fprintf(stderr, "unresolved ind call %x\n", (dd)((dd)0x1a20 + (*(dw*)(((db*)&tilerow_tbl)+di)))); if ((short)(sp - sp_) > 0) { sp = sp_; return; } }
             /* pop     si ;~ 01A2:1CBD */
             si = pop();
             /* inc     word_1D8F6 ;~ 01A2:1CBE */
@@ -12751,11 +12751,11 @@ void seg000_1cd9_proc(void) {
     /* jmp     short loc_11C82 ;~ 01A2:1CF1 */
     loc_11c82(); return;
 sub_11d12:
-    /* mov     di, cs:seg_10000 ;~ 01A2:1D12 */
+    /* mov     di, cs:seg_data ;~ 01A2:1D12 */
     /* mov     ds, di ;~ 01A2:1D17 */
-    ds = (seg_10000);
-    /* mov     di, cs:seg_10012 ;~ 01A2:1D19 */
-    di = seg_10012;
+    ds = (seg_data);
+    /* mov     di, cs:seg_draw ;~ 01A2:1D19 */
+    di = seg_draw;
     /* mov     es, di ;~ 01A2:1D1E */
     es = di;
     /* mov     bx, word_1D902 ;~ 01A2:1D20 */
@@ -12786,16 +12786,16 @@ sub_11d12:
     { if (1) { CF = (((dd)bx << (1)) >> 16) & 1; bx <<= 1; ZF = ((dw)(bx) == 0); SF = (((dw)(bx)) >> 15); } }
     /* mov     dx, word_2AA40 ;~ 01A2:1D44 */
     dx = row_meta;
-    /* mov     cx, cs:seg_10004 ;~ 01A2:1D48 */
-    cx = seg_10004;
+    /* mov     cx, cs:seg_resbuf ;~ 01A2:1D48 */
+    cx = seg_resbuf;
     /* mov     ds, cx ;~ 01A2:1D4D */
     ds = cx;
     /* mov     si, 42h ; 'B' ;~ 01A2:1D4F */
     si = 0x42;
     /* call    cs:funcs_11D52[bx] ;~ 01A2:1D52 */
-    { vfn f_ = func_at((dd)0x1a20 + (*(dw*)(((db*)&funcs_11d52)+bx))); dw sp_ = sp; if (f_) f_(); else fprintf(stderr, "unresolved ind call %x\n", (dd)((dd)0x1a20 + (*(dw*)(((db*)&funcs_11d52)+bx)))); if ((short)(sp - sp_) > 0) { sp = sp_; return; } }
-    /* mov     ax, cs:seg_10000 ;~ 01A2:1D57 */
-    ax = seg_10000;
+    { vfn f_ = func_at((dd)0x1a20 + (*(dw*)(((db*)&sprrow_tbl)+bx))); dw sp_ = sp; if (f_) f_(); else fprintf(stderr, "unresolved ind call %x\n", (dd)((dd)0x1a20 + (*(dw*)(((db*)&sprrow_tbl)+bx)))); if ((short)(sp - sp_) > 0) { sp = sp_; return; } }
+    /* mov     ax, cs:seg_data ;~ 01A2:1D57 */
+    ax = seg_data;
     /* mov     ds, ax ;~ 01A2:1D5B */
     ds = ax;
     /* inc     word_1D900 ;~ 01A2:1D5D */
@@ -12824,11 +12824,11 @@ locret_11d81:
 }
 void draw_tile_compose(void) {
     dd _sa = 0, _sb = 0;
-    /* mov     di, cs:seg_10000 ;~ 01A2:1D12 */
+    /* mov     di, cs:seg_data ;~ 01A2:1D12 */
     /* mov     ds, di ;~ 01A2:1D17 */
-    ds = (seg_10000);
-    /* mov     di, cs:seg_10012 ;~ 01A2:1D19 */
-    di = seg_10012;
+    ds = (seg_data);
+    /* mov     di, cs:seg_draw ;~ 01A2:1D19 */
+    di = seg_draw;
     /* mov     es, di ;~ 01A2:1D1E */
     es = di;
     /* mov     bx, word_1D902 ;~ 01A2:1D20 */
@@ -12859,16 +12859,16 @@ void draw_tile_compose(void) {
     { if (1) { CF = (((dd)bx << (1)) >> 16) & 1; bx <<= 1; ZF = ((dw)(bx) == 0); SF = (((dw)(bx)) >> 15); } }
     /* mov     dx, word_2AA40 ;~ 01A2:1D44 */
     dx = row_meta;
-    /* mov     cx, cs:seg_10004 ;~ 01A2:1D48 */
-    cx = seg_10004;
+    /* mov     cx, cs:seg_resbuf ;~ 01A2:1D48 */
+    cx = seg_resbuf;
     /* mov     ds, cx ;~ 01A2:1D4D */
     ds = cx;
     /* mov     si, 42h ; 'B' ;~ 01A2:1D4F */
     si = 0x42;
     /* call    cs:funcs_11D52[bx] ;~ 01A2:1D52 */
-    { vfn f_ = func_at((dd)0x1a20 + (*(dw*)(((db*)&funcs_11d52)+bx))); dw sp_ = sp; if (f_) f_(); else fprintf(stderr, "unresolved ind call %x\n", (dd)((dd)0x1a20 + (*(dw*)(((db*)&funcs_11d52)+bx)))); if ((short)(sp - sp_) > 0) { sp = sp_; return; } }
-    /* mov     ax, cs:seg_10000 ;~ 01A2:1D57 */
-    ax = seg_10000;
+    { vfn f_ = func_at((dd)0x1a20 + (*(dw*)(((db*)&sprrow_tbl)+bx))); dw sp_ = sp; if (f_) f_(); else fprintf(stderr, "unresolved ind call %x\n", (dd)((dd)0x1a20 + (*(dw*)(((db*)&sprrow_tbl)+bx)))); if ((short)(sp - sp_) > 0) { sp = sp_; return; } }
+    /* mov     ax, cs:seg_data ;~ 01A2:1D57 */
+    ax = seg_data;
     /* mov     ds, ax ;~ 01A2:1D5B */
     ds = ax;
     /* inc     word_1D900 ;~ 01A2:1D5D */
@@ -13233,8 +13233,8 @@ loc_11ec5:
     return;
 }
 void blit_tile_mcga(void) {
-    /* mov     cx, cs:seg_10010 ;~ 01A2:1EB3 */
-    cx = seg_10010;
+    /* mov     cx, cs:seg_flip ;~ 01A2:1EB3 */
+    cx = seg_flip;
     /* mov     es, cx ;~ 01A2:1EB8 */
     es = cx;
     /* mov     cl, 5 ;~ 01A2:1EBA */
@@ -13634,8 +13634,8 @@ loc_1204d:
     return;
 }
 void sprrow_mcga_b(void) {
-    /* mov     cx, cs:seg_10010 ;~ 01A2:203B */
-    cx = seg_10010;
+    /* mov     cx, cs:seg_flip ;~ 01A2:203B */
+    cx = seg_flip;
     /* mov     es, cx ;~ 01A2:2040 */
     es = cx;
     /* mov     cl, 5 ;~ 01A2:2042 */
@@ -14013,8 +14013,8 @@ loc_121b4:
     return;
 }
 void sprrow_mcga_c(void) {
-    /* mov     cx, cs:seg_10010 ;~ 01A2:219F */
-    cx = seg_10010;
+    /* mov     cx, cs:seg_flip ;~ 01A2:219F */
+    cx = seg_flip;
     /* mov     es, cx ;~ 01A2:21A4 */
     es = cx;
     /* mov     cl, 5 ;~ 01A2:21A6 */
@@ -16496,8 +16496,8 @@ loc_12680:
     return;
 }
 void blit_dst_patch(void) {
-    /* mov     ax, cs:seg_10012 ;~ 01A2:26A0 */
-    ax = seg_10012;
+    /* mov     ax, cs:seg_draw ;~ 01A2:26A0 */
+    ax = seg_draw;
     /* mov     cs:word_126DA, ax ;~ 01A2:26A4 */
     word_126da = ax;
     /* mov     cs:word_126DC, ax ;~ 01A2:26A8 */
@@ -16507,8 +16507,8 @@ void blit_dst_patch(void) {
 }
 void loc_126c9(void) {
     dd _sa = 0, _sb = 0;
-    /* mov     ax, cs:seg_10000 ;~ 01A2:26C9 */
-    ax = seg_10000;
+    /* mov     ax, cs:seg_data ;~ 01A2:26C9 */
+    ax = seg_data;
     /* mov     ds, ax ;~ 01A2:26CD */
     ds = ax;
     /* mov     di, word_1D934 ;~ 01A2:26CF */
@@ -16516,7 +16516,7 @@ void loc_126c9(void) {
     /* shl     di, 1           ; switch 5 cases ;~ 01A2:26D3 */
     { if (1) { CF = (((dd)di << (1)) >> 16) & 1; di <<= 1; ZF = ((dw)(di) == 0); SF = (((dw)(di)) >> 15); } }
     /* jmp     cs:jpt_126D5[di] ; switch jump ;~ 01A2:26D5 */
-    { vfn f_ = func_at((dd)0x1a20 + (*(dw*)(((db*)&jpt_126d5)+di))); if (f_) f_(); else fprintf(stderr, "unresolved ind jmp %x\n", (dd)((dd)0x1a20 + (*(dw*)(((db*)&jpt_126d5)+di)))); return; }
+    { vfn f_ = func_at((dd)0x1a20 + (*(dw*)(((db*)&clip_jt)+di))); if (f_) f_(); else fprintf(stderr, "unresolved ind jmp %x\n", (dd)((dd)0x1a20 + (*(dw*)(((db*)&clip_jt)+di)))); return; }
 loc_126de:
     /* mov     word_1DDB9, 1Fh ; jumptable 000126D5 case 1 ;~ 01A2:26DE */
     rectreg_base = 0x1F;
@@ -17010,16 +17010,16 @@ loc_12761:
 }
 void video_bufs_setup(void) {
     dd _sa = 0, _sb = 0;
-    /* mov     ax, cs:seg_10010 ;~ 01A2:26B9 */
+    /* mov     ax, cs:seg_flip ;~ 01A2:26B9 */
     /* mov     cs:word_126DA, ax ;~ 01A2:26BD */
-    word_126da = (seg_10010);
-    /* mov     ax, cs:seg_10012 ;~ 01A2:26C1 */
-    ax = seg_10012;
+    word_126da = (seg_flip);
+    /* mov     ax, cs:seg_draw ;~ 01A2:26C1 */
+    ax = seg_draw;
     /* mov     cs:word_126DC, ax ;~ 01A2:26C5 */
     word_126dc = ax;
 loc_126c9:
-    /* mov     ax, cs:seg_10000 ;~ 01A2:26C9 */
-    ax = seg_10000;
+    /* mov     ax, cs:seg_data ;~ 01A2:26C9 */
+    ax = seg_data;
     /* mov     ds, ax ;~ 01A2:26CD */
     ds = ax;
     /* mov     di, word_1D934 ;~ 01A2:26CF */
@@ -17027,7 +17027,7 @@ loc_126c9:
     /* shl     di, 1           ; switch 5 cases ;~ 01A2:26D3 */
     { if (1) { CF = (((dd)di << (1)) >> 16) & 1; di <<= 1; ZF = ((dw)(di) == 0); SF = (((dw)(di)) >> 15); } }
     /* jmp     cs:jpt_126D5[di] ; switch jump ;~ 01A2:26D5 */
-    { vfn f_ = func_at((dd)0x1a20 + (*(dw*)(((db*)&jpt_126d5)+di))); if (f_) f_(); else fprintf(stderr, "unresolved ind jmp %x\n", (dd)((dd)0x1a20 + (*(dw*)(((db*)&jpt_126d5)+di)))); return; }
+    { vfn f_ = func_at((dd)0x1a20 + (*(dw*)(((db*)&clip_jt)+di))); if (f_) f_(); else fprintf(stderr, "unresolved ind jmp %x\n", (dd)((dd)0x1a20 + (*(dw*)(((db*)&clip_jt)+di)))); return; }
 loc_126de:
     /* mov     word_1DDB9, 1Fh ; jumptable 000126D5 case 1 ;~ 01A2:26DE */
     rectreg_base = 0x1F;
@@ -18885,8 +18885,8 @@ loc_12940:
 }
 void clip_go_tandy(void) {
     dd _sa = 0, _sb = 0;
-    /* mov     ax, cs:seg_10000 ; jumptable 000126D5 case 0 ;~ 01A2:294D */
-    ax = seg_10000;
+    /* mov     ax, cs:seg_data ; jumptable 000126D5 case 0 ;~ 01A2:294D */
+    ax = seg_data;
     /* mov     ds, ax ;~ 01A2:2951 */
     ds = ax;
     /* mov     word_1DDB9, 1Fh ;~ 01A2:2953 */
@@ -29358,8 +29358,8 @@ loc_13185:
         dx = word_1e1c3;
         /* shl     bx, 1 ;~ 01A2:31A3 */
         { if (1) { CF = (((dd)bx << (1)) >> 16) & 1; bx <<= 1; ZF = ((dw)(bx) == 0); SF = (((dw)(bx)) >> 15); } }
-        /* mov     si, cs:seg_10012 ;~ 01A2:31A5 */
-        si = seg_10012;
+        /* mov     si, cs:seg_draw ;~ 01A2:31A5 */
+        si = seg_draw;
         /* mov     es, si ;~ 01A2:31AA */
         es = si;
         /* mov     di, word_1E1C1 ;~ 01A2:31AC */
@@ -29368,8 +29368,8 @@ loc_131b0:
         do {
             /* mov     si, [bx+0BD5h] ;~ 01A2:31B0 */
             si = *(dw*)raddr(ds,bx+0x0BD5);
-            /* mov     ds, cs:seg_10010 ;~ 01A2:31B4 */
-            ds = seg_10010;
+            /* mov     ds, cs:seg_flip ;~ 01A2:31B4 */
+            ds = seg_flip;
             /* add     si, ax ;~ 01A2:31B9 */
             { dd t_ = (dd)si + (dd)ax; CF = t_ > 0xFFFF; si = t_; ZF = ((dw)(si) == 0); SF = (((dw)(si)) >> 15); }
             /* mov     cx, dx ;~ 01A2:31BB */
@@ -29382,14 +29382,14 @@ loc_131b0:
             { dd t_ = (dd)bx + (dd)2; CF = t_ > 0xFFFF; bx = t_; ZF = ((dw)(bx) == 0); SF = (((dw)(bx)) >> 15); }
             /* and     bx, 1FFh ;~ 01A2:31C2 */
             bx &= 0x1FF; CF = 0; OF = 0; ZF = ((dw)(bx) == 0); SF = (((dw)(bx)) >> 15);
-            /* mov     ds, cs:seg_10000 ;~ 01A2:31C6 */
-            ds = seg_10000;
+            /* mov     ds, cs:seg_data ;~ 01A2:31C6 */
+            ds = seg_data;
             /* dec     byte_1E1C5 ;~ 01A2:31CB */
             (byte_1e1c5)--; ZF = ((db)(byte_1e1c5) == 0); SF = (((db)(byte_1e1c5)) >> 7);
             /* jnz     short loc_131B0 ;~ 01A2:31CF */
         } while (byte_1e1c5 != 0);
-        /* mov     ax, cs:seg_10010 ;~ 01A2:31D1 */
-        ax = seg_10010;
+        /* mov     ax, cs:seg_flip ;~ 01A2:31D1 */
+        ax = seg_flip;
         /* mov     cs:word_126DA, ax ;~ 01A2:31D5 */
         word_126da = ax;
     }
@@ -29602,8 +29602,8 @@ loc_13185:
         dx = word_1e1c3;
         /* shl     bx, 1 ;~ 01A2:31A3 */
         { if (1) { CF = (((dd)bx << (1)) >> 16) & 1; bx <<= 1; ZF = ((dw)(bx) == 0); SF = (((dw)(bx)) >> 15); } }
-        /* mov     si, cs:seg_10012 ;~ 01A2:31A5 */
-        si = seg_10012;
+        /* mov     si, cs:seg_draw ;~ 01A2:31A5 */
+        si = seg_draw;
         /* mov     es, si ;~ 01A2:31AA */
         es = si;
         /* mov     di, word_1E1C1 ;~ 01A2:31AC */
@@ -29612,8 +29612,8 @@ loc_131b0:
         do {
             /* mov     si, [bx+0BD5h] ;~ 01A2:31B0 */
             si = *(dw*)raddr(ds,bx+0x0BD5);
-            /* mov     ds, cs:seg_10010 ;~ 01A2:31B4 */
-            ds = seg_10010;
+            /* mov     ds, cs:seg_flip ;~ 01A2:31B4 */
+            ds = seg_flip;
             /* add     si, ax ;~ 01A2:31B9 */
             { dd t_ = (dd)si + (dd)ax; CF = t_ > 0xFFFF; si = t_; ZF = ((dw)(si) == 0); SF = (((dw)(si)) >> 15); }
             /* mov     cx, dx ;~ 01A2:31BB */
@@ -29626,14 +29626,14 @@ loc_131b0:
             { dd t_ = (dd)bx + (dd)2; CF = t_ > 0xFFFF; bx = t_; ZF = ((dw)(bx) == 0); SF = (((dw)(bx)) >> 15); }
             /* and     bx, 1FFh ;~ 01A2:31C2 */
             bx &= 0x1FF; CF = 0; OF = 0; ZF = ((dw)(bx) == 0); SF = (((dw)(bx)) >> 15);
-            /* mov     ds, cs:seg_10000 ;~ 01A2:31C6 */
-            ds = seg_10000;
+            /* mov     ds, cs:seg_data ;~ 01A2:31C6 */
+            ds = seg_data;
             /* dec     byte_1E1C5 ;~ 01A2:31CB */
             (byte_1e1c5)--; ZF = ((db)(byte_1e1c5) == 0); SF = (((db)(byte_1e1c5)) >> 7);
             /* jnz     short loc_131B0 ;~ 01A2:31CF */
         } while (byte_1e1c5 != 0);
-        /* mov     ax, cs:seg_10010 ;~ 01A2:31D1 */
-        ax = seg_10010;
+        /* mov     ax, cs:seg_flip ;~ 01A2:31D1 */
+        ax = seg_flip;
         /* mov     cs:word_126DA, ax ;~ 01A2:31D5 */
         word_126da = ax;
     }
@@ -29839,8 +29839,8 @@ loc_13185:
         dx = word_1e1c3;
         /* shl     bx, 1 ;~ 01A2:31A3 */
         { if (1) { CF = (((dd)bx << (1)) >> 16) & 1; bx <<= 1; ZF = ((dw)(bx) == 0); SF = (((dw)(bx)) >> 15); } }
-        /* mov     si, cs:seg_10012 ;~ 01A2:31A5 */
-        si = seg_10012;
+        /* mov     si, cs:seg_draw ;~ 01A2:31A5 */
+        si = seg_draw;
         /* mov     es, si ;~ 01A2:31AA */
         es = si;
         /* mov     di, word_1E1C1 ;~ 01A2:31AC */
@@ -29849,8 +29849,8 @@ loc_131b0:
         do {
             /* mov     si, [bx+0BD5h] ;~ 01A2:31B0 */
             si = *(dw*)raddr(ds,bx+0x0BD5);
-            /* mov     ds, cs:seg_10010 ;~ 01A2:31B4 */
-            ds = seg_10010;
+            /* mov     ds, cs:seg_flip ;~ 01A2:31B4 */
+            ds = seg_flip;
             /* add     si, ax ;~ 01A2:31B9 */
             { dd t_ = (dd)si + (dd)ax; CF = t_ > 0xFFFF; si = t_; ZF = ((dw)(si) == 0); SF = (((dw)(si)) >> 15); }
             /* mov     cx, dx ;~ 01A2:31BB */
@@ -29863,14 +29863,14 @@ loc_131b0:
             { dd t_ = (dd)bx + (dd)2; CF = t_ > 0xFFFF; bx = t_; ZF = ((dw)(bx) == 0); SF = (((dw)(bx)) >> 15); }
             /* and     bx, 1FFh ;~ 01A2:31C2 */
             bx &= 0x1FF; CF = 0; OF = 0; ZF = ((dw)(bx) == 0); SF = (((dw)(bx)) >> 15);
-            /* mov     ds, cs:seg_10000 ;~ 01A2:31C6 */
-            ds = seg_10000;
+            /* mov     ds, cs:seg_data ;~ 01A2:31C6 */
+            ds = seg_data;
             /* dec     byte_1E1C5 ;~ 01A2:31CB */
             (byte_1e1c5)--; ZF = ((db)(byte_1e1c5) == 0); SF = (((db)(byte_1e1c5)) >> 7);
             /* jnz     short loc_131B0 ;~ 01A2:31CF */
         } while (byte_1e1c5 != 0);
-        /* mov     ax, cs:seg_10010 ;~ 01A2:31D1 */
-        ax = seg_10010;
+        /* mov     ax, cs:seg_flip ;~ 01A2:31D1 */
+        ax = seg_flip;
         /* mov     cs:word_126DA, ax ;~ 01A2:31D5 */
         word_126da = ax;
     }
@@ -30054,8 +30054,8 @@ loc_13185:
         dx = word_1e1c3;
         /* shl     bx, 1 ;~ 01A2:31A3 */
         { if (1) { CF = (((dd)bx << (1)) >> 16) & 1; bx <<= 1; ZF = ((dw)(bx) == 0); SF = (((dw)(bx)) >> 15); } }
-        /* mov     si, cs:seg_10012 ;~ 01A2:31A5 */
-        si = seg_10012;
+        /* mov     si, cs:seg_draw ;~ 01A2:31A5 */
+        si = seg_draw;
         /* mov     es, si ;~ 01A2:31AA */
         es = si;
         /* mov     di, word_1E1C1 ;~ 01A2:31AC */
@@ -30064,8 +30064,8 @@ loc_131b0:
         do {
             /* mov     si, [bx+0BD5h] ;~ 01A2:31B0 */
             si = *(dw*)raddr(ds,bx+0x0BD5);
-            /* mov     ds, cs:seg_10010 ;~ 01A2:31B4 */
-            ds = seg_10010;
+            /* mov     ds, cs:seg_flip ;~ 01A2:31B4 */
+            ds = seg_flip;
             /* add     si, ax ;~ 01A2:31B9 */
             { dd t_ = (dd)si + (dd)ax; CF = t_ > 0xFFFF; si = t_; ZF = ((dw)(si) == 0); SF = (((dw)(si)) >> 15); }
             /* mov     cx, dx ;~ 01A2:31BB */
@@ -30078,14 +30078,14 @@ loc_131b0:
             { dd t_ = (dd)bx + (dd)2; CF = t_ > 0xFFFF; bx = t_; ZF = ((dw)(bx) == 0); SF = (((dw)(bx)) >> 15); }
             /* and     bx, 1FFh ;~ 01A2:31C2 */
             bx &= 0x1FF; CF = 0; OF = 0; ZF = ((dw)(bx) == 0); SF = (((dw)(bx)) >> 15);
-            /* mov     ds, cs:seg_10000 ;~ 01A2:31C6 */
-            ds = seg_10000;
+            /* mov     ds, cs:seg_data ;~ 01A2:31C6 */
+            ds = seg_data;
             /* dec     byte_1E1C5 ;~ 01A2:31CB */
             (byte_1e1c5)--; ZF = ((db)(byte_1e1c5) == 0); SF = (((db)(byte_1e1c5)) >> 7);
             /* jnz     short loc_131B0 ;~ 01A2:31CF */
         } while (byte_1e1c5 != 0);
-        /* mov     ax, cs:seg_10010 ;~ 01A2:31D1 */
-        ax = seg_10010;
+        /* mov     ax, cs:seg_flip ;~ 01A2:31D1 */
+        ax = seg_flip;
         /* mov     cs:word_126DA, ax ;~ 01A2:31D5 */
         word_126da = ax;
     }
@@ -30202,8 +30202,8 @@ void loc_13185(void) {
         dx = word_1e1c3;
         /* shl     bx, 1 ;~ 01A2:31A3 */
         { if (1) { CF = (((dd)bx << (1)) >> 16) & 1; bx <<= 1; ZF = ((dw)(bx) == 0); SF = (((dw)(bx)) >> 15); } }
-        /* mov     si, cs:seg_10012 ;~ 01A2:31A5 */
-        si = seg_10012;
+        /* mov     si, cs:seg_draw ;~ 01A2:31A5 */
+        si = seg_draw;
         /* mov     es, si ;~ 01A2:31AA */
         es = si;
         /* mov     di, word_1E1C1 ;~ 01A2:31AC */
@@ -30212,8 +30212,8 @@ loc_131b0:
         do {
             /* mov     si, [bx+0BD5h] ;~ 01A2:31B0 */
             si = *(dw*)raddr(ds,bx+0x0BD5);
-            /* mov     ds, cs:seg_10010 ;~ 01A2:31B4 */
-            ds = seg_10010;
+            /* mov     ds, cs:seg_flip ;~ 01A2:31B4 */
+            ds = seg_flip;
             /* add     si, ax ;~ 01A2:31B9 */
             { dd t_ = (dd)si + (dd)ax; CF = t_ > 0xFFFF; si = t_; ZF = ((dw)(si) == 0); SF = (((dw)(si)) >> 15); }
             /* mov     cx, dx ;~ 01A2:31BB */
@@ -30226,14 +30226,14 @@ loc_131b0:
             { dd t_ = (dd)bx + (dd)2; CF = t_ > 0xFFFF; bx = t_; ZF = ((dw)(bx) == 0); SF = (((dw)(bx)) >> 15); }
             /* and     bx, 1FFh ;~ 01A2:31C2 */
             bx &= 0x1FF; CF = 0; OF = 0; ZF = ((dw)(bx) == 0); SF = (((dw)(bx)) >> 15);
-            /* mov     ds, cs:seg_10000 ;~ 01A2:31C6 */
-            ds = seg_10000;
+            /* mov     ds, cs:seg_data ;~ 01A2:31C6 */
+            ds = seg_data;
             /* dec     byte_1E1C5 ;~ 01A2:31CB */
             (byte_1e1c5)--; ZF = ((db)(byte_1e1c5) == 0); SF = (((db)(byte_1e1c5)) >> 7);
             /* jnz     short loc_131B0 ;~ 01A2:31CF */
         } while (byte_1e1c5 != 0);
-        /* mov     ax, cs:seg_10010 ;~ 01A2:31D1 */
-        ax = seg_10010;
+        /* mov     ax, cs:seg_flip ;~ 01A2:31D1 */
+        ax = seg_flip;
         /* mov     cs:word_126DA, ax ;~ 01A2:31D5 */
         word_126da = ax;
     }
@@ -30336,8 +30336,8 @@ loc_131b0:
     do {
         /* mov     si, [bx+0BD5h] ;~ 01A2:31B0 */
         si = *(dw*)raddr(ds,bx+0x0BD5);
-        /* mov     ds, cs:seg_10010 ;~ 01A2:31B4 */
-        ds = seg_10010;
+        /* mov     ds, cs:seg_flip ;~ 01A2:31B4 */
+        ds = seg_flip;
         /* add     si, ax ;~ 01A2:31B9 */
         { dd t_ = (dd)si + (dd)ax; CF = t_ > 0xFFFF; si = t_; ZF = ((dw)(si) == 0); SF = (((dw)(si)) >> 15); }
         /* mov     cx, dx ;~ 01A2:31BB */
@@ -30350,14 +30350,14 @@ loc_131b0:
         { dd t_ = (dd)bx + (dd)2; CF = t_ > 0xFFFF; bx = t_; ZF = ((dw)(bx) == 0); SF = (((dw)(bx)) >> 15); }
         /* and     bx, 1FFh ;~ 01A2:31C2 */
         bx &= 0x1FF; CF = 0; OF = 0; ZF = ((dw)(bx) == 0); SF = (((dw)(bx)) >> 15);
-        /* mov     ds, cs:seg_10000 ;~ 01A2:31C6 */
-        ds = seg_10000;
+        /* mov     ds, cs:seg_data ;~ 01A2:31C6 */
+        ds = seg_data;
         /* dec     byte_1E1C5 ;~ 01A2:31CB */
         (byte_1e1c5)--; ZF = ((db)(byte_1e1c5) == 0); SF = (((db)(byte_1e1c5)) >> 7);
         /* jnz     short loc_131B0 ;~ 01A2:31CF */
     } while (byte_1e1c5 != 0);
-    /* mov     ax, cs:seg_10010 ;~ 01A2:31D1 */
-    ax = seg_10010;
+    /* mov     ax, cs:seg_flip ;~ 01A2:31D1 */
+    ax = seg_flip;
     /* mov     cs:word_126DA, ax ;~ 01A2:31D5 */
     word_126da = ax;
 loc_131d9:
@@ -31144,8 +31144,8 @@ loc_13185:
         dx = word_1e1c3;
         /* shl     bx, 1 ;~ 01A2:31A3 */
         { if (1) { CF = (((dd)bx << (1)) >> 16) & 1; bx <<= 1; ZF = ((dw)(bx) == 0); SF = (((dw)(bx)) >> 15); } }
-        /* mov     si, cs:seg_10012 ;~ 01A2:31A5 */
-        si = seg_10012;
+        /* mov     si, cs:seg_draw ;~ 01A2:31A5 */
+        si = seg_draw;
         /* mov     es, si ;~ 01A2:31AA */
         es = si;
         /* mov     di, word_1E1C1 ;~ 01A2:31AC */
@@ -31154,8 +31154,8 @@ loc_131b0:
         do {
             /* mov     si, [bx+0BD5h] ;~ 01A2:31B0 */
             si = *(dw*)raddr(ds,bx+0x0BD5);
-            /* mov     ds, cs:seg_10010 ;~ 01A2:31B4 */
-            ds = seg_10010;
+            /* mov     ds, cs:seg_flip ;~ 01A2:31B4 */
+            ds = seg_flip;
             /* add     si, ax ;~ 01A2:31B9 */
             { dd t_ = (dd)si + (dd)ax; CF = t_ > 0xFFFF; si = t_; ZF = ((dw)(si) == 0); SF = (((dw)(si)) >> 15); }
             /* mov     cx, dx ;~ 01A2:31BB */
@@ -31168,14 +31168,14 @@ loc_131b0:
             { dd t_ = (dd)bx + (dd)2; CF = t_ > 0xFFFF; bx = t_; ZF = ((dw)(bx) == 0); SF = (((dw)(bx)) >> 15); }
             /* and     bx, 1FFh ;~ 01A2:31C2 */
             bx &= 0x1FF; CF = 0; OF = 0; ZF = ((dw)(bx) == 0); SF = (((dw)(bx)) >> 15);
-            /* mov     ds, cs:seg_10000 ;~ 01A2:31C6 */
-            ds = seg_10000;
+            /* mov     ds, cs:seg_data ;~ 01A2:31C6 */
+            ds = seg_data;
             /* dec     byte_1E1C5 ;~ 01A2:31CB */
             (byte_1e1c5)--; ZF = ((db)(byte_1e1c5) == 0); SF = (((db)(byte_1e1c5)) >> 7);
             /* jnz     short loc_131B0 ;~ 01A2:31CF */
         } while (byte_1e1c5 != 0);
-        /* mov     ax, cs:seg_10010 ;~ 01A2:31D1 */
-        ax = seg_10010;
+        /* mov     ax, cs:seg_flip ;~ 01A2:31D1 */
+        ax = seg_flip;
         /* mov     cs:word_126DA, ax ;~ 01A2:31D5 */
         word_126da = ax;
     }
@@ -31398,8 +31398,8 @@ loc_1330d:
         dx = word_1e1c3;
         /* shl     bx, 1 ;~ 01A2:332B */
         { if (1) { CF = (((dd)bx << (1)) >> 16) & 1; bx <<= 1; ZF = ((dw)(bx) == 0); SF = (((dw)(bx)) >> 15); } }
-        /* mov     si, cs:seg_10012 ;~ 01A2:332D */
-        si = seg_10012;
+        /* mov     si, cs:seg_draw ;~ 01A2:332D */
+        si = seg_draw;
         /* mov     es, si ;~ 01A2:3332 */
         es = si;
         /* mov     di, word_1E1C1 ;~ 01A2:3334 */
@@ -31408,8 +31408,8 @@ loc_13338:
         do {
             /* mov     si, [bx+0BD5h] ;~ 01A2:3338 */
             si = *(dw*)raddr(ds,bx+0x0BD5);
-            /* mov     ds, cs:seg_10010 ;~ 01A2:333C */
-            ds = seg_10010;
+            /* mov     ds, cs:seg_flip ;~ 01A2:333C */
+            ds = seg_flip;
             /* add     si, ax ;~ 01A2:3341 */
             { dd t_ = (dd)si + (dd)ax; CF = t_ > 0xFFFF; si = t_; ZF = ((dw)(si) == 0); SF = (((dw)(si)) >> 15); }
             /* mov     cx, dx ;~ 01A2:3343 */
@@ -31422,14 +31422,14 @@ loc_13338:
             { dd t_ = (dd)bx + (dd)2; CF = t_ > 0xFFFF; bx = t_; ZF = ((dw)(bx) == 0); SF = (((dw)(bx)) >> 15); }
             /* and     bx, 1FFh ;~ 01A2:334A */
             bx &= 0x1FF; CF = 0; OF = 0; ZF = ((dw)(bx) == 0); SF = (((dw)(bx)) >> 15);
-            /* mov     ds, cs:seg_10000 ;~ 01A2:334E */
-            ds = seg_10000;
+            /* mov     ds, cs:seg_data ;~ 01A2:334E */
+            ds = seg_data;
             /* dec     byte_1E1C5 ;~ 01A2:3353 */
             (byte_1e1c5)--; ZF = ((db)(byte_1e1c5) == 0); SF = (((db)(byte_1e1c5)) >> 7);
             /* jnz     short loc_13338 ;~ 01A2:3357 */
         } while (byte_1e1c5 != 0);
-        /* mov     ax, cs:seg_10010 ;~ 01A2:3359 */
-        ax = seg_10010;
+        /* mov     ax, cs:seg_flip ;~ 01A2:3359 */
+        ax = seg_flip;
         /* mov     cs:word_126DA, ax ;~ 01A2:335D */
         word_126da = ax;
     }
@@ -31656,8 +31656,8 @@ loc_1330d:
         dx = word_1e1c3;
         /* shl     bx, 1 ;~ 01A2:332B */
         { if (1) { CF = (((dd)bx << (1)) >> 16) & 1; bx <<= 1; ZF = ((dw)(bx) == 0); SF = (((dw)(bx)) >> 15); } }
-        /* mov     si, cs:seg_10012 ;~ 01A2:332D */
-        si = seg_10012;
+        /* mov     si, cs:seg_draw ;~ 01A2:332D */
+        si = seg_draw;
         /* mov     es, si ;~ 01A2:3332 */
         es = si;
         /* mov     di, word_1E1C1 ;~ 01A2:3334 */
@@ -31666,8 +31666,8 @@ loc_13338:
         do {
             /* mov     si, [bx+0BD5h] ;~ 01A2:3338 */
             si = *(dw*)raddr(ds,bx+0x0BD5);
-            /* mov     ds, cs:seg_10010 ;~ 01A2:333C */
-            ds = seg_10010;
+            /* mov     ds, cs:seg_flip ;~ 01A2:333C */
+            ds = seg_flip;
             /* add     si, ax ;~ 01A2:3341 */
             { dd t_ = (dd)si + (dd)ax; CF = t_ > 0xFFFF; si = t_; ZF = ((dw)(si) == 0); SF = (((dw)(si)) >> 15); }
             /* mov     cx, dx ;~ 01A2:3343 */
@@ -31680,14 +31680,14 @@ loc_13338:
             { dd t_ = (dd)bx + (dd)2; CF = t_ > 0xFFFF; bx = t_; ZF = ((dw)(bx) == 0); SF = (((dw)(bx)) >> 15); }
             /* and     bx, 1FFh ;~ 01A2:334A */
             bx &= 0x1FF; CF = 0; OF = 0; ZF = ((dw)(bx) == 0); SF = (((dw)(bx)) >> 15);
-            /* mov     ds, cs:seg_10000 ;~ 01A2:334E */
-            ds = seg_10000;
+            /* mov     ds, cs:seg_data ;~ 01A2:334E */
+            ds = seg_data;
             /* dec     byte_1E1C5 ;~ 01A2:3353 */
             (byte_1e1c5)--; ZF = ((db)(byte_1e1c5) == 0); SF = (((db)(byte_1e1c5)) >> 7);
             /* jnz     short loc_13338 ;~ 01A2:3357 */
         } while (byte_1e1c5 != 0);
-        /* mov     ax, cs:seg_10010 ;~ 01A2:3359 */
-        ax = seg_10010;
+        /* mov     ax, cs:seg_flip ;~ 01A2:3359 */
+        ax = seg_flip;
         /* mov     cs:word_126DA, ax ;~ 01A2:335D */
         word_126da = ax;
     }
@@ -31907,8 +31907,8 @@ loc_1330d:
         dx = word_1e1c3;
         /* shl     bx, 1 ;~ 01A2:332B */
         { if (1) { CF = (((dd)bx << (1)) >> 16) & 1; bx <<= 1; ZF = ((dw)(bx) == 0); SF = (((dw)(bx)) >> 15); } }
-        /* mov     si, cs:seg_10012 ;~ 01A2:332D */
-        si = seg_10012;
+        /* mov     si, cs:seg_draw ;~ 01A2:332D */
+        si = seg_draw;
         /* mov     es, si ;~ 01A2:3332 */
         es = si;
         /* mov     di, word_1E1C1 ;~ 01A2:3334 */
@@ -31917,8 +31917,8 @@ loc_13338:
         do {
             /* mov     si, [bx+0BD5h] ;~ 01A2:3338 */
             si = *(dw*)raddr(ds,bx+0x0BD5);
-            /* mov     ds, cs:seg_10010 ;~ 01A2:333C */
-            ds = seg_10010;
+            /* mov     ds, cs:seg_flip ;~ 01A2:333C */
+            ds = seg_flip;
             /* add     si, ax ;~ 01A2:3341 */
             { dd t_ = (dd)si + (dd)ax; CF = t_ > 0xFFFF; si = t_; ZF = ((dw)(si) == 0); SF = (((dw)(si)) >> 15); }
             /* mov     cx, dx ;~ 01A2:3343 */
@@ -31931,14 +31931,14 @@ loc_13338:
             { dd t_ = (dd)bx + (dd)2; CF = t_ > 0xFFFF; bx = t_; ZF = ((dw)(bx) == 0); SF = (((dw)(bx)) >> 15); }
             /* and     bx, 1FFh ;~ 01A2:334A */
             bx &= 0x1FF; CF = 0; OF = 0; ZF = ((dw)(bx) == 0); SF = (((dw)(bx)) >> 15);
-            /* mov     ds, cs:seg_10000 ;~ 01A2:334E */
-            ds = seg_10000;
+            /* mov     ds, cs:seg_data ;~ 01A2:334E */
+            ds = seg_data;
             /* dec     byte_1E1C5 ;~ 01A2:3353 */
             (byte_1e1c5)--; ZF = ((db)(byte_1e1c5) == 0); SF = (((db)(byte_1e1c5)) >> 7);
             /* jnz     short loc_13338 ;~ 01A2:3357 */
         } while (byte_1e1c5 != 0);
-        /* mov     ax, cs:seg_10010 ;~ 01A2:3359 */
-        ax = seg_10010;
+        /* mov     ax, cs:seg_flip ;~ 01A2:3359 */
+        ax = seg_flip;
         /* mov     cs:word_126DA, ax ;~ 01A2:335D */
         word_126da = ax;
     }
@@ -32136,8 +32136,8 @@ loc_1330d:
         dx = word_1e1c3;
         /* shl     bx, 1 ;~ 01A2:332B */
         { if (1) { CF = (((dd)bx << (1)) >> 16) & 1; bx <<= 1; ZF = ((dw)(bx) == 0); SF = (((dw)(bx)) >> 15); } }
-        /* mov     si, cs:seg_10012 ;~ 01A2:332D */
-        si = seg_10012;
+        /* mov     si, cs:seg_draw ;~ 01A2:332D */
+        si = seg_draw;
         /* mov     es, si ;~ 01A2:3332 */
         es = si;
         /* mov     di, word_1E1C1 ;~ 01A2:3334 */
@@ -32146,8 +32146,8 @@ loc_13338:
         do {
             /* mov     si, [bx+0BD5h] ;~ 01A2:3338 */
             si = *(dw*)raddr(ds,bx+0x0BD5);
-            /* mov     ds, cs:seg_10010 ;~ 01A2:333C */
-            ds = seg_10010;
+            /* mov     ds, cs:seg_flip ;~ 01A2:333C */
+            ds = seg_flip;
             /* add     si, ax ;~ 01A2:3341 */
             { dd t_ = (dd)si + (dd)ax; CF = t_ > 0xFFFF; si = t_; ZF = ((dw)(si) == 0); SF = (((dw)(si)) >> 15); }
             /* mov     cx, dx ;~ 01A2:3343 */
@@ -32160,14 +32160,14 @@ loc_13338:
             { dd t_ = (dd)bx + (dd)2; CF = t_ > 0xFFFF; bx = t_; ZF = ((dw)(bx) == 0); SF = (((dw)(bx)) >> 15); }
             /* and     bx, 1FFh ;~ 01A2:334A */
             bx &= 0x1FF; CF = 0; OF = 0; ZF = ((dw)(bx) == 0); SF = (((dw)(bx)) >> 15);
-            /* mov     ds, cs:seg_10000 ;~ 01A2:334E */
-            ds = seg_10000;
+            /* mov     ds, cs:seg_data ;~ 01A2:334E */
+            ds = seg_data;
             /* dec     byte_1E1C5 ;~ 01A2:3353 */
             (byte_1e1c5)--; ZF = ((db)(byte_1e1c5) == 0); SF = (((db)(byte_1e1c5)) >> 7);
             /* jnz     short loc_13338 ;~ 01A2:3357 */
         } while (byte_1e1c5 != 0);
-        /* mov     ax, cs:seg_10010 ;~ 01A2:3359 */
-        ax = seg_10010;
+        /* mov     ax, cs:seg_flip ;~ 01A2:3359 */
+        ax = seg_flip;
         /* mov     cs:word_126DA, ax ;~ 01A2:335D */
         word_126da = ax;
     }
@@ -32298,8 +32298,8 @@ void loc_1330d(void) {
         dx = word_1e1c3;
         /* shl     bx, 1 ;~ 01A2:332B */
         { if (1) { CF = (((dd)bx << (1)) >> 16) & 1; bx <<= 1; ZF = ((dw)(bx) == 0); SF = (((dw)(bx)) >> 15); } }
-        /* mov     si, cs:seg_10012 ;~ 01A2:332D */
-        si = seg_10012;
+        /* mov     si, cs:seg_draw ;~ 01A2:332D */
+        si = seg_draw;
         /* mov     es, si ;~ 01A2:3332 */
         es = si;
         /* mov     di, word_1E1C1 ;~ 01A2:3334 */
@@ -32308,8 +32308,8 @@ loc_13338:
         do {
             /* mov     si, [bx+0BD5h] ;~ 01A2:3338 */
             si = *(dw*)raddr(ds,bx+0x0BD5);
-            /* mov     ds, cs:seg_10010 ;~ 01A2:333C */
-            ds = seg_10010;
+            /* mov     ds, cs:seg_flip ;~ 01A2:333C */
+            ds = seg_flip;
             /* add     si, ax ;~ 01A2:3341 */
             { dd t_ = (dd)si + (dd)ax; CF = t_ > 0xFFFF; si = t_; ZF = ((dw)(si) == 0); SF = (((dw)(si)) >> 15); }
             /* mov     cx, dx ;~ 01A2:3343 */
@@ -32322,14 +32322,14 @@ loc_13338:
             { dd t_ = (dd)bx + (dd)2; CF = t_ > 0xFFFF; bx = t_; ZF = ((dw)(bx) == 0); SF = (((dw)(bx)) >> 15); }
             /* and     bx, 1FFh ;~ 01A2:334A */
             bx &= 0x1FF; CF = 0; OF = 0; ZF = ((dw)(bx) == 0); SF = (((dw)(bx)) >> 15);
-            /* mov     ds, cs:seg_10000 ;~ 01A2:334E */
-            ds = seg_10000;
+            /* mov     ds, cs:seg_data ;~ 01A2:334E */
+            ds = seg_data;
             /* dec     byte_1E1C5 ;~ 01A2:3353 */
             (byte_1e1c5)--; ZF = ((db)(byte_1e1c5) == 0); SF = (((db)(byte_1e1c5)) >> 7);
             /* jnz     short loc_13338 ;~ 01A2:3357 */
         } while (byte_1e1c5 != 0);
-        /* mov     ax, cs:seg_10010 ;~ 01A2:3359 */
-        ax = seg_10010;
+        /* mov     ax, cs:seg_flip ;~ 01A2:3359 */
+        ax = seg_flip;
         /* mov     cs:word_126DA, ax ;~ 01A2:335D */
         word_126da = ax;
     }
@@ -32446,8 +32446,8 @@ loc_13338:
     do {
         /* mov     si, [bx+0BD5h] ;~ 01A2:3338 */
         si = *(dw*)raddr(ds,bx+0x0BD5);
-        /* mov     ds, cs:seg_10010 ;~ 01A2:333C */
-        ds = seg_10010;
+        /* mov     ds, cs:seg_flip ;~ 01A2:333C */
+        ds = seg_flip;
         /* add     si, ax ;~ 01A2:3341 */
         { dd t_ = (dd)si + (dd)ax; CF = t_ > 0xFFFF; si = t_; ZF = ((dw)(si) == 0); SF = (((dw)(si)) >> 15); }
         /* mov     cx, dx ;~ 01A2:3343 */
@@ -32460,14 +32460,14 @@ loc_13338:
         { dd t_ = (dd)bx + (dd)2; CF = t_ > 0xFFFF; bx = t_; ZF = ((dw)(bx) == 0); SF = (((dw)(bx)) >> 15); }
         /* and     bx, 1FFh ;~ 01A2:334A */
         bx &= 0x1FF; CF = 0; OF = 0; ZF = ((dw)(bx) == 0); SF = (((dw)(bx)) >> 15);
-        /* mov     ds, cs:seg_10000 ;~ 01A2:334E */
-        ds = seg_10000;
+        /* mov     ds, cs:seg_data ;~ 01A2:334E */
+        ds = seg_data;
         /* dec     byte_1E1C5 ;~ 01A2:3353 */
         (byte_1e1c5)--; ZF = ((db)(byte_1e1c5) == 0); SF = (((db)(byte_1e1c5)) >> 7);
         /* jnz     short loc_13338 ;~ 01A2:3357 */
     } while (byte_1e1c5 != 0);
-    /* mov     ax, cs:seg_10010 ;~ 01A2:3359 */
-    ax = seg_10010;
+    /* mov     ax, cs:seg_flip ;~ 01A2:3359 */
+    ax = seg_flip;
     /* mov     cs:word_126DA, ax ;~ 01A2:335D */
     word_126da = ax;
 loc_13361:
@@ -33352,8 +33352,8 @@ loc_1330d:
         dx = word_1e1c3;
         /* shl     bx, 1 ;~ 01A2:332B */
         { if (1) { CF = (((dd)bx << (1)) >> 16) & 1; bx <<= 1; ZF = ((dw)(bx) == 0); SF = (((dw)(bx)) >> 15); } }
-        /* mov     si, cs:seg_10012 ;~ 01A2:332D */
-        si = seg_10012;
+        /* mov     si, cs:seg_draw ;~ 01A2:332D */
+        si = seg_draw;
         /* mov     es, si ;~ 01A2:3332 */
         es = si;
         /* mov     di, word_1E1C1 ;~ 01A2:3334 */
@@ -33362,8 +33362,8 @@ loc_13338:
         do {
             /* mov     si, [bx+0BD5h] ;~ 01A2:3338 */
             si = *(dw*)raddr(ds,bx+0x0BD5);
-            /* mov     ds, cs:seg_10010 ;~ 01A2:333C */
-            ds = seg_10010;
+            /* mov     ds, cs:seg_flip ;~ 01A2:333C */
+            ds = seg_flip;
             /* add     si, ax ;~ 01A2:3341 */
             { dd t_ = (dd)si + (dd)ax; CF = t_ > 0xFFFF; si = t_; ZF = ((dw)(si) == 0); SF = (((dw)(si)) >> 15); }
             /* mov     cx, dx ;~ 01A2:3343 */
@@ -33376,14 +33376,14 @@ loc_13338:
             { dd t_ = (dd)bx + (dd)2; CF = t_ > 0xFFFF; bx = t_; ZF = ((dw)(bx) == 0); SF = (((dw)(bx)) >> 15); }
             /* and     bx, 1FFh ;~ 01A2:334A */
             bx &= 0x1FF; CF = 0; OF = 0; ZF = ((dw)(bx) == 0); SF = (((dw)(bx)) >> 15);
-            /* mov     ds, cs:seg_10000 ;~ 01A2:334E */
-            ds = seg_10000;
+            /* mov     ds, cs:seg_data ;~ 01A2:334E */
+            ds = seg_data;
             /* dec     byte_1E1C5 ;~ 01A2:3353 */
             (byte_1e1c5)--; ZF = ((db)(byte_1e1c5) == 0); SF = (((db)(byte_1e1c5)) >> 7);
             /* jnz     short loc_13338 ;~ 01A2:3357 */
         } while (byte_1e1c5 != 0);
-        /* mov     ax, cs:seg_10010 ;~ 01A2:3359 */
-        ax = seg_10010;
+        /* mov     ax, cs:seg_flip ;~ 01A2:3359 */
+        ax = seg_flip;
         /* mov     cs:word_126DA, ax ;~ 01A2:335D */
         word_126da = ax;
     }
@@ -33496,8 +33496,8 @@ loc_133c4:
 }
 void clip_go_herc(void) {
     dd _sa = 0, _sb = 0;
-    /* mov     ax, cs:seg_10000 ; jumptable 000126D5 case 4 ;~ 01A2:33D2 */
-    ax = seg_10000;
+    /* mov     ax, cs:seg_data ; jumptable 000126D5 case 4 ;~ 01A2:33D2 */
+    ax = seg_data;
     /* mov     ds, ax ;~ 01A2:33D6 */
     ds = ax;
     /* mov     word_1DDB9, 1Fh ;~ 01A2:33D8 */
@@ -35423,8 +35423,8 @@ loc_1363f:
     return;
 }
 void clear_table(void) {
-    /* mov     ax, cs:seg_10000 ;~ 01A2:3634 */
-    ax = seg_10000;
+    /* mov     ax, cs:seg_data ;~ 01A2:3634 */
+    ax = seg_data;
     /* mov     ds, ax ;~ 01A2:3638 */
     ds = ax;
     /* mov     al, 0 ;~ 01A2:363A */
@@ -35460,8 +35460,8 @@ loc_1363f:
 }
 void blitflag_go_tandy(void) {
     dd _sa = 0, _sb = 0;
-    /* mov     ax, cs:seg_10010 ; jumptable 0001367D case 1 ;~ 01A2:3682 */
-    ax = seg_10010;
+    /* mov     ax, cs:seg_flip ; jumptable 0001367D case 1 ;~ 01A2:3682 */
+    ax = seg_flip;
     /* mov     es, ax ;~ 01A2:3686 */
     es = ax;
     /* mov     word_1DDB9, 1Fh ;~ 01A2:3688 */
@@ -35510,10 +35510,10 @@ loc_136b4:
     { if (1) { CF = (((dd)bx << (1)) >> 16) & 1; bx <<= 1; ZF = ((dw)(bx) == 0); SF = (((dw)(bx)) >> 15); } }
     /* xor     ch, ch ;~ 01A2:36D1 */
     ch = 0; CF = 0; OF = 0; ZF = 1; SF = 0;
-    /* mov     ax, cs:seg_10000 ;~ 01A2:36D3 */
-    ax = seg_10000;
-    /* mov     bp, cs:seg_10012 ;~ 01A2:36D7 */
-    bp = seg_10012;
+    /* mov     ax, cs:seg_data ;~ 01A2:36D3 */
+    ax = seg_data;
+    /* mov     bp, cs:seg_draw ;~ 01A2:36D7 */
+    bp = seg_draw;
 loc_136dc:
     do {
         /* and     bx, 1FFh ;~ 01A2:36DC */
@@ -35588,10 +35588,10 @@ loc_136b4:
         { if (1) { CF = (((dd)bx << (1)) >> 16) & 1; bx <<= 1; ZF = ((dw)(bx) == 0); SF = (((dw)(bx)) >> 15); } }
         /* xor     ch, ch ;~ 01A2:36D1 */
         ch = 0; CF = 0; OF = 0; ZF = 1; SF = 0;
-        /* mov     ax, cs:seg_10000 ;~ 01A2:36D3 */
-        ax = seg_10000;
-        /* mov     bp, cs:seg_10012 ;~ 01A2:36D7 */
-        bp = seg_10012;
+        /* mov     ax, cs:seg_data ;~ 01A2:36D3 */
+        ax = seg_data;
+        /* mov     bp, cs:seg_draw ;~ 01A2:36D7 */
+        bp = seg_draw;
 loc_136dc:
         do {
             /* and     bx, 1FFh ;~ 01A2:36DC */
@@ -35654,10 +35654,10 @@ loc_136b4:
     { if (1) { CF = (((dd)bx << (1)) >> 16) & 1; bx <<= 1; ZF = ((dw)(bx) == 0); SF = (((dw)(bx)) >> 15); } }
     /* xor     ch, ch ;~ 01A2:36D1 */
     ch = 0; CF = 0; OF = 0; ZF = 1; SF = 0;
-    /* mov     ax, cs:seg_10000 ;~ 01A2:36D3 */
-    ax = seg_10000;
-    /* mov     bp, cs:seg_10012 ;~ 01A2:36D7 */
-    bp = seg_10012;
+    /* mov     ax, cs:seg_data ;~ 01A2:36D3 */
+    ax = seg_data;
+    /* mov     bp, cs:seg_draw ;~ 01A2:36D7 */
+    bp = seg_draw;
 loc_136dc:
     do {
         /* and     bx, 1FFh ;~ 01A2:36DC */
@@ -35781,10 +35781,10 @@ loc_136b4:
         { if (1) { CF = (((dd)bx << (1)) >> 16) & 1; bx <<= 1; ZF = ((dw)(bx) == 0); SF = (((dw)(bx)) >> 15); } }
         /* xor     ch, ch ;~ 01A2:36D1 */
         ch = 0; CF = 0; OF = 0; ZF = 1; SF = 0;
-        /* mov     ax, cs:seg_10000 ;~ 01A2:36D3 */
-        ax = seg_10000;
-        /* mov     bp, cs:seg_10012 ;~ 01A2:36D7 */
-        bp = seg_10012;
+        /* mov     ax, cs:seg_data ;~ 01A2:36D3 */
+        ax = seg_data;
+        /* mov     bp, cs:seg_draw ;~ 01A2:36D7 */
+        bp = seg_draw;
     } while (1);
 }
 void loc_136ff(void) {
@@ -35832,10 +35832,10 @@ loc_136b4:
         { if (1) { CF = (((dd)bx << (1)) >> 16) & 1; bx <<= 1; ZF = ((dw)(bx) == 0); SF = (((dw)(bx)) >> 15); } }
         /* xor     ch, ch ;~ 01A2:36D1 */
         ch = 0; CF = 0; OF = 0; ZF = 1; SF = 0;
-        /* mov     ax, cs:seg_10000 ;~ 01A2:36D3 */
-        ax = seg_10000;
-        /* mov     bp, cs:seg_10012 ;~ 01A2:36D7 */
-        bp = seg_10012;
+        /* mov     ax, cs:seg_data ;~ 01A2:36D3 */
+        ax = seg_data;
+        /* mov     bp, cs:seg_draw ;~ 01A2:36D7 */
+        bp = seg_draw;
 loc_136dc:
         do {
             /* and     bx, 1FFh ;~ 01A2:36DC */
@@ -35868,8 +35868,8 @@ loc_136dc:
 }
 void blitflag_go_cga(void) {
     dd _sa = 0, _sb = 0;
-    /* mov     ax, cs:seg_10010 ; jumptable 0001367D case 0 ;~ 01A2:3708 */
-    ax = seg_10010;
+    /* mov     ax, cs:seg_flip ; jumptable 0001367D case 0 ;~ 01A2:3708 */
+    ax = seg_flip;
     /* mov     es, ax ;~ 01A2:370C */
     es = ax;
     /* mov     word_1DDB9, 1Fh ;~ 01A2:370E */
@@ -35918,10 +35918,10 @@ loc_1373a:
     { if (1) { CF = (((dd)bx << (1)) >> 16) & 1; bx <<= 1; ZF = ((dw)(bx) == 0); SF = (((dw)(bx)) >> 15); } }
     /* xor     ch, ch ;~ 01A2:3757 */
     ch = 0; CF = 0; OF = 0; ZF = 1; SF = 0;
-    /* mov     ax, cs:seg_10000 ;~ 01A2:3759 */
-    ax = seg_10000;
-    /* mov     bp, cs:seg_10012 ;~ 01A2:375D */
-    bp = seg_10012;
+    /* mov     ax, cs:seg_data ;~ 01A2:3759 */
+    ax = seg_data;
+    /* mov     bp, cs:seg_draw ;~ 01A2:375D */
+    bp = seg_draw;
 loc_13762:
     do {
         /* and     bx, 1FFh ;~ 01A2:3762 */
@@ -35994,10 +35994,10 @@ loc_1373a:
         { if (1) { CF = (((dd)bx << (1)) >> 16) & 1; bx <<= 1; ZF = ((dw)(bx) == 0); SF = (((dw)(bx)) >> 15); } }
         /* xor     ch, ch ;~ 01A2:3757 */
         ch = 0; CF = 0; OF = 0; ZF = 1; SF = 0;
-        /* mov     ax, cs:seg_10000 ;~ 01A2:3759 */
-        ax = seg_10000;
-        /* mov     bp, cs:seg_10012 ;~ 01A2:375D */
-        bp = seg_10012;
+        /* mov     ax, cs:seg_data ;~ 01A2:3759 */
+        ax = seg_data;
+        /* mov     bp, cs:seg_draw ;~ 01A2:375D */
+        bp = seg_draw;
 loc_13762:
         do {
             /* and     bx, 1FFh ;~ 01A2:3762 */
@@ -36058,10 +36058,10 @@ loc_1373a:
     { if (1) { CF = (((dd)bx << (1)) >> 16) & 1; bx <<= 1; ZF = ((dw)(bx) == 0); SF = (((dw)(bx)) >> 15); } }
     /* xor     ch, ch ;~ 01A2:3757 */
     ch = 0; CF = 0; OF = 0; ZF = 1; SF = 0;
-    /* mov     ax, cs:seg_10000 ;~ 01A2:3759 */
-    ax = seg_10000;
-    /* mov     bp, cs:seg_10012 ;~ 01A2:375D */
-    bp = seg_10012;
+    /* mov     ax, cs:seg_data ;~ 01A2:3759 */
+    ax = seg_data;
+    /* mov     bp, cs:seg_draw ;~ 01A2:375D */
+    bp = seg_draw;
 loc_13762:
     do {
         /* and     bx, 1FFh ;~ 01A2:3762 */
@@ -36181,10 +36181,10 @@ loc_1373a:
         { if (1) { CF = (((dd)bx << (1)) >> 16) & 1; bx <<= 1; ZF = ((dw)(bx) == 0); SF = (((dw)(bx)) >> 15); } }
         /* xor     ch, ch ;~ 01A2:3757 */
         ch = 0; CF = 0; OF = 0; ZF = 1; SF = 0;
-        /* mov     ax, cs:seg_10000 ;~ 01A2:3759 */
-        ax = seg_10000;
-        /* mov     bp, cs:seg_10012 ;~ 01A2:375D */
-        bp = seg_10012;
+        /* mov     ax, cs:seg_data ;~ 01A2:3759 */
+        ax = seg_data;
+        /* mov     bp, cs:seg_draw ;~ 01A2:375D */
+        bp = seg_draw;
     } while (1);
 }
 void loc_13781(void) {
@@ -36232,10 +36232,10 @@ loc_1373a:
         { if (1) { CF = (((dd)bx << (1)) >> 16) & 1; bx <<= 1; ZF = ((dw)(bx) == 0); SF = (((dw)(bx)) >> 15); } }
         /* xor     ch, ch ;~ 01A2:3757 */
         ch = 0; CF = 0; OF = 0; ZF = 1; SF = 0;
-        /* mov     ax, cs:seg_10000 ;~ 01A2:3759 */
-        ax = seg_10000;
-        /* mov     bp, cs:seg_10012 ;~ 01A2:375D */
-        bp = seg_10012;
+        /* mov     ax, cs:seg_data ;~ 01A2:3759 */
+        ax = seg_data;
+        /* mov     bp, cs:seg_draw ;~ 01A2:375D */
+        bp = seg_draw;
 loc_13762:
         do {
             /* and     bx, 1FFh ;~ 01A2:3762 */
@@ -36266,8 +36266,8 @@ loc_13762:
 }
 void blitflag_go_ega(void) {
     dd _sa = 0, _sb = 0;
-    /* mov     ax, cs:seg_10010 ; jumptable 0001367D case 2 ;~ 01A2:378A */
-    ax = seg_10010;
+    /* mov     ax, cs:seg_flip ; jumptable 0001367D case 2 ;~ 01A2:378A */
+    ax = seg_flip;
     /* mov     es, ax ;~ 01A2:378E */
     es = ax;
     /* mov     word_1DDB9, 1Fh ;~ 01A2:3790 */
@@ -36324,10 +36324,10 @@ loc_137bc:
     dh = 0; CF = 0; OF = 0; ZF = 1; SF = 0;
     /* xor     ch, ch ;~ 01A2:37E2 */
     ch = 0; CF = 0; OF = 0; ZF = 1; SF = 0;
-    /* mov     ax, cs:seg_10000 ;~ 01A2:37E4 */
-    ax = seg_10000;
-    /* mov     bp, cs:seg_10012 ;~ 01A2:37E8 */
-    bp = seg_10012;
+    /* mov     ax, cs:seg_data ;~ 01A2:37E4 */
+    ax = seg_data;
+    /* mov     bp, cs:seg_draw ;~ 01A2:37E8 */
+    bp = seg_draw;
 loc_137ed:
     do {
         /* and     bx, 1FFh ;~ 01A2:37ED */
@@ -36424,10 +36424,10 @@ loc_137bc:
         dh = 0; CF = 0; OF = 0; ZF = 1; SF = 0;
         /* xor     ch, ch ;~ 01A2:37E2 */
         ch = 0; CF = 0; OF = 0; ZF = 1; SF = 0;
-        /* mov     ax, cs:seg_10000 ;~ 01A2:37E4 */
-        ax = seg_10000;
-        /* mov     bp, cs:seg_10012 ;~ 01A2:37E8 */
-        bp = seg_10012;
+        /* mov     ax, cs:seg_data ;~ 01A2:37E4 */
+        ax = seg_data;
+        /* mov     bp, cs:seg_draw ;~ 01A2:37E8 */
+        bp = seg_draw;
 loc_137ed:
         do {
             /* and     bx, 1FFh ;~ 01A2:37ED */
@@ -36512,10 +36512,10 @@ loc_137bc:
     dh = 0; CF = 0; OF = 0; ZF = 1; SF = 0;
     /* xor     ch, ch ;~ 01A2:37E2 */
     ch = 0; CF = 0; OF = 0; ZF = 1; SF = 0;
-    /* mov     ax, cs:seg_10000 ;~ 01A2:37E4 */
-    ax = seg_10000;
-    /* mov     bp, cs:seg_10012 ;~ 01A2:37E8 */
-    bp = seg_10012;
+    /* mov     ax, cs:seg_data ;~ 01A2:37E4 */
+    ax = seg_data;
+    /* mov     bp, cs:seg_draw ;~ 01A2:37E8 */
+    bp = seg_draw;
 loc_137ed:
     do {
         /* and     bx, 1FFh ;~ 01A2:37ED */
@@ -36675,10 +36675,10 @@ loc_137bc:
         dh = 0; CF = 0; OF = 0; ZF = 1; SF = 0;
         /* xor     ch, ch ;~ 01A2:37E2 */
         ch = 0; CF = 0; OF = 0; ZF = 1; SF = 0;
-        /* mov     ax, cs:seg_10000 ;~ 01A2:37E4 */
-        ax = seg_10000;
-        /* mov     bp, cs:seg_10012 ;~ 01A2:37E8 */
-        bp = seg_10012;
+        /* mov     ax, cs:seg_data ;~ 01A2:37E4 */
+        ax = seg_data;
+        /* mov     bp, cs:seg_draw ;~ 01A2:37E8 */
+        bp = seg_draw;
     } while (1);
 }
 void loc_13824(void) {
@@ -36734,10 +36734,10 @@ loc_137bc:
         dh = 0; CF = 0; OF = 0; ZF = 1; SF = 0;
         /* xor     ch, ch ;~ 01A2:37E2 */
         ch = 0; CF = 0; OF = 0; ZF = 1; SF = 0;
-        /* mov     ax, cs:seg_10000 ;~ 01A2:37E4 */
-        ax = seg_10000;
-        /* mov     bp, cs:seg_10012 ;~ 01A2:37E8 */
-        bp = seg_10012;
+        /* mov     ax, cs:seg_data ;~ 01A2:37E4 */
+        ax = seg_data;
+        /* mov     bp, cs:seg_draw ;~ 01A2:37E8 */
+        bp = seg_draw;
 loc_137ed:
         do {
             /* and     bx, 1FFh ;~ 01A2:37ED */
@@ -36783,8 +36783,8 @@ loc_137ed:
     } while (1);
 }
 void blitflag_go_mcga(void) {
-    /* mov     ax, cs:seg_10010 ; jumptable 0001367D case 3 ;~ 01A2:382E */
-    ax = seg_10010;
+    /* mov     ax, cs:seg_flip ; jumptable 0001367D case 3 ;~ 01A2:382E */
+    ax = seg_flip;
     /* mov     es, ax ;~ 01A2:3832 */
     es = ax;
     /* mov     word_1DDB0, 1Fh ;~ 01A2:3834 */
@@ -36829,10 +36829,10 @@ loc_1385c:
     dh = *(db*)raddr(ds,si+0x110B);
     /* shl     bx, 1 ;~ 01A2:3879 */
     { if (1) { CF = (((dd)bx << (1)) >> 16) & 1; bx <<= 1; ZF = ((dw)(bx) == 0); SF = (((dw)(bx)) >> 15); } }
-    /* mov     ax, cs:seg_10000 ;~ 01A2:387B */
-    ax = seg_10000;
-    /* mov     bp, cs:seg_10012 ;~ 01A2:387F */
-    bp = seg_10012;
+    /* mov     ax, cs:seg_data ;~ 01A2:387B */
+    ax = seg_data;
+    /* mov     bp, cs:seg_draw ;~ 01A2:387F */
+    bp = seg_draw;
 loc_13884:
     do {
         /* and     bx, 1FFh ;~ 01A2:3884 */
@@ -36900,10 +36900,10 @@ loc_1385c:
         dh = *(db*)raddr(ds,si+0x110B);
         /* shl     bx, 1 ;~ 01A2:3879 */
         { if (1) { CF = (((dd)bx << (1)) >> 16) & 1; bx <<= 1; ZF = ((dw)(bx) == 0); SF = (((dw)(bx)) >> 15); } }
-        /* mov     ax, cs:seg_10000 ;~ 01A2:387B */
-        ax = seg_10000;
-        /* mov     bp, cs:seg_10012 ;~ 01A2:387F */
-        bp = seg_10012;
+        /* mov     ax, cs:seg_data ;~ 01A2:387B */
+        ax = seg_data;
+        /* mov     bp, cs:seg_draw ;~ 01A2:387F */
+        bp = seg_draw;
 loc_13884:
         do {
             /* and     bx, 1FFh ;~ 01A2:3884 */
@@ -36961,10 +36961,10 @@ loc_1385c:
     dh = *(db*)raddr(ds,si+0x110B);
     /* shl     bx, 1 ;~ 01A2:3879 */
     { if (1) { CF = (((dd)bx << (1)) >> 16) & 1; bx <<= 1; ZF = ((dw)(bx) == 0); SF = (((dw)(bx)) >> 15); } }
-    /* mov     ax, cs:seg_10000 ;~ 01A2:387B */
-    ax = seg_10000;
-    /* mov     bp, cs:seg_10012 ;~ 01A2:387F */
-    bp = seg_10012;
+    /* mov     ax, cs:seg_data ;~ 01A2:387B */
+    ax = seg_data;
+    /* mov     bp, cs:seg_draw ;~ 01A2:387F */
+    bp = seg_draw;
 loc_13884:
     do {
         /* and     bx, 1FFh ;~ 01A2:3884 */
@@ -37077,10 +37077,10 @@ loc_1385c:
         dh = *(db*)raddr(ds,si+0x110B);
         /* shl     bx, 1 ;~ 01A2:3879 */
         { if (1) { CF = (((dd)bx << (1)) >> 16) & 1; bx <<= 1; ZF = ((dw)(bx) == 0); SF = (((dw)(bx)) >> 15); } }
-        /* mov     ax, cs:seg_10000 ;~ 01A2:387B */
-        ax = seg_10000;
-        /* mov     bp, cs:seg_10012 ;~ 01A2:387F */
-        bp = seg_10012;
+        /* mov     ax, cs:seg_data ;~ 01A2:387B */
+        ax = seg_data;
+        /* mov     bp, cs:seg_draw ;~ 01A2:387F */
+        bp = seg_draw;
     } while (1);
 }
 void loc_138a5(void) {
@@ -37123,10 +37123,10 @@ loc_1385c:
         dh = *(db*)raddr(ds,si+0x110B);
         /* shl     bx, 1 ;~ 01A2:3879 */
         { if (1) { CF = (((dd)bx << (1)) >> 16) & 1; bx <<= 1; ZF = ((dw)(bx) == 0); SF = (((dw)(bx)) >> 15); } }
-        /* mov     ax, cs:seg_10000 ;~ 01A2:387B */
-        ax = seg_10000;
-        /* mov     bp, cs:seg_10012 ;~ 01A2:387F */
-        bp = seg_10012;
+        /* mov     ax, cs:seg_data ;~ 01A2:387B */
+        ax = seg_data;
+        /* mov     bp, cs:seg_draw ;~ 01A2:387F */
+        bp = seg_draw;
 loc_13884:
         do {
             /* and     bx, 1FFh ;~ 01A2:3884 */
@@ -37157,8 +37157,8 @@ loc_13884:
 }
 void blitflag_go_herc(void) {
     dd _sa = 0, _sb = 0;
-    /* mov     ax, cs:seg_10010 ; jumptable 0001367D case 4 ;~ 01A2:38AE */
-    ax = seg_10010;
+    /* mov     ax, cs:seg_flip ; jumptable 0001367D case 4 ;~ 01A2:38AE */
+    ax = seg_flip;
     /* mov     es, ax ;~ 01A2:38B2 */
     es = ax;
     /* mov     word_1DDB9, 1Fh ;~ 01A2:38B4 */
@@ -37207,10 +37207,10 @@ loc_138e0:
     { if (1) { CF = (((dd)bx << (1)) >> 16) & 1; bx <<= 1; ZF = ((dw)(bx) == 0); SF = (((dw)(bx)) >> 15); } }
     /* xor     ch, ch ;~ 01A2:38FD */
     ch = 0; CF = 0; OF = 0; ZF = 1; SF = 0;
-    /* mov     ax, cs:seg_10000 ;~ 01A2:38FF */
-    ax = seg_10000;
-    /* mov     bp, cs:seg_10012 ;~ 01A2:3903 */
-    bp = seg_10012;
+    /* mov     ax, cs:seg_data ;~ 01A2:38FF */
+    ax = seg_data;
+    /* mov     bp, cs:seg_draw ;~ 01A2:3903 */
+    bp = seg_draw;
 loc_13908:
     do {
         /* and     bx, 1FFh ;~ 01A2:3908 */
@@ -37283,10 +37283,10 @@ loc_138e0:
         { if (1) { CF = (((dd)bx << (1)) >> 16) & 1; bx <<= 1; ZF = ((dw)(bx) == 0); SF = (((dw)(bx)) >> 15); } }
         /* xor     ch, ch ;~ 01A2:38FD */
         ch = 0; CF = 0; OF = 0; ZF = 1; SF = 0;
-        /* mov     ax, cs:seg_10000 ;~ 01A2:38FF */
-        ax = seg_10000;
-        /* mov     bp, cs:seg_10012 ;~ 01A2:3903 */
-        bp = seg_10012;
+        /* mov     ax, cs:seg_data ;~ 01A2:38FF */
+        ax = seg_data;
+        /* mov     bp, cs:seg_draw ;~ 01A2:3903 */
+        bp = seg_draw;
 loc_13908:
         do {
             /* and     bx, 1FFh ;~ 01A2:3908 */
@@ -37347,10 +37347,10 @@ loc_138e0:
     { if (1) { CF = (((dd)bx << (1)) >> 16) & 1; bx <<= 1; ZF = ((dw)(bx) == 0); SF = (((dw)(bx)) >> 15); } }
     /* xor     ch, ch ;~ 01A2:38FD */
     ch = 0; CF = 0; OF = 0; ZF = 1; SF = 0;
-    /* mov     ax, cs:seg_10000 ;~ 01A2:38FF */
-    ax = seg_10000;
-    /* mov     bp, cs:seg_10012 ;~ 01A2:3903 */
-    bp = seg_10012;
+    /* mov     ax, cs:seg_data ;~ 01A2:38FF */
+    ax = seg_data;
+    /* mov     bp, cs:seg_draw ;~ 01A2:3903 */
+    bp = seg_draw;
 loc_13908:
     do {
         /* and     bx, 1FFh ;~ 01A2:3908 */
@@ -37470,10 +37470,10 @@ loc_138e0:
         { if (1) { CF = (((dd)bx << (1)) >> 16) & 1; bx <<= 1; ZF = ((dw)(bx) == 0); SF = (((dw)(bx)) >> 15); } }
         /* xor     ch, ch ;~ 01A2:38FD */
         ch = 0; CF = 0; OF = 0; ZF = 1; SF = 0;
-        /* mov     ax, cs:seg_10000 ;~ 01A2:38FF */
-        ax = seg_10000;
-        /* mov     bp, cs:seg_10012 ;~ 01A2:3903 */
-        bp = seg_10012;
+        /* mov     ax, cs:seg_data ;~ 01A2:38FF */
+        ax = seg_data;
+        /* mov     bp, cs:seg_draw ;~ 01A2:3903 */
+        bp = seg_draw;
     } while (1);
 }
 void loc_13927(void) {
@@ -37521,10 +37521,10 @@ loc_138e0:
         { if (1) { CF = (((dd)bx << (1)) >> 16) & 1; bx <<= 1; ZF = ((dw)(bx) == 0); SF = (((dw)(bx)) >> 15); } }
         /* xor     ch, ch ;~ 01A2:38FD */
         ch = 0; CF = 0; OF = 0; ZF = 1; SF = 0;
-        /* mov     ax, cs:seg_10000 ;~ 01A2:38FF */
-        ax = seg_10000;
-        /* mov     bp, cs:seg_10012 ;~ 01A2:3903 */
-        bp = seg_10012;
+        /* mov     ax, cs:seg_data ;~ 01A2:38FF */
+        ax = seg_data;
+        /* mov     bp, cs:seg_draw ;~ 01A2:3903 */
+        bp = seg_draw;
 loc_13908:
         do {
             /* and     bx, 1FFh ;~ 01A2:3908 */
@@ -37575,8 +37575,8 @@ void locret_1392f(void) {
 }
 void sprite_blit_flagged(void) {
     dd _sa = 0, _sb = 0;
-    /* mov     ax, cs:seg_10000 ;~ 01A2:3671 */
-    ax = seg_10000;
+    /* mov     ax, cs:seg_data ;~ 01A2:3671 */
+    ax = seg_data;
     /* mov     ds, ax ;~ 01A2:3675 */
     ds = ax;
     /* mov     di, word_1D934 ;~ 01A2:3677 */
@@ -37584,10 +37584,10 @@ void sprite_blit_flagged(void) {
     /* shl     di, 1           ; switch 5 cases ;~ 01A2:367B */
     { if (1) { CF = (((dd)di << (1)) >> 16) & 1; di <<= 1; ZF = ((dw)(di) == 0); SF = (((dw)(di)) >> 15); } }
     /* jmp     cs:jpt_1367D[di] ; switch jump ;~ 01A2:367D */
-    { vfn f_ = func_at((dd)0x1a20 + (*(dw*)(((db*)&jpt_1367d)+di))); if (f_) f_(); else fprintf(stderr, "unresolved ind jmp %x\n", (dd)((dd)0x1a20 + (*(dw*)(((db*)&jpt_1367d)+di)))); return; }
+    { vfn f_ = func_at((dd)0x1a20 + (*(dw*)(((db*)&blitflag_jt)+di))); if (f_) f_(); else fprintf(stderr, "unresolved ind jmp %x\n", (dd)((dd)0x1a20 + (*(dw*)(((db*)&blitflag_jt)+di)))); return; }
 loc_13682:
-    /* mov     ax, cs:seg_10010 ; jumptable 0001367D case 1 ;~ 01A2:3682 */
-    ax = seg_10010;
+    /* mov     ax, cs:seg_flip ; jumptable 0001367D case 1 ;~ 01A2:3682 */
+    ax = seg_flip;
     /* mov     es, ax ;~ 01A2:3686 */
     es = ax;
     /* mov     word_1DDB9, 1Fh ;~ 01A2:3688 */
@@ -37636,10 +37636,10 @@ loc_136b4:
     { if (1) { CF = (((dd)bx << (1)) >> 16) & 1; bx <<= 1; ZF = ((dw)(bx) == 0); SF = (((dw)(bx)) >> 15); } }
     /* xor     ch, ch ;~ 01A2:36D1 */
     ch = 0; CF = 0; OF = 0; ZF = 1; SF = 0;
-    /* mov     ax, cs:seg_10000 ;~ 01A2:36D3 */
-    ax = seg_10000;
-    /* mov     bp, cs:seg_10012 ;~ 01A2:36D7 */
-    bp = seg_10012;
+    /* mov     ax, cs:seg_data ;~ 01A2:36D3 */
+    ax = seg_data;
+    /* mov     bp, cs:seg_draw ;~ 01A2:36D7 */
+    bp = seg_draw;
 loc_136dc:
     do {
         /* and     bx, 1FFh ;~ 01A2:36DC */
@@ -37714,16 +37714,16 @@ loc_13943:
         bh = 0; CF = 0; OF = 0; ZF = 1; SF = 0;
         /* shl     bx, 1 ;~ 01A2:396C */
         { if (1) { CF = (((dd)bx << (1)) >> 16) & 1; bx <<= 1; ZF = ((dw)(bx) == 0); SF = (((dw)(bx)) >> 15); } }
-        /* mov     cx, cs:seg_10010 ;~ 01A2:396E */
-        cx = seg_10010;
+        /* mov     cx, cs:seg_flip ;~ 01A2:396E */
+        cx = seg_flip;
         /* mov     es, cx ;~ 01A2:3973 */
         es = cx;
 loc_13975:
         do {
             /* mov     di, [bx+0BD5h] ;~ 01A2:3975 */
             di = *(dw*)raddr(ds,bx+0x0BD5);
-            /* mov     ds, cs:seg_10012 ;~ 01A2:3979 */
-            ds = seg_10012;
+            /* mov     ds, cs:seg_draw ;~ 01A2:3979 */
+            ds = seg_draw;
             /* add     di, ax ;~ 01A2:397E */
             { dd t_ = (dd)di + (dd)ax; CF = t_ > 0xFFFF; di = t_; ZF = ((dw)(di) == 0); SF = (((dw)(di)) >> 15); }
             /* mov     cx, dx ;~ 01A2:3980 */
@@ -37736,8 +37736,8 @@ loc_13975:
             { dd t_ = (dd)bx + (dd)2; CF = t_ > 0xFFFF; bx = t_; ZF = ((dw)(bx) == 0); SF = (((dw)(bx)) >> 15); }
             /* and     bx, 1FFh ;~ 01A2:3987 */
             bx &= 0x1FF; CF = 0; OF = 0; ZF = ((dw)(bx) == 0); SF = (((dw)(bx)) >> 15);
-            /* mov     ds, cs:seg_10000 ;~ 01A2:398B */
-            ds = seg_10000;
+            /* mov     ds, cs:seg_data ;~ 01A2:398B */
+            ds = seg_data;
             /* dec     byte_1E1C5 ;~ 01A2:3990 */
             (byte_1e1c5)--; ZF = ((db)(byte_1e1c5) == 0); SF = (((db)(byte_1e1c5)) >> 7);
             /* jnz     short loc_13975 ;~ 01A2:3994 */
@@ -37775,16 +37775,16 @@ loc_13943:
         bh = 0; CF = 0; OF = 0; ZF = 1; SF = 0;
         /* shl     bx, 1 ;~ 01A2:396C */
         { if (1) { CF = (((dd)bx << (1)) >> 16) & 1; bx <<= 1; ZF = ((dw)(bx) == 0); SF = (((dw)(bx)) >> 15); } }
-        /* mov     cx, cs:seg_10010 ;~ 01A2:396E */
-        cx = seg_10010;
+        /* mov     cx, cs:seg_flip ;~ 01A2:396E */
+        cx = seg_flip;
         /* mov     es, cx ;~ 01A2:3973 */
         es = cx;
 loc_13975:
         do {
             /* mov     di, [bx+0BD5h] ;~ 01A2:3975 */
             di = *(dw*)raddr(ds,bx+0x0BD5);
-            /* mov     ds, cs:seg_10012 ;~ 01A2:3979 */
-            ds = seg_10012;
+            /* mov     ds, cs:seg_draw ;~ 01A2:3979 */
+            ds = seg_draw;
             /* add     di, ax ;~ 01A2:397E */
             { dd t_ = (dd)di + (dd)ax; CF = t_ > 0xFFFF; di = t_; ZF = ((dw)(di) == 0); SF = (((dw)(di)) >> 15); }
             /* mov     cx, dx ;~ 01A2:3980 */
@@ -37797,8 +37797,8 @@ loc_13975:
             { dd t_ = (dd)bx + (dd)2; CF = t_ > 0xFFFF; bx = t_; ZF = ((dw)(bx) == 0); SF = (((dw)(bx)) >> 15); }
             /* and     bx, 1FFh ;~ 01A2:3987 */
             bx &= 0x1FF; CF = 0; OF = 0; ZF = ((dw)(bx) == 0); SF = (((dw)(bx)) >> 15);
-            /* mov     ds, cs:seg_10000 ;~ 01A2:398B */
-            ds = seg_10000;
+            /* mov     ds, cs:seg_data ;~ 01A2:398B */
+            ds = seg_data;
             /* dec     byte_1E1C5 ;~ 01A2:3990 */
             (byte_1e1c5)--; ZF = ((db)(byte_1e1c5) == 0); SF = (((db)(byte_1e1c5)) >> 7);
             /* jnz     short loc_13975 ;~ 01A2:3994 */
@@ -37820,8 +37820,8 @@ loc_13975:
         do {
             /* mov     di, [bx+0BD5h] ;~ 01A2:3975 */
             di = *(dw*)raddr(ds,bx+0x0BD5);
-            /* mov     ds, cs:seg_10012 ;~ 01A2:3979 */
-            ds = seg_10012;
+            /* mov     ds, cs:seg_draw ;~ 01A2:3979 */
+            ds = seg_draw;
             /* add     di, ax ;~ 01A2:397E */
             { dd t_ = (dd)di + (dd)ax; CF = t_ > 0xFFFF; di = t_; ZF = ((dw)(di) == 0); SF = (((dw)(di)) >> 15); }
             /* mov     cx, dx ;~ 01A2:3980 */
@@ -37834,8 +37834,8 @@ loc_13975:
             { dd t_ = (dd)bx + (dd)2; CF = t_ > 0xFFFF; bx = t_; ZF = ((dw)(bx) == 0); SF = (((dw)(bx)) >> 15); }
             /* and     bx, 1FFh ;~ 01A2:3987 */
             bx &= 0x1FF; CF = 0; OF = 0; ZF = ((dw)(bx) == 0); SF = (((dw)(bx)) >> 15);
-            /* mov     ds, cs:seg_10000 ;~ 01A2:398B */
-            ds = seg_10000;
+            /* mov     ds, cs:seg_data ;~ 01A2:398B */
+            ds = seg_data;
             /* dec     byte_1E1C5 ;~ 01A2:3990 */
             (byte_1e1c5)--; ZF = ((db)(byte_1e1c5) == 0); SF = (((db)(byte_1e1c5)) >> 7);
             /* jnz     short loc_13975 ;~ 01A2:3994 */
@@ -37877,16 +37877,16 @@ loc_13943:
         bh = 0; CF = 0; OF = 0; ZF = 1; SF = 0;
         /* shl     bx, 1 ;~ 01A2:396C */
         { if (1) { CF = (((dd)bx << (1)) >> 16) & 1; bx <<= 1; ZF = ((dw)(bx) == 0); SF = (((dw)(bx)) >> 15); } }
-        /* mov     cx, cs:seg_10010 ;~ 01A2:396E */
-        cx = seg_10010;
+        /* mov     cx, cs:seg_flip ;~ 01A2:396E */
+        cx = seg_flip;
         /* mov     es, cx ;~ 01A2:3973 */
         es = cx;
     } while (1);
 }
 void mcga_dirty_update(void) {
     dd _sa = 0, _sb = 0;
-    /* mov     ax, cs:seg_10000 ;~ 01A2:3930 */
-    ax = seg_10000;
+    /* mov     ax, cs:seg_data ;~ 01A2:3930 */
+    ax = seg_data;
     /* cmp     word_1D934, 3 ;~ 01A2:3934 */
     CF = (dd)adapter_id < (dd)3; ZF = ((dw)((adapter_id) - (3)) == 0); SF = (((dw)((adapter_id) - (3))) >> 15);
     /* jz      short loc_1393C ;~ 01A2:3939 */
@@ -37929,16 +37929,16 @@ loc_13943:
     bh = 0; CF = 0; OF = 0; ZF = 1; SF = 0;
     /* shl     bx, 1 ;~ 01A2:396C */
     { if (1) { CF = (((dd)bx << (1)) >> 16) & 1; bx <<= 1; ZF = ((dw)(bx) == 0); SF = (((dw)(bx)) >> 15); } }
-    /* mov     cx, cs:seg_10010 ;~ 01A2:396E */
-    cx = seg_10010;
+    /* mov     cx, cs:seg_flip ;~ 01A2:396E */
+    cx = seg_flip;
     /* mov     es, cx ;~ 01A2:3973 */
     es = cx;
 loc_13975:
     do {
         /* mov     di, [bx+0BD5h] ;~ 01A2:3975 */
         di = *(dw*)raddr(ds,bx+0x0BD5);
-        /* mov     ds, cs:seg_10012 ;~ 01A2:3979 */
-        ds = seg_10012;
+        /* mov     ds, cs:seg_draw ;~ 01A2:3979 */
+        ds = seg_draw;
         /* add     di, ax ;~ 01A2:397E */
         { dd t_ = (dd)di + (dd)ax; CF = t_ > 0xFFFF; di = t_; ZF = ((dw)(di) == 0); SF = (((dw)(di)) >> 15); }
         /* mov     cx, dx ;~ 01A2:3980 */
@@ -37951,8 +37951,8 @@ loc_13975:
         { dd t_ = (dd)bx + (dd)2; CF = t_ > 0xFFFF; bx = t_; ZF = ((dw)(bx) == 0); SF = (((dw)(bx)) >> 15); }
         /* and     bx, 1FFh ;~ 01A2:3987 */
         bx &= 0x1FF; CF = 0; OF = 0; ZF = ((dw)(bx) == 0); SF = (((dw)(bx)) >> 15);
-        /* mov     ds, cs:seg_10000 ;~ 01A2:398B */
-        ds = seg_10000;
+        /* mov     ds, cs:seg_data ;~ 01A2:398B */
+        ds = seg_data;
         /* dec     byte_1E1C5 ;~ 01A2:3990 */
         (byte_1e1c5)--; ZF = ((db)(byte_1e1c5) == 0); SF = (((db)(byte_1e1c5)) >> 7);
         /* jnz     short loc_13975 ;~ 01A2:3994 */
@@ -39955,9 +39955,9 @@ loc_13b08:
 loc_13b12:
     /* mov     sp, cs:word_13A90 ;~ 01A2:3B12 */
     sp = word_13a90;
-    /* mov     ax, cs:seg_10000 ;~ 01A2:3B17 */
+    /* mov     ax, cs:seg_data ;~ 01A2:3B17 */
     /* mov     ds, ax ;~ 01A2:3B1B */
-    ds = (seg_10000);
+    ds = (seg_data);
     /* mov     ax, cs:word_13A92 ;~ 01A2:3B1D */
     /* mov     ss, ax ;~ 01A2:3B21 */
     ss = (word_13a92);
@@ -40062,8 +40062,8 @@ loc_13b85:
         goto loc_13baa;
     }
 loc_13b9e:
-    /* mov     ax, cs:seg_10000 ;~ 01A2:3B9E */
-    ax = seg_10000;
+    /* mov     ax, cs:seg_data ;~ 01A2:3B9E */
+    ax = seg_data;
     /* mov     ds, ax ;~ 01A2:3BA2 */
     ds = ax;
     /* mov     es, ax ;~ 01A2:3BA4 */
@@ -40167,9 +40167,9 @@ loc_13b08:
 loc_13b12:
     /* mov     sp, cs:word_13A90 ;~ 01A2:3B12 */
     sp = word_13a90;
-    /* mov     ax, cs:seg_10000 ;~ 01A2:3B17 */
+    /* mov     ax, cs:seg_data ;~ 01A2:3B17 */
     /* mov     ds, ax ;~ 01A2:3B1B */
-    ds = (seg_10000);
+    ds = (seg_data);
     /* mov     ax, cs:word_13A92 ;~ 01A2:3B1D */
     /* mov     ss, ax ;~ 01A2:3B21 */
     ss = (word_13a92);
@@ -40274,8 +40274,8 @@ loc_13b85:
         goto loc_13baa;
     }
 loc_13b9e:
-    /* mov     ax, cs:seg_10000 ;~ 01A2:3B9E */
-    ax = seg_10000;
+    /* mov     ax, cs:seg_data ;~ 01A2:3B9E */
+    ax = seg_data;
     /* mov     ds, ax ;~ 01A2:3BA2 */
     ds = ax;
     /* mov     es, ax ;~ 01A2:3BA4 */
@@ -40403,9 +40403,9 @@ locret_13bc0:
 void loc_13b12(void) {
     /* mov     sp, cs:word_13A90 ;~ 01A2:3B12 */
     sp = word_13a90;
-    /* mov     ax, cs:seg_10000 ;~ 01A2:3B17 */
+    /* mov     ax, cs:seg_data ;~ 01A2:3B17 */
     /* mov     ds, ax ;~ 01A2:3B1B */
-    ds = (seg_10000);
+    ds = (seg_data);
     /* mov     ax, cs:word_13A92 ;~ 01A2:3B1D */
     /* mov     ss, ax ;~ 01A2:3B21 */
     ss = (word_13a92);
@@ -40510,8 +40510,8 @@ loc_13b85:
         goto loc_13baa;
     }
 loc_13b9e:
-    /* mov     ax, cs:seg_10000 ;~ 01A2:3B9E */
-    ax = seg_10000;
+    /* mov     ax, cs:seg_data ;~ 01A2:3B9E */
+    ax = seg_data;
     /* mov     ds, ax ;~ 01A2:3BA2 */
     ds = ax;
     /* mov     es, ax ;~ 01A2:3BA4 */
@@ -40624,8 +40624,8 @@ loc_13b85:
         goto loc_13baa;
     }
 loc_13b9e:
-    /* mov     ax, cs:seg_10000 ;~ 01A2:3B9E */
-    ax = seg_10000;
+    /* mov     ax, cs:seg_data ;~ 01A2:3B9E */
+    ax = seg_data;
     /* mov     ds, ax ;~ 01A2:3BA2 */
     ds = ax;
     /* mov     es, ax ;~ 01A2:3BA4 */
@@ -40684,8 +40684,8 @@ void loc_13b85(void) {
         goto loc_13baa;
     }
 loc_13b9e:
-    /* mov     ax, cs:seg_10000 ;~ 01A2:3B9E */
-    ax = seg_10000;
+    /* mov     ax, cs:seg_data ;~ 01A2:3B9E */
+    ax = seg_data;
     /* mov     ds, ax ;~ 01A2:3BA2 */
     ds = ax;
     /* mov     es, ax ;~ 01A2:3BA4 */
@@ -40722,8 +40722,8 @@ locret_13bc0:
     return;
 }
 void loc_13b9e(void) {
-    /* mov     ax, cs:seg_10000 ;~ 01A2:3B9E */
-    ax = seg_10000;
+    /* mov     ax, cs:seg_data ;~ 01A2:3B9E */
+    ax = seg_data;
     /* mov     ds, ax ;~ 01A2:3BA2 */
     ds = ax;
     /* mov     es, ax ;~ 01A2:3BA4 */
@@ -40797,8 +40797,8 @@ loc_13baa:
 }
 void load_overlay(void) {
     dd _sa = 0, _sb = 0;
-    /* mov     ax, cs:seg_10000 ;~ 01A2:3A94 */
-    ax = seg_10000;
+    /* mov     ax, cs:seg_data ;~ 01A2:3A94 */
+    ax = seg_data;
     /* mov     ds, ax ;~ 01A2:3A98 */
     ds = ax;
     /* mov     es, ax ;~ 01A2:3A9A */
@@ -40913,9 +40913,9 @@ loc_13b08:
 loc_13b12:
     /* mov     sp, cs:word_13A90 ;~ 01A2:3B12 */
     sp = word_13a90;
-    /* mov     ax, cs:seg_10000 ;~ 01A2:3B17 */
+    /* mov     ax, cs:seg_data ;~ 01A2:3B17 */
     /* mov     ds, ax ;~ 01A2:3B1B */
-    ds = (seg_10000);
+    ds = (seg_data);
     /* mov     ax, cs:word_13A92 ;~ 01A2:3B1D */
     /* mov     ss, ax ;~ 01A2:3B21 */
     ss = (word_13a92);
@@ -41020,8 +41020,8 @@ loc_13b85:
         goto loc_13baa;
     }
 loc_13b9e:
-    /* mov     ax, cs:seg_10000 ;~ 01A2:3B9E */
-    ax = seg_10000;
+    /* mov     ax, cs:seg_data ;~ 01A2:3B9E */
+    ax = seg_data;
     /* mov     ds, ax ;~ 01A2:3BA2 */
     ds = ax;
     /* mov     es, ax ;~ 01A2:3BA4 */
@@ -41058,8 +41058,8 @@ locret_13bc0:
     return;
 }
 void scroll_go_a(void) {
-    /* mov     ax, cs:seg_10012 ; jumptable 00016AB9 case 2 ;~ 01A2:3BEA */
-    ax = seg_10012;
+    /* mov     ax, cs:seg_draw ; jumptable 00016AB9 case 2 ;~ 01A2:3BEA */
+    ax = seg_draw;
     /* mov     es, ax ;~ 01A2:3BEE */
     es = ax;
     /* mov     di, word_1D934 ;~ 01A2:3BF0 */
@@ -41069,9 +41069,9 @@ void scroll_go_a(void) {
     /* mov     ds, ax ;~ 01A2:3BF6 */
     ds = ax;
     /* call    cs:funcs_13BF8[di] ;~ 01A2:3BF8 */
-    { vfn f_ = func_at((dd)0x1a20 + (*(dw*)(((db*)&funcs_13bf8)+di))); dw sp_ = sp; if (f_) f_(); else fprintf(stderr, "unresolved ind call %x\n", (dd)((dd)0x1a20 + (*(dw*)(((db*)&funcs_13bf8)+di)))); if ((short)(sp - sp_) > 0) { sp = sp_; return; } }
-    /* mov     ax, cs:seg_10000 ;~ 01A2:3BFD */
-    ax = seg_10000;
+    { vfn f_ = func_at((dd)0x1a20 + (*(dw*)(((db*)&scroll_tbl_a)+di))); dw sp_ = sp; if (f_) f_(); else fprintf(stderr, "unresolved ind call %x\n", (dd)((dd)0x1a20 + (*(dw*)(((db*)&scroll_tbl_a)+di)))); if ((short)(sp - sp_) > 0) { sp = sp_; return; } }
+    /* mov     ax, cs:seg_data ;~ 01A2:3BFD */
+    ax = seg_data;
     /* mov     ds, ax ;~ 01A2:3C01 */
     ds = ax;
     /* jmp     sub_1428A ;~ 01A2:3C03 */
@@ -41221,8 +41221,8 @@ void scroll_a_ega(void) {
     return;
 }
 void scroll_a_mcga(void) {
-    /* mov     ax, cs:seg_10010 ;~ 01A2:3C84 */
-    ax = seg_10010;
+    /* mov     ax, cs:seg_flip ;~ 01A2:3C84 */
+    ax = seg_flip;
     /* mov     es, ax ;~ 01A2:3C88 */
     es = ax;
     /* mov     ds, ax ;~ 01A2:3C8A */
@@ -41263,8 +41263,8 @@ void scroll_a_herc(void) {
     return;
 }
 void scroll_go_b(void) {
-    /* mov     ax, cs:seg_10012 ; jumptable 00016AB9 case 4 ;~ 01A2:3CBB */
-    ax = seg_10012;
+    /* mov     ax, cs:seg_draw ; jumptable 00016AB9 case 4 ;~ 01A2:3CBB */
+    ax = seg_draw;
     /* mov     es, ax ;~ 01A2:3CBF */
     es = ax;
     /* mov     di, ds:0AB4h ;~ 01A2:3CC1 */
@@ -41274,9 +41274,9 @@ void scroll_go_b(void) {
     /* mov     ds, ax ;~ 01A2:3CC7 */
     ds = ax;
     /* call    cs:funcs_13CC9[di] ;~ 01A2:3CC9 */
-    { vfn f_ = func_at((dd)0x1a20 + (*(dw*)(((db*)&funcs_13cc9)+di))); dw sp_ = sp; if (f_) f_(); else fprintf(stderr, "unresolved ind call %x\n", (dd)((dd)0x1a20 + (*(dw*)(((db*)&funcs_13cc9)+di)))); if ((short)(sp - sp_) > 0) { sp = sp_; return; } }
-    /* mov     ax, cs:seg_10000 ;~ 01A2:3CCE */
-    ax = seg_10000;
+    { vfn f_ = func_at((dd)0x1a20 + (*(dw*)(((db*)&scroll_tbl_b)+di))); dw sp_ = sp; if (f_) f_(); else fprintf(stderr, "unresolved ind call %x\n", (dd)((dd)0x1a20 + (*(dw*)(((db*)&scroll_tbl_b)+di)))); if ((short)(sp - sp_) > 0) { sp = sp_; return; } }
+    /* mov     ax, cs:seg_data ;~ 01A2:3CCE */
+    ax = seg_data;
     /* mov     ds, ax ;~ 01A2:3CD2 */
     ds = ax;
     /* jmp     sub_143AC ;~ 01A2:3CD4 */
@@ -41439,8 +41439,8 @@ void scroll_b_ega(void) {
     return;
 }
 void scroll_b_mcga(void) {
-    /* mov     ax, cs:seg_10010 ;~ 01A2:3D5A */
-    ax = seg_10010;
+    /* mov     ax, cs:seg_flip ;~ 01A2:3D5A */
+    ax = seg_flip;
     /* mov     es, ax ;~ 01A2:3D5E */
     es = ax;
     /* mov     ds, ax ;~ 01A2:3D60 */
@@ -41485,8 +41485,8 @@ void scroll_b_herc(void) {
     return;
 }
 void scroll_go_c(void) {
-    /* mov     ax, cs:seg_10012 ; jumptable 00016AB9 case 8 ;~ 01A2:3D93 */
-    ax = seg_10012;
+    /* mov     ax, cs:seg_draw ; jumptable 00016AB9 case 8 ;~ 01A2:3D93 */
+    ax = seg_draw;
     /* mov     es, ax ;~ 01A2:3D97 */
     es = ax;
     /* mov     di, ds:0AB4h ;~ 01A2:3D99 */
@@ -41496,9 +41496,9 @@ void scroll_go_c(void) {
     /* mov     ds, ax ;~ 01A2:3D9F */
     ds = ax;
     /* call    cs:funcs_13DA1[di] ;~ 01A2:3DA1 */
-    { vfn f_ = func_at((dd)0x1a20 + (*(dw*)(((db*)&funcs_13da1)+di))); dw sp_ = sp; if (f_) f_(); else fprintf(stderr, "unresolved ind call %x\n", (dd)((dd)0x1a20 + (*(dw*)(((db*)&funcs_13da1)+di)))); if ((short)(sp - sp_) > 0) { sp = sp_; return; } }
-    /* mov     ax, cs:seg_10000 ;~ 01A2:3DA6 */
-    ax = seg_10000;
+    { vfn f_ = func_at((dd)0x1a20 + (*(dw*)(((db*)&scroll_tbl_c)+di))); dw sp_ = sp; if (f_) f_(); else fprintf(stderr, "unresolved ind call %x\n", (dd)((dd)0x1a20 + (*(dw*)(((db*)&scroll_tbl_c)+di)))); if ((short)(sp - sp_) > 0) { sp = sp_; return; } }
+    /* mov     ax, cs:seg_data ;~ 01A2:3DA6 */
+    ax = seg_data;
     /* mov     ds, ax ;~ 01A2:3DAA */
     ds = ax;
     /* jmp     sub_14320 ;~ 01A2:3DAC */
@@ -41648,8 +41648,8 @@ void scroll_c_ega(void) {
     return;
 }
 void scroll_c_mcga(void) {
-    /* mov     ax, cs:seg_10010 ;~ 01A2:3E2D */
-    ax = seg_10010;
+    /* mov     ax, cs:seg_flip ;~ 01A2:3E2D */
+    ax = seg_flip;
     /* mov     es, ax ;~ 01A2:3E31 */
     es = ax;
     /* mov     ds, ax ;~ 01A2:3E33 */
@@ -41690,8 +41690,8 @@ void scroll_c_herc(void) {
     return;
 }
 void scroll_go_d(void) {
-    /* mov     ax, cs:seg_10012 ; jumptable 00016AB9 case 1 ;~ 01A2:3E64 */
-    ax = seg_10012;
+    /* mov     ax, cs:seg_draw ; jumptable 00016AB9 case 1 ;~ 01A2:3E64 */
+    ax = seg_draw;
     /* mov     es, ax ;~ 01A2:3E68 */
     es = ax;
     /* mov     di, ds:0AB4h ;~ 01A2:3E6A */
@@ -41701,9 +41701,9 @@ void scroll_go_d(void) {
     /* mov     ds, ax ;~ 01A2:3E70 */
     ds = ax;
     /* call    cs:funcs_13E72[di] ;~ 01A2:3E72 */
-    { vfn f_ = func_at((dd)0x1a20 + (*(dw*)(((db*)&funcs_13e72)+di))); dw sp_ = sp; if (f_) f_(); else fprintf(stderr, "unresolved ind call %x\n", (dd)((dd)0x1a20 + (*(dw*)(((db*)&funcs_13e72)+di)))); if ((short)(sp - sp_) > 0) { sp = sp_; return; } }
-    /* mov     ax, cs:seg_10000 ;~ 01A2:3E77 */
-    ax = seg_10000;
+    { vfn f_ = func_at((dd)0x1a20 + (*(dw*)(((db*)&scroll_tbl_d)+di))); dw sp_ = sp; if (f_) f_(); else fprintf(stderr, "unresolved ind call %x\n", (dd)((dd)0x1a20 + (*(dw*)(((db*)&scroll_tbl_d)+di)))); if ((short)(sp - sp_) > 0) { sp = sp_; return; } }
+    /* mov     ax, cs:seg_data ;~ 01A2:3E77 */
+    ax = seg_data;
     /* mov     ds, ax ;~ 01A2:3E7B */
     ds = ax;
     /* jmp     sub_142DA ;~ 01A2:3E7D */
@@ -41861,8 +41861,8 @@ void scroll_d_ega(void) {
     return;
 }
 void scroll_d_mcga(void) {
-    /* mov     ax, cs:seg_10010 ;~ 01A2:3F01 */
-    ax = seg_10010;
+    /* mov     ax, cs:seg_flip ;~ 01A2:3F01 */
+    ax = seg_flip;
     /* mov     es, ax ;~ 01A2:3F05 */
     es = ax;
     /* mov     ds, ax ;~ 01A2:3F07 */
@@ -41907,8 +41907,8 @@ void scroll_d_herc(void) {
     return;
 }
 void scroll_go_e(void) {
-    /* mov     ax, cs:seg_10012 ; jumptable 00016AB9 case 5 ;~ 01A2:3F3A */
-    ax = seg_10012;
+    /* mov     ax, cs:seg_draw ; jumptable 00016AB9 case 5 ;~ 01A2:3F3A */
+    ax = seg_draw;
     /* mov     es, ax ;~ 01A2:3F3E */
     es = ax;
     /* mov     di, ds:0AB4h ;~ 01A2:3F40 */
@@ -41918,9 +41918,9 @@ void scroll_go_e(void) {
     /* mov     ds, ax ;~ 01A2:3F46 */
     ds = ax;
     /* call    cs:funcs_13F48[di] ;~ 01A2:3F48 */
-    { vfn f_ = func_at((dd)0x1a20 + (*(dw*)(((db*)&funcs_13f48)+di))); dw sp_ = sp; if (f_) f_(); else fprintf(stderr, "unresolved ind call %x\n", (dd)((dd)0x1a20 + (*(dw*)(((db*)&funcs_13f48)+di)))); if ((short)(sp - sp_) > 0) { sp = sp_; return; } }
-    /* mov     ax, cs:seg_10000 ;~ 01A2:3F4D */
-    ax = seg_10000;
+    { vfn f_ = func_at((dd)0x1a20 + (*(dw*)(((db*)&scroll_tbl_e)+di))); dw sp_ = sp; if (f_) f_(); else fprintf(stderr, "unresolved ind call %x\n", (dd)((dd)0x1a20 + (*(dw*)(((db*)&scroll_tbl_e)+di)))); if ((short)(sp - sp_) > 0) { sp = sp_; return; } }
+    /* mov     ax, cs:seg_data ;~ 01A2:3F4D */
+    ax = seg_data;
     /* mov     ds, ax ;~ 01A2:3F51 */
     ds = ax;
     /* call    sub_143AC ;~ 01A2:3F53 */
@@ -42080,8 +42080,8 @@ void scroll_e_ega(void) {
     return;
 }
 void scroll_e_mcga(void) {
-    /* mov     ax, cs:seg_10010 ;~ 01A2:3FDA */
-    ax = seg_10010;
+    /* mov     ax, cs:seg_flip ;~ 01A2:3FDA */
+    ax = seg_flip;
     /* mov     es, ax ;~ 01A2:3FDE */
     es = ax;
     /* mov     ds, ax ;~ 01A2:3FE0 */
@@ -42126,8 +42126,8 @@ void scroll_e_herc(void) {
     return;
 }
 void scroll_go_f(void) {
-    /* mov     ax, cs:seg_10012 ; jumptable 00016AB9 case 9 ;~ 01A2:4013 */
-    ax = seg_10012;
+    /* mov     ax, cs:seg_draw ; jumptable 00016AB9 case 9 ;~ 01A2:4013 */
+    ax = seg_draw;
     /* mov     es, ax ;~ 01A2:4017 */
     es = ax;
     /* mov     di, ds:0AB4h ;~ 01A2:4019 */
@@ -42136,10 +42136,10 @@ void scroll_go_f(void) {
     { if (1) { CF = (((dd)di << (1)) >> 16) & 1; di <<= 1; ZF = ((dw)(di) == 0); SF = (((dw)(di)) >> 15); } }
     /* mov     ds, ax ;~ 01A2:401F */
     ds = ax;
-    /* call    cs:funcs_14021[di] ;~ 01A2:4021 */
-    { vfn f_ = func_at((dd)0x1a20 + (*(dw*)(((db*)&funcs_14021)+di))); dw sp_ = sp; if (f_) f_(); else fprintf(stderr, "unresolved ind call %x\n", (dd)((dd)0x1a20 + (*(dw*)(((db*)&funcs_14021)+di)))); if ((short)(sp - sp_) > 0) { sp = sp_; return; } }
-    /* mov     ax, cs:seg_10000 ;~ 01A2:4026 */
-    ax = seg_10000;
+    /* call    cs:scroll_tbl_f[di] ;~ 01A2:4021 */
+    { vfn f_ = func_at((dd)0x1a20 + (*(dw*)(((db*)&scroll_tbl_f)+di))); dw sp_ = sp; if (f_) f_(); else fprintf(stderr, "unresolved ind call %x\n", (dd)((dd)0x1a20 + (*(dw*)(((db*)&scroll_tbl_f)+di)))); if ((short)(sp - sp_) > 0) { sp = sp_; return; } }
+    /* mov     ax, cs:seg_data ;~ 01A2:4026 */
+    ax = seg_data;
     /* mov     ds, ax ;~ 01A2:402A */
     ds = ax;
     /* call    sub_14320 ;~ 01A2:402C */
@@ -42299,8 +42299,8 @@ void scroll_f_ega(void) {
     return;
 }
 void scroll_f_mcga(void) {
-    /* mov     ax, cs:seg_10010 ;~ 01A2:40B3 */
-    ax = seg_10010;
+    /* mov     ax, cs:seg_flip ;~ 01A2:40B3 */
+    ax = seg_flip;
     /* mov     es, ax ;~ 01A2:40B7 */
     es = ax;
     /* mov     ds, ax ;~ 01A2:40B9 */
@@ -42345,8 +42345,8 @@ void scroll_f_herc(void) {
     return;
 }
 void scroll_go_g(void) {
-    /* mov     ax, cs:seg_10012 ; jumptable 00016AB9 case 6 ;~ 01A2:40EC */
-    ax = seg_10012;
+    /* mov     ax, cs:seg_draw ; jumptable 00016AB9 case 6 ;~ 01A2:40EC */
+    ax = seg_draw;
     /* mov     es, ax ;~ 01A2:40F0 */
     es = ax;
     /* mov     di, ds:0AB4h ;~ 01A2:40F2 */
@@ -42356,9 +42356,9 @@ void scroll_go_g(void) {
     /* mov     ds, ax ;~ 01A2:40F8 */
     ds = ax;
     /* call    cs:funcs_140FA[di] ;~ 01A2:40FA */
-    { vfn f_ = func_at((dd)0x1a20 + (*(dw*)(((db*)&funcs_140fa)+di))); dw sp_ = sp; if (f_) f_(); else fprintf(stderr, "unresolved ind call %x\n", (dd)((dd)0x1a20 + (*(dw*)(((db*)&funcs_140fa)+di)))); if ((short)(sp - sp_) > 0) { sp = sp_; return; } }
-    /* mov     ax, cs:seg_10000 ;~ 01A2:40FF */
-    ax = seg_10000;
+    { vfn f_ = func_at((dd)0x1a20 + (*(dw*)(((db*)&scroll_tbl_g)+di))); dw sp_ = sp; if (f_) f_(); else fprintf(stderr, "unresolved ind call %x\n", (dd)((dd)0x1a20 + (*(dw*)(((db*)&scroll_tbl_g)+di)))); if ((short)(sp - sp_) > 0) { sp = sp_; return; } }
+    /* mov     ax, cs:seg_data ;~ 01A2:40FF */
+    ax = seg_data;
     /* mov     ds, ax ;~ 01A2:4103 */
     ds = ax;
     /* call    sub_143AC ;~ 01A2:4105 */
@@ -42510,8 +42510,8 @@ void scroll_g_ega(void) {
     return;
 }
 void scroll_g_mcga(void) {
-    /* mov     ax, cs:seg_10010 ;~ 01A2:4189 */
-    ax = seg_10010;
+    /* mov     ax, cs:seg_flip ;~ 01A2:4189 */
+    ax = seg_flip;
     /* mov     es, ax ;~ 01A2:418D */
     es = ax;
     /* mov     ds, ax ;~ 01A2:418F */
@@ -42552,8 +42552,8 @@ void scroll_g_herc(void) {
     return;
 }
 void scroll_go_h(void) {
-    /* mov     ax, cs:seg_10012 ; jumptable 00016AB9 case 10 ;~ 01A2:41C0 */
-    ax = seg_10012;
+    /* mov     ax, cs:seg_draw ; jumptable 00016AB9 case 10 ;~ 01A2:41C0 */
+    ax = seg_draw;
     /* mov     es, ax ;~ 01A2:41C4 */
     es = ax;
     /* mov     di, ds:0AB4h ;~ 01A2:41C6 */
@@ -42563,9 +42563,9 @@ void scroll_go_h(void) {
     /* mov     ds, ax ;~ 01A2:41CC */
     ds = ax;
     /* call    cs:funcs_141CE[di] ;~ 01A2:41CE */
-    { vfn f_ = func_at((dd)0x1a20 + (*(dw*)(((db*)&funcs_141ce)+di))); dw sp_ = sp; if (f_) f_(); else fprintf(stderr, "unresolved ind call %x\n", (dd)((dd)0x1a20 + (*(dw*)(((db*)&funcs_141ce)+di)))); if ((short)(sp - sp_) > 0) { sp = sp_; return; } }
-    /* mov     ax, cs:seg_10000 ;~ 01A2:41D3 */
-    ax = seg_10000;
+    { vfn f_ = func_at((dd)0x1a20 + (*(dw*)(((db*)&scroll_tbl_h)+di))); dw sp_ = sp; if (f_) f_(); else fprintf(stderr, "unresolved ind call %x\n", (dd)((dd)0x1a20 + (*(dw*)(((db*)&scroll_tbl_h)+di)))); if ((short)(sp - sp_) > 0) { sp = sp_; return; } }
+    /* mov     ax, cs:seg_data ;~ 01A2:41D3 */
+    ax = seg_data;
     /* mov     ds, ax ;~ 01A2:41D7 */
     ds = ax;
     /* call    sub_14320 ;~ 01A2:41D9 */
@@ -42717,8 +42717,8 @@ void scroll_h_ega(void) {
     return;
 }
 void scroll_h_mcga(void) {
-    /* mov     ax, cs:seg_10010 ;~ 01A2:425D */
-    ax = seg_10010;
+    /* mov     ax, cs:seg_flip ;~ 01A2:425D */
+    ax = seg_flip;
     /* mov     es, ax ;~ 01A2:4261 */
     es = ax;
     /* mov     ds, ax ;~ 01A2:4263 */
@@ -43904,8 +43904,8 @@ loc_1450e:
     return;
 }
 void scroll_d_direct(void) {
-    /* mov     ax, cs:seg_10012 ;~ 01A2:44D5 */
-    ax = seg_10012;
+    /* mov     ax, cs:seg_draw ;~ 01A2:44D5 */
+    ax = seg_draw;
     /* mov     es, ax ;~ 01A2:44D9 */
     es = ax;
     /* mov     di, ds:0AB4h ;~ 01A2:44DB */
@@ -43915,10 +43915,10 @@ void scroll_d_direct(void) {
     /* mov     ds, ax ;~ 01A2:44E1 */
     ds = ax;
     /* call    cs:funcs_13E72[di] ;~ 01A2:44E3 */
-    { vfn f_ = func_at((dd)0x1a20 + (*(dw*)(((db*)&funcs_13e72)+di))); dw sp_ = sp; if (f_) f_(); else fprintf(stderr, "unresolved ind call %x\n", (dd)((dd)0x1a20 + (*(dw*)(((db*)&funcs_13e72)+di)))); if ((short)(sp - sp_) > 0) { sp = sp_; return; } }
-    /* mov     ax, cs:seg_10000 ;~ 01A2:44E8 */
+    { vfn f_ = func_at((dd)0x1a20 + (*(dw*)(((db*)&scroll_tbl_d)+di))); dw sp_ = sp; if (f_) f_(); else fprintf(stderr, "unresolved ind call %x\n", (dd)((dd)0x1a20 + (*(dw*)(((db*)&scroll_tbl_d)+di)))); if ((short)(sp - sp_) > 0) { sp = sp_; return; } }
+    /* mov     ax, cs:seg_data ;~ 01A2:44E8 */
     /* mov     ds, ax ;~ 01A2:44EC */
-    ds = (seg_10000);
+    ds = (seg_data);
     /* mov     word_2AA40, 0FFFFh ;~ 01A2:44EE */
     row_meta = 0x0FFFF;
     /* mov     cx, 1 ;~ 01A2:44F4 */
@@ -46286,8 +46286,8 @@ void frame_compose_flip(void) {
     return;
 }
 void game_main(void) {
-    /* mov     ax, cs:seg_10000 ;~ 01A2:4760 */
-    ax = seg_10000;
+    /* mov     ax, cs:seg_data ;~ 01A2:4760 */
+    ax = seg_data;
     /* mov     ds, ax ;~ 01A2:4764 */
     ds = ax;
     /* mov     es, ax ;~ 01A2:4766 */
@@ -46365,8 +46365,8 @@ loc_147a5:
     select_resource_d();
 loc_147d9:
     do {
-        /* mov     ax, cs:seg_10000 ;~ 01A2:47D9 */
-        ax = seg_10000;
+        /* mov     ax, cs:seg_data ;~ 01A2:47D9 */
+        ax = seg_data;
         /* mov     ds, ax ;~ 01A2:47DD */
         ds = ax;
         /* mov     es, ax ;~ 01A2:47DF */
@@ -46511,8 +46511,8 @@ void loc_147a5(void) {
     select_resource_d();
 loc_147d9:
     do {
-        /* mov     ax, cs:seg_10000 ;~ 01A2:47D9 */
-        ax = seg_10000;
+        /* mov     ax, cs:seg_data ;~ 01A2:47D9 */
+        ax = seg_data;
         /* mov     ds, ax ;~ 01A2:47DD */
         ds = ax;
         /* mov     es, ax ;~ 01A2:47DF */
@@ -46619,8 +46619,8 @@ loc_1486d:
 void loc_147d9(void) {
 loc_147d9:
     do {
-        /* mov     ax, cs:seg_10000 ;~ 01A2:47D9 */
-        ax = seg_10000;
+        /* mov     ax, cs:seg_data ;~ 01A2:47D9 */
+        ax = seg_data;
         /* mov     ds, ax ;~ 01A2:47DD */
         ds = ax;
         /* mov     es, ax ;~ 01A2:47DF */
@@ -46786,8 +46786,8 @@ loc_1486d:
         /* jmp     loc_147D9 ;~ 01A2:488D */
         goto loc_147d9;
 loc_147d9:
-        /* mov     ax, cs:seg_10000 ;~ 01A2:47D9 */
-        ax = seg_10000;
+        /* mov     ax, cs:seg_data ;~ 01A2:47D9 */
+        ax = seg_data;
         /* mov     ds, ax ;~ 01A2:47DD */
         ds = ax;
         /* mov     es, ax ;~ 01A2:47DF */
@@ -46857,8 +46857,8 @@ loc_1486d:
             /* jmp     loc_147D9 ;~ 01A2:488D */
             goto loc_147d9;
 loc_147d9:
-            /* mov     ax, cs:seg_10000 ;~ 01A2:47D9 */
-            ax = seg_10000;
+            /* mov     ax, cs:seg_data ;~ 01A2:47D9 */
+            ax = seg_data;
             /* mov     ds, ax ;~ 01A2:47DD */
             ds = ax;
             /* mov     es, ax ;~ 01A2:47DF */
@@ -48962,15 +48962,15 @@ void render_tick(void) {
     /* inc     word_265AC ;~ 01A2:4ACD */
     (word_265ac)++; ZF = ((dw)(word_265ac) == 0); SF = (((dw)(word_265ac)) >> 15);
     /* dec     word_265AE ;~ 01A2:4AD1 */
-    (word_265ae)--; ZF = ((dw)(word_265ae) == 0); SF = (((dw)(word_265ae)) >> 15);
+    (render_cnt)--; ZF = ((dw)(render_cnt) == 0); SF = (((dw)(render_cnt)) >> 15);
     /* jns     short locret_14B0B ;~ 01A2:4AD5 */
-    if ((short)(word_265ae) >= 0) { return; }
+    if ((short)(render_cnt) >= 0) { return; }
     /* mov     ax, word_1D94B ;~ 01A2:4AD7 */
     ax = stage_parm_b;
     /* mov     word_265AE, ax ;~ 01A2:4ADA */
-    _sa = (word_265ae);
+    _sa = (render_cnt);
     /* mov     word_265AE, ax ;~ 01A2:4ADA */
-    word_265ae = ax;
+    render_cnt = ax;
 sub_14add:
     /* mov     word_1DDB2, 1 ;~ 01A2:4ADD */
     compose_gate = 1;
@@ -49043,8 +49043,8 @@ locret_14b0b:
     return;
 }
 void loc_14b1a(void) {
-    /* mov     ax, cs:seg_10004 ;~ 01A2:4B1A */
-    ax = seg_10004;
+    /* mov     ax, cs:seg_resbuf ;~ 01A2:4B1A */
+    ax = seg_resbuf;
     /* mov     es, ax ;~ 01A2:4B1E */
     es = ax;
     /* mov     si, 3C70h ;~ 01A2:4B20 */
@@ -49059,8 +49059,8 @@ void loc_14b1a(void) {
     return;
 }
 void build_mcga_lut(void) {
-    /* mov     ax, cs:seg_10000 ;~ 01A2:4B0C */
-    ax = seg_10000;
+    /* mov     ax, cs:seg_data ;~ 01A2:4B0C */
+    ax = seg_data;
     /* mov     ds, ax ;~ 01A2:4B10 */
     ds = ax;
     /* cmp     word_1D934, 3 ;~ 01A2:4B12 */
@@ -49071,8 +49071,8 @@ void build_mcga_lut(void) {
         return;
     }
 loc_14b1a:
-    /* mov     ax, cs:seg_10004 ;~ 01A2:4B1A */
-    ax = seg_10004;
+    /* mov     ax, cs:seg_resbuf ;~ 01A2:4B1A */
+    ax = seg_resbuf;
     /* mov     es, ax ;~ 01A2:4B1E */
     es = ax;
     /* mov     si, 3C70h ;~ 01A2:4B20 */
@@ -51668,7 +51668,7 @@ void cursor_snap(void) {
     /* mov     al, 0 ;~ 01A2:4DDB */
     al = 0;
     /* mov     byte_26DF1, al ;~ 01A2:4DDD */
-    byte_26df1 = al;
+    snap_v = al;
     /* mov     byte_26DFA, al ;~ 01A2:4DE0 */
     byte_26dfa = al;
     /* call    sub_14E9D ;~ 01A2:4DE3 */
@@ -59818,8 +59818,8 @@ loc_15221:
     bl |= bl; CF = 0; OF = 0; ZF = ((db)(bl) == 0); SF = (((db)(bl)) >> 7);
     /* call    sub_14B57 ;~ 01A2:5229 */
     rec_addr_bx();
-    /* mov     ax, cs:seg_10000 ;~ 01A2:522C */
-    ax = seg_10000;
+    /* mov     ax, cs:seg_data ;~ 01A2:522C */
+    ax = seg_data;
     /* mov     es, ax ;~ 01A2:5230 */
     es = ax;
     /* mov     si, 9F7Eh ;~ 01A2:5232 */
@@ -60042,8 +60042,8 @@ loc_15221:
     bl |= bl; CF = 0; OF = 0; ZF = ((db)(bl) == 0); SF = (((db)(bl)) >> 7);
     /* call    sub_14B57 ;~ 01A2:5229 */
     rec_addr_bx();
-    /* mov     ax, cs:seg_10000 ;~ 01A2:522C */
-    ax = seg_10000;
+    /* mov     ax, cs:seg_data ;~ 01A2:522C */
+    ax = seg_data;
     /* mov     es, ax ;~ 01A2:5230 */
     es = ax;
     /* mov     si, 9F7Eh ;~ 01A2:5232 */
@@ -60257,8 +60257,8 @@ loc_15221:
     bl |= bl; CF = 0; OF = 0; ZF = ((db)(bl) == 0); SF = (((db)(bl)) >> 7);
     /* call    sub_14B57 ;~ 01A2:5229 */
     rec_addr_bx();
-    /* mov     ax, cs:seg_10000 ;~ 01A2:522C */
-    ax = seg_10000;
+    /* mov     ax, cs:seg_data ;~ 01A2:522C */
+    ax = seg_data;
     /* mov     es, ax ;~ 01A2:5230 */
     es = ax;
     /* mov     si, 9F7Eh ;~ 01A2:5232 */
@@ -60453,8 +60453,8 @@ loc_15221:
                 bl |= bl; CF = 0; OF = 0; ZF = ((db)(bl) == 0); SF = (((db)(bl)) >> 7);
                 /* call    sub_14B57 ;~ 01A2:5229 */
                 rec_addr_bx();
-                /* mov     ax, cs:seg_10000 ;~ 01A2:522C */
-                ax = seg_10000;
+                /* mov     ax, cs:seg_data ;~ 01A2:522C */
+                ax = seg_data;
                 /* mov     es, ax ;~ 01A2:5230 */
                 es = ax;
                 /* mov     si, 9F7Eh ;~ 01A2:5232 */
@@ -60633,8 +60633,8 @@ loc_15221:
                 bl |= bl; CF = 0; OF = 0; ZF = ((db)(bl) == 0); SF = (((db)(bl)) >> 7);
                 /* call    sub_14B57 ;~ 01A2:5229 */
                 rec_addr_bx();
-                /* mov     ax, cs:seg_10000 ;~ 01A2:522C */
-                ax = seg_10000;
+                /* mov     ax, cs:seg_data ;~ 01A2:522C */
+                ax = seg_data;
                 /* mov     es, ax ;~ 01A2:5230 */
                 es = ax;
                 /* mov     si, 9F7Eh ;~ 01A2:5232 */
@@ -60837,8 +60837,8 @@ loc_15221:
         bl |= bl; CF = 0; OF = 0; ZF = ((db)(bl) == 0); SF = (((db)(bl)) >> 7);
         /* call    sub_14B57 ;~ 01A2:5229 */
         rec_addr_bx();
-        /* mov     ax, cs:seg_10000 ;~ 01A2:522C */
-        ax = seg_10000;
+        /* mov     ax, cs:seg_data ;~ 01A2:522C */
+        ax = seg_data;
         /* mov     es, ax ;~ 01A2:5230 */
         es = ax;
         /* mov     si, 9F7Eh ;~ 01A2:5232 */
@@ -61019,8 +61019,8 @@ loc_15221:
     bl |= bl; CF = 0; OF = 0; ZF = ((db)(bl) == 0); SF = (((db)(bl)) >> 7);
     /* call    sub_14B57 ;~ 01A2:5229 */
     rec_addr_bx();
-    /* mov     ax, cs:seg_10000 ;~ 01A2:522C */
-    ax = seg_10000;
+    /* mov     ax, cs:seg_data ;~ 01A2:522C */
+    ax = seg_data;
     /* mov     es, ax ;~ 01A2:5230 */
     es = ax;
     /* mov     si, 9F7Eh ;~ 01A2:5232 */
@@ -61114,8 +61114,8 @@ void loc_15221(void) {
     bl |= bl; CF = 0; OF = 0; ZF = ((db)(bl) == 0); SF = (((db)(bl)) >> 7);
     /* call    sub_14B57 ;~ 01A2:5229 */
     rec_addr_bx();
-    /* mov     ax, cs:seg_10000 ;~ 01A2:522C */
-    ax = seg_10000;
+    /* mov     ax, cs:seg_data ;~ 01A2:522C */
+    ax = seg_data;
     /* mov     es, ax ;~ 01A2:5230 */
     es = ax;
     /* mov     si, 9F7Eh ;~ 01A2:5232 */
@@ -61475,8 +61475,8 @@ loc_15221:
     bl |= bl; CF = 0; OF = 0; ZF = ((db)(bl) == 0); SF = (((db)(bl)) >> 7);
     /* call    sub_14B57 ;~ 01A2:5229 */
     rec_addr_bx();
-    /* mov     ax, cs:seg_10000 ;~ 01A2:522C */
-    ax = seg_10000;
+    /* mov     ax, cs:seg_data ;~ 01A2:522C */
+    ax = seg_data;
     /* mov     es, ax ;~ 01A2:5230 */
     es = ax;
     /* mov     si, 9F7Eh ;~ 01A2:5232 */
@@ -67293,7 +67293,7 @@ loc_15980:
     /* retn ;~ 01A2:598E */
     return;
 }
-void loc_159df(void) {
+void podhit_dispatch(void) {
 loc_159df:
     do {
         /* call    sub_159FF ;~ 01A2:59DF */
@@ -67304,7 +67304,7 @@ loc_159df:
             pod_hit_test();
             /* shl     bx, 1 ;~ 01A2:59E7 */
             { if (1) { CF = (((dd)bx << (1)) >> 16) & 1; bx <<= 1; ZF = ((dw)(bx) == 0); SF = (((dw)(bx)) >> 15); } }
-            /* call    cs:funcs_159E9[bx] ;~ 01A2:59E9 */
+            /* call    cs:podhit_tbl[bx] ;~ 01A2:59E9 */
             { vfn f_ = func_at((dd)0x1a20 + (*(dw*)(((db*)&funcs_159e9)+bx))); dw sp_ = sp; if (f_) f_(); else fprintf(stderr, "unresolved ind call %x\n", (dd)((dd)0x1a20 + (*(dw*)(((db*)&funcs_159e9)+bx)))); if ((short)(sp - sp_) > 0) { sp = sp_; return; } }
         }
 loc_159ee:
@@ -67342,7 +67342,7 @@ loc_159df:
         pod_hit_test();
         /* shl     bx, 1 ;~ 01A2:59E7 */
         { if (1) { CF = (((dd)bx << (1)) >> 16) & 1; bx <<= 1; ZF = ((dw)(bx) == 0); SF = (((dw)(bx)) >> 15); } }
-        /* call    cs:funcs_159E9[bx] ;~ 01A2:59E9 */
+        /* call    cs:podhit_tbl[bx] ;~ 01A2:59E9 */
         { vfn f_ = func_at((dd)0x1a20 + (*(dw*)(((db*)&funcs_159e9)+bx))); dw sp_ = sp; if (f_) f_(); else fprintf(stderr, "unresolved ind call %x\n", (dd)((dd)0x1a20 + (*(dw*)(((db*)&funcs_159e9)+bx)))); if ((short)(sp - sp_) > 0) { sp = sp_; return; } }
     } while (1);
 }
@@ -67389,7 +67389,7 @@ loc_159df:
             pod_hit_test();
             /* shl     bx, 1 ;~ 01A2:59E7 */
             { if (1) { CF = (((dd)bx << (1)) >> 16) & 1; bx <<= 1; ZF = ((dw)(bx) == 0); SF = (((dw)(bx)) >> 15); } }
-            /* call    cs:funcs_159E9[bx] ;~ 01A2:59E9 */
+            /* call    cs:podhit_tbl[bx] ;~ 01A2:59E9 */
             { vfn f_ = func_at((dd)0x1a20 + (*(dw*)(((db*)&funcs_159e9)+bx))); dw sp_ = sp; if (f_) f_(); else fprintf(stderr, "unresolved ind call %x\n", (dd)((dd)0x1a20 + (*(dw*)(((db*)&funcs_159e9)+bx)))); if ((short)(sp - sp_) > 0) { sp = sp_; return; } }
         }
 loc_159ee:
@@ -81772,7 +81772,7 @@ void action_dispatch(void) {
     /* shl     bx, 1 ;~ 01A2:6AB7 */
     { if (1) { CF = (((dd)bx << (1)) >> 16) & 1; bx <<= 1; ZF = ((dw)(bx) == 0); SF = (((dw)(bx)) >> 15); } }
     /* jmp     cs:jpt_16AB9[bx] ; switch jump ;~ 01A2:6AB9 */
-    { vfn f_ = func_at((dd)0x1a20 + (*(dw*)(((db*)&jpt_16ab9)+bx))); if (f_) f_(); else fprintf(stderr, "unresolved ind jmp %x\n", (dd)((dd)0x1a20 + (*(dw*)(((db*)&jpt_16ab9)+bx)))); return; }
+    { vfn f_ = func_at((dd)0x1a20 + (*(dw*)(((db*)&pan_jt)+bx))); if (f_) f_(); else fprintf(stderr, "unresolved ind jmp %x\n", (dd)((dd)0x1a20 + (*(dw*)(((db*)&pan_jt)+bx)))); return; }
 }
 void locret_16ad0(void) {
     /* retn ;~ 01A2:6AD0 */
@@ -106578,21 +106578,21 @@ void obj_follow_move(void) {
     /* cwd ;~ 01A2:78E3 */
     dx = (short)ax < 0 ? 0xFFFF : 0;
     /* mov     word_29B52, ax ;~ 01A2:78E4 */
-    word_29b52 = ax;
+    follow_sav_a = ax;
     /* mov     word_29B54, dx ;~ 01A2:78E7 */
-    word_29b54 = dx;
+    follow_sav_d = dx;
     /* mov     ax, cx ;~ 01A2:78EB */
     ax = cx;
     /* cwd ;~ 01A2:78ED */
     dx = (short)ax < 0 ? 0xFFFF : 0;
     /* mov     word_29B56, ax ;~ 01A2:78EE */
-    word_29b56 = ax;
+    follow_sav_a2 = ax;
     /* mov     word_29B58, dx ;~ 01A2:78F1 */
-    word_29b58 = dx;
+    follow_sav_d2 = dx;
     /* mov     ax, word_29B52 ;~ 01A2:78F5 */
-    ax = word_29b52;
+    ax = follow_sav_a;
     /* mov     dx, word_29B54 ;~ 01A2:78F8 */
-    dx = word_29b54;
+    dx = follow_sav_d;
     /* add     [bx-4151h], al ;~ 01A2:78FC */
     { dd t_ = (dd)*(db*)raddr(ds,bx-0x4151) + (dd)al; CF = t_ > 0xFF; *(db*)raddr(ds,bx-0x4151) = t_; ZF = ((db)(*(db*)raddr(ds,bx-0x4151)) == 0); SF = (((db)(*(db*)raddr(ds,bx-0x4151))) >> 7); }
     /* adc     [bx-4085h], ah ;~ 01A2:7900 */
@@ -106600,9 +106600,9 @@ void obj_follow_move(void) {
     /* adc     [bx-4041h], dl ;~ 01A2:7904 */
     { dd t_ = (dd)*(db*)raddr(ds,bx-0x4041) + (dd)dl + CF; CF = t_ > 0xFF; *(db*)raddr(ds,bx-0x4041) = t_; ZF = ((db)(*(db*)raddr(ds,bx-0x4041)) == 0); SF = (((db)(*(db*)raddr(ds,bx-0x4041))) >> 7); }
     /* mov     ax, word_29B56 ;~ 01A2:7908 */
-    ax = word_29b56;
+    ax = follow_sav_a2;
     /* mov     dx, word_29B58 ;~ 01A2:790B */
-    dx = word_29b58;
+    dx = follow_sav_d2;
     /* add     [bx-412Fh], al ;~ 01A2:790F */
     { dd t_ = (dd)*(db*)raddr(ds,bx-0x412F) + (dd)al; CF = t_ > 0xFF; *(db*)raddr(ds,bx-0x412F) = t_; ZF = ((db)(*(db*)raddr(ds,bx-0x412F)) == 0); SF = (((db)(*(db*)raddr(ds,bx-0x412F))) >> 7); }
     /* adc     [bx-4063h], ah ;~ 01A2:7913 */
@@ -108407,7 +108407,7 @@ loc_17c18:
     /* retn ;~ 01A2:7C1C */
     return;
 }
-void loc_17c3e(void) {
+void bar_draw(void) {
     dd _sa = 0, _sb = 0;
     /* mov     bl, byte_2A7AD ;~ 01A2:7C3E */
     bl = alert_lvl;
@@ -108441,7 +108441,7 @@ void loc_17c3e(void) {
     di = adapter_id;
     /* shl     di, 1           ; switch 5 cases ;~ 01A2:7C62 */
     { if (1) { CF = (((dd)di << (1)) >> 16) & 1; di <<= 1; ZF = ((dw)(di) == 0); SF = (((dw)(di)) >> 15); } }
-    /* jmp     cs:jpt_17C64[di] ; switch jump ;~ 01A2:7C64 */
+    /* jmp     cs:bar_jt[di] ; switch jump ;~ 01A2:7C64 */
     { vfn f_ = func_at((dd)0x1a20 + (*(dw*)(((db*)&jpt_17c64)+di))); if (f_) f_(); else fprintf(stderr, "unresolved ind jmp %x\n", (dd)((dd)0x1a20 + (*(dw*)(((db*)&jpt_17c64)+di)))); return; }
 loc_17c69:
     /* mov     al, [si-2FEEh]  ; jumptable 00017C64 cases 1-3 ;~ 01A2:7C69 */
@@ -108948,7 +108948,7 @@ loc_17c3e:
     di = adapter_id;
     /* shl     di, 1           ; switch 5 cases ;~ 01A2:7C62 */
     { if (1) { CF = (((dd)di << (1)) >> 16) & 1; di <<= 1; ZF = ((dw)(di) == 0); SF = (((dw)(di)) >> 15); } }
-    /* jmp     cs:jpt_17C64[di] ; switch jump ;~ 01A2:7C64 */
+    /* jmp     cs:bar_jt[di] ; switch jump ;~ 01A2:7C64 */
     { vfn f_ = func_at((dd)0x1a20 + (*(dw*)(((db*)&jpt_17c64)+di))); if (f_) f_(); else fprintf(stderr, "unresolved ind jmp %x\n", (dd)((dd)0x1a20 + (*(dw*)(((db*)&jpt_17c64)+di)))); return; }
 loc_17c69:
     /* mov     al, [si-2FEEh]  ; jumptable 00017C64 cases 1-3 ;~ 01A2:7C69 */
@@ -130238,7 +130238,7 @@ loc_1891d:
             /* mov     si, ax ;~ 01A2:892D */
             si = ax;
             /* call    cs:funcs_1892F[si] ;~ 01A2:892F */
-            { vfn f_ = func_at((dd)0x1a20 + (*(dw*)(((db*)&funcs_1892f)+si))); dw sp_ = sp; if (f_) f_(); else fprintf(stderr, "unresolved ind call %x\n", (dd)((dd)0x1a20 + (*(dw*)(((db*)&funcs_1892f)+si)))); if ((short)(sp - sp_) > 0) { sp = sp_; return; } }
+            { vfn f_ = func_at((dd)0x1a20 + (*(dw*)(((db*)&objtype_tbl)+si))); dw sp_ = sp; if (f_) f_(); else fprintf(stderr, "unresolved ind call %x\n", (dd)((dd)0x1a20 + (*(dw*)(((db*)&objtype_tbl)+si)))); if ((short)(sp - sp_) > 0) { sp = sp_; return; } }
             /* cmp     bx, word_2A7A8 ;~ 01A2:8934 */
             CF = (dd)bx < (dd)word_2a7a8; ZF = ((dw)((bx) - (word_2a7a8)) == 0); SF = (((dw)((bx) - (word_2a7a8))) >> 15);
             /* jz      short loc_1895C ;~ 01A2:8938 */
@@ -130317,7 +130317,7 @@ loc_1891d:
             /* mov     si, ax ;~ 01A2:892D */
             si = ax;
             /* call    cs:funcs_1892F[si] ;~ 01A2:892F */
-            { vfn f_ = func_at((dd)0x1a20 + (*(dw*)(((db*)&funcs_1892f)+si))); dw sp_ = sp; if (f_) f_(); else fprintf(stderr, "unresolved ind call %x\n", (dd)((dd)0x1a20 + (*(dw*)(((db*)&funcs_1892f)+si)))); if ((short)(sp - sp_) > 0) { sp = sp_; return; } }
+            { vfn f_ = func_at((dd)0x1a20 + (*(dw*)(((db*)&objtype_tbl)+si))); dw sp_ = sp; if (f_) f_(); else fprintf(stderr, "unresolved ind call %x\n", (dd)((dd)0x1a20 + (*(dw*)(((db*)&objtype_tbl)+si)))); if ((short)(sp - sp_) > 0) { sp = sp_; return; } }
             /* cmp     bx, word_2A7A8 ;~ 01A2:8934 */
             CF = (dd)bx < (dd)word_2a7a8; ZF = ((dw)((bx) - (word_2a7a8)) == 0); SF = (((dw)((bx) - (word_2a7a8))) >> 15);
             /* jz      short loc_1895C ;~ 01A2:8938 */
@@ -130379,7 +130379,7 @@ loc_1891d:
         /* mov     si, ax ;~ 01A2:892D */
         si = ax;
         /* call    cs:funcs_1892F[si] ;~ 01A2:892F */
-        { vfn f_ = func_at((dd)0x1a20 + (*(dw*)(((db*)&funcs_1892f)+si))); dw sp_ = sp; if (f_) f_(); else fprintf(stderr, "unresolved ind call %x\n", (dd)((dd)0x1a20 + (*(dw*)(((db*)&funcs_1892f)+si)))); if ((short)(sp - sp_) > 0) { sp = sp_; return; } }
+        { vfn f_ = func_at((dd)0x1a20 + (*(dw*)(((db*)&objtype_tbl)+si))); dw sp_ = sp; if (f_) f_(); else fprintf(stderr, "unresolved ind call %x\n", (dd)((dd)0x1a20 + (*(dw*)(((db*)&objtype_tbl)+si)))); if ((short)(sp - sp_) > 0) { sp = sp_; return; } }
         /* cmp     bx, word_2A7A8 ;~ 01A2:8934 */
         CF = (dd)bx < (dd)word_2a7a8; ZF = ((dw)((bx) - (word_2a7a8)) == 0); SF = (((dw)((bx) - (word_2a7a8))) >> 15);
         /* jz      short loc_1895C ;~ 01A2:8938 */
@@ -130436,7 +130436,7 @@ loc_1891d:
             /* mov     si, ax ;~ 01A2:892D */
             si = ax;
             /* call    cs:funcs_1892F[si] ;~ 01A2:892F */
-            { vfn f_ = func_at((dd)0x1a20 + (*(dw*)(((db*)&funcs_1892f)+si))); dw sp_ = sp; if (f_) f_(); else fprintf(stderr, "unresolved ind call %x\n", (dd)((dd)0x1a20 + (*(dw*)(((db*)&funcs_1892f)+si)))); if ((short)(sp - sp_) > 0) { sp = sp_; return; } }
+            { vfn f_ = func_at((dd)0x1a20 + (*(dw*)(((db*)&objtype_tbl)+si))); dw sp_ = sp; if (f_) f_(); else fprintf(stderr, "unresolved ind call %x\n", (dd)((dd)0x1a20 + (*(dw*)(((db*)&objtype_tbl)+si)))); if ((short)(sp - sp_) > 0) { sp = sp_; return; } }
             /* cmp     bx, word_2A7A8 ;~ 01A2:8934 */
             CF = (dd)bx < (dd)word_2a7a8; ZF = ((dw)((bx) - (word_2a7a8)) == 0); SF = (((dw)((bx) - (word_2a7a8))) >> 15);
             /* jz      short loc_1895C ;~ 01A2:8938 */
@@ -178287,8 +178287,8 @@ locret_1a9a2:
     return;
 }
 void render_dispatch(void) {
-    /* mov     ax, cs:seg_10012 ;~ 01A2:A9BA */
-    ax = seg_10012;
+    /* mov     ax, cs:seg_draw ;~ 01A2:A9BA */
+    ax = seg_draw;
     /* mov     es, ax ;~ 01A2:A9BE */
     es = ax;
     /* mov     di, word_1D934 ;~ 01A2:A9C0 */
@@ -178298,9 +178298,9 @@ void render_dispatch(void) {
     /* mov     ds, ax ;~ 01A2:A9C6 */
     ds = ax;
     /* call    cs:funcs_1A9C8[di] ;~ 01A2:A9C8 */
-    { vfn f_ = func_at((dd)0x1a20 + (*(dw*)(((db*)&funcs_1a9c8)+di))); dw sp_ = sp; if (f_) f_(); else fprintf(stderr, "unresolved ind call %x\n", (dd)((dd)0x1a20 + (*(dw*)(((db*)&funcs_1a9c8)+di)))); if ((short)(sp - sp_) > 0) { sp = sp_; return; } }
-    /* mov     ax, cs:seg_10000 ;~ 01A2:A9CD */
-    ax = seg_10000;
+    { vfn f_ = func_at((dd)0x1a20 + (*(dw*)(((db*)&rdr_copy_tbl)+di))); dw sp_ = sp; if (f_) f_(); else fprintf(stderr, "unresolved ind call %x\n", (dd)((dd)0x1a20 + (*(dw*)(((db*)&rdr_copy_tbl)+di)))); if ((short)(sp - sp_) > 0) { sp = sp_; return; } }
+    /* mov     ax, cs:seg_data ;~ 01A2:A9CD */
+    ax = seg_data;
     /* mov     ds, ax ;~ 01A2:A9D1 */
     ds = ax;
     /* retn ;~ 01A2:A9D3 */
@@ -180635,7 +180635,7 @@ void phase_state_step(void) {
     /* jnz     short loc_1AC30 ;~ 01A2:ABF7 */
     if (al == 0) {
         /* dec     byte_2A9D2 ;~ 01A2:ABF9 */
-        (byte_2a9d2)--; ZF = ((db)(byte_2a9d2) == 0); SF = (((db)(byte_2a9d2)) >> 7);
+        (phase_cnt)--; ZF = ((db)(phase_cnt) == 0); SF = (((db)(phase_cnt)) >> 7);
         /* mov     si, 0Ch ;~ 01A2:ABFD */
         si = 0x0C;
         /* mov     ax, word_2A9CE ;~ 01A2:AC00 */
@@ -183491,8 +183491,8 @@ void loc_1b06d(void) {
 }
 void draw_cell_strip(void) {
     dd _sa = 0, _sb = 0;
-    /* mov     ax, cs:seg_10012 ;~ 01A2:B002 */
-    ax = seg_10012;
+    /* mov     ax, cs:seg_draw ;~ 01A2:B002 */
+    ax = seg_draw;
     /* mov     es, ax ;~ 01A2:B006 */
     es = ax;
     /* mov     bp, word_1DBDD ;~ 01A2:B008 */
@@ -184142,7 +184142,7 @@ void cell_glyph_fetch(void) {
     /* shl     si, 1           ; switch 5 cases ;~ 01A2:B096 */
     { if (1) { CF = (((dd)si << (1)) >> 16) & 1; si <<= 1; ZF = ((dw)(si) == 0); SF = (((dw)(si)) >> 15); } }
     /* jmp     cs:jpt_1B098[si] ; switch jump ;~ 01A2:B098 */
-    { vfn f_ = func_at((dd)0x1a20 + (*(dw*)(((db*)&jpt_1b098)+si))); if (f_) f_(); else fprintf(stderr, "unresolved ind jmp %x\n", (dd)((dd)0x1a20 + (*(dw*)(((db*)&jpt_1b098)+si)))); return; }
+    { vfn f_ = func_at((dd)0x1a20 + (*(dw*)(((db*)&cellgfx_jt)+si))); if (f_) f_(); else fprintf(stderr, "unresolved ind jmp %x\n", (dd)((dd)0x1a20 + (*(dw*)(((db*)&cellgfx_jt)+si)))); return; }
 loc_1b09d:
     /* mov     cl, 5           ; jumptable 0001B098 case 1 ;~ 01A2:B09D */
     cl = 5;
@@ -184756,7 +184756,7 @@ void call_mission_fn(void) {
     /* shl     bx, 1 ;~ 01A2:B3E0 */
     { if (1) { CF = (((dd)bx << (1)) >> 16) & 1; bx <<= 1; ZF = ((dw)(bx) == 0); SF = (((dw)(bx)) >> 15); } }
     /* call    cs:funcs_1B3E2[bx] ;~ 01A2:B3E2 */
-    { vfn f_ = func_at((dd)0x1a20 + (*(dw*)(((db*)&funcs_1b3e2)+bx))); dw sp_ = sp; if (f_) f_(); else fprintf(stderr, "unresolved ind call %x\n", (dd)((dd)0x1a20 + (*(dw*)(((db*)&funcs_1b3e2)+bx)))); if ((short)(sp - sp_) > 0) { sp = sp_; return; } }
+    { vfn f_ = func_at((dd)0x1a20 + (*(dw*)(((db*)&mission_setup_tbl)+bx))); dw sp_ = sp; if (f_) f_(); else fprintf(stderr, "unresolved ind call %x\n", (dd)((dd)0x1a20 + (*(dw*)(((db*)&mission_setup_tbl)+bx)))); if ((short)(sp - sp_) > 0) { sp = sp_; return; } }
     /* mov     byte_28CC4, 1 ;~ 01A2:B3E7 */
     byte_28cc4 = 1;
     /* mov     byte_28CC3, 2 ;~ 01A2:B3EC */
@@ -184893,8 +184893,8 @@ loc_1b43f:
     } while (1);
 }
 void map_init(void) {
-    /* mov     ax, cs:seg_10000 ;~ 01A2:B400 */
-    ax = seg_10000;
+    /* mov     ax, cs:seg_data ;~ 01A2:B400 */
+    ax = seg_data;
     /* mov     es, ax ;~ 01A2:B404 */
     es = ax;
     /* mov     di, 9736h ;~ 01A2:B406 */
@@ -184916,7 +184916,7 @@ void map_init(void) {
     /* shl     bx, 1 ;~ 01A2:B41D */
     { if (1) { CF = (((dd)bx << (1)) >> 16) & 1; bx <<= 1; ZF = ((dw)(bx) == 0); SF = (((dw)(bx)) >> 15); } }
     /* call    cs:funcs_1B41F[bx] ;~ 01A2:B41F */
-    { vfn f_ = func_at((dd)0x1a20 + (*(dw*)(((db*)&funcs_1b41f)+bx))); dw sp_ = sp; if (f_) f_(); else fprintf(stderr, "unresolved ind call %x\n", (dd)((dd)0x1a20 + (*(dw*)(((db*)&funcs_1b41f)+bx)))); if ((short)(sp - sp_) > 0) { sp = sp_; return; } }
+    { vfn f_ = func_at((dd)0x1a20 + (*(dw*)(((db*)&mission_pop_tbl)+bx))); dw sp_ = sp; if (f_) f_(); else fprintf(stderr, "unresolved ind call %x\n", (dd)((dd)0x1a20 + (*(dw*)(((db*)&mission_pop_tbl)+bx)))); if ((short)(sp - sp_) > 0) { sp = sp_; return; } }
     /* mov     ax, 9736h ;~ 01A2:B424 */
     ax = 0x9736;
     /* mov     word_265B0, ax ;~ 01A2:B427 */
@@ -184970,7 +184970,7 @@ void mission_init_dispatch(void) {
     /* shl     di, 1           ; switch 12 cases ;~ 01A2:B473 */
     { if (1) { CF = (((dd)di << (1)) >> 16) & 1; di <<= 1; ZF = ((dw)(di) == 0); SF = (((dw)(di)) >> 15); } }
     /* jmp     cs:jpt_1B475[di] ; switch jump ;~ 01A2:B475 */
-    { vfn f_ = func_at((dd)0x1a20 + (*(dw*)(((db*)&jpt_1b475)+di))); if (f_) f_(); else fprintf(stderr, "unresolved ind jmp %x\n", (dd)((dd)0x1a20 + (*(dw*)(((db*)&jpt_1b475)+di)))); return; }
+    { vfn f_ = func_at((dd)0x1a20 + (*(dw*)(((db*)&mission_jt)+di))); if (f_) f_(); else fprintf(stderr, "unresolved ind jmp %x\n", (dd)((dd)0x1a20 + (*(dw*)(((db*)&mission_jt)+di)))); return; }
 }
 void mapgen_fill_a(void) {
     /* mov     byte_2B0C6, 1Fh ;~ 01A2:B47A */
@@ -189415,8 +189415,8 @@ loc_1bdf1:
         CF = (dd)*(dw*)raddr(ds,0x0E2A4) < (dd)0; ZF = ((dw)((*(dw*)raddr(ds,0x0E2A4)) - (0)) == 0); SF = (((dw)((*(dw*)raddr(ds,0x0E2A4)) - (0))) >> 15);
         /* jnz     short loc_1BE1F ;~ 01A2:BE07 */
         if (*(dw*)raddr(ds,0x0E2A4) == 0) {
-            /* mov     es, cs:seg_10012 ;~ 01A2:BE09 */
-            es = seg_10012;
+            /* mov     es, cs:seg_draw ;~ 01A2:BE09 */
+            es = seg_draw;
             /* push    ds ;~ 01A2:BE0E */
             push(ds);
             /* jmp     short loc_1BE14 ;~ 01A2:BE0F */
@@ -189613,8 +189613,8 @@ loc_1bdf1:
         CF = (dd)*(dw*)raddr(ds,0x0E2A4) < (dd)0; ZF = ((dw)((*(dw*)raddr(ds,0x0E2A4)) - (0)) == 0); SF = (((dw)((*(dw*)raddr(ds,0x0E2A4)) - (0))) >> 15);
         /* jnz     short loc_1BE1F ;~ 01A2:BE07 */
         if (*(dw*)raddr(ds,0x0E2A4) == 0) {
-            /* mov     es, cs:seg_10012 ;~ 01A2:BE09 */
-            es = seg_10012;
+            /* mov     es, cs:seg_draw ;~ 01A2:BE09 */
+            es = seg_draw;
             /* push    ds ;~ 01A2:BE0E */
             push(ds);
             /* jmp     short loc_1BE14 ;~ 01A2:BE0F */
@@ -189786,8 +189786,8 @@ loc_1bdf1:
         CF = (dd)*(dw*)raddr(ds,0x0E2A4) < (dd)0; ZF = ((dw)((*(dw*)raddr(ds,0x0E2A4)) - (0)) == 0); SF = (((dw)((*(dw*)raddr(ds,0x0E2A4)) - (0))) >> 15);
         /* jnz     short loc_1BE1F ;~ 01A2:BE07 */
         if (*(dw*)raddr(ds,0x0E2A4) == 0) {
-            /* mov     es, cs:seg_10012 ;~ 01A2:BE09 */
-            es = seg_10012;
+            /* mov     es, cs:seg_draw ;~ 01A2:BE09 */
+            es = seg_draw;
             /* push    ds ;~ 01A2:BE0E */
             push(ds);
             /* jmp     short loc_1BE14 ;~ 01A2:BE0F */
@@ -190105,8 +190105,8 @@ loc_1bdf1:
         CF = (dd)*(dw*)raddr(ds,0x0E2A4) < (dd)0; ZF = ((dw)((*(dw*)raddr(ds,0x0E2A4)) - (0)) == 0); SF = (((dw)((*(dw*)raddr(ds,0x0E2A4)) - (0))) >> 15);
         /* jnz     short loc_1BE1F ;~ 01A2:BE07 */
         if (*(dw*)raddr(ds,0x0E2A4) != 0) goto loc_1be1f;
-        /* mov     es, cs:seg_10012 ;~ 01A2:BE09 */
-        es = seg_10012;
+        /* mov     es, cs:seg_draw ;~ 01A2:BE09 */
+        es = seg_draw;
         /* push    ds ;~ 01A2:BE0E */
         push(ds);
         /* jmp     short loc_1BE14 ;~ 01A2:BE0F */
@@ -190271,8 +190271,8 @@ loc_1bdf1:
             CF = (dd)*(dw*)raddr(ds,0x0E2A4) < (dd)0; ZF = ((dw)((*(dw*)raddr(ds,0x0E2A4)) - (0)) == 0); SF = (((dw)((*(dw*)raddr(ds,0x0E2A4)) - (0))) >> 15);
             /* jnz     short loc_1BE1F ;~ 01A2:BE07 */
         } while (*(dw*)raddr(ds,0x0E2A4) != 0);
-        /* mov     es, cs:seg_10012 ;~ 01A2:BE09 */
-        es = seg_10012;
+        /* mov     es, cs:seg_draw ;~ 01A2:BE09 */
+        es = seg_draw;
         /* push    ds ;~ 01A2:BE0E */
         push(ds);
         /* jmp     short loc_1BE14 ;~ 01A2:BE0F */
@@ -190422,8 +190422,8 @@ loc_1bdf1:
             CF = (dd)*(dw*)raddr(ds,0x0E2A4) < (dd)0; ZF = ((dw)((*(dw*)raddr(ds,0x0E2A4)) - (0)) == 0); SF = (((dw)((*(dw*)raddr(ds,0x0E2A4)) - (0))) >> 15);
             /* jnz     short loc_1BE1F ;~ 01A2:BE07 */
             if (*(dw*)raddr(ds,0x0E2A4) == 0) {
-                /* mov     es, cs:seg_10012 ;~ 01A2:BE09 */
-                es = seg_10012;
+                /* mov     es, cs:seg_draw ;~ 01A2:BE09 */
+                es = seg_draw;
                 /* push    ds ;~ 01A2:BE0E */
                 push(ds);
                 /* jmp     short loc_1BE14 ;~ 01A2:BE0F */
@@ -190668,8 +190668,8 @@ void loc_1bebb(void) {
     CF = (dd)*(dw*)raddr(ds,0x0E2A4) < (dd)0; ZF = ((dw)((*(dw*)raddr(ds,0x0E2A4)) - (0)) == 0); SF = (((dw)((*(dw*)raddr(ds,0x0E2A4)) - (0))) >> 15);
     /* jnz     short loc_1BEE0 ;~ 01A2:BECB */
     if (*(dw*)raddr(ds,0x0E2A4) == 0) {
-        /* mov     es, cs:seg_10012 ;~ 01A2:BECD */
-        es = seg_10012;
+        /* mov     es, cs:seg_draw ;~ 01A2:BECD */
+        es = seg_draw;
         /* push    ds ;~ 01A2:BED2 */
         push(ds);
         /* jmp     short loc_1BED8 ;~ 01A2:BED3 */
@@ -193505,8 +193505,8 @@ loc_1c066:
     CF = (dd)*(dw*)raddr(ds,0x0E2A4) < (dd)0; ZF = ((dw)((*(dw*)raddr(ds,0x0E2A4)) - (0)) == 0); SF = (((dw)((*(dw*)raddr(ds,0x0E2A4)) - (0))) >> 15);
     /* jnz     short loc_1C0A0 ;~ 01A2:C085 */
     if (*(dw*)raddr(ds,0x0E2A4) == 0) {
-        /* mov     es, cs:seg_10012 ;~ 01A2:C087 */
-        es = seg_10012;
+        /* mov     es, cs:seg_draw ;~ 01A2:C087 */
+        es = seg_draw;
         /* push    ds ;~ 01A2:C08C */
         push(ds);
         /* jmp     short loc_1C092 ;~ 01A2:C08D */
@@ -193622,8 +193622,8 @@ loc_1c066:
     CF = (dd)*(dw*)raddr(ds,0x0E2A4) < (dd)0; ZF = ((dw)((*(dw*)raddr(ds,0x0E2A4)) - (0)) == 0); SF = (((dw)((*(dw*)raddr(ds,0x0E2A4)) - (0))) >> 15);
     /* jnz     short loc_1C0A0 ;~ 01A2:C085 */
     if (*(dw*)raddr(ds,0x0E2A4) == 0) {
-        /* mov     es, cs:seg_10012 ;~ 01A2:C087 */
-        es = seg_10012;
+        /* mov     es, cs:seg_draw ;~ 01A2:C087 */
+        es = seg_draw;
         /* push    ds ;~ 01A2:C08C */
         push(ds);
         /* jmp     short loc_1C092 ;~ 01A2:C08D */
@@ -193703,8 +193703,8 @@ loc_1c066:
     CF = (dd)*(dw*)raddr(ds,0x0E2A4) < (dd)0; ZF = ((dw)((*(dw*)raddr(ds,0x0E2A4)) - (0)) == 0); SF = (((dw)((*(dw*)raddr(ds,0x0E2A4)) - (0))) >> 15);
     /* jnz     short loc_1C0A0 ;~ 01A2:C085 */
     if (*(dw*)raddr(ds,0x0E2A4) == 0) {
-        /* mov     es, cs:seg_10012 ;~ 01A2:C087 */
-        es = seg_10012;
+        /* mov     es, cs:seg_draw ;~ 01A2:C087 */
+        es = seg_draw;
         /* push    ds ;~ 01A2:C08C */
         push(ds);
         /* jmp     short loc_1C092 ;~ 01A2:C08D */
@@ -193992,8 +193992,8 @@ loc_1c10f:
     CF = (dd)*(dw*)raddr(ds,0x0E2A4) < (dd)0; ZF = ((dw)((*(dw*)raddr(ds,0x0E2A4)) - (0)) == 0); SF = (((dw)((*(dw*)raddr(ds,0x0E2A4)) - (0))) >> 15);
     /* jnz     short loc_1C15B ;~ 01A2:C14E */
     if (*(dw*)raddr(ds,0x0E2A4) == 0) {
-        /* mov     es, cs:seg_10012 ;~ 01A2:C150 */
-        es = seg_10012;
+        /* mov     es, cs:seg_draw ;~ 01A2:C150 */
+        es = seg_draw;
         /* call    sub_1BD50 ;~ 01A2:C155 */
         ds_wrap_a();
         /* mov     ds:0E244h, ax ;~ 01A2:C158 */
@@ -194112,8 +194112,8 @@ loc_1c10f:
     CF = (dd)*(dw*)raddr(ds,0x0E2A4) < (dd)0; ZF = ((dw)((*(dw*)raddr(ds,0x0E2A4)) - (0)) == 0); SF = (((dw)((*(dw*)raddr(ds,0x0E2A4)) - (0))) >> 15);
     /* jnz     short loc_1C15B ;~ 01A2:C14E */
     if (*(dw*)raddr(ds,0x0E2A4) == 0) {
-        /* mov     es, cs:seg_10012 ;~ 01A2:C150 */
-        es = seg_10012;
+        /* mov     es, cs:seg_draw ;~ 01A2:C150 */
+        es = seg_draw;
         /* call    sub_1BD50 ;~ 01A2:C155 */
         ds_wrap_a();
         /* mov     ds:0E244h, ax ;~ 01A2:C158 */
@@ -194178,8 +194178,8 @@ loc_1c10f:
     CF = (dd)*(dw*)raddr(ds,0x0E2A4) < (dd)0; ZF = ((dw)((*(dw*)raddr(ds,0x0E2A4)) - (0)) == 0); SF = (((dw)((*(dw*)raddr(ds,0x0E2A4)) - (0))) >> 15);
     /* jnz     short loc_1C15B ;~ 01A2:C14E */
     if (*(dw*)raddr(ds,0x0E2A4) == 0) {
-        /* mov     es, cs:seg_10012 ;~ 01A2:C150 */
-        es = seg_10012;
+        /* mov     es, cs:seg_draw ;~ 01A2:C150 */
+        es = seg_draw;
         /* call    sub_1BD50 ;~ 01A2:C155 */
         ds_wrap_a();
         /* mov     ds:0E244h, ax ;~ 01A2:C158 */
@@ -194407,8 +194407,8 @@ loc_1c246:
     CF = (dd)*(dw*)raddr(ds,0x0E2A4) < (dd)0; ZF = ((dw)((*(dw*)raddr(ds,0x0E2A4)) - (0)) == 0); SF = (((dw)((*(dw*)raddr(ds,0x0E2A4)) - (0))) >> 15);
     /* jnz     short loc_1C266 ;~ 01A2:C251 */
     if (*(dw*)raddr(ds,0x0E2A4) == 0) {
-        /* mov     es, cs:seg_10012 ;~ 01A2:C253 */
-        es = seg_10012;
+        /* mov     es, cs:seg_draw ;~ 01A2:C253 */
+        es = seg_draw;
         /* push    ds ;~ 01A2:C258 */
         push(ds);
         /* jmp     short loc_1C25E ;~ 01A2:C259 */
@@ -194523,8 +194523,8 @@ loc_1c246:
     CF = (dd)*(dw*)raddr(ds,0x0E2A4) < (dd)0; ZF = ((dw)((*(dw*)raddr(ds,0x0E2A4)) - (0)) == 0); SF = (((dw)((*(dw*)raddr(ds,0x0E2A4)) - (0))) >> 15);
     /* jnz     short loc_1C266 ;~ 01A2:C251 */
     if (*(dw*)raddr(ds,0x0E2A4) == 0) {
-        /* mov     es, cs:seg_10012 ;~ 01A2:C253 */
-        es = seg_10012;
+        /* mov     es, cs:seg_draw ;~ 01A2:C253 */
+        es = seg_draw;
         /* push    ds ;~ 01A2:C258 */
         push(ds);
         /* jmp     short loc_1C25E ;~ 01A2:C259 */
@@ -194604,8 +194604,8 @@ loc_1c246:
                 CF = (dd)*(dw*)raddr(ds,0x0E2A4) < (dd)0; ZF = ((dw)((*(dw*)raddr(ds,0x0E2A4)) - (0)) == 0); SF = (((dw)((*(dw*)raddr(ds,0x0E2A4)) - (0))) >> 15);
                 /* jnz     short loc_1C266 ;~ 01A2:C251 */
                 if (*(dw*)raddr(ds,0x0E2A4) == 0) {
-                    /* mov     es, cs:seg_10012 ;~ 01A2:C253 */
-                    es = seg_10012;
+                    /* mov     es, cs:seg_draw ;~ 01A2:C253 */
+                    es = seg_draw;
                     /* push    ds ;~ 01A2:C258 */
                     push(ds);
                     /* jmp     short loc_1C25E ;~ 01A2:C259 */
@@ -195004,8 +195004,8 @@ loc_1c329:
     CF = (dd)*(dw*)raddr(ds,0x0E2A4) < (dd)0; ZF = ((dw)((*(dw*)raddr(ds,0x0E2A4)) - (0)) == 0); SF = (((dw)((*(dw*)raddr(ds,0x0E2A4)) - (0))) >> 15);
     /* jnz     short loc_1C361 ;~ 01A2:C34C */
     if (*(dw*)raddr(ds,0x0E2A4) == 0) {
-        /* mov     es, cs:seg_10012 ;~ 01A2:C34E */
-        es = seg_10012;
+        /* mov     es, cs:seg_draw ;~ 01A2:C34E */
+        es = seg_draw;
         /* push    ds ;~ 01A2:C353 */
         push(ds);
         /* jmp     short loc_1C359 ;~ 01A2:C354 */
@@ -195117,8 +195117,8 @@ loc_1c329:
     CF = (dd)*(dw*)raddr(ds,0x0E2A4) < (dd)0; ZF = ((dw)((*(dw*)raddr(ds,0x0E2A4)) - (0)) == 0); SF = (((dw)((*(dw*)raddr(ds,0x0E2A4)) - (0))) >> 15);
     /* jnz     short loc_1C361 ;~ 01A2:C34C */
     if (*(dw*)raddr(ds,0x0E2A4) == 0) {
-        /* mov     es, cs:seg_10012 ;~ 01A2:C34E */
-        es = seg_10012;
+        /* mov     es, cs:seg_draw ;~ 01A2:C34E */
+        es = seg_draw;
         /* push    ds ;~ 01A2:C353 */
         push(ds);
         /* jmp     short loc_1C359 ;~ 01A2:C354 */
@@ -195214,8 +195214,8 @@ loc_1c329:
             CF = (dd)*(dw*)raddr(ds,0x0E2A4) < (dd)0; ZF = ((dw)((*(dw*)raddr(ds,0x0E2A4)) - (0)) == 0); SF = (((dw)((*(dw*)raddr(ds,0x0E2A4)) - (0))) >> 15);
             /* jnz     short loc_1C361 ;~ 01A2:C34C */
             if (*(dw*)raddr(ds,0x0E2A4) == 0) {
-                /* mov     es, cs:seg_10012 ;~ 01A2:C34E */
-                es = seg_10012;
+                /* mov     es, cs:seg_draw ;~ 01A2:C34E */
+                es = seg_draw;
                 /* push    ds ;~ 01A2:C353 */
                 push(ds);
                 /* jmp     short loc_1C359 ;~ 01A2:C354 */
@@ -195322,8 +195322,8 @@ loc_1c329:
             CF = (dd)*(dw*)raddr(ds,0x0E2A4) < (dd)0; ZF = ((dw)((*(dw*)raddr(ds,0x0E2A4)) - (0)) == 0); SF = (((dw)((*(dw*)raddr(ds,0x0E2A4)) - (0))) >> 15);
             /* jnz     short loc_1C361 ;~ 01A2:C34C */
             if (*(dw*)raddr(ds,0x0E2A4) == 0) {
-                /* mov     es, cs:seg_10012 ;~ 01A2:C34E */
-                es = seg_10012;
+                /* mov     es, cs:seg_draw ;~ 01A2:C34E */
+                es = seg_draw;
                 /* push    ds ;~ 01A2:C353 */
                 push(ds);
                 /* jmp     short loc_1C359 ;~ 01A2:C354 */
@@ -195737,8 +195737,8 @@ loc_1c473:
         CF = (dd)*(dw*)raddr(ds,0x0E2A4) < (dd)0; ZF = ((dw)((*(dw*)raddr(ds,0x0E2A4)) - (0)) == 0); SF = (((dw)((*(dw*)raddr(ds,0x0E2A4)) - (0))) >> 15);
         /* jnz     short loc_1C495 ;~ 01A2:C480 */
         if (*(dw*)raddr(ds,0x0E2A4) == 0) {
-            /* mov     es, cs:seg_10012 ;~ 01A2:C482 */
-            es = seg_10012;
+            /* mov     es, cs:seg_draw ;~ 01A2:C482 */
+            es = seg_draw;
             /* push    ds ;~ 01A2:C487 */
             push(ds);
             /* jmp     short loc_1C48D ;~ 01A2:C488 */
@@ -195994,8 +195994,8 @@ loc_1c473:
         CF = (dd)*(dw*)raddr(ds,0x0E2A4) < (dd)0; ZF = ((dw)((*(dw*)raddr(ds,0x0E2A4)) - (0)) == 0); SF = (((dw)((*(dw*)raddr(ds,0x0E2A4)) - (0))) >> 15);
         /* jnz     short loc_1C495 ;~ 01A2:C480 */
         if (*(dw*)raddr(ds,0x0E2A4) == 0) {
-            /* mov     es, cs:seg_10012 ;~ 01A2:C482 */
-            es = seg_10012;
+            /* mov     es, cs:seg_draw ;~ 01A2:C482 */
+            es = seg_draw;
             /* push    ds ;~ 01A2:C487 */
             push(ds);
             /* jmp     short loc_1C48D ;~ 01A2:C488 */
@@ -196245,8 +196245,8 @@ loc_1c473:
             CF = (dd)*(dw*)raddr(ds,0x0E2A4) < (dd)0; ZF = ((dw)((*(dw*)raddr(ds,0x0E2A4)) - (0)) == 0); SF = (((dw)((*(dw*)raddr(ds,0x0E2A4)) - (0))) >> 15);
             /* jnz     short loc_1C495 ;~ 01A2:C480 */
             if (*(dw*)raddr(ds,0x0E2A4) == 0) {
-                /* mov     es, cs:seg_10012 ;~ 01A2:C482 */
-                es = seg_10012;
+                /* mov     es, cs:seg_draw ;~ 01A2:C482 */
+                es = seg_draw;
                 /* push    ds ;~ 01A2:C487 */
                 push(ds);
                 /* jmp     short loc_1C48D ;~ 01A2:C488 */
@@ -196477,8 +196477,8 @@ loc_1c473:
         CF = (dd)*(dw*)raddr(ds,0x0E2A4) < (dd)0; ZF = ((dw)((*(dw*)raddr(ds,0x0E2A4)) - (0)) == 0); SF = (((dw)((*(dw*)raddr(ds,0x0E2A4)) - (0))) >> 15);
         /* jnz     short loc_1C495 ;~ 01A2:C480 */
         if (*(dw*)raddr(ds,0x0E2A4) == 0) {
-            /* mov     es, cs:seg_10012 ;~ 01A2:C482 */
-            es = seg_10012;
+            /* mov     es, cs:seg_draw ;~ 01A2:C482 */
+            es = seg_draw;
             /* push    ds ;~ 01A2:C487 */
             push(ds);
             /* jmp     short loc_1C48D ;~ 01A2:C488 */
@@ -196651,8 +196651,8 @@ loc_1c473:
         CF = (dd)*(dw*)raddr(ds,0x0E2A4) < (dd)0; ZF = ((dw)((*(dw*)raddr(ds,0x0E2A4)) - (0)) == 0); SF = (((dw)((*(dw*)raddr(ds,0x0E2A4)) - (0))) >> 15);
         /* jnz     short loc_1C495 ;~ 01A2:C480 */
         if (*(dw*)raddr(ds,0x0E2A4) == 0) {
-            /* mov     es, cs:seg_10012 ;~ 01A2:C482 */
-            es = seg_10012;
+            /* mov     es, cs:seg_draw ;~ 01A2:C482 */
+            es = seg_draw;
             /* push    ds ;~ 01A2:C487 */
             push(ds);
             /* jmp     short loc_1C48D ;~ 01A2:C488 */
@@ -196769,8 +196769,8 @@ loc_1c473:
         CF = (dd)*(dw*)raddr(ds,0x0E2A4) < (dd)0; ZF = ((dw)((*(dw*)raddr(ds,0x0E2A4)) - (0)) == 0); SF = (((dw)((*(dw*)raddr(ds,0x0E2A4)) - (0))) >> 15);
         /* jnz     short loc_1C495 ;~ 01A2:C480 */
         if (*(dw*)raddr(ds,0x0E2A4) == 0) {
-            /* mov     es, cs:seg_10012 ;~ 01A2:C482 */
-            es = seg_10012;
+            /* mov     es, cs:seg_draw ;~ 01A2:C482 */
+            es = seg_draw;
             /* push    ds ;~ 01A2:C487 */
             push(ds);
             /* jmp     short loc_1C48D ;~ 01A2:C488 */
@@ -196985,8 +196985,8 @@ loc_1c473:
             CF = (dd)*(dw*)raddr(ds,0x0E2A4) < (dd)0; ZF = ((dw)((*(dw*)raddr(ds,0x0E2A4)) - (0)) == 0); SF = (((dw)((*(dw*)raddr(ds,0x0E2A4)) - (0))) >> 15);
             /* jnz     short loc_1C495 ;~ 01A2:C480 */
         } while (*(dw*)raddr(ds,0x0E2A4) != 0);
-        /* mov     es, cs:seg_10012 ;~ 01A2:C482 */
-        es = seg_10012;
+        /* mov     es, cs:seg_draw ;~ 01A2:C482 */
+        es = seg_draw;
         /* push    ds ;~ 01A2:C487 */
         push(ds);
         /* jmp     short loc_1C48D ;~ 01A2:C488 */
@@ -197097,8 +197097,8 @@ loc_1c473:
             CF = (dd)*(dw*)raddr(ds,0x0E2A4) < (dd)0; ZF = ((dw)((*(dw*)raddr(ds,0x0E2A4)) - (0)) == 0); SF = (((dw)((*(dw*)raddr(ds,0x0E2A4)) - (0))) >> 15);
             /* jnz     short loc_1C495 ;~ 01A2:C480 */
         } while (*(dw*)raddr(ds,0x0E2A4) != 0);
-        /* mov     es, cs:seg_10012 ;~ 01A2:C482 */
-        es = seg_10012;
+        /* mov     es, cs:seg_draw ;~ 01A2:C482 */
+        es = seg_draw;
         /* push    ds ;~ 01A2:C487 */
         push(ds);
         /* jmp     short loc_1C48D ;~ 01A2:C488 */
@@ -197199,8 +197199,8 @@ loc_1c473:
             CF = (dd)*(dw*)raddr(ds,0x0E2A4) < (dd)0; ZF = ((dw)((*(dw*)raddr(ds,0x0E2A4)) - (0)) == 0); SF = (((dw)((*(dw*)raddr(ds,0x0E2A4)) - (0))) >> 15);
             /* jnz     short loc_1C495 ;~ 01A2:C480 */
             if (*(dw*)raddr(ds,0x0E2A4) == 0) {
-                /* mov     es, cs:seg_10012 ;~ 01A2:C482 */
-                es = seg_10012;
+                /* mov     es, cs:seg_draw ;~ 01A2:C482 */
+                es = seg_draw;
                 /* push    ds ;~ 01A2:C487 */
                 push(ds);
                 /* jmp     short loc_1C48D ;~ 01A2:C488 */
@@ -197500,8 +197500,8 @@ loc_1c589:
     CF = (dd)*(dw*)raddr(ds,0x0E2A4) < (dd)0; ZF = ((dw)((*(dw*)raddr(ds,0x0E2A4)) - (0)) == 0); SF = (((dw)((*(dw*)raddr(ds,0x0E2A4)) - (0))) >> 15);
     /* jnz     short loc_1C5A5 ;~ 01A2:C594 */
     if (*(dw*)raddr(ds,0x0E2A4) == 0) {
-        /* mov     es, cs:seg_10012 ;~ 01A2:C596 */
-        es = seg_10012;
+        /* mov     es, cs:seg_draw ;~ 01A2:C596 */
+        es = seg_draw;
         /* call    sub_1C66B ;~ 01A2:C59B */
         ds_wrap_b();
         /* mov     ds:0E244h, ax ;~ 01A2:C59E */
@@ -197741,8 +197741,8 @@ loc_1c589:
     CF = (dd)*(dw*)raddr(ds,0x0E2A4) < (dd)0; ZF = ((dw)((*(dw*)raddr(ds,0x0E2A4)) - (0)) == 0); SF = (((dw)((*(dw*)raddr(ds,0x0E2A4)) - (0))) >> 15);
     /* jnz     short loc_1C5A5 ;~ 01A2:C594 */
     if (*(dw*)raddr(ds,0x0E2A4) == 0) {
-        /* mov     es, cs:seg_10012 ;~ 01A2:C596 */
-        es = seg_10012;
+        /* mov     es, cs:seg_draw ;~ 01A2:C596 */
+        es = seg_draw;
         /* call    sub_1C66B ;~ 01A2:C59B */
         ds_wrap_b();
         /* mov     ds:0E244h, ax ;~ 01A2:C59E */
@@ -197928,8 +197928,8 @@ loc_1c589:
     CF = (dd)*(dw*)raddr(ds,0x0E2A4) < (dd)0; ZF = ((dw)((*(dw*)raddr(ds,0x0E2A4)) - (0)) == 0); SF = (((dw)((*(dw*)raddr(ds,0x0E2A4)) - (0))) >> 15);
     /* jnz     short loc_1C5A5 ;~ 01A2:C594 */
     if (*(dw*)raddr(ds,0x0E2A4) == 0) {
-        /* mov     es, cs:seg_10012 ;~ 01A2:C596 */
-        es = seg_10012;
+        /* mov     es, cs:seg_draw ;~ 01A2:C596 */
+        es = seg_draw;
         /* call    sub_1C66B ;~ 01A2:C59B */
         ds_wrap_b();
         /* mov     ds:0E244h, ax ;~ 01A2:C59E */
@@ -198111,8 +198111,8 @@ loc_1c589:
     CF = (dd)*(dw*)raddr(ds,0x0E2A4) < (dd)0; ZF = ((dw)((*(dw*)raddr(ds,0x0E2A4)) - (0)) == 0); SF = (((dw)((*(dw*)raddr(ds,0x0E2A4)) - (0))) >> 15);
     /* jnz     short loc_1C5A5 ;~ 01A2:C594 */
     if (*(dw*)raddr(ds,0x0E2A4) == 0) {
-        /* mov     es, cs:seg_10012 ;~ 01A2:C596 */
-        es = seg_10012;
+        /* mov     es, cs:seg_draw ;~ 01A2:C596 */
+        es = seg_draw;
         /* call    sub_1C66B ;~ 01A2:C59B */
         ds_wrap_b();
         /* mov     ds:0E244h, ax ;~ 01A2:C59E */
@@ -198257,8 +198257,8 @@ loc_1c589:
                 CF = (dd)*(dw*)raddr(ds,0x0E2A4) < (dd)0; ZF = ((dw)((*(dw*)raddr(ds,0x0E2A4)) - (0)) == 0); SF = (((dw)((*(dw*)raddr(ds,0x0E2A4)) - (0))) >> 15);
                 /* jnz     short loc_1C5A5 ;~ 01A2:C594 */
                 if (*(dw*)raddr(ds,0x0E2A4) == 0) {
-                    /* mov     es, cs:seg_10012 ;~ 01A2:C596 */
-                    es = seg_10012;
+                    /* mov     es, cs:seg_draw ;~ 01A2:C596 */
+                    es = seg_draw;
                     /* call    sub_1C66B ;~ 01A2:C59B */
                     ds_wrap_b();
                     /* mov     ds:0E244h, ax ;~ 01A2:C59E */
@@ -199168,8 +199168,8 @@ loc_1c6e7:
             CF = (dd)*(dw*)raddr(ds,0x0E2A4) < (dd)0; ZF = ((dw)((*(dw*)raddr(ds,0x0E2A4)) - (0)) == 0); SF = (((dw)((*(dw*)raddr(ds,0x0E2A4)) - (0))) >> 15);
             /* jnz     short loc_1C709 ;~ 01A2:C6F2 */
             if (*(dw*)raddr(ds,0x0E2A4) == 0) {
-                /* mov     es, cs:seg_10012 ;~ 01A2:C6F4 */
-                es = seg_10012;
+                /* mov     es, cs:seg_draw ;~ 01A2:C6F4 */
+                es = seg_draw;
                 /* push    ds ;~ 01A2:C6F9 */
                 push(ds);
                 /* jmp     short loc_1C6FF ;~ 01A2:C6FA */
@@ -199364,8 +199364,8 @@ loc_1c6e7:
             CF = (dd)*(dw*)raddr(ds,0x0E2A4) < (dd)0; ZF = ((dw)((*(dw*)raddr(ds,0x0E2A4)) - (0)) == 0); SF = (((dw)((*(dw*)raddr(ds,0x0E2A4)) - (0))) >> 15);
             /* jnz     short loc_1C709 ;~ 01A2:C6F2 */
             if (*(dw*)raddr(ds,0x0E2A4) == 0) {
-                /* mov     es, cs:seg_10012 ;~ 01A2:C6F4 */
-                es = seg_10012;
+                /* mov     es, cs:seg_draw ;~ 01A2:C6F4 */
+                es = seg_draw;
                 /* push    ds ;~ 01A2:C6F9 */
                 push(ds);
                 /* jmp     short loc_1C6FF ;~ 01A2:C6FA */
@@ -199737,8 +199737,8 @@ loc_1c6e7:
             CF = (dd)*(dw*)raddr(ds,0x0E2A4) < (dd)0; ZF = ((dw)((*(dw*)raddr(ds,0x0E2A4)) - (0)) == 0); SF = (((dw)((*(dw*)raddr(ds,0x0E2A4)) - (0))) >> 15);
             /* jnz     short loc_1C709 ;~ 01A2:C6F2 */
         } while (*(dw*)raddr(ds,0x0E2A4) != 0);
-        /* mov     es, cs:seg_10012 ;~ 01A2:C6F4 */
-        es = seg_10012;
+        /* mov     es, cs:seg_draw ;~ 01A2:C6F4 */
+        es = seg_draw;
         /* push    ds ;~ 01A2:C6F9 */
         push(ds);
         /* jmp     short loc_1C6FF ;~ 01A2:C6FA */
@@ -199927,8 +199927,8 @@ loc_1c6e7:
             CF = (dd)*(dw*)raddr(ds,0x0E2A4) < (dd)0; ZF = ((dw)((*(dw*)raddr(ds,0x0E2A4)) - (0)) == 0); SF = (((dw)((*(dw*)raddr(ds,0x0E2A4)) - (0))) >> 15);
             /* jnz     short loc_1C709 ;~ 01A2:C6F2 */
         } while (*(dw*)raddr(ds,0x0E2A4) != 0);
-        /* mov     es, cs:seg_10012 ;~ 01A2:C6F4 */
-        es = seg_10012;
+        /* mov     es, cs:seg_draw ;~ 01A2:C6F4 */
+        es = seg_draw;
         /* push    ds ;~ 01A2:C6F9 */
         push(ds);
         /* jmp     short loc_1C6FF ;~ 01A2:C6FA */
@@ -200385,8 +200385,8 @@ loc_1c855:
         CF = (dd)*(dw*)raddr(ds,0x0E2A4) < (dd)0; ZF = ((dw)((*(dw*)raddr(ds,0x0E2A4)) - (0)) == 0); SF = (((dw)((*(dw*)raddr(ds,0x0E2A4)) - (0))) >> 15);
         /* jnz     short loc_1C882 ;~ 01A2:C86B */
         if (*(dw*)raddr(ds,0x0E2A4) == 0) {
-            /* mov     es, cs:seg_10012 ;~ 01A2:C86D */
-            es = seg_10012;
+            /* mov     es, cs:seg_draw ;~ 01A2:C86D */
+            es = seg_draw;
             /* push    ds ;~ 01A2:C872 */
             push(ds);
             /* jmp     short loc_1C878 ;~ 01A2:C873 */
@@ -200520,8 +200520,8 @@ loc_1c855:
         CF = (dd)*(dw*)raddr(ds,0x0E2A4) < (dd)0; ZF = ((dw)((*(dw*)raddr(ds,0x0E2A4)) - (0)) == 0); SF = (((dw)((*(dw*)raddr(ds,0x0E2A4)) - (0))) >> 15);
         /* jnz     short loc_1C882 ;~ 01A2:C86B */
         if (*(dw*)raddr(ds,0x0E2A4) == 0) {
-            /* mov     es, cs:seg_10012 ;~ 01A2:C86D */
-            es = seg_10012;
+            /* mov     es, cs:seg_draw ;~ 01A2:C86D */
+            es = seg_draw;
             /* push    ds ;~ 01A2:C872 */
             push(ds);
             /* jmp     short loc_1C878 ;~ 01A2:C873 */
@@ -200609,8 +200609,8 @@ loc_1c855:
         CF = (dd)*(dw*)raddr(ds,0x0E2A4) < (dd)0; ZF = ((dw)((*(dw*)raddr(ds,0x0E2A4)) - (0)) == 0); SF = (((dw)((*(dw*)raddr(ds,0x0E2A4)) - (0))) >> 15);
         /* jnz     short loc_1C882 ;~ 01A2:C86B */
         if (*(dw*)raddr(ds,0x0E2A4) == 0) {
-            /* mov     es, cs:seg_10012 ;~ 01A2:C86D */
-            es = seg_10012;
+            /* mov     es, cs:seg_draw ;~ 01A2:C86D */
+            es = seg_draw;
             /* push    ds ;~ 01A2:C872 */
             push(ds);
             /* jmp     short loc_1C878 ;~ 01A2:C873 */
@@ -200686,8 +200686,8 @@ loc_1c855:
         CF = (dd)*(dw*)raddr(ds,0x0E2A4) < (dd)0; ZF = ((dw)((*(dw*)raddr(ds,0x0E2A4)) - (0)) == 0); SF = (((dw)((*(dw*)raddr(ds,0x0E2A4)) - (0))) >> 15);
         /* jnz     short loc_1C882 ;~ 01A2:C86B */
         if (*(dw*)raddr(ds,0x0E2A4) == 0) {
-            /* mov     es, cs:seg_10012 ;~ 01A2:C86D */
-            es = seg_10012;
+            /* mov     es, cs:seg_draw ;~ 01A2:C86D */
+            es = seg_draw;
             /* push    ds ;~ 01A2:C872 */
             push(ds);
             /* jmp     short loc_1C878 ;~ 01A2:C873 */
@@ -200725,8 +200725,8 @@ loc_1c855:
         CF = (dd)*(dw*)raddr(ds,0x0E2A4) < (dd)0; ZF = ((dw)((*(dw*)raddr(ds,0x0E2A4)) - (0)) == 0); SF = (((dw)((*(dw*)raddr(ds,0x0E2A4)) - (0))) >> 15);
         /* jnz     short loc_1C882 ;~ 01A2:C86B */
         if (*(dw*)raddr(ds,0x0E2A4) == 0) {
-            /* mov     es, cs:seg_10012 ;~ 01A2:C86D */
-            es = seg_10012;
+            /* mov     es, cs:seg_draw ;~ 01A2:C86D */
+            es = seg_draw;
             /* push    ds ;~ 01A2:C872 */
             push(ds);
             /* jmp     short loc_1C878 ;~ 01A2:C873 */
@@ -200782,8 +200782,8 @@ loc_1c855:
             CF = (dd)*(dw*)raddr(ds,0x0E2A4) < (dd)0; ZF = ((dw)((*(dw*)raddr(ds,0x0E2A4)) - (0)) == 0); SF = (((dw)((*(dw*)raddr(ds,0x0E2A4)) - (0))) >> 15);
             /* jnz     short loc_1C882 ;~ 01A2:C86B */
         } while (*(dw*)raddr(ds,0x0E2A4) != 0);
-        /* mov     es, cs:seg_10012 ;~ 01A2:C86D */
-        es = seg_10012;
+        /* mov     es, cs:seg_draw ;~ 01A2:C86D */
+        es = seg_draw;
         /* push    ds ;~ 01A2:C872 */
         push(ds);
         /* jmp     short loc_1C878 ;~ 01A2:C873 */
@@ -200815,8 +200815,8 @@ loc_1c855:
             CF = (dd)*(dw*)raddr(ds,0x0E2A4) < (dd)0; ZF = ((dw)((*(dw*)raddr(ds,0x0E2A4)) - (0)) == 0); SF = (((dw)((*(dw*)raddr(ds,0x0E2A4)) - (0))) >> 15);
             /* jnz     short loc_1C882 ;~ 01A2:C86B */
         } while (*(dw*)raddr(ds,0x0E2A4) != 0);
-        /* mov     es, cs:seg_10012 ;~ 01A2:C86D */
-        es = seg_10012;
+        /* mov     es, cs:seg_draw ;~ 01A2:C86D */
+        es = seg_draw;
         /* push    ds ;~ 01A2:C872 */
         push(ds);
         /* jmp     short loc_1C878 ;~ 01A2:C873 */
@@ -200951,8 +200951,8 @@ loc_1c91f:
             CF = (dd)*(dw*)raddr(ds,0x0E2A4) < (dd)0; ZF = ((dw)((*(dw*)raddr(ds,0x0E2A4)) - (0)) == 0); SF = (((dw)((*(dw*)raddr(ds,0x0E2A4)) - (0))) >> 15);
             /* jnz     short loc_1C94A ;~ 01A2:C937 */
             if (*(dw*)raddr(ds,0x0E2A4) == 0) {
-                /* mov     es, cs:seg_10012 ;~ 01A2:C939 */
-                es = seg_10012;
+                /* mov     es, cs:seg_draw ;~ 01A2:C939 */
+                es = seg_draw;
                 /* call    sub_1C9F9 ;~ 01A2:C93E */
                 ds_wrap_c();
                 /* mov     ds:0E244h, ax ;~ 01A2:C941 */
@@ -201091,8 +201091,8 @@ loc_1c91f:
             CF = (dd)*(dw*)raddr(ds,0x0E2A4) < (dd)0; ZF = ((dw)((*(dw*)raddr(ds,0x0E2A4)) - (0)) == 0); SF = (((dw)((*(dw*)raddr(ds,0x0E2A4)) - (0))) >> 15);
             /* jnz     short loc_1C94A ;~ 01A2:C937 */
             if (*(dw*)raddr(ds,0x0E2A4) == 0) {
-                /* mov     es, cs:seg_10012 ;~ 01A2:C939 */
-                es = seg_10012;
+                /* mov     es, cs:seg_draw ;~ 01A2:C939 */
+                es = seg_draw;
                 /* call    sub_1C9F9 ;~ 01A2:C93E */
                 ds_wrap_c();
                 /* mov     ds:0E244h, ax ;~ 01A2:C941 */
@@ -201190,8 +201190,8 @@ loc_1c91f:
             CF = (dd)*(dw*)raddr(ds,0x0E2A4) < (dd)0; ZF = ((dw)((*(dw*)raddr(ds,0x0E2A4)) - (0)) == 0); SF = (((dw)((*(dw*)raddr(ds,0x0E2A4)) - (0))) >> 15);
             /* jnz     short loc_1C94A ;~ 01A2:C937 */
             if (*(dw*)raddr(ds,0x0E2A4) == 0) {
-                /* mov     es, cs:seg_10012 ;~ 01A2:C939 */
-                es = seg_10012;
+                /* mov     es, cs:seg_draw ;~ 01A2:C939 */
+                es = seg_draw;
                 /* call    sub_1C9F9 ;~ 01A2:C93E */
                 ds_wrap_c();
                 /* mov     ds:0E244h, ax ;~ 01A2:C941 */
@@ -201272,8 +201272,8 @@ loc_1c91f:
             CF = (dd)*(dw*)raddr(ds,0x0E2A4) < (dd)0; ZF = ((dw)((*(dw*)raddr(ds,0x0E2A4)) - (0)) == 0); SF = (((dw)((*(dw*)raddr(ds,0x0E2A4)) - (0))) >> 15);
             /* jnz     short loc_1C94A ;~ 01A2:C937 */
             if (*(dw*)raddr(ds,0x0E2A4) == 0) {
-                /* mov     es, cs:seg_10012 ;~ 01A2:C939 */
-                es = seg_10012;
+                /* mov     es, cs:seg_draw ;~ 01A2:C939 */
+                es = seg_draw;
                 /* call    sub_1C9F9 ;~ 01A2:C93E */
                 ds_wrap_c();
                 /* mov     ds:0E244h, ax ;~ 01A2:C941 */
@@ -201351,8 +201351,8 @@ loc_1c91f:
                     CF = (dd)*(dw*)raddr(ds,0x0E2A4) < (dd)0; ZF = ((dw)((*(dw*)raddr(ds,0x0E2A4)) - (0)) == 0); SF = (((dw)((*(dw*)raddr(ds,0x0E2A4)) - (0))) >> 15);
                     /* jnz     short loc_1C94A ;~ 01A2:C937 */
                     if (*(dw*)raddr(ds,0x0E2A4) == 0) {
-                        /* mov     es, cs:seg_10012 ;~ 01A2:C939 */
-                        es = seg_10012;
+                        /* mov     es, cs:seg_draw ;~ 01A2:C939 */
+                        es = seg_draw;
                         /* call    sub_1C9F9 ;~ 01A2:C93E */
                         ds_wrap_c();
                         /* mov     ds:0E244h, ax ;~ 01A2:C941 */
@@ -201422,8 +201422,8 @@ loc_1c91f:
                         CF = (dd)*(dw*)raddr(ds,0x0E2A4) < (dd)0; ZF = ((dw)((*(dw*)raddr(ds,0x0E2A4)) - (0)) == 0); SF = (((dw)((*(dw*)raddr(ds,0x0E2A4)) - (0))) >> 15);
                         /* jnz     short loc_1C94A ;~ 01A2:C937 */
                         if (*(dw*)raddr(ds,0x0E2A4) == 0) {
-                            /* mov     es, cs:seg_10012 ;~ 01A2:C939 */
-                            es = seg_10012;
+                            /* mov     es, cs:seg_draw ;~ 01A2:C939 */
+                            es = seg_draw;
                             /* call    sub_1C9F9 ;~ 01A2:C93E */
                             ds_wrap_c();
                             /* mov     ds:0E244h, ax ;~ 01A2:C941 */
@@ -201501,8 +201501,8 @@ loc_1c91f:
                         CF = (dd)*(dw*)raddr(ds,0x0E2A4) < (dd)0; ZF = ((dw)((*(dw*)raddr(ds,0x0E2A4)) - (0)) == 0); SF = (((dw)((*(dw*)raddr(ds,0x0E2A4)) - (0))) >> 15);
                         /* jnz     short loc_1C94A ;~ 01A2:C937 */
                         if (*(dw*)raddr(ds,0x0E2A4) == 0) {
-                            /* mov     es, cs:seg_10012 ;~ 01A2:C939 */
-                            es = seg_10012;
+                            /* mov     es, cs:seg_draw ;~ 01A2:C939 */
+                            es = seg_draw;
                             /* call    sub_1C9F9 ;~ 01A2:C93E */
                             ds_wrap_c();
                             /* mov     ds:0E244h, ax ;~ 01A2:C941 */
@@ -201565,8 +201565,8 @@ loc_1c91f:
             CF = (dd)*(dw*)raddr(ds,0x0E2A4) < (dd)0; ZF = ((dw)((*(dw*)raddr(ds,0x0E2A4)) - (0)) == 0); SF = (((dw)((*(dw*)raddr(ds,0x0E2A4)) - (0))) >> 15);
             /* jnz     short loc_1C94A ;~ 01A2:C937 */
             if (*(dw*)raddr(ds,0x0E2A4) == 0) {
-                /* mov     es, cs:seg_10012 ;~ 01A2:C939 */
-                es = seg_10012;
+                /* mov     es, cs:seg_draw ;~ 01A2:C939 */
+                es = seg_draw;
                 /* call    sub_1C9F9 ;~ 01A2:C93E */
                 ds_wrap_c();
                 /* mov     ds:0E244h, ax ;~ 01A2:C941 */
@@ -201625,8 +201625,8 @@ loc_1c91f:
             CF = (dd)*(dw*)raddr(ds,0x0E2A4) < (dd)0; ZF = ((dw)((*(dw*)raddr(ds,0x0E2A4)) - (0)) == 0); SF = (((dw)((*(dw*)raddr(ds,0x0E2A4)) - (0))) >> 15);
             /* jnz     short loc_1C94A ;~ 01A2:C937 */
         } while (*(dw*)raddr(ds,0x0E2A4) != 0);
-        /* mov     es, cs:seg_10012 ;~ 01A2:C939 */
-        es = seg_10012;
+        /* mov     es, cs:seg_draw ;~ 01A2:C939 */
+        es = seg_draw;
         /* call    sub_1C9F9 ;~ 01A2:C93E */
         ds_wrap_c();
         /* mov     ds:0E244h, ax ;~ 01A2:C941 */
@@ -201653,8 +201653,8 @@ loc_1c95b:
         CF = (dd)*(dw*)raddr(ds,0x0E2A4) < (dd)0; ZF = ((dw)((*(dw*)raddr(ds,0x0E2A4)) - (0)) == 0); SF = (((dw)((*(dw*)raddr(ds,0x0E2A4)) - (0))) >> 15);
         /* jnz     short loc_1C98A ;~ 01A2:C973 */
         if (*(dw*)raddr(ds,0x0E2A4) == 0) {
-            /* mov     es, cs:seg_10012 ;~ 01A2:C975 */
-            es = seg_10012;
+            /* mov     es, cs:seg_draw ;~ 01A2:C975 */
+            es = seg_draw;
             /* push    ds ;~ 01A2:C97A */
             push(ds);
             /* jmp     short loc_1C980 ;~ 01A2:C97B */
@@ -201855,8 +201855,8 @@ loc_1c95b:
             CF = (dd)*(dw*)raddr(ds,0x0E2A4) < (dd)0; ZF = ((dw)((*(dw*)raddr(ds,0x0E2A4)) - (0)) == 0); SF = (((dw)((*(dw*)raddr(ds,0x0E2A4)) - (0))) >> 15);
             /* jnz     short loc_1C98A ;~ 01A2:C973 */
         } while (*(dw*)raddr(ds,0x0E2A4) != 0);
-        /* mov     es, cs:seg_10012 ;~ 01A2:C975 */
-        es = seg_10012;
+        /* mov     es, cs:seg_draw ;~ 01A2:C975 */
+        es = seg_draw;
         /* push    ds ;~ 01A2:C97A */
         push(ds);
         /* jmp     short loc_1C980 ;~ 01A2:C97B */
@@ -201962,8 +201962,8 @@ loc_1c95b:
             CF = (dd)*(dw*)raddr(ds,0x0E2A4) < (dd)0; ZF = ((dw)((*(dw*)raddr(ds,0x0E2A4)) - (0)) == 0); SF = (((dw)((*(dw*)raddr(ds,0x0E2A4)) - (0))) >> 15);
             /* jnz     short loc_1C98A ;~ 01A2:C973 */
         } while (*(dw*)raddr(ds,0x0E2A4) != 0);
-        /* mov     es, cs:seg_10012 ;~ 01A2:C975 */
-        es = seg_10012;
+        /* mov     es, cs:seg_draw ;~ 01A2:C975 */
+        es = seg_draw;
         /* push    ds ;~ 01A2:C97A */
         push(ds);
         /* jmp     short loc_1C980 ;~ 01A2:C97B */

@@ -88,12 +88,16 @@ for f in glob.glob(f'{AR}/port/tests/*.[ch]'):
     hits += patch(f, lambda s: sub_word(s, main_pat, main_map))
 
 tnd_pat = combined(tnd_map)
-hits += patch(f'{AR}/lifted/tandysnd.exe_seg001.c', lambda s: sub_call(s, tnd_pat, tnd_map))
+# whole-word in the lifted source so internal `loc_X:`/`sub_X:` labels follow
+# their renamed procs (`goto loc_X` and `loc_X:` must stay consistent).
+hits += patch(f'{AR}/lifted/tandysnd.exe_seg001.c', lambda s: sub_word(s, tnd_pat, tnd_map))
 hits += patch(f'{AR}/lifted/tnd_procs.h', lambda s: sub_call(s, tnd_pat, tnd_map))
 tnd_pref = {f'tnd_{o}': f'tnd_{n}' for o, n in tnd_map.items()}
 tnd_pref_pat = combined(tnd_pref)
-for f in (f'{AR}/port/gen/tandysnd_seg001.c', f'{AR}/port/tnd_procs.h'):
-    hits += patch(f, lambda s: sub_call(s, tnd_pref_pat, tnd_pref))
+# lifted label defs/`goto`s appear verbatim under the tnd_ prefix in the port
+# copy as well — whole-word there too (procs.h has only call/decl sites).
+hits += patch(f'{AR}/port/gen/tandysnd_seg001.c', lambda s: sub_word(s, tnd_pref_pat, tnd_pref))
+hits += patch(f'{AR}/port/tnd_procs.h', lambda s: sub_call(s, tnd_pref_pat, tnd_pref))
 tw_map = {**{f'tw_tnd_{o}': f'tw_tnd_{n}' for o, n in tnd_map.items()}, **tnd_pref}
 hits += patch(f'{AR}/port/memimg.c',
               lambda s: sub_word(s, combined(tw_map), tw_map))
