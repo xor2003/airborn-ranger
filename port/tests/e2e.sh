@@ -17,7 +17,7 @@ cd ..
 # airdrop (Osprey -> pod drop -> parafoil descent) runs on its own.
 SDL_VIDEODRIVER=dummy SDL_AUDIODRIVER=dummy \
 M2C_DUMP="$T" M2C_DUMP_EVERY=120 \
-M2C_KEYS="4..2..\r\r\r\r\r\r\r\r\r\r\r\r\r\r..\R..\d..\r..\R..\d..\r..\l..\d..\r..\R..\d..\r..\u..\r..\R..\R..\d..\r..\R..\l..\u..\r..\R..\d..\r............................................................................................................................................................................................................................................................................................" \
+M2C_KEYS="..2..\r\r\r\r\r\r\r\r\r\r\r\r\r\r..\R..\d..\r..\R..\d..\r..\l..\d..\r..\R..\d..\r..\u..\r..\R..\R..\d..\r..\R..\l..\u..\r..\R..\d..\r............................................................................................................................................................................................................................................................................................" \
 M2C_KEYS_DELAY=10 \
 timeout 150 ./port/ar_port 2>"$T".log || true
 
@@ -47,12 +47,13 @@ for f in reversed(frames):           # POD is reached late; stop at first hit
     red = rgb_count(f, (168, 0, 0))
     if red >= 2000: break
 if red < 2000:                  print(f"FAIL: POD screen not reached (red px={red})"); ok = False
-# Airdrop signature: the parafoil descent is >90% teal sky (0,168,168).
-teal = 0
+# Airdrop signature: the parafoil descent fills >55% of the frame with a single
+# sky color — teal (0,168,168) on day missions, yellow (252,252,84) on dusk.
+sky = 0
 for f in reversed(frames):
-    teal = rgb_count(f, (0, 168, 168))
-    if teal >= 150000: break
-if teal < 150000:               print(f"FAIL: airdrop not reached (teal px={teal})"); ok = False
+    sky = max(rgb_count(f, (0, 168, 168)), rgb_count(f, (252, 252, 84)))
+    if sky >= 150000: break
+if sky < 150000:                print(f"FAIL: airdrop not reached (sky px={sky})"); ok = False
 if "unresolved ind" in log:     print("FAIL: unresolved indirect calls"); ok = False
 print(("e2e: PASS" if ok else "e2e: FAIL"),
       f"({len(frames)} frames, {len(hashes)} distinct)")

@@ -238,14 +238,14 @@
 #define byte_20D54 (*(volatile db*)&mem[0x12774])
 #define word_20D56 (*(volatile dw*)&mem[0x12776])
 #define word_20D58 (*(volatile dw*)&mem[0x12778])
-#define byte_24E70 (*(volatile db*)&mem[0x16890])
-#define byte_24E71 (*(volatile db*)&mem[0x16891])
-#define word_24E72 (*(volatile dw*)&mem[0x16892])
-#define word_24E74 (*(volatile dw*)&mem[0x16894])
-#define byte_24E76 (*(volatile db*)&mem[0x16896])
-#define word_24E77 (*(volatile dw*)&mem[0x16897])
-#define word_24E79 (*(volatile dw*)&mem[0x16899])
-#define byte_24E7B (*(volatile db*)&mem[0x1689b])
+#define byte_24E70 (*(volatile db*)raddr_(ds,0x7ff0))
+#define byte_24E71 (*(volatile db*)raddr_(ds,0x7ff1))
+#define word_24E72 (*(volatile dw*)raddr_(ds,0x7ff2))
+#define word_24E74 (*(volatile dw*)raddr_(ds,0x7ff4))
+#define byte_24E76 (*(volatile db*)raddr_(ds,0x7ff6))
+#define word_24E77 (*(volatile dw*)raddr_(ds,0x7ff7))
+#define word_24E79 (*(volatile dw*)raddr_(ds,0x7ff9))
+#define byte_24E7B (*(volatile db*)raddr_(ds,0x7ffb))
 #define word_26564 (*(volatile dw*)&mem[0x17f84])
 #define word_26566 (*(volatile dw*)&mem[0x17f86])
 #define word_2656A (*(volatile dw*)&mem[0x17f8a])
@@ -1326,14 +1326,14 @@ extern db dummy50a3c745_seg002_f6fe_28997;
 #define word_20d56 (*(volatile dw*)&mem[0x12776]) /* alias word_20D56 */
 #define word_20d58 (*(volatile dw*)&mem[0x12778]) /* alias word_20D58 */
 extern dw dummy50a3c745_seg002_1277e_29407;
-#define byte_24e70 (*(volatile db*)&mem[0x16890]) /* alias byte_24E70 */
-#define byte_24e71 (*(volatile db*)&mem[0x16891]) /* alias byte_24E71 */
-#define word_24e72 (*(volatile dw*)&mem[0x16892]) /* alias word_24E72 */
-#define word_24e74 (*(volatile dw*)&mem[0x16894]) /* alias word_24E74 */
-#define byte_24e76 (*(volatile db*)&mem[0x16896]) /* alias byte_24E76 */
-#define word_24e77 (*(volatile dw*)&mem[0x16897]) /* alias word_24E77 */
-#define word_24e79 (*(volatile dw*)&mem[0x16899]) /* alias word_24E79 */
-#define byte_24e7b (*(volatile db*)&mem[0x1689b]) /* alias byte_24E7B */
+#define byte_24e70 (*(volatile db*)raddr_(ds,0x7ff0)) /* ds-rel alias byte_24E70 */
+#define byte_24e71 (*(volatile db*)raddr_(ds,0x7ff1)) /* ds-rel alias byte_24E71 */
+#define word_24e72 (*(volatile dw*)raddr_(ds,0x7ff2)) /* ds-rel alias word_24E72 */
+#define word_24e74 (*(volatile dw*)raddr_(ds,0x7ff4)) /* ds-rel alias word_24E74 */
+#define byte_24e76 (*(volatile db*)raddr_(ds,0x7ff6)) /* ds-rel alias byte_24E76 */
+#define word_24e77 (*(volatile dw*)raddr_(ds,0x7ff7)) /* ds-rel alias word_24E77 */
+#define word_24e79 (*(volatile dw*)raddr_(ds,0x7ff9)) /* ds-rel alias word_24E79 */
+#define byte_24e7b (*(volatile db*)raddr_(ds,0x7ffb)) /* ds-rel alias byte_24E7B */
 #define word_2656a (*(volatile dw*)&mem[0x17f8a]) /* alias word_2656A */
 #define word_2656c (*(volatile dw*)&mem[0x17f8c]) /* alias word_2656C */
 #define word_2656e (*(volatile dw*)&mem[0x17f8e]) /* alias word_2656E */

@@ -1,7 +1,7 @@
 // TANDYSND overlay lifted procs
 #pragma once
 void tnd_edummylabel1(void);
-void tnd_edummylabel10(void);
+void tnd_uninstall_timer(void);
 void tnd_edummylabel11(void);
 void tnd_edummylabel12(void);
 void tnd_edummylabel13(void);
@@ -49,9 +49,9 @@ void tnd_edummylabel50(void);
 void tnd_edummylabel51(void);
 void tnd_edummylabel6(void);
 void tnd_edummylabel7(void);
-void tnd_edummylabel8(void);
-void tnd_edummylabel9(void);
-void tnd_loc_1046b(void);
+void tnd_timer_isr(void);
+void tnd_install_timer_2(void);
+void tnd_timer_isr_chain(void);
 void tnd_loc_104bb(void);
 void tnd_loc_104bf(void);
 void tnd_loc_104e1(void);
@@ -94,10 +94,10 @@ void tnd_locret_106e7(void);
 void tnd_locret_107ba(void);
 void tnd_locret_108bc(void);
 void tnd_seg001_33e_proc(void);
-void tnd_seg001_4_proc(void);
-void tnd_sub_1040b(void);
+void tnd_module_init(void);
+void tnd_install_timer(void);
 void tnd_sub_104a4(void);
-void tnd_sub_104c5(void);
+void tnd_seq_tick(void);
 void tnd_sub_1051f(void);
 void tnd_sub_1059b(void);
 void tnd_sub_105b0(void);

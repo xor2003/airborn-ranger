@@ -10,7 +10,7 @@ comments alongside each lifted statement.
 import re, os, glob
 
 SRC = "/home/xor/games/airborn/build_ida/src"
-OUT = "/home/xor/games/airborn/lifted"
+OUT = os.environ.get('LIFT_OUT', "/home/xor/games/airborn/lifted")
 
 UNSIGNED = {'JC':'<','JB':'<','JNAE':'<','JNC':'>=','JAE':'>=','JNB':'>=',
             'JA':'>','JNBE':'>','JBE':'<=','JNA':'<='}
@@ -18,6 +18,10 @@ SIGNED   = {'JL':'<','JNGE':'<','JGE':'>=','JNL':'>=','JG':'>','JNLE':'>','JLE':
 EQUAL    = {'JZ':'==','JE':'==','JNZ':'!=','JNE':'!='}
 BYTEREGS = {'al','ah','bl','bh','cl','ch','dl','dh'}
 WORDREGS = {'ax','bx','cx','dx','si','di','bp','sp','cs','ds','es','ss'}
+# byte/word register aliasing for operand-clobber detection
+REGFAM = {}
+for _r in 'abcd':
+    REGFAM[_r + 'x'] = REGFAM[_r + 'l'] = REGFAM[_r + 'h'] = {_r + 'x', _r + 'l', _r + 'h'}
 
 def opwidth(e):
     if e in BYTEREGS or e.startswith('byte_') or 'db*' in e: return 'b'
@@ -61,11 +65,46 @@ def split_args(s):
 class Lifter:
     def __init__(self):
         self.pending = None   # (a,b,kind) flag producer awaiting fold; kind: cmp|result
+        self.pdirty = [0, 0]  # pending operand i was spilled to _fa/_fb
+        self.pcf = False      # CF rewritten since pending producer (clc/stc/cmc)
+        self._w = []          # operand texts written by the current op
+        self.spilled = False  # function used a _fa/_fb spill
         self.ah = None        # last literal -> ah
         self.goto_targets = []  # labels referenced by goto/if-goto (for closure)
         self.disp = None      # last __disp = EXPR (indirect call/jump operand)
         self.segbase = 0x1a20 # mem base of the segment this function runs in
         self.fnmem = 0        # mem addr of this function (for cs:eip+1 far operands)
+
+    def _pend(self, a, b, kind, w):
+        self.pending = (a, b, kind, w)
+        self.pdirty = [0, 0]
+        self.pcf = False
+
+    def _clob(self, out):
+        """A write between a flag op and its conditional jump must not change
+        the folded compare's operand text (cmp x,m; mov m,y; jz tests m's OLD
+        value via flags). Snapshot the operand to a scratch before the write
+        and fold against that."""
+        if self.pending is None or not self._w:
+            return
+        wt = set()
+        for x in self._w:
+            for t in re.findall(r'[A-Za-z_]\w*', x):
+                wt |= REGFAM.get(t, {t})
+        wt -= {'dw', 'db', 'dd', 'pop', 'push', 'swap'}
+        pd = list(self.pending)
+        ins = 0
+        for i in (0, 1):
+            if self.pdirty[i] or pd[i] in ('0', '0x0', '0x00'):
+                continue
+            if set(re.findall(r'[A-Za-z_]\w*', pd[i])) & wt:
+                slot = '_sa' if i == 0 else '_sb'
+                out.insert(ins, f"{slot} = ({pd[i]});")
+                ins += 1
+                pd[i] = slot
+                self.pdirty[i] = 1
+                self.spilled = True
+        self.pending = tuple(pd)
 
     def flagval(self, jcc):
         w = self.pending[3] if (self.pending is not None and len(self.pending) > 3) else 'w'
@@ -83,7 +122,9 @@ class Lifter:
             return FLAGREAD.get(jcc, '0')
         a, b, kind = self.pending[:3]
         if kind == 'cmp':
-            if jcc in UNSIGNED: return f"{a} {UNSIGNED[jcc]} {b}"
+            if jcc in UNSIGNED:
+                # clc/stc/cmc rewrote CF since the cmp — operand fold is stale
+                return FLAGREAD[jcc] if self.pcf else f"{a} {UNSIGNED[jcc]} {b}"
             if jcc in EQUAL:    return f"{a} {EQUAL[jcc]} {b}"
             if jcc in SIGNED:
                 ea = a if a.startswith('(') else signedcast(a, w)
@@ -105,6 +146,7 @@ class Lifter:
     def op(self, inner, asm=''):
         inner = inner.strip()
         out = []
+        self._w = []
         self._width = 'db' if 'byte ptr' in asm else ('dw' if 'word ptr' in asm else None)
         if self._width is None:
             if re.search(r'\b(b[lx]|c[lx]|d[lx]|al|ah)\b\s*,\s*byte', asm): self._width = 'db'
@@ -126,6 +168,18 @@ class Lifter:
                 v = int(m2.group(2), 0)
                 self.ah = (v & 0xFF) if m2.group(1) == 'ah' else (v >> 8 & 0xFF)
             elif re.match(r'^(ah|ax)\s*=', s): self.ah = None
+            # pacing floor: the ground loop's per-frame countdown reloads from
+            # speed table word_1D949, which is 0 at the default speed index —
+            # on a 4.77MHz 8088 the frame's own work paced the loop, on a fast
+            # host 0 = uncapped free-run. Floor the reload at 1 int1c tick
+            # (~18-20Hz, the game's fastest nonzero pace). mov reg,0 excluded.
+            if s == 'word_1d955 = ax': s = 'word_1d955 = ax ? ax : 1'
+            m3 = re.match(r'^(.*?)(?<![=!<>])=(?!=)', s)
+            if m3: self._w.append(m3.group(1))
+            self._w += re.findall(r'\(?\s*([A-Za-z_]\w*)\s*(?:\+\+|--)', s)
+            if 'pop(' in s: self._w.append('sp')
+            if 'push(' in s: self._w += ['sp', 'raddr_(ss,sp)']
+            self._clob(out)
             out.append(s + ';'); return out
         op, args = m.group(1).lstrip('_'), split_args(m.group(2))
         BYTEREG = {'al','ah','bl','bh','cl','ch','dl','dh'}
@@ -136,126 +190,132 @@ class Lifter:
             return re.sub(r'\*\((?:db|dw)\*\)?\(raddr_?\((.*?)\)\)|\*\(raddr_?\((.*?)\)\)',
                           lambda mm: f"*({t}*)raddr({mm.group(1) or mm.group(2)})", e)
         def wmask(e):
-            if e in BYTEREG or 'db*' in e: return '0xFF'
-            if e in WORDREG or 'dw*' in e: return '0xFFFF'
+            if e in BYTEREG or 'db*' in e or e.startswith('byte_'): return '0xFF'
+            if e in WORDREG or 'dw*' in e or e.startswith('word_'): return '0xFFFF'
+            if 'dd*' in e or e.startswith('dword_'): return '0xFFFFFFFF'
             return '0xFF' if self._width == 'db' else '0xFFFF'
         if op == 'MOV' and len(args) == 2:
             src = widthcast(args[1], args[0])
             if re.match(r'^\*\(raddr', args[0]):
                 dst = widthcast(args[0], args[1])
             else: dst = args[0]
+            self._w.append(args[0])
             out.append(f"{dst} = {src};")
             a0 = args[0]
             if a0 == 'ah' and re.match(r'^(0x|\d)', args[1]): self.ah = int(args[1], 0)
             elif a0 == 'ax' and re.match(r'^(0x|\d)', args[1]): self.ah = int(args[1], 0) >> 8 & 0xFF
             elif a0 in ('ax','ah'): self.ah = None
         elif op == 'CMP' and len(args) == 2:
-            a0 = widthcast(args[0], args[0])
+            a0 = widthcast(args[0], args[1])
             b = widthcast(args[1], args[0])
             w_ = opwidth(a0)
-            self.pending = (a0, b, 'cmp', w_)
+            self._pend(a0, b, 'cmp', w_)
             out.append(f"CF = (dd){a0} < (dd){b}; " + self.zsf(f"({a0}) - ({b})", w_))
         elif op == 'TEST' and len(args) == 2:
-            a0 = widthcast(args[0], args[0])
+            a0 = widthcast(args[0], args[1])
             if args[0] == args[1]:
-                self.pending = (a0, '0', 'result', opwidth(a0)); res = a0
+                self._pend(a0, '0', 'result', opwidth(a0)); res = a0
             else:
                 res = f"({a0} & {widthcast(args[1], args[0])})"
-                self.pending = (res, '0', 'result', opwidth(args[0]))
-            out.append("CF = 0; OF = 0; " + self.zsf(res, opwidth(args[0])))
+                self._pend(res, '0', 'result', opwidth(a0))
+            out.append("CF = 0; OF = 0; " + self.zsf(res, opwidth(a0)))
         elif op in ('ADD','SUB','AND','OR','XOR','ADC','SBB'):
             sym = {'ADD':'+','SUB':'-','AND':'&','OR':'|','XOR':'^','ADC':'+','SBB':'-'}[op]
-            a0 = widthcast(args[0], args[0])
+            a0 = widthcast(args[0], args[1])
             b = widthcast(args[1], args[0])
-            M = wmask(args[0])
+            M = wmask(a0)
             if op == 'XOR' and args[0] == args[1]:
-                self.pending = ('0', '0', 'result', 'w')
+                self._pend('0', '0', 'result', 'w')
                 out.append(f"{a0} = 0; CF = 0; OF = 0; ZF = 1; SF = 0;")
             elif op == 'ADD':
-                self.pending = (a0, '0', 'result', opwidth(a0))
+                self._pend(a0, '0', 'result', opwidth(a0))
                 out.append(f"{{ dd t_ = (dd){a0} + (dd){b}; CF = t_ > {M}; {a0} = t_; " + self.zsf(a0, opwidth(a0)) + " }")
             elif op == 'ADC':
-                self.pending = (a0, '0', 'result', opwidth(a0))
+                self._pend(a0, '0', 'result', opwidth(a0))
                 out.append(f"{{ dd t_ = (dd){a0} + (dd){b} + CF; CF = t_ > {M}; {a0} = t_; " + self.zsf(a0, opwidth(a0)) + " }")
             elif op == 'SUB':
-                self.pending = (a0, '0', 'result', opwidth(a0))
+                self._pend(a0, '0', 'result', opwidth(a0))
                 out.append(f"{{ dd t_ = (dd){a0} - (dd){b}; CF = (dd){a0} < (dd){b}; {a0} = t_; " + self.zsf(a0, opwidth(a0)) + " }")
             elif op == 'SBB':
-                self.pending = (a0, '0', 'result', opwidth(a0))
+                self._pend(a0, '0', 'result', opwidth(a0))
                 out.append(f"{{ dd t_ = (dd){a0} - (dd){b} - CF; CF = (dd){a0} < (dd){b} + CF; {a0} = t_; " + self.zsf(a0, opwidth(a0)) + " }")
             else:
-                self.pending = (a0, '0', 'result', opwidth(a0))   # flags reflect stored result
+                self._pend(a0, '0', 'result', opwidth(a0))   # flags reflect stored result
                 out.append(f"{a0} {sym}= {b}; CF = 0; OF = 0; " + self.zsf(a0, opwidth(a0)))
         elif op in ('INC','DEC'):
             a0 = widthcast(args[0], args[0])
             d = '+' if op=='INC' else '-'
-            self.pending = (a0, '0', 'result', opwidth(a0))
+            self._pend(a0, '0', 'result', opwidth(a0))
             out.append(f"({a0}){d}{d}; " + self.zsf(a0, opwidth(a0)))
         elif op == 'NEG':
             a0 = widthcast(args[0], args[0])
-            self.pending = (a0, '0', 'result', opwidth(a0))
+            self._pend(a0, '0', 'result', opwidth(a0))
             out.append(f"{a0} = -({a0}); CF = ({a0} != 0); " + self.zsf(a0, opwidth(a0)))
         elif op == 'NOT':
             a0 = widthcast(args[0], args[0])
+            self._w.append(a0)
             out.append(f"{a0} = ~{a0};")
         elif op in ('SHL','SHR','SAR'):
-            a0 = widthcast(args[0], args[0])
+            a0 = widthcast(args[0], args[1])
             sym = '<<' if op=='SHL' else '>>'
-            cast = signedcast('', 'b' if (args[0] in BYTEREGS or wmask(args[0]) == '0xFF') else 'w') if op=='SAR' else ''
-            bits = '8' if wmask(args[0]) == '0xFF' else '16'
-            self.pending = (a0, '0', 'result', opwidth(a0))
+            cast = signedcast('', 'b' if (args[0] in BYTEREGS or wmask(a0) == '0xFF') else 'w') if op=='SAR' else ''
+            bits = '8' if wmask(a0) == '0xFF' else '16'
+            self._pend(a0, '0', 'result', opwidth(a0))
             n = args[1]
             if op == 'SHL':
-                out.append(f"{{ if ({n}) {{ CF = (((dd){a0} << ({n})) >> {bits}) & 1; {a0} <<= {n}; " + self.zsf(a0, opwidth(a0)) + " } }}")
+                out.append(f"{{ if ({n}) {{ CF = (((dd){a0} << ({n})) >> {bits}) & 1; {a0} <<= {n}; " + self.zsf(a0, opwidth(a0)) + " } }")
             else:
-                out.append(f"{{ if ({n}) {{ CF = ({a0} >> (({n})-1)) & 1; {a0} = {cast}{a0} >> {n}; " + self.zsf(a0, opwidth(a0)) + " } }}")
+                out.append(f"{{ if ({n}) {{ CF = ({a0} >> (({n})-1)) & 1; {a0} = {cast}{a0} >> {n}; " + self.zsf(a0, opwidth(a0)) + " } }")
         elif op in ('ROL','ROR','RCL','RCR'):
             a0 = widthcast(args[0], 'ax')  # rotates are word ops here
+            self._w.append(a0)
             out.append(f"{a0} = {op.lower()}16({a0}, {args[1]});")
-        elif op == 'CLC': out.append("CF = 0;")
-        elif op == 'STC': out.append("CF = 1;")
-        elif op == 'CMC': out.append("CF = !CF;")
+        elif op == 'CLC': self.pcf = True; out.append("CF = 0;")
+        elif op == 'STC': self.pcf = True; out.append("CF = 1;")
+        elif op == 'CMC': self.pcf = True; out.append("CF = !CF;")
         elif op in ('CLD','STD'): out.append(f"DF = {0 if op=='CLD' else 1};")
         elif op in ('CLI','STI'): out.append(f"IF = {0 if op=='CLI' else 1};")
-        elif op == 'PUSH': out.append(f"push({args[0]});")
-        elif op in ('PUSHF','PUSHF16'): out.append("pushf();")
-        elif op == 'POP': out.append(f"{args[0]} = pop();")
-        elif op in ('POPF','POPF16'): out.append("popf();")
-        elif op == 'XCHG': out.append(f"swap({args[0]}, {args[1]});")
-        elif op == 'CBW': out.append("ax = (char)al;")
-        elif op == 'CWD': out.append("dx = (short)ax < 0 ? 0xFFFF : 0;")
+        elif op == 'PUSH': self._w += ['sp', 'raddr_(ss,sp)']; out.append(f"push({args[0]});")
+        elif op in ('PUSHF','PUSHF16'): self._w += ['sp', 'raddr_(ss,sp)']; out.append("pushf();")
+        elif op == 'POP': self._w += [args[0], 'sp']; out.append(f"{args[0]} = pop();")
+        elif op in ('POPF','POPF16'): self.pending = None; out.append("popf();")
+        elif op == 'XCHG': self._w += [args[0], args[1]]; out.append(f"swap({args[0]}, {args[1]});")
+        elif op == 'CBW': self._w.append('ax'); out.append("ax = (char)al;")
+        elif op == 'CWD': self._w.append('dx'); out.append("dx = (short)ax < 0 ? 0xFFFF : 0;")
         # string ops honor DF (std = backward); si/di are 16-bit so -2 wraps like hw
-        elif op == 'MOVSW': out.append(self._rep + "*(dw*)raddr_(es,di) = *(dw*)raddr_(ds,si); si += DF?-2:2; di += DF?-2:2;" if not self._rep else "while (cx--) { *(dw*)raddr_(es,di) = *(dw*)raddr_(ds,si); si += DF?-2:2; di += DF?-2:2; }")
-        elif op == 'MOVSB': out.append("while (cx--) { *(db*)raddr_(es,di) = *(db*)raddr_(ds,si); si += DF?-1:1; di += DF?-1:1; }" if self._rep else "*(db*)raddr_(es,di) = *(db*)raddr_(ds,si); si += DF?-1:1; di += DF?-1:1;")
-        elif op == 'LODSW': out.append("while (cx--) { ax = *(dw*)raddr_(ds,si); si += DF?-2:2; }" if self._rep else "ax = *(dw*)raddr_(ds,si); si += DF?-2:2;")
-        elif op == 'LODSB': out.append("while (cx--) { al = *(db*)raddr_(ds,si); si += DF?-1:1; }" if self._rep else "al = *(db*)raddr_(ds,si); si += DF?-1:1;")
-        elif op == 'STOSW': out.append("while (cx--) { *(dw*)raddr_(es,di) = ax; di += DF?-2:2; }" if self._rep else "*(dw*)raddr_(es,di) = ax; di += DF?-2:2;")
-        elif op == 'STOSB': out.append("while (cx--) { *(db*)raddr_(es,di) = al; di += DF?-1:1; }" if self._rep else "*(db*)raddr_(es,di) = al; di += DF?-1:1;")
-        elif op == 'CMPSW': self.pending=('ax','*(dw*)raddr_(es,di)','cmp','w'); out.append("si += DF?-2:2; di += DF?-2:2;")
-        elif op == 'CMPSB': self.pending=('al','*(db*)raddr_(es,di)','cmp','b'); out.append("si += DF?-1:1; di += DF?-1:1;")
-        elif op == 'SCASW': self.pending=('ax','*(dw*)raddr_(es,di)','cmp','w'); out.append("di += DF?-2:2;")
-        elif op == 'SCASB': self.pending=('al','*(db*)raddr_(es,di)','cmp','b'); out.append("di += DF?-1:1;")
-        elif op == 'MUL': out.append(f"{{unsigned long r = (unsigned long)ax * {args[0]}; ax = r; dx = r >> 16;}}")
-        elif op == 'IMUL': out.append(f"{{long r = (long)(short)ax * (short){args[0]}; ax = r; dx = r >> 16;}}")
-        elif op == 'DIV': out.append(f"{{unsigned long n = ((unsigned long)dx<<16)|ax; ax = n / {args[0]}; dx = n % {args[0]};}}")
-        elif op == 'IDIV': out.append(f"{{long n = ((long)dx<<16)|ax; ax = n / (short){args[0]}; dx = n % (short){args[0]};}}")
-        elif op in ('MUL1_1',): out.append(f"ax = (dw)al * {args[0]};")
-        elif op in ('MUL1_2',): out.append(f"{{dd r = (dd)ax * {args[0]}; ax = r; dx = r >> 16;}}")
-        elif op in ('IMUL1_1',): out.append(f"ax = (dw)((signed char)al * (signed char){args[0]});")
-        elif op in ('IMUL1_2',): out.append(f"{{long r = (long)(short)ax * (short){args[0]}; ax = r; dx = r >> 16;}}")
-        elif op in ('DIV1_1',): out.append(f"{{dw n = ax; al = n / {args[0]}; ah = n % {args[0]};}}")
-        elif op in ('DIV1_2',): out.append(f"{{unsigned long n = ((unsigned long)dx<<16)|ax; ax = n / {args[0]}; dx = n % {args[0]};}}")
-        elif op in ('IDIV1_1',): out.append(f"{{short n = (short)ax; al = n / (signed char){args[0]}; ah = n % (signed char){args[0]};}}")
-        elif op in ('IDIV1_2',): out.append(f"{{long n = ((long)dx<<16)|ax; ax = n / (short){args[0]}; dx = n % (short){args[0]};}}")
-        elif op == 'XLAT': out.append("al = *(db*)raddr_(ds, bx + al);")
+        elif op == 'MOVSW': self._w += ['si','di','raddr_(es,di)']; out.append(self._rep + "*(dw*)raddr_(es,di) = *(dw*)raddr_(ds,si); si += DF?-2:2; di += DF?-2:2;" if not self._rep else "while (cx--) { *(dw*)raddr_(es,di) = *(dw*)raddr_(ds,si); si += DF?-2:2; di += DF?-2:2; }")
+        elif op == 'MOVSB': self._w += ['si','di','raddr_(es,di)']; out.append("while (cx--) { *(db*)raddr_(es,di) = *(db*)raddr_(ds,si); si += DF?-1:1; di += DF?-1:1; }" if self._rep else "*(db*)raddr_(es,di) = *(db*)raddr_(ds,si); si += DF?-1:1; di += DF?-1:1;")
+        elif op == 'LODSW': self._w += ['ax','si']; out.append("while (cx--) { ax = *(dw*)raddr_(ds,si); si += DF?-2:2; }" if self._rep else "ax = *(dw*)raddr_(ds,si); si += DF?-2:2;")
+        elif op == 'LODSB': self._w += ['ax','si']; out.append("while (cx--) { al = *(db*)raddr_(ds,si); si += DF?-1:1; }" if self._rep else "al = *(db*)raddr_(ds,si); si += DF?-1:1;")
+        elif op == 'STOSW': self._w += ['di','raddr_(es,di)']; out.append("while (cx--) { *(dw*)raddr_(es,di) = ax; di += DF?-2:2; }" if self._rep else "*(dw*)raddr_(es,di) = ax; di += DF?-2:2;")
+        elif op == 'STOSB': self._w += ['di','raddr_(es,di)']; out.append("while (cx--) { *(db*)raddr_(es,di) = al; di += DF?-1:1; }" if self._rep else "*(db*)raddr_(es,di) = al; di += DF?-1:1;")
+        elif op == 'CMPSW': self._w += ['si','di']; self._pend('ax','*(dw*)raddr_(es,di)','cmp','w'); self._clob(out); out.append("si += DF?-2:2; di += DF?-2:2;")
+        elif op == 'CMPSB': self._w += ['si','di']; self._pend('al','*(db*)raddr_(es,di)','cmp','b'); self._clob(out); out.append("si += DF?-1:1; di += DF?-1:1;")
+        elif op == 'SCASW': self._w += ['di']; self._pend('ax','*(dw*)raddr_(es,di)','cmp','w'); self._clob(out); out.append("di += DF?-2:2;")
+        elif op == 'SCASB': self._w += ['di']; self._pend('al','*(db*)raddr_(es,di)','cmp','b'); self._clob(out); out.append("di += DF?-1:1;")
+        elif op == 'MUL': self._w += ['ax','dx']; out.append(f"{{unsigned long r = (unsigned long)ax * {args[0]}; ax = r; dx = r >> 16;}}")
+        elif op == 'IMUL': self._w += ['ax','dx']; out.append(f"{{long r = (long)(short)ax * (short){args[0]}; ax = r; dx = r >> 16;}}")
+        elif op == 'DIV': self._w += ['ax','dx']; out.append(f"{{unsigned long n = ((unsigned long)dx<<16)|ax; ax = n / {args[0]}; dx = n % {args[0]};}}")
+        elif op == 'IDIV': self._w += ['ax','dx']; out.append(f"{{long n = ((long)dx<<16)|ax; ax = n / (short){args[0]}; dx = n % (short){args[0]};}}")
+        elif op in ('MUL1_1',): self._w += ['ax']; out.append(f"ax = (dw)al * {args[0]};")
+        elif op in ('MUL1_2',): self._w += ['ax','dx']; out.append(f"{{dd r = (dd)ax * {args[0]}; ax = r; dx = r >> 16;}}")
+        elif op in ('IMUL1_1',): self._w += ['ax']; out.append(f"ax = (dw)((signed char)al * (signed char){args[0]});")
+        elif op in ('IMUL1_2',): self._w += ['ax','dx']; out.append(f"{{long r = (long)(short)ax * (short){args[0]}; ax = r; dx = r >> 16;}}")
+        elif op in ('DIV1_1',): self._w += ['ax']; out.append(f"{{dw n = ax; al = n / {args[0]}; ah = n % {args[0]};}}")
+        elif op in ('DIV1_2',): self._w += ['ax','dx']; out.append(f"{{unsigned long n = ((unsigned long)dx<<16)|ax; ax = n / {args[0]}; dx = n % {args[0]};}}")
+        elif op in ('IDIV1_1',): self._w += ['ax']; out.append(f"{{short n = (short)ax; al = n / (signed char){args[0]}; ah = n % (signed char){args[0]};}}")
+        elif op in ('IDIV1_2',): self._w += ['ax','dx']; out.append(f"{{long n = ((long)dx<<16)|ax; ax = n / (short){args[0]}; dx = n % (short){args[0]};}}")
+        elif op == 'XLAT': self._w.append('ax'); out.append("al = *(db*)raddr_(ds, bx + al);")
         elif op == 'NOP': pass
-        elif op == 'LEA': out.append(f"{args[0]} = &{args[1]};")
+        elif op == 'LEA': self._w.append(args[0]); out.append(f"{args[0]} = &{args[1]};")
         elif op in ('LES','LDS'):
             seg = 'es' if op=='LES' else 'ds'
+            self._w += [args[0], seg]
             out.append(f"{args[0]} = *(dw*)raddr_({seg if 0 else 'ds'},{args[1]}); {seg} = *(dw*)raddr_(ds,{args[1]}+2);")
-        elif op == 'IN': out.append(f"{args[0]} = in({args[1]});")
+        elif op == 'IN': self._w.append(args[0]); out.append(f"{args[0]} = in({args[1]});")
         elif op == 'OUT': out.append(f"out({args[0]}, {args[1]});")
         elif op == 'INT' or op == '_INT':
+            self.pending = None   # int handlers clobber flags/operands
             num = args[0]
             if num in ('0x21','0X21'):
                 fn = DOS21.get(self.ah)
@@ -270,6 +330,7 @@ class Lifter:
             else: out.append(f"swi({num});")
         elif op.startswith('REP'): pass  # prefix: folded into string op by codegen already
         else: out.append(f"/* {op}({', '.join(args)}); */")
+        self._clob(out)
         return out
 
     def jump(self, inner, asm=''):
@@ -305,7 +366,12 @@ class Lifter:
                 else:
                     t = disp_target(self, e, asm)
                     if t:
-                        out.append(f"{{ vfn f_ = func_at({t}); if (f_) f_(); else fprintf(stderr, \"unresolved ind call %x\\n\", (dd)({t})); }}")
+                        # A callee that pops the call's pushed return address
+                        # (e.g. POD DONE: sub_15C66's `pop di` + tail retn) ends
+                        # this proc's frame in the original. Near calls push no
+                        # guest ret here, so detect it via net sp movement and
+                        # unwind natively.
+                        out.append(f"{{ vfn f_ = func_at({t}); dw sp_ = sp; if (f_) f_(); else fprintf(stderr, \"unresolved ind call %x\\n\", (dd)({t})); if ((short)(sp - sp_) > 0) {{ sp = sp_; return; }} }}")
                     else:
                         out.append("__dispatch_call_ext();")
             else:
@@ -607,6 +673,28 @@ def structure(lines):
 REGS = 'ax bx cx dx si di bp sp al ah bl bh cl ch dl dh CF ZF SF OF'.split()
 ASSIGN_RE = re.compile(r'^(\s*)(\w+)\s*=\s*(.+);\s*$')
 
+# x86 sub-register aliasing: al/ah live inside ax, etc. A mention of any
+# family member is a mention of the whole group for liveness purposes.
+_REG_FAMILY = {
+    'ax': 'ax|al|ah', 'bx': 'bx|bl|bh', 'cx': 'cx|cl|ch', 'dx': 'dx|dl|dh',
+    'al': 'ax|al|ah', 'ah': 'ax|al|ah',
+    'bl': 'bx|bl|bh', 'bh': 'bx|bl|bh',
+    'cl': 'cx|cl|ch', 'ch': 'cx|cl|ch',
+    'dl': 'dx|dl|dh', 'dh': 'dx|dl|dh',
+    'si': 'si', 'di': 'di', 'bp': 'bp', 'sp': 'sp',
+    'cs': 'cs', 'ds': 'ds', 'es': 'es', 'ss': 'ss',
+}
+# a plain write to key fully overwrites every reg in the value set
+# (ax = e kills al/ah; al = e kills only al — ah keeps its old bits)
+_REG_COVERS = {
+    'ax': {'ax', 'al', 'ah'}, 'bx': {'bx', 'bl', 'bh'},
+    'cx': {'cx', 'cl', 'ch'}, 'dx': {'dx', 'dl', 'dh'},
+    'al': {'al'}, 'ah': {'ah'}, 'bl': {'bl'}, 'bh': {'bh'},
+    'cl': {'cl'}, 'ch': {'ch'}, 'dl': {'dl'}, 'dh': {'dh'},
+    'si': {'si'}, 'di': {'di'}, 'bp': {'bp'}, 'sp': {'sp'},
+    'cs': {'cs'}, 'ds': {'ds'}, 'es': {'es'}, 'ss': {'ss'},
+}
+
 def _reads_reg(line, reg):
     """line reads reg (RHS use, condition, or op-assign like +=)."""
     m = ASSIGN_RE.match(line)
@@ -636,14 +724,22 @@ def _reg_dead_after(lines, j, reg):
     may not dominate reads entered through other paths, and calls may
     observe or clobber register globals invisibly.
     """
+    fam = re.compile(r'\b(?:%s)\b' % _REG_FAMILY.get(reg, reg))
     for k in range(j + 1, len(lines)):
         ln = re.sub(r'/\*.*?\*/', '', lines[k]).strip()
         if not ln: continue
         if _CF_BOUNDARY.match(ln): return False
         if re.search(r'\w+\s*\(', ln): return False   # call/macro: may touch reg globals
-        if re.search(r'\b%s\b' % reg, ln):
-            # first occurrence decides: write-without-read => dead; read => live
-            return not _reads_reg(ln, reg) if _writes_reg(ln, reg) else False
+        hit = fam.search(ln)
+        if hit:
+            h = hit.group(0)
+            am = ASSIGN_RE.match(ln)
+            # covering write (R = e) whose RHS doesn't read the family => dead
+            if (am and am.group(2) == h and reg in _REG_COVERS.get(h, ())
+                    and not fam.search(am.group(3))):
+                return True
+            # any other family touch (read, partial write, op-assign) => live
+            return False
     return True
 
 STRUCT_BARRIER = re.compile(r'^\s*(?:\w+:|do\b|\}|else|break;|goto\b|return\b|while\s*\(|for\s*\()')
@@ -850,6 +946,8 @@ def emit_entry(name, label, blockmap, order, group_entries):
                 merged.append(f"{m1.group(1)}ax = 0x{((hv << 8) | lv):04X};")
                 i2 = j2 + 1; continue
         merged.append(out[i2]); i2 += 1
+    if L.spilled:
+        merged.insert(1, "    dd _sa = 0, _sb = 0;")
     return merged
 
 def lift_file(path, out):

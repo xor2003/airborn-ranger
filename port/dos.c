@@ -176,6 +176,9 @@ void dos_exec(void){           /* AH=4Bh AL=03h — overlay load (TANDYSND.EXE) 
     dw loadseg = *(dw*)raddr_(es,bx);
     dw relf    = *(dw*)raddr_(es,bx+2);
     char path[256]; asciz(ds,dx,path,sizeof path);
+    if (getenv("M2C_EXECTRACE"))
+        fprintf(stderr,"EXEC try '%s' ds=%x es=%x bx=%x loadseg=%x relf=%x\n",
+                path, ds, es, bx, loadseg, relf);
     FILE *f = fopen(path,"rb");
     if (!f){ CF=1; ax=2; return; }
     db hdr[0x20];
@@ -246,7 +249,6 @@ void rt_call_vector(int n){
 /* BIOS int8 (IRQ0) replica: bump the BDA tick count and chain to int1c,
  * which runs the game's user-tick handler. TANDYSND's int8 chains here
  * (via its saved dword_103DE) every 3 ticks while music plays (~20 Hz). */
-dd rt_i8_cnt, rt_1c_cnt;
 void rt_bios_int8(void){
     ++rt_i8_cnt;
     ++*(dd*)&mem[0x46c];                        /* BIOS_DATA tick count */

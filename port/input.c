@@ -124,6 +124,94 @@ static void rel_cancel(int scan){
         if (rel_pend[i].scan == scan){ rel_pend[i] = rel_pend[--rel_n]; return; }
 }
 
+/* ---- mouse -> keyboard emulation --------------------------------------
+ * The DOS original is keyboard-only (no int 33h): menus navigate with the
+ * arrow keys and confirm with Enter, so mouse input is folded into the
+ * same int9/int16 path a physical keypress uses. Motion accumulates into a
+ * pending pixel delta that rt_pump_events folds into arrow keys once per
+ * pump — diverted (held-mask) screens get the arrow's bitmask bit held,
+ * int16 screens get discrete keycodes. Left button = Enter (select),
+ * right button = Escape (back). Set M2C_MOUSE=0 to disable. */
+static int mouse_on = -1;                    /* lazy: -1 unknown, else 0/1 */
+static int macc_x, macc_y;                   /* pending deltas (window px) */
+static int win_w = 960, win_h = 600;         /* window px; window is VW*3 x VH*3 */
+
+static int mouse_enabled(void){
+    if (mouse_on < 0){
+        const char *v = getenv("M2C_MOUSE");
+        mouse_on = !(v && *v == '0');
+    }
+    return mouse_on;
+}
+
+/* Force-clear a held-mask bit (bypasses the int9 divert-flag check — used to
+ * drop a mouse-held bit even if the screen has since left divert mode). */
+static void mrelease(int scan){
+    *(dw*)&mem[DS_BASE + 0xad9] &= ~*(dw*)&mem[DS_BASE + 0x950 + (scan & 0x7f) * 2];
+}
+
+/* One keypress through the same diverted/kpush path as a physical key:
+ * diverted keys set their held-mask bit (release deferred so the guest's
+ * tick-gated sampler can't miss it); plain keys queue an int16 keycode. */
+static void synth_key(int xs, db a, int down){
+    if (down){
+        rel_cancel(xs & 0x7f);
+        down_at[xs & 0x7f] = SDL_GetTicks();
+        port60 = xs;
+        if (!int9_update(xs & 0x7f, 1))
+            kpush((dw)((xs << 8) | a));
+    } else {
+        port60 = xs | 0x80;
+        if (*(dw*)&mem[DS_BASE + 0xad7] == 1 &&
+            *(dw*)&mem[DS_BASE + 0x950 + (xs & 0x7f) * 2])
+            rel_defer(xs & 0x7f);
+    }
+    /* non-diverted releases queue nothing (BIOS buffers only presses) */
+}
+
+/* Fold accumulated mouse deltas into arrow keys. Runs once per pump so the
+ * guest samples each held bit inside its own polling window. */
+static void mouse_dir_step(void){
+    static int mhx, mhy;                     /* arrow scans held by the mouse */
+    if (!mouse_enabled()){ macc_x = macc_y = 0; return; }
+    if (*(dw*)&mem[DS_BASE + 0xad7] == 1){
+        /* Held-mask screens (POD, gameplay): hold a direction bit while delta
+         * is pending. The cursor moves ~4 game-px per guest poll = ~12 window
+         * px on the 3x window, so drain 12/poll and it tracks the mouse ~1:1. */
+        const int DRAIN = 12;
+        int hx = 0, hy = 0;
+        if (macc_x > 0){ hx = 0x4d; macc_x = macc_x > DRAIN ? macc_x - DRAIN : 0; }
+        else if (macc_x < 0){ hx = 0x4b; macc_x = macc_x < -DRAIN ? macc_x + DRAIN : 0; }
+        if (macc_y > 0){ hy = 0x50; macc_y = macc_y > DRAIN ? macc_y - DRAIN : 0; }
+        else if (macc_y < 0){ hy = 0x48; macc_y = macc_y < -DRAIN ? macc_y + DRAIN : 0; }
+        if (hx != mhx){ if (mhx) mrelease(mhx); if (hx) int9_update(hx, 1); mhx = hx; }
+        if (hy != mhy){ if (mhy) mrelease(mhy); if (hy) int9_update(hy, 1); mhy = hy; }
+    } else {
+        if (mhx){ mrelease(mhx); mhx = 0; }  /* divert dropped mid-drag: release */
+        if (mhy){ mrelease(mhy); mhy = 0; }
+        const int STEP = 20;                 /* window px of motion per item step */
+        while (macc_x >=  STEP){ synth_key(0x4d, 0, 1); synth_key(0x4d, 0, 0); macc_x -= STEP; }
+        while (macc_x <= -STEP){ synth_key(0x4b, 0, 1); synth_key(0x4b, 0, 0); macc_x += STEP; }
+        while (macc_y >=  STEP){ synth_key(0x50, 0, 1); synth_key(0x50, 0, 0); macc_y -= STEP; }
+        while (macc_y <= -STEP){ synth_key(0x48, 0, 1); synth_key(0x48, 0, 0); macc_y += STEP; }
+    }
+}
+
+/* POD cursor screens: drop the guest crosshair at the absolute pointer
+ * position (window px -> 320x200 guest px, clamped to the cursor bounds). */
+static void pod_abs_cursor(int wx, int wy){
+    int gx = wx * 320 / (win_w > 0 ? win_w : 960);
+    int gy = wy * 200 / (win_h > 0 ? win_h : 600);
+    if (gx < 0) gx = 0; if (gx > 0x138) gx = 0x138;
+    if (gy < 0) gy = 0; if (gy > 0xC4)  gy = 0xC4;
+    *(db*)&mem[0xf71f] = (db)gx;         /* word_1DCFF (cursor X lo) */
+    *(db*)&mem[0xf73f] = (db)(gx >> 8);  /* word_1DD1F (cursor X hi) */
+    *(db*)&mem[0xf75f] = (db)gy;         /* word_1DD3F (cursor Y)    */
+    macc_x = macc_y = 0;
+    if (getenv("M2C_MOUSEDBG"))
+        fprintf(stderr, "mouse abs win=%d,%d -> cur=%d,%d\n", wx, wy, gx, gy);
+}
+
 /* scripted key feeder for headless testing: M2C_KEYS="1245 " drips one
  * keypress per M2C_KEYS_DELAY pump calls. Escapes: \r enter \e esc
  * \u \d \l \r2 arrows (up/down/left/right). Each key press is followed by
@@ -159,6 +247,9 @@ static const char *script_key(const char *s, int *scan, db *ascii){
         case 'd': *scan = 0x50; *ascii = 0; return s + 2;
         case 'l': *scan = 0x4b; *ascii = 0; return s + 2;
         case 'R': *scan = 0x4d; *ascii = 0; return s + 2;
+        case 'H': *scan = -3; *ascii = 0; return s + 2;      /* hold-next-key flag */
+        case 'F': *scan = 0x43; *ascii = 0; return s + 2;    /* F9 -> map overlay */
+        case '5': *scan = 0x4c; *ascii = 0; return s + 2;    /* KP5 -> fire/divert bit4 */
         }
     }
     if (*s == '.'){ *scan = -1; *ascii = 0; return s + 1; }   /* pause one delay window */
@@ -175,6 +266,7 @@ void rt_script_feed(void){
     static const char *script; static int sdel;
     static int pend_scan = -1;
     static int wait_poll0 = -1;
+    static int hold_next = 0;
     static SDL_mutex *mx;
     if (!mx) mx = SDL_CreateMutex();
     SDL_LockMutex(mx);
@@ -203,6 +295,9 @@ void rt_script_feed(void){
          * have polled at least once since the key became pending. */
         int xs; db asc;
         const char *next = script_key(script, &xs, &asc);
+        if (xs == -3){                          /* \H: next key is held, not released */
+            hold_next = 1; script = next; sdel = 0; goto out;
+        }
         if (xs < 0){                            /* pause token: just wait a window */
             script = next; sdel = 0; goto out;
         }
@@ -270,7 +365,8 @@ void rt_script_feed(void){
             if (getenv("M2C_KTRACE")) fprintf(stderr, "feed %02x div=%d scr=%x\n", xs, d,
                                               *(dw*)&mem[DS_BASE + 0xa94]);
             if (!d) kpush((dw)((xs << 8) | asc));
-            pend_scan = xs;
+            pend_scan = hold_next ? -1 : xs;    /* \H: press stays held, no release */
+            hold_next = 0;
         }
     }
 out:
@@ -290,9 +386,35 @@ void rt_pump_events(void){
     }
     rt_script_feed();
     rel_expire();
+    /* DBG: M2C_HOLDWALK=<hex> forces word_1D959 dir bits only in walk phase
+     * (byte_2A9CA!=0) so menus/descent aren't disturbed. dir bit set=held.
+     * (M2C_HOLD in video.c ORs bits globally for menu/POD testing instead.) */
+    {   static int hset=-1; static dw hv;
+        if (hset<0){ const char*s=getenv("M2C_HOLDWALK"); hv=s?strtol(s,0,16):0; hset=s?1:0; }
+        if (hset && mem[0x1c3ea]!=0)
+            *(dw*)&mem[DS_BASE+0xad9] = (dw)((*(dw*)&mem[DS_BASE+0xad9] & ~0x3f) | (hv & 0x3f)); }
+    /* DBG: M2C_SEEDPOS=1 forces the landed walk phase once the mission loop is
+     * running (descent counter word_2A968 past its 0xFFF0 init), snapping the
+     * ranger to a known mid-map position so direction tests aren't confounded
+     * by where the scripted descent happened to land. */
+    if (getenv("M2C_SEEDPOS")){
+        if (*(dw*)&mem[0xf33e] != 0){            /* mission state active */
+            mem[0x1c3f3] = 1;                    /* byte_2A9D3 = landed  */
+            mem[0x1c3ea] = 1;                    /* byte_2A9CA = walk    */
+            if (*(dw*)&mem[0xf71f] == 0){        /* re-seed until it sticks */
+                mem[0xf720]=0x60; mem[0xf740]=0x00;   /* X=0x0060 -> cellX 8  */
+                mem[0xf760]=0x64;                    /* Y=0x64               */
+                mem[0xf71f]=0x80; mem[0xf75f]=0x80;  /* fine = mid           */
+                mem[0x1c402]=0xF0;                   /* byte_2A9E2 budget    */
+            }
+        }
+    }
     SDL_Event e;
     while (SDL_PollEvent(&e)){
         if (e.type == SDL_QUIT) rt_exit(0);
+        if (e.type == SDL_WINDOWEVENT && e.window.event == SDL_WINDOWEVENT_RESIZED &&
+            e.window.data1 > 0 && e.window.data2 > 0)
+            { win_w = e.window.data1; win_h = e.window.data2; }
         if (e.type == SDL_KEYDOWN || e.type == SDL_KEYUP){
             int xs = xt_scan(e.key.keysym.scancode);
             if (!xs) continue;
@@ -323,15 +445,78 @@ void rt_pump_events(void){
                 kpush((dw)((xs<<8)|a));
             }
         }
+        if (e.type == SDL_MOUSEMOTION && mouse_enabled()){
+            /* Screens with a free pixel cursor (POD selection: word_1D920==5)
+             * take the absolute pointer position — the guest cursor globals are
+             * written directly, matching the original "move crosshair to point"
+             * feel. Other menus stay on relative deltas -> synthesized arrows. */
+            if (*(dw*)&mem[0xf340] == 5)            /* word_1D920 == POD */
+                pod_abs_cursor(e.motion.x, e.motion.y);
+            else {
+                macc_x += e.motion.xrel; macc_y += e.motion.yrel;
+                /* clamp backlog: a fast fling shouldn't queue seconds of input */
+                if (macc_x >  480) macc_x =  480; else if (macc_x < -480) macc_x = -480;
+                if (macc_y >  480) macc_y =  480; else if (macc_y < -480) macc_y = -480;
+                if (getenv("M2C_MOUSEDBG"))
+                    fprintf(stderr, "mouse mv %d,%d acc=%d,%d held=%04x\n",
+                            e.motion.xrel, e.motion.yrel, macc_x, macc_y,
+                            *(dw*)&mem[DS_BASE + 0xad9]);
+            }
+        }
+        if ((e.type == SDL_MOUSEBUTTONDOWN || e.type == SDL_MOUSEBUTTONUP) &&
+            mouse_enabled()){
+            int down = e.type == SDL_MOUSEBUTTONDOWN;
+            /* A click with no preceding motion (window entry, touchpad tap)
+             * would hit-test the stale cursor — sync it from the button's
+             * own coordinates first. */
+            if (*(dw*)&mem[0xf340] == 5)
+                pod_abs_cursor(e.button.x, e.button.y);
+            if (e.button.button == SDL_BUTTON_LEFT)
+                synth_key(0x1c, 0x0d, down);      /* Enter: select */
+            else if (e.button.button == SDL_BUTTON_RIGHT)
+                synth_key(0x01, 0x1b, down);      /* Escape: back */
+            if (getenv("M2C_MOUSEDBG"))
+                fprintf(stderr, "mouse btn %d %s held=%04x\n",
+                        e.button.button, down ? "dn" : "up",
+                        *(dw*)&mem[DS_BASE + 0xad9]);
+        }
     }
+    mouse_dir_step();
 }
 
 dw rt_kbd_port60(void){ dw v = port60; port60 = 0; return v; }
 
+/* Detect the graphics-mode menu by its "DESIRED MODE" string in the text
+ * buffer — its int16 read is the only BIOS-blocking pick in the game. */
+static int gfx_menu_visible(void){
+    static const char tag[] = "DESIRED MODE";
+    for (int row = 0; row < 25; row++){
+        const unsigned char *p = &mem[0xb8000 + row*160];
+        for (int col = 0; col + (int)sizeof(tag)-1 <= 80; col++){
+            int i; for (i = 0; i < (int)sizeof(tag)-1; i++)
+                if (p[(col+i)*2] != (unsigned char)tag[i]) break;   /* chars at even ofs */
+            if (i == (int)sizeof(tag)-1) return 1;
+        }
+    }
+    return 0;
+}
+
 /* BIOS int 16h */
 void bios_getch(void){      /* AH=0: block -> AX */
     int v;
-    while ((v = kpop()) < 0){ kbd_polls++; rt_frame(); SDL_Delay(1); }
+    static int gfx_done;    /* auto-select MCGA once, on the mode menu */
+    while ((v = kpop()) < 0){
+        kbd_polls++; rt_frame(); SDL_Delay(1);
+        if (!gfx_done && gfx_menu_visible()){
+            const char *g = getenv("M2C_GFXMODE");
+            char pick = g ? *g : '4';       /* 4 = MCGA / mode 13h */
+            if (pick >= '1' && pick <= '5'){
+                gfx_done = 1;
+                if (getenv("M2C_KTRACE")) fprintf(stderr, "getch <- gfxmode '%c'\n", pick);
+                ax = pick; return;
+            }
+        }
+    }
     if (getenv("M2C_KTRACE")) fprintf(stderr, "getch <- %04x caller=%p\n", v, __builtin_return_address(0));
     ax = v;
 }

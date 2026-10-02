@@ -11,6 +11,16 @@
 import re, os, glob
 
 AR = '/home/xor/games/airborn'
+
+# semantic renames (tools/names.map): lifted sources may already carry the new
+# names — fmap addr lookup + tndoffs keys must resolve via the ORIGINAL name.
+NAMEMAP, TNDMAP = {}, {}
+for _ln in open(os.path.join(AR, 'tools', 'names.map')):
+    _f = _ln.split('#')[0].split()
+    if len(_f) >= 2:
+        (TNDMAP if 'tnd' in _f[2:] else NAMEMAP)[_f[0]] = _f[1]
+NAME2OLD = {v: k for k, v in NAMEMAP.items()}
+TND2OLD = {v: k for k, v in TNDMAP.items()}
 OUT = os.path.join(AR, 'port')
 os.makedirs(OUT, exist_ok=True)
 
@@ -41,6 +51,20 @@ def guess_type(name):
     if name.startswith(('dword_', 'far', 'jpt_', 'funcs_')): return 'dd'
     return 'db'
 
+# decompress_res scratch block (seg002:7FF0..7FFB, above the ds:67F0 dict).
+# The decoder runs with ds = the *compressed-source* segment (e.g. the 38c5
+# staging buffer), so the original `mov ds:[7FFx]` hits scratch RAM there.
+# Pinning these to image addresses puts them inside the TTLSCR decompression
+# dest (e8a:3F22+) and the output overwrites the decoder's own state mid-run
+# (TTLSCR stops at 16599 instead of 22000). Emit ds-relative defines — under
+# the normal data segment (ds=e8a) they resolve to the same addresses anyway.
+DSREL = {}
+for _n, _p, _o, _a in syms:
+    if _n.lower() in {'byte_24e70','byte_24e71','word_24e72','word_24e74',
+                      'byte_24e76','word_24e77','word_24e79','byte_24e7b'}:
+        DSREL[_n.lower()] = _o
+DSREL.update({n.lower(): o for n, o in DSREL.items()})  # already lower
+
 # --- port/data_syms.h ---
 w = open(os.path.join(OUT, 'data_syms.h'), 'w')
 w.write('// data symbol -> mem[] aliases (lst-linear addressing)\n#pragma once\n')
@@ -49,7 +73,10 @@ for name, para, off, addr in syms:
     if re.match(r'(sub_|loc_|locret_|nullsub_|start$|entry|.*_proc$)', name):
         continue  # code addresses are real functions, not data
     t = symtype.get(name, guess_type(name))
-    w.write(f'#define {name} (*(volatile {t}*)&mem[0x{addr:x}])\n')
+    if name.lower() in DSREL:
+        w.write(f'#define {name} (*(volatile {t}*)raddr_(ds,0x{off:x}))\n')
+    else:
+        w.write(f'#define {name} (*(volatile {t}*)&mem[0x{addr:x}])\n')
     emitted.add(name)
 # externs without a map entry (dummy arrays etc) -> keep as real vars.
 # Case-insensitive alias first: fake-C lowercases symbol names (word_1D934 ->
@@ -64,7 +91,10 @@ for ln in open(os.path.join(AR, 'lifted', 'lifted_data.h')):
         t, n = m.groups()
         hit = bylower.get(n.lower())
         if hit and not re.match(r'(sub_|loc_|locret_|nullsub_|start$|entry|.*_proc$)', hit[0]):
-            w.write(f'#define {n} (*(volatile {t}*)&mem[0x{hit[1]:x}]) /* alias {hit[0]} */\n')
+            if n.lower() in DSREL:
+                w.write(f'#define {n} (*(volatile {t}*)raddr_(ds,0x{DSREL[n.lower()]:x})) /* ds-rel alias {hit[0]} */\n')
+            else:
+                w.write(f'#define {n} (*(volatile {t}*)&mem[0x{hit[1]:x}]) /* alias {hit[0]} */\n')
         else:
             extra.append(m.groups())
             w.write(f'extern {t} {n};\n')
@@ -188,7 +218,16 @@ for _n in sorted(set(re.findall(r'^void (\w+)\(void\)', tsrc, re.M)),
                  key=len, reverse=True):
     tsrc = re.sub(r'\b%s\s*\(' % re.escape(_n), 'tnd_%s(' % _n, tsrc)
 tnames = re.findall(r'^void (\w+)\(void\)', tsrc, re.M)
-tndoffs = {'tnd_' + k: v for k, v in tndoffs.items()}
+# tndoffs keys are lifted names; a renamed lifted proc (edummylabel8 ->
+# timer_isr) may appear in tsrc under either its raw label (tnd_edummylabel8)
+# or its semantic name (tnd_timer_isr) depending on whether rename ran before
+# gen_port. Key both forms to the same addr so the funmap join matches either
+# way — running gen_port before or after rename must not drop ISR entries.
+_tndoffs = {}
+for _k, _v in tndoffs.items():
+    _tndoffs['tnd_' + _k] = _v
+    _tndoffs['tnd_' + TNDMAP.get(_k, _k)] = _v
+tndoffs = _tndoffs
 
 with open(os.path.join(OUT, 'tnd_syms.h'), 'w') as th:
     th.write('// TANDYSND overlay data symbols -> mem[tnd_base + image offset]\n#pragma once\n')
@@ -220,15 +259,17 @@ for n in sorted(set(tnames)):
         w.write('static void tw_%s(void){ dw _ocs = cs; cs = tnd_cseg; %s(); cs = _ocs; }\n' % (n, n))
 # overlay entry trampoline for seg001:0002 (`push cs; pop ds;` bytes IDA left
 # undecoded — falls into seg001_4_proc = call sub_1040B; retf)
-w.write('static void tnd_e0002(void){ dw _ocs = cs; cs = tnd_cseg; push(cs); ds = pop(); tnd_seg001_4_proc(); cs = _ocs; }\n')
+_tnd_entry = 'tnd_' + TNDMAP.get('seg001_4_proc', 'seg001_4_proc')
+w.write('static void tnd_e0002(void){ dw _ocs = cs; cs = tnd_cseg; push(cs); ds = pop(); %s(); cs = _ocs; }\n' % _tnd_entry)
 w.write('static void rt_nullfn(void){}\n')
 w.write('static const fent fmap[] = {\n')
 for n in fns:
-    hit = bylower.get(n.lower())
+    o = NAME2OLD.get(n, n)      # renamed procs: addr comes from the old name
+    hit = bylower.get(o.lower())
     if hit and re.match(r'(sub_|loc_|locret_|nullsub_|start$|entry|.*_proc$)', hit[0]):
         w.write('  {0x%x, %s},\n' % (hit[1], n))
         continue
-    m = re.match(r'(sub_|loc_|locret_|start$)([0-9a-fA-F]*)$', n)
+    m = re.match(r'(sub_|loc_|locret_|start$)([0-9a-fA-F]*)$', o)
     if m:
         if n == 'start':
             continue
@@ -236,7 +277,7 @@ for n in fns:
         if lin >= 0x10000:  # lst name = maplin + 0x10000 ; mem = 0x1a20 + maplin
             w.write('  {0x%x, %s},\n' % (0x1a20 + (lin - 0x10000), n))
         continue
-    m = re.match(r'seg(\d+)_([0-9a-fA-F]+)_proc$', n)
+    m = re.match(r'seg(\d+)_([0-9a-fA-F]+)_proc$', o)
     if m:
         # IDA chunk-entry names: seg+offset -> mem addr via segment base
         sbase = {0: 0x1a20, 1: 0xe45f, 2: 0xe8a0, 3: 0x1cf30}.get(int(m.group(1)))
@@ -262,8 +303,9 @@ print("memimg.c + funmap written")
 
 # --- port/gen_*.c: lifted bodies with port header ---
 # procs that get an rt_tracef() probe injected at entry (M2C_TRACE env)
-TRACE_PROCS = ('sub_107c3', 'sub_10841', 'sub_13998', 'loc_108dd', 'sub_108c6',
-               'sub_13a94', 'sub_109a4', 'sub_1071e')
+TRACE_PROCS = tuple(NAMEMAP.get(t, t) for t in
+    ('load_resource', 'res_file_read', 'decompress_res', 'res_load_fail', 'open_res_file',
+     'load_overlay', 'res_file_error', 'delay_3_ticks'))
 os.makedirs(os.path.join(OUT, 'gen'), exist_ok=True)
 for f in glob.glob(os.path.join(AR, 'lifted', 'ar.exe*.c')):
     src = open(f, encoding='utf8', errors='replace').read()

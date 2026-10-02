@@ -20,6 +20,8 @@ static int pidx, pwrote;               /* 0x3c8 write index state */
 static int pidx_r;                     /* 0x3c7 read index */
 static db attrpal[17];                 /* int10 AX=100x palette regs 0-15 + border */
 static Uint32 last_frame;
+int m2c_glyph_calls;
+dd m2c_dmc_rects, m2c_dmc_calls, m2c_scroll_calls, m2c_dtc_calls;
 static int pit_latch;                /* 0=expect ch0 reload lo, 1=expect hi */
 static unsigned pit_reload = 0;      /* ch0 reload value; 0 == 65536 */
 static double pit_period_ms = 1000.0*65536/1193180.0;   /* current IRQ0 period */
@@ -40,7 +42,9 @@ static void isr_hold(int sig){
     while (park_ack < id) sched_yield();
 }
 
+static unsigned g8_cnt;                  /* IRQ0 dispatches, for TICKSTAT */
 static void guest_irq0(void){
+    ++g8_cnt;
     if (!cpu_tid) return;                  /* worker not registered yet */
     sig_atomic_t id = ++park_req;
     pthread_kill(cpu_tid, SIGUSR1);
@@ -114,7 +118,33 @@ void rt_present(int pump);
  * animation) is still visible — the main thread presents staged frames. */
 static Uint32 tick_cb(Uint32 interval, void *param){
     (void)param;
-    irq_accum += interval;
+    /* M2C_GOD=1: pin the wounds counter (byte_29712) — hits can't accumulate.
+     * Also freeze the mission clock: word_295EB is an 18-tick divider — while
+     * it never reaches 0, sub_1927A never decrements the 3-digit display.
+     * And hold ammo (byte_29715-29718) at its high-water mark so firing can't
+     * deplete it while resupply/pickups still raise it. */
+    static int godmode = -1;
+    static db ammo_hwm[4];
+    if (godmode < 0) godmode = getenv("M2C_GOD") != NULL;
+    if (godmode){
+        mem[0x1b132] = 0;
+        *(dw*)&mem[0x1b00b] = 0x12;
+        for (int i = 0; i < 4; i++){
+            db v = mem[0x1b135 + i];
+            if (v > ammo_hwm[i]) ammo_hwm[i] = v;
+            mem[0x1b135 + i] = ammo_hwm[i];
+        }
+    }
+    /* accumulate real elapsed time — SDL timer granularity coarsens `interval`
+     * (4ms requested, ~8-10ms delivered), which would run ticks at half rate */
+    static Uint32 tick_last;
+    Uint32 tnow = SDL_GetTicks();
+    if (!tick_last) tick_last = tnow;
+    irq_accum += tnow - tick_last;
+    tick_last = tnow;
+    /* IRQ latch: ticks that pile up while the CPU is busy are lost, never
+     * queued — cap catch-up so a long guest op can't dump a burst of ticks */
+    if (irq_accum > pit_period_ms * 4) irq_accum = pit_period_ms * 4;
     while (irq_accum >= pit_period_ms){
         irq_accum -= pit_period_ms;
         /* IRQ0: BIOS stub runs inline (mem-only C, thread-safe); a guest hook
@@ -122,10 +152,136 @@ static Uint32 tick_cb(Uint32 interval, void *param){
         if (*(dd*)&mem[0x20] == 0xf000fea5) rt_bios_int8();
         else if (!getenv("M2C_NOIRQ")) guest_irq0();
     }
+    /* M2C_HOLD=hexmask: force bits in the int9 held-key mask (word_1D959) —
+     * deterministic held-key injection for menu/POD debugging, bypasses SDL. */
+    {   static int hold_mask = -1;
+        static Uint32 hold_at = 0;
+        if (hold_mask < 0){
+            hold_mask = getenv("M2C_HOLD") ? (int)strtol(getenv("M2C_HOLD"), 0, 16) : 0;
+            hold_at = getenv("M2C_HOLD_AT") ? (Uint32)strtol(getenv("M2C_HOLD_AT"), 0, 0) : 0;
+        }
+        if (hold_mask && SDL_GetTicks() >= hold_at)
+            *(dw*)&mem[0xe8a0 + 0xad9] |= (dw)hold_mask;
+    }
+    /* M2C_SNAP=path: one-shot dump of mem[] once walk phase is live with a
+     * placed ranger (X-int nonzero) — offline collision/movement replay. */
+    {   static int snapped;
+        const char *snap_to = getenv("M2C_SNAP");
+        if (snap_to && !snapped && mem[0x1c3ea] == 1 && mem[0x1A81B] != 0){
+            FILE *f = fopen(snap_to, "wb");
+            if (f){ fwrite(mem, 1, 1<<20, f); fclose(f); snapped = 1;
+                    fprintf(stderr, "SNAP wrote %s\n", snap_to); }
+        }
+    }
     Uint32 now = SDL_GetTicks();
     static Uint32 last_feed;
     if (now - last_feed >= 40){ rt_script_feed(); last_feed = now; }
     if (now - last_frame >= 33){ rt_present(0); last_frame = now; }
+    if (getenv("M2C_TRATE")){
+        static Uint32 t5;
+        if (now - t5 >= 5000){ extern void rt_trate_report(void); rt_trate_report(); t5 = now; }
+    }
+    if (getenv("M2C_STATE")){
+        static Uint32 s0;
+        if (now - s0 >= 500){
+            fprintf(stderr, "ST ca=%d ce=%d d0=%d e2=%d e1=%d 1dcff=%04x 1dd1f=%04x 1dd3f=%04x 26de4=%04x 26de6=%d 2962=%d 1d94d=%d 1d91e=%d mode=%d dv=%d held=%04x clk=%d%d%d ammo=%d,%d,%d,%d t=%u r955=%u r949=%u a945=%u sae=%d i66=%x i74=%d i6a=%d\n",
+                    mem[0x1c3ea], *(dw*)&mem[0x1c3ee], *(dw*)&mem[0x1c3f0],
+                    mem[0x1c402], mem[0x1c401],
+                    *(dw*)&mem[0xf71f], *(dw*)&mem[0xf73f], *(dw*)&mem[0xf75f],
+                    *(dw*)&mem[0x18804], mem[0x18806],
+                    *(dw*)&mem[0x1c382], *(dw*)&mem[0xf36d],
+                    *(dw*)&mem[0xf33e], cur_mode,
+                    *(dw*)&mem[0xe8a0 + 0xad7], *(dw*)&mem[0xe8a0 + 0xad9],
+                    mem[0x1a6f4], mem[0x1a6f5], mem[0x1a6f6],
+                    mem[0x1b135], mem[0x1b136], mem[0x1b137], mem[0x1b138],
+                    *(dw*)&mem[0xf102], *(dw*)&mem[0xf375], *(dw*)&mem[0xf369],
+                    *(dw*)&mem[0x17fca], *(dw*)&mem[0xf365],
+                    *(dw*)&mem[0x17f86], *(dw*)&mem[0x17f94],
+                    *(dw*)&mem[0x17f8a]);
+            fprintf(stderr, "  spriteXY=%02x,%02x(%02x) cellres=%d slide=%d cell=%d,%d | glyph=%d w934=%d s10=%04x s12=%04x s0e=%04x | f8=%d b70=%d a961=%d a99d=%04x\n",
+                    mem[0xf721], mem[0xf761], mem[0xf741],
+                    *(dw*)&mem[0x1c42d], *(dw*)&mem[0x1c41b], mem[0x1c3ff], mem[0x1c400],
+                    m2c_glyph_calls, *(dw*)&mem[0xf354],
+                    *(dw*)&mem[0x1a30], *(dw*)&mem[0x1a32], *(dw*)&mem[0x1a2e],
+                    *(dw*)&mem[0xf318], *(dw*)&mem[0x1ca90], mem[0x1c381], *(dw*)&mem[0x1c3bd]);
+            {   /* buffer checksums: present(0x48c5) compose(0x38c5) vga */
+                unsigned long cp=0,cc=0,cv=0;
+                for (long i=0;i<64000;i+=37){ cp=cp*131+mem[0x48c50+i]; cc=cc*131+mem[0x38c50+i]; cv=cv*131+mem[0xa0000+i]; }
+                fprintf(stderr, "  px=%d py=%d camx=%d camy=%d pf=%d,%d th=%d,%d a8=%d,%d 5ae=%d r94b=%d held=%04x dir=%04x thr=%04x db0=%d scr=%d sdir=%02x dtc=%d dmc=%d/%d ck p=%lx c=%lx v=%lx\n",
+                    mem[0x1c380], mem[0x1c381], *(dw*)&mem[0x1b0a3], *(dw*)&mem[0x1b0a1],
+                    *(dw*)&mem[0x1b09b], *(dw*)&mem[0x1b09d], *(dw*)&mem[0x1b234], *(dw*)&mem[0x1b236],
+                    *(dw*)&mem[0x1b088], *(dw*)&mem[0x1b08a],
+                    *(dw*)&mem[0x1c2c0], *(dw*)&mem[0x1c2c2],
+                    *(dw*)&mem[0x17fce], *(dw*)&mem[0xf36b], *(dw*)&mem[0x1a36],
+                    *(dw*)&mem[0xf7d0], m2c_scroll_calls, mem[0x1b09a],
+                    m2c_dtc_calls, m2c_dmc_rects, m2c_dmc_calls, cp,cc,cv);
+            }
+            /* DBG: divert-table entries for the 4 arrows (scan*2 word) at 0xf1f0 */
+            fprintf(stderr, "  dvT up=%04x lf=%04x dn=%04x rt=%04x | ent=%04x sp=%04x ctl=%04x alt=%04x esc=%04x | d3=%d ce=%d\n",
+                    *(dw*)&mem[0xf1f0 + 0x48*2], *(dw*)&mem[0xf1f0 + 0x4b*2],
+                    *(dw*)&mem[0xf1f0 + 0x50*2], *(dw*)&mem[0xf1f0 + 0x4d*2],
+                    *(dw*)&mem[0xf1f0 + 0x1c*2], *(dw*)&mem[0xf1f0 + 0x39*2],
+                    *(dw*)&mem[0xf1f0 + 0x1d*2], *(dw*)&mem[0xf1f0 + 0x38*2],
+                    *(dw*)&mem[0xf1f0 + 0x01*2],
+                    mem[0x1c3f3], *(dw*)&mem[0x1c3ee]);
+            {   /* free-roam: word_265AA frame counter + object-field region dump */
+                fprintf(stderr, "  free fcnt=%d a8a0=%d 26dd5=%d 1dcb0=%d obj[%02x %02x %02x %02x %02x %02x %02x %02x]\n",
+                        *(dw*)&mem[0x17fca],
+                        *(dw*)&mem[0x1c2c0], mem[0x187f5], mem[0xf6d0],
+                        mem[0xA87F], mem[0xA880], mem[0xA881], mem[0xA88F],
+                        mem[0xA890], mem[0xAEB7+1], mem[0xAEA3+1], mem[0xAECB+1]);
+            }
+            {   /* M2C_MDUMP=<hexaddr>:<hexlen> — text dump of a mem region */
+                static long ma = -1, ml;
+                if (ma < 0){ const char *s = getenv("M2C_MDUMP"); char *e;
+                    ma = s ? strtol(s,&e,16) : 0;
+                    ml = (s && *e==':') ? strtol(e+1,0,16) : 0; }
+                if (ma > 0 && ml > 0){
+                    fprintf(stderr, "MD %05lx: ", ma);
+                    for (long i=0;i<ml;i++){ unsigned char c=mem[ma+i];
+                        fputc(c>=32&&c<127?c:'.',stderr); }
+                    fprintf(stderr, "\n");
+                }
+                /* one-shot second region: M2C_MDUMP2=addr:len — nonzero stats */
+                static long m2 = -2, m2l;
+                if (m2 == -2){ const char *s = getenv("M2C_MDUMP2"); char *e;
+                    m2 = s ? strtol(s,&e,16) : 0;
+                    m2l = (s && *e==':') ? strtol(e+1,0,16) : 0; }
+                if (m2 > 0 && m2l > 0){
+                    long nz=0; for(long i=0;i<m2l;i++) if(mem[m2+i]) nz++;
+                    fprintf(stderr, "MD2 %05lx nz=%ld/%ld: ", m2, nz, m2l);
+                    for (long i=0;i<m2l && i<256;i++){ if (i && i%32==0) fprintf(stderr,"\n      ");
+                        fprintf(stderr,"%02x",mem[m2+i]); }
+                    fprintf(stderr,"\n");
+                }
+                /* compose-buffer diff: track which byte ranges change between ticks */
+                if (getenv("M2C_CDIFF")){
+                    static unsigned char *prev; static int init;
+                    if (!prev){ prev = malloc(64000); }
+                    if (!init){ memcpy(prev,&mem[0x38c50],64000); init=1; }
+                    else {
+                        long lo=64000,hi=-1,nd=0;
+                        for (long i=0;i<64000;i++) if (mem[0x38c50+i]!=prev[i]){ nd++; if(i<lo)lo=i; if(i>hi)hi=i; }
+                        fprintf(stderr,"  CDIFF nd=%ld range=[%ld..%ld]\n",nd,lo,hi);
+                        memcpy(prev,&mem[0x38c50],64000);
+                    }
+                }
+            }
+            s0 = now;
+        }
+    }
+    if (getenv("M2C_TICKSTAT")){
+        extern dd rt_i8_cnt, rt_1c_cnt;
+        static Uint32 t0; static dd p_i8, p_1c; static unsigned p_g8;
+        if (!t0){ t0 = now; p_i8 = rt_i8_cnt; p_1c = rt_1c_cnt; p_g8 = g8_cnt; }
+        if (now - t0 >= 2000){
+            double s = (now - t0) / 1000.0;
+            fprintf(stderr, "TICKSTAT irq0=%.1f/s bios8=%.1f/s int1c=%.1f/s pit=%.1fms\n",
+                    (g8_cnt - p_g8)/s, (rt_i8_cnt - p_i8)/s, (rt_1c_cnt - p_1c)/s,
+                    pit_period_ms);
+            t0 = now; p_i8 = rt_i8_cnt; p_1c = rt_1c_cnt; p_g8 = g8_cnt;
+        }
+    }
     return interval;
 }
 
@@ -195,10 +351,30 @@ void rt_present(int pump){
     const char *dump = getenv("M2C_DUMP");
     int every = getenv("M2C_DUMP_EVERY") ? atoi(getenv("M2C_DUMP_EVERY")) : 30;
     if (dump && ++fno % every == 0){
+        if (getenv("M2C_VSTAT")){
+            int nz = 0; for (int i = 0; i < 64000; i++) nz += mem[VGA_BASE+i] != 0;
+            int npal = 0; for (int i = 0; i < 256; i++) npal += pal32[i] != 0xff000000;
+            /* seg_1000E/10/12/18 live in the image header block at cs:0 */
+            dw s0e = *(dw*)&mem[0x1a20+0x0E], s10 = *(dw*)&mem[0x1a20+0x10],
+               s12 = *(dw*)&mem[0x1a20+0x12], s18 = *(dw*)&mem[0x1a20+0x18];
+            int nz12 = 0, nz10 = 0;
+            for (int i = 0; i < 64000; i++){ nz12 += mem[((dd)s12<<4)+i] != 0; nz10 += mem[((dd)s10<<4)+i] != 0; }
+            /* intro tilemap regions: decompressed at ds(0e8a):3f22 (lo) and ds:8722 (hi) */
+            int tmlo = 0, tmhi = 0;
+            for (int i = 0; i < 0x4800; i++){ tmlo += mem[0xE8A0+0x3F22+i] != 0; tmhi += mem[0xE8A0+0x8722+i] != 0; }
+            fprintf(stderr, "VSTAT %d mode=%x vga=%d pal=%d s10=%x:%d s12=%x:%d s0e=%x s18=%x tmlo=%d tmhi=%d\n",
+                    fno, cur_mode, nz, npal, s10, nz10, s12, nz12, s0e, s18, tmlo, tmhi);
+        }
         char p[256]; snprintf(p, sizeof p, "%s.%04d.ppm", dump, fno/every);
         FILE *f = fopen(p, "wb");
         if (f){ fprintf(f, "P6\n%d %d\n255\n", TW, TH);
             for (int i=0;i<TW*TH;i++){ Uint32 c=pix[i]; fputc(c>>16,f);fputc(c>>8,f);fputc(c,f);} fclose(f);}
+        if (getenv("M2C_DUMP_RAW")){
+            char r[256]; snprintf(r, sizeof r, "%s.%04d.idx", dump, fno/every);
+            if ((f = fopen(r, "wb"))){ fwrite(mem+VGA_BASE, 1, 64000, f); fclose(f); }
+            snprintf(r, sizeof r, "%s.%04d.pal", dump, fno/every);
+            if ((f = fopen(r, "wb"))){ fwrite(pal, 1, 768, f); fclose(f); }
+        }
         char q[256]; snprintf(q, sizeof q, "%s.%04d.txt", dump, fno/every);
         if ((f = fopen(q, "wb"))){ dd tb = (cur_mode==7)?MONO_BASE:TEXT_BASE;
             for (int r=0;r<25;r++){ for(int c=0;c<80;c++){ db cc=mem[tb+(r*80+c)*2];

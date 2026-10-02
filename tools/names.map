@@ -1,0 +1,224 @@
+# Airborne Ranger semantic function names — evidence-driven only.
+# Format:  oldname  newname  [tnd]
+#   untagged        = AR.EXE (lifted/ar.exe*.c, port/gen/ar.exe*.c, procs)
+#   tagged 'tnd'    = TANDYSND.EXE overlay (prefixed tnd_ in port/gen + fmap)
+# Applied in place by tools/rename.py. If a name's evidence is weak, leave
+# the sub_/loc_/edummylabelN name — a wrong name is worse than no name.
+
+# --- graphics-mode menu (sub_10616 cluster) ---
+sub_10616 gfx_mode_menu        # int16 '1'..'5' pick -> byte_1cea2
+sub_10696 clear_text_buf       # rep stosw 2000w at es=word_1cea3
+sub_106c0 draw_text_table      # packed row/col/text table -> text buf
+sub_106a7 set_bda_equip_video  # BDA 0x40:0x10 video bits (tandy gate)
+sub_106ee resize_prog_block    # SETBLOCK of PSP block to seg_10018 top
+
+# --- display pipeline ---
+sub_11b81 vblank_wait          # polls 0x3DA bit3 (70 Hz beam model)
+sub_1197d compose_frame        # s12 draw buf -> s10 flip buf dispatch
+sub_11952 compose_frame_cond   # same, skipped when word_1d934==3
+sub_11a19 flip_frame           # per-adapter present dispatch (jpt_11a25)
+sub_11c28 adapter_compose_flip # non-MCGA compose+flip dispatch
+sub_11d12 draw_tile_compose    # tile -> es=seg_10012 draw buffer
+sub_11eb3 blit_tile_mcga       # glyph byte -> 2 px via F000/F100 LUTs -> s10
+sub_14b0c build_mcga_lut       # fills 512B pixel LUT at seg_10004:0xF000
+sub_101d9 build_tile_tables    # tile row/col tables (ds:0xBD5/0xAEF)
+
+# --- frame pacing / input ---
+loc_114ea timer_tick_isr       # int1c handler: 6 countdowns + tick++
+sub_1245a frame_wait           # spins on word_1d94d, polls input meanwhile
+sub_12333 poll_input           # kbd/mouse/joystick -> word_1dca2/1dca4
+sub_1071e delay_3_ticks        # word_1d94d=3 + BDA flag + wait
+sub_14723 delay_ticks          # waits ax ticks on word_1d94d
+sub_1472e frame_compose_flip   # word_1ddb2 gate + compose + flip
+
+# --- resource loader ---
+sub_10954 load_res_pair        # loads 2 compressed resources per call
+sub_10740 select_resource      # word_1d008 res-id cache + reload
+sub_107c3 load_resource        # res id -> ds:0x756 desc -> file read/decomp
+sub_13998 decompress_res       # cx-byte packed stream -> target buf
+
+# --- intro / menu flow ---
+sub_1459d intro_animation      # scroll phases + paratrooper zoom
+sub_1453d draw_tilemap_frame   # unconditional 1000-tile map draw
+sub_155c9 input_device_menu    # keys 1/2/3 device pick
+sub_1561e show_device_menu     # renders device menu via sub_14da2
+sub_14da2 draw_menu_screen     # id'd menu text renderer
+sub_13634 clear_table          # zeroes a lookup table
+sub_1aaaf mission_run          # on-ground mission (loc_1ab33 frame loop)
+sub_100c5 dispatch_phase       # central phase dispatcher (loc_14760)
+
+# --- DOS glue ---
+sub_10116 farcall_ptr_a9e      # far call through ds:0xA9E slot
+sub_1e829 patched_trampoline   # target word patched at runtime
+
+# --- mission_run cluster (loc_1ab33 frame loop + prologue) ---
+sub_1130a rand_next            # Galois LFSR pair, BIOS-time seeded (681 calls)
+sub_1b993 map_cell_read        # bounds ck + cell byte @ds:0x9736; CF=oob
+sub_1b268 map_probe_xy         # (byte_2a960/61 x,y) -> cell base word_265b4+byte
+sub_16af0 map_cell_write       # guarded store al -> [word_265b4+si]
+sub_16e96 obj_overlap_test     # same-type objs, |dxy| vs radius sum -> CF=hit
+sub_16b30 update_obj_max       # running max: al<best->ret; else snapshot fields
+sub_10a19 read_key             # kbhit loop + ext-prefix (0x56/0x76) handling
+sub_10a33 key_poll             # bios_kbhit+getch + scancode table translate
+sub_10a04 toggle_mode_flag     # ext-key: word_1d930^=1 -> trampoline pair
+sub_10b43 clear_backbuf        # adapter dispatch + fill seg_1000e 0x4000w
+sub_157d1 menu_screen_run      # load_res_pair + draw_menu_screen(1F) + poll
+sub_1af76 init_obj_table       # 7-slot table init, fixed field values
+sub_1af63 obj_lookup_word      # ds:bx-0x2468[ax*2] word -> two obj byte fields
+sub_126b9 video_bufs_setup     # patches compose/flip seg bases; adapter dispatch
+
+# --- resource file I/O ---
+sub_10841 res_file_read        # seek+hdr -> dos_read 3F into target segs
+sub_10884 seek_res_entry       # dos_seek end->size, read hdr; CF=err
+sub_108c6 open_res_file        # dos_open 3D00 name@word_1d018 -> word_1d016
+sub_108d4 close_res_file       # dos_close 3E handle word_1d016
+sub_109a4 res_file_error       # prints res name + waits Enter
+loc_108dd res_load_fail        # close + 3x beep + error msg -> CF=1
+sub_10b99 speaker_beep         # out 0x61 bit1 toggling + cx delay loops
+sub_13a94 load_overlay         # dos_alloc + dos_exec 4B03 + fixup tbl copy
+
+# --- game_main cluster (loc_14760 = real top-level loop) ---
+loc_14760 game_main            # stack set, overlay load, intro/menu/mission loop
+sub_10bbf kb_flush             # drains BIOS keybuf (while kbhit: getch)
+sub_12432 wait_btn_release     # polls input until word_1dca2&10 + 1dca4&10
+sub_11643 video_bufs_init      # seg_10010=s12+0x1000, s18=+0x2000, s0e=A000
+sub_113cc set_video_mode       # adapter dispatch -> bios_set_mode (0x13 MCGA)
+sub_10abf clear_flipbuf        # adapter dispatch + zero seg_10010
+sub_10b20 clear_drawbuf        # adapter dispatch + zero seg_10012
+sub_10a6c clear_all_bufs       # clear_backbuf+flipbuf+drawbuf trio
+sub_11c42 compose_flip         # ungated compose_frame+flip_frame (jpt_11c4e)
+sub_11c6a tilemap_compose      # 0x8722 tile src -> seg_10012 compositor
+sub_1b400 map_init             # clears 0x800B @ds:0x9736 + populate dispatch
+sub_1b46f mission_init_dispatch # jpt_1b475 indexed by word_27150
+sub_1b3d6 call_mission_fn      # indirect call funcs_1b3e2[obj field]
+sub_14b2c load_stage_parms     # word_26582&7 idx -> word_1d949/1d94b
+sub_15809 title_screen_once    # guard word_26dd3 + draw_menu_screen(0x21)
+sub_1512d load_res_0a          # fixed-arg thunk: load_resource(0x0A)
+sub_14b50 reset_tbl_ptr        # word_26deb = 0x4E9C
+sub_10755 select_resource_b    # slot word_1d00a + adapter bias ds:0x178
+sub_10774 select_resource_c    # slot word_1d00c cache
+sub_10986 select_resource_d    # slot word_1d00e, ax+3 for adapter 0/4
+sub_13930 mcga_dirty_update    # adapter==3 only: walks rect list word_1ddb0
+sub_1443f sprite_param_set     # ds:0xC7FD&4 picks 2 size param sets
+sub_15d33 copy_draw_params     # 5x 3-byte records ds:0xBBD6 -> draw fields
+sub_14890 reset_counters       # copy 6B ds:si-0x5F31->-0x5D36 + zero batch
+sub_148b3 reset_run_state      # zero run vars; byte_27152&3 -> byte_28cc1
+sub_15996 hud_setup            # res pair 5 + draw-region + copy_draw_params
+sub_18750 clear_8_slots        # fills ds:si-0x26F3 x8 with 0xFF
+sub_14add redraw_frame         # compose_cond+bufsetup+sprites+flip+farcall
+
+# --- mission_run per-frame + object layer ---
+sub_1ae94 obj_to_map_xy        # pixel fields >>3 -> byte_2a960/61 probe inputs
+sub_1aec8 map_mark_cell        # writes 0x22 marker into probed map cell
+sub_1ad16 tick_slot_timers     # 3-slot countdown [si-0x24A4] -> expire handler
+sub_1ac54 slot_init            # init slot fields from draw pos (word_2a9d6)
+sub_1b002 draw_cell_strip      # 4x+0x20 batched cell fetch (word_2a99d row)
+sub_1a9ba render_dispatch      # funcs_1a9c8[adapter] call, ds=es=seg_10012
+sub_1b090 cell_glyph_fetch     # jpt_1b098 + word fetch ds:si-0x1B52
+sub_1adce move_dir_tick        # every-2-tick: input nibble&0xF -> dir table
+sub_1ad87 draw_pos_advance     # bumps draw-pos fields +2, init anim counter
+
+# --- menu/mission-select screens ---
+sub_1514d main_menu            # res pair 1 + draw_menu_screen(1), choice->flow
+sub_17e30  mission_select      # res pair 6/7 by byte_27157 + mission list walk
+sub_15375  brief_screen        # res pair 3 + tbl-0x5871[word_27150*2] text
+sub_15854  find_files          # get_drive/set_dta/find_first -> file enum
+sub_154e2  menu_select_loop    # cursor blink + nav loop, word_28343 select
+sub_15569  menu_nav_step       # frame_wait + dir bits -> word_28343 cursor
+sub_158c3  file_field_copy     # copies 4B ds:bx-0x449C -> word_265b0 row
+sub_18248  walk_set_bits       # iterates word_2a5a3 bitmask -> sub_18295
+sub_182da  render_bit_row      # '0'-fill 6 cells + per-bit table fill
+sub_14a10  post_mission_loop   # 2nd interactive frame loop, word_1d945 exit
+
+# --- hardware-level video/timer ---
+sub_1037e  load_palette        # 16 regs via bios_palette(0x1000) tbl@word_1cea0
+sub_11bbc  set_border_color    # bios_video(0x0Bxx) border/bk color per adapter
+sub_11397  video_hw_init       # tandy out(0x62,0x38) else BDA 0x40:0x10 bits
+sub_1146a  ega_clear_planes    # 0x3CE bitmask + 0x3C4 mapmask, zero es 0x1000w
+sub_11549  install_irq0        # PIT ch0 out43/40 + hook vector 8 (es:0x20)
+sub_11842  ega_blit_planar     # interleaved plane writes es:di,+0x28,+0x50..
+sub_10e1c  ega_blit_planar_b   # same planar blit, src word_1d916 rows
+sub_10920  write_res_file      # dos 3C create + 40 write + close (res writer)
+
+# --- object alloc/spawn layer ---
+sub_14b57  rec_addr_bx         # word_265b0 = bx*0x51 + 0xA0D5 (record base)
+sub_1b846  obj_spawn           # cell_to_px(0) + defaults 0x24 -> obj_alloc
+sub_1b9b9  obj_alloc           # find_free_slot + write 7 fields + type al
+sub_1ba04  find_free_slot      # scan si 0..0x22 for [si-0x4173]==0 -> CF=full
+sub_1ba19  clear_obj_slot      # zero ~18 obj fields for slot si
+sub_1b4b7  cell_to_px          # tbl word_2b245/7[al*2] >>3 -> pos bytes 2a6b0
+sub_16ad1  obj_copy_xy         # copy 4 pos fields -> word_2aa69/6b scratch
+sub_1b344  obj_cell_tile       # save regs + xy_to_cell + probe + tile_lookup
+sub_1b23d  xy_to_cell          # word_2aa69/6b >>2 >>3 -> byte_2a960/61
+sub_1b35e  tile_lookup         # word_2b24f[ax&7F] + word_2b251[si*16] fetch
+sub_18968  clamp_obj_pos       # clamp pos vs word_2967b -> word_265b0
+sub_16a1d  snap_xy_reset       # word_2967b/d=0xFFF0 then snap_to_cell
+sub_16a26  snap_to_cell        # &0xFFFC >>2 >>1 -> cell-aligned draw pos
+sub_18691  obj_delta_apply     # pos bytes += ds:si-0x27B9/-0x27AA deltas
+sub_1b8e2  map_rect_write      # rect loop: map_cell_read ck + copy rec->cells
+sub_1b8c3  rand_map_pos        # rand&0x1F pos, retries until map_rect_write ok
+sub_166b8  clear_sub_obj       # si in [3,8): zero 2 fields + sub_18749
+sub_168a6  apply_obj_scratch   # commit byte_2984c-e scratch to obj si fields
+sub_17342  obj_frame_calc      # (fld>>1)+(flag!=0) clamp 3 -> frame idx
+sub_16473  obj_field_copy      # CF-gated: [si-0x41A3/-0x419B] -> bx obj fields
+sub_15bd5  draw_list_walk      # iterate ds:si-0x43AD list -> draw fields
+sub_14fb1  tbl_row_fetch       # byte_26de9<0x19 -> ds:0xB3F[al*2] -> word_265b0
+sub_115d1  dispatch_a9c        # funcs_115e7[ds:0xA9C] indirect dispatch
+sub_16ba0  obj_flags_and       # [bx-0x3A69]&[bx-0x3E65] -> word_1d91e=0x15,CF
+sub_1ac97  view_pan_step       # alt-frame hist shift; dir bits pan 8..0x118
+sub_1abf2  phase_state_step    # word_2a9d0 state idx, >=0x48 ticks -> next
+sub_14b63  member_sel_init     # word_1d91c=2 + member rec field 0x4A check
+sub_14bc7  member_sel_scan     # iterate member recs via byte_27149/field 0x4A
+sub_14bc2  member_sel_prep     # byte_2731e=0 then falls into member_sel_scan
+sub_14cc7  screen_compose      # tilemap_compose+flip, pick text ptr by 1dcb0
+sub_14d54  draw_text_at        # pos idx byte_27152 -> tbl -> text render
+sub_14d68  sel_idx_step        # dir bits>>3 -> byte_27152-- clamp 0
+sub_14dc1  cursor_snap         # word_1d94d=2, snapshot 26de0/26de8/9 fields
+sub_15137  sel_accept_poll     # word_26de4&0x10 -> byte_26de6 accept latch
+
+# --- battle frame loop (post_mission_loop callees) ---
+sub_15f09  battle_key_check    # key_poll: +-0/_ -> word_26582 speed, SPC->byte_28cc0, 'K'->26dd5, ext 80-82/digits -> byte_29711 weapon sel
+sub_1891a  obj_tick_all        # bx 0..0x21 over live [bx-4173] slots -> funcs_1892f[type] dispatch; bx-change stashes + snd 0x4F
+sub_1654c  obj_motion_tick     # live slots [bx-3A25]: sign-ext vel add to pos lo/hi, dec [bx-395D], scratch word_2aa69/6b
+sub_14acd  render_tick         # word_265ac++ ; word_265ae-- cadence -> falls into redraw_frame + word_1d955 spin/reload
+sub_15e25  spawn_tick          # drains+reloads word_297f3 (diff tbl -0x368B + lvl -0x3683 + rand&1F), prob-gates enemy_spawn, bumps byte_28cc2 level
+sub_16d88  enemy_spawn         # byte_2974f<2 cap; find_free_slot_b + obj_rec_clear + pick_spawn_xy + diff stats [-3741/-3739] + field init
+sub_160e6  find_free_slot_b    # second [si-4173]==0 scan si 0..0x22, CF=full (cf find_free_slot)
+sub_160fb  obj_rec_clear       # zeroes ~34+ strided obj fields at si (wider than clear_obj_slot)
+sub_185f5  pick_spawn_xy       # rand16 pt tbl -0x2842 or -0x2862/66 -> byte_2a612-15; word_2a610=si
+sub_16d4e  slot_weight_sum     # 6 slots: sum [si-3759]*[si-376B] -> word_298c2; returns sum>>3
+sub_16d13  ai_param_fetch      # idx=(clamp(29712*2+sum/8,0,5)<<1)+(28cc1<2?0xC:0) -> word_29b97=[-331B], word_29b95=[-3303]
+sub_16b56  target_pri_decay    # byte_29763 max-pri watermark (update_obj_max): clamp>=0, dec while byte_28cc8==0
+sub_16b13  sprite_reset        # snap_xy_reset + sprite_param_set pair (battle-entry init)
+sub_1b8ac  grid_cell_mark      # store 0x2D at ds:[byte_28cb4*32 + byte_28cb3]-0x68CA
+sub_16ab2  action_dispatch     # jpt_16ab9[byte_2967a & 0xF] indirect jmp (event set by obj ticks)
+sub_16705  unit_draw_walk      # 8-slot ascending-key ([si-3939],[si-3941]) selection -> unit_draw_emit each pass
+sub_167a7  unit_draw_emit      # emit draw rec bx+0E3F/0E5F/0EBF/0EDF/0EFF + clip-mask merge word_1dd9f/1dda3
+sub_17b10  hud_weapon_update   # byte_29711 sel (byte_2a7af +5 bias) + ammo digit-count -> word_29e36/8/a/c/e tile cells
+sub_17cf4  fx_overlay_fill     # word_29ebc!=0: fill 0x20-entry overlay ds:0E3F.. (spr 0x113, pos word_29f60, -0/4) + video_bufs_setup
+
+# --- POD screen + descent (hud_setup/mission_run cluster) ---
+sub_159ff  pod_cursor_move     # frame_wait; dir nibble -> delta tbls -43FB/-441B, clamp X<=0x138 Y<=0xC4; action bit->wait_btn_release, ret SF=1
+sub_15a5a  pod_hit_test        # cursor xy vs 0x25 rect recs ds:0xBC9B (10B: y0,y1,x0,x1,id) -> word_28c83=id, bx=0/1/2 class
+sub_13671  sprite_blit_flagged # jpt_1367d dispatch; slots 0x1F..0 (+0x20 if word_1d937): flagged [si+F67] -> row blit to seg_10010
+sub_1af9c  descent_steer       # byte_2a9ca==0: input nibble -> X delta tbl -2513, clamp 8..0x138 + anim toggle word_1dcbf; else drift anim
+sub_1aa51  ground_map_draw     # 40x25 cells: word_2a99d=0x7F+rowband[-24F3] -> tile_blit each; compose_flip
+sub_116e0  tile_blit           # di=seg_10012 bx=0 -> shared tile blitter loc_1170b
+sub_1036f  load_palette_b      # ds=seg_10000 word_1cea0=0x1972 -> loc_10397 apply (cf load_palette=0x1962)
+
+# --- far-jmp slots patched by load_overlay fixups ---
+sub_1e810  farjmp_ptr_10231    # jmp far via dd mem[0x10231] (overlay call slot)
+sub_1e815  farjmp_ptr_10236    # jmp far via dd mem[0x10236]
+sub_1e81a  farjmp_ptr_1023b    # jmp far via dd mem[0x1023b]
+sub_1e81f  farjmp_ptr_10240    # jmp far via dd mem[0x10240]
+sub_1e824  farjmp_ptr_10245    # jmp far via dd mem[0x10245]
+sub_1e82e  farjmp_ptr_1024f    # jmp far via dd mem[0x1024f]
+
+# --- TANDYSND overlay (timer chain verified this session) ---
+edummylabel8  timer_isr        tnd  # IRQ0: seq tick, /3 chain to old int8
+sub_104c5     seq_tick         tnd  # sound sequencer, runs every PIT tick
+sub_1040b     install_timer    tnd  # saves int8, hooks ISR, PIT 0x4DAE
+edummylabel10 uninstall_timer  tnd  # restores int8 + PIT reload 0
+edummylabel9  install_timer_2  tnd  # second install entry (same tail)
+loc_1046b     timer_isr_chain  tnd  # every-3rd-tick: reset cnt, jmp old int8
+seg001_4_proc module_init      tnd  # overlay entry: ds=cs, call install

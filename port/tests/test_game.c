@@ -2,7 +2,7 @@
  *   - image load + fixups
  *   - func_at address->function mapping
  *   - BIOS int8 stub -> int1c -> countdown timers
- *   - LZW resource decoder sub_13998 vs an independent reference implementation
+ *   - LZW resource decoder decompress_res vs an independent reference implementation
  *     over every *CHR/*.SCR/misc .DTX file in the game dir
  */
 #include "../rt.h"
@@ -82,7 +82,7 @@ static size_t port_lzw(const char *path){
     fclose(f);
     ds = SRCSEG; si = SRCOFF; es = DSTSEG; di = 0; cx = (dw)n; dx = 0;
     ss = STKSEG; sp = 0xFFFE;
-    sub_13998();
+    decompress_res();
     return di;                                  /* dest offset = bytes out */
 }
 
@@ -97,8 +97,8 @@ int main(void){
     /* ---- func_at ---- */
     CHECK(func_at(0xffea5) == rt_bios_int8);
     { vfn z = func_at(0); CHECK(z != 0); z(); }
-    CHECK(func_at(0x1a20 + 0x3998) == sub_13998);  /* LZW decoder maps */
-    CHECK(func_at(0x1a20 + 0x1c6a) == sub_11c6a);  /* tilemap compositor */
+    CHECK(func_at(0x1a20 + 0x3998) == decompress_res);  /* LZW decoder maps */
+    CHECK(func_at(0x1a20 + 0x1c6a) == tilemap_compose);  /* tilemap compositor */
 
     /* ---- int1c special-case + BIOS int8 chain ---- */
     *(dw*)&mem[0x1c*4]   = 0x14d6;                 /* seg000:14D6 */

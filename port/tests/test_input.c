@@ -109,6 +109,88 @@ int main(void){
     for (int i = 0; i < 4; i++) rt_script_feed();
     bios_kbhit();
     CHECK(ZF == 0); CHECK((ax >> 8) == 0x06);       /* '5' scancode */
+    unsetenv("M2C_KEYS");
+
+    /* --- mouse -> keyboard emulation --- */
+    unsetenv("M2C_MOUSE"); mouse_on = -1;
+    CHECK(mouse_enabled() == 1);                    /* default on */
+    setenv("M2C_MOUSE", "0", 1); mouse_on = -1;
+    CHECK(mouse_enabled() == 0);
+    unsetenv("M2C_MOUSE"); mouse_on = -1;
+
+    /* click = Enter keycode on an int16 (non-diverted) menu */
+    memset(&mem[DS_BASE], 0, 0x1000);
+    *(dw*)&mem[DS_BASE + 0xad7] = 0;
+    khead = ktail = 0; rel_n = 0;
+    synth_key(0x1c, 0x0d, 1);                       /* left button down */
+    synth_key(0x1c, 0x0d, 0);                       /* up: queues nothing */
+    bios_kbhit();
+    CHECK(ZF == 0); CHECK(ax == 0x1c0d);
+    kpop();
+    CHECK(khead == ktail);                          /* exactly one key */
+
+    /* click = held-mask Enter on a diverted (POD) screen */
+    *(dw*)&mem[DS_BASE + 0xad7] = 1;
+    *(dw*)&mem[DS_BASE + 0x950 + 0x1c*2] = 0x0010;  /* ENTER -> bit4 */
+    *(dw*)&mem[DS_BASE + 0xad9] = 0;
+    rel_n = 0; khead = ktail = 0;
+    synth_key(0x1c, 0x0d, 1);
+    CHECK(*(dw*)&mem[DS_BASE + 0xad9] == 0x0010);   /* bit held */
+    CHECK(khead == ktail);                          /* nothing on int16 */
+    synth_key(0x1c, 0x0d, 0);
+    CHECK(rel_n == 1);                              /* release deferred */
+
+    /* motion -> discrete arrow keycodes on an int16 menu */
+    *(dw*)&mem[DS_BASE + 0xad7] = 0;
+    khead = ktail = 0;
+    macc_x = 0; macc_y = 50;                        /* 50px down = 2x20px steps */
+    mouse_dir_step();
+    int n = 0; while (kpop() >= 0) n++;
+    CHECK(n == 2); CHECK(macc_y == 10);             /* 50-40 leftover */
+
+    /* motion -> held arrow bit on a held-mask (POD) screen */
+    memset(&mem[DS_BASE], 0, 0x1000);
+    *(dw*)&mem[DS_BASE + 0xad7] = 1;
+    *(dw*)&mem[DS_BASE + 0x950 + 0x4d*2] = 0x0040;  /* RIGHT -> bit6 */
+    *(dw*)&mem[DS_BASE + 0x950 + 0x4b*2] = 0x0080;  /* LEFT  -> bit7 */
+    macc_x = 30; macc_y = 0;
+    mouse_dir_step();
+    CHECK(*(dw*)&mem[DS_BASE + 0xad9] == 0x0040);   /* RIGHT held */
+    CHECK(macc_x == 18);                            /* drained 12px */
+    mouse_dir_step();
+    CHECK(*(dw*)&mem[DS_BASE + 0xad9] == 0x0040);   /* still held mid-drain */
+    macc_x = 0;
+    for (int i = 0; i < 8; i++) mouse_dir_step();
+    CHECK(*(dw*)&mem[DS_BASE + 0xad9] == 0);        /* released when spent */
+
+    /* opposite direction flips the held bit, not just adds */
+    macc_x = -15;
+    mouse_dir_step();
+    CHECK(*(dw*)&mem[DS_BASE + 0xad9] == 0x0080);   /* LEFT held */
+
+    /* --- SDL event loop integration: real MOUSEMOTION/BUTTON events --- */
+    SDL_Init(SDL_INIT_EVENTS);
+    *(dw*)&mem[DS_BASE + 0xad7] = 0;                /* int16 menu */
+    memset(&mem[DS_BASE + 0x950], 0, 0x200);
+    khead = ktail = 0; macc_x = macc_y = 0; rel_n = 0;
+    SDL_FlushEvents(SDL_FIRSTEVENT, SDL_LASTEVENT);
+    SDL_Event me; memset(&me, 0, sizeof me);
+    me.type = SDL_MOUSEMOTION; me.motion.xrel = 40; me.motion.yrel = 0;
+    SDL_PushEvent(&me);
+    rt_pump_events();                               /* drain -> dir_step */
+    n = 0; while (kpop() >= 0) n++;
+    CHECK(n == 2);                                  /* 40px -> 2 right arrows */
+
+    memset(&me, 0, sizeof me);
+    me.type = SDL_MOUSEBUTTONDOWN; me.button.button = SDL_BUTTON_LEFT;
+    SDL_PushEvent(&me);
+    memset(&me, 0, sizeof me);
+    me.type = SDL_MOUSEBUTTONUP; me.button.button = SDL_BUTTON_LEFT;
+    SDL_PushEvent(&me);
+    rt_pump_events();
+    bios_kbhit();
+    CHECK(ZF == 0); CHECK(ax == 0x1c0d);            /* click -> Enter */
+    kpop();
 
     fprintf(stderr, "test_input: %d checks, %d failures\n", checks, fails);
     return fails ? 1 : 0;

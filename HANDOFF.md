@@ -1,417 +1,191 @@
-UPDATE 2026-09-28 — port/ stability verified; formal comparator is reference-only.
+# Handoff prompt — Airborne Ranger C port
 
-- port/ar_port builds clean (gcc -O2, no errors) and passes `make check`
-  (320 unit checks: rt/dos/input/snd/video/game harnesses).
-- e2e smoke (tests/e2e.sh): headless boot -> key-driven through the menu
-  chain (title -> credits -> mission select -> difficulty -> mission
-  briefing) -> SUPPLY POD SELECTION -> DONE via arrow+Enter navigation ->
-  airdrop sequence (parafoil descent renders). PASS.
-  Verified flow detail: the controls menu's "2" = KEYBOARD-DIRECTIONAL
-  ("1" is joystick, waits on gameport 0x201 forever headless). The POD
-  screen consumes only the int9 held-mask (arrows+Enter, bit-coded as a
-  joystick abstraction in word_1D959); digits/letters go to the int16
-  queue it never reads there. NEW in input.c: M2C_MASKDUMP=1 prints which
-  scancodes the current screen arms — the tool for driving any future
-  scripted-input checks. M2C_KEYDBG=1 logs every real SDL key event
-  (xt code, diverted?, held-mask, cursor pos) — use it to diagnose any
-  "keys not working" report at the real-keyboard path.
-- INPUT FIX (real keyboards): the POD screen samples the int9 held-mask
-  inside a tick-gated loop (sub_1245A waits for an int1c decrement, ~55ms
-  windows). A physical tap shorter than one event-pump interval could
-  set+clear the bit inside a single SDL_PollEvent drain — invisible to
-  the guest. Diverted key releases are now deferred so every press holds
-  for >=60ms (input.c rel_pend/rel_defer/rel_expire). Verified: synthetic
-  SDL events through rt_pump_events set/hold/clear mask bits correctly,
-  and a direct sub_159ff unit probe moves the POD cursor +4px per poll
-  for a held arrow. Full mechanism: SDL event -> xt_scan -> int9_update
-  -> word_1D959 -> sub_1231C -> word_1DCA2 -> word_26DE4 -> cursor at
-  word_1DCFF/1DD3F (the red arrow sprite, object slot 0, moves 4px per
-  55ms tick — deliberately joystick-paced, same as the original).
-- DECOMPILER BUGFIX (root cause of dead POD/menu input): sub_1245A's tail
-  folds `mov ax, word_1D8D4; mov word_1DCA2, ax` into
-  `word_1dca2 = (word_1d8d4)` — dropping the `ax` load, so the next
-  `mov byte ptr word_26DE4, al` stored STALE al (always 0xFF = neutral).
-  Every screen fed by the controller sampler saw a frozen input byte.
-  Fixed to `ax = word_1dca2 = word_1d8d4` in lifted/ + port/gen/ (4 sites:
-  sub_1245a + loc_12466/12474/1247F entry stubs). A scan of all lifted/gen
-  C for the same dropped-load fold pattern found no other instances.
-  Verified: unit probe moves cursor a0->b0 under held RIGHT; make check
-  320/320; e2e PASS with 32 distinct screens (input now live everywhere).
-- DECOMPILER BUGFIX (POD Enter/dispatch): two flag-return defects.
-  sub_159FF's `or al,0FFh` (fire) and `and al,10h` (no-fire) must leave
-  SF for the caller's jns — lifted emit wrote only CF, so fire never
-  dispatched. And the DONE hotspot unwinds via `pop di`+retn past the
-  indirect-call return — a host func_at() call has no guest return addr,
-  so `di = pop()` ate guest stack and the loop resumed forever. Modeled
-  with a file-static `pod_done` latch: loc_15CBC sets it, the three POD
-  loop copies (sub_15996 + loc_159DF/159EE stubs) check it after
-  dispatch, POD entries reset it.
-- DECOMPILER BUGFIX (systemic — the big one): lift.py's `pending` flag
-  fold clears on CALL/RETN and NOTHING ever wrote the ZF/SF/OF globals —
-  every `if (ZF)`/`if (SF)` fallback read stale flags. Any function that
-  returns flags to a caller (`or/test; retn` boolean idiom) was broken:
-  sub_159FF (SF=fire), sub_1B993 (ZF=cell free) — the latter hung the
-  post-POD map generator in an infinite random-placement retry while the
-  screen sat frozen on stale POD pixels. Fix: tools/fixflags.py
-  materializes ZF/SF(/OF=0 for logic ops) at every flag-defining emitted
-  statement — 21,550 sites in both lifted/ and port/gen/. lift.py itself
-  now emits the same flags natively (self.zsf) so regen converges.
-  Verified: 320/320 checks; e2e PASS with 364 frames / 173 distinct —
-  full mission loop: title->controls->mission->difficulty->briefing->
-  POD->DONE->deploy->parafoil descent->landing->MISSION ASSESSMENT.
-- DECOMPILER BUGFIX (backward self-jumps emitted as recursion): asm
-  `jz/jns sub_X` to a function's own entry were emitted as
-  `sub_X(); return;` — unbounded host recursion in wait-loops (e.g.
-  sub_12432's fire-release spin). Converted to `goto sub_X;` at 8 sites
-  (sub_10a19, sub_12432, sub_124d1, sub_154d7, sub_157be, sub_17316,
-  sub_1b8c3) in lifted/ + port/gen/.
-- Manual triage of the comparator's real-looking diffs (sub_106a7,
-  sub_15f09, sub_169b6, sub_1b23d, sub_1bcaa): all five are faithful
-  instruction-level translations; diffs traced to comparator asymmetries
-  (oracle disp_unres extra return paths, boundary-summary UF shapes,
-  image-byte resolution on cand only). No port bugs found.
-- The clean C port at port/gen/*.c + port/*.c is the stable, readable
-  deliverable. The masm2c oracle (build_sdl/ar_m2c) remains the reference.
+You are continuing work on the Airborne Ranger DOS→C port at
+`/home/xor/games/airborn`. Goal remains: a stable, reproducible C
+decompilation of `AR.EXE` — every function represented in generated C,
+recompiles cleanly, gameplay/menus/input/graphics match the reference
+`build_sdl/ar_m2c` behavior. Read `HANDOFF.md` for the full history.
 
-COMPARATOR (artifacts/airborn-z3cmp/, informational only):
-- Z3/SSA per-function cross-ABI equivalence checker; 479/479 AR.EXE
-  functions processed: 26 passed, 57 failed, 35 refused, 342 timeout,
-  19 incomplete. Merged report: aircmp-results.json.
-- Most "failed" verdicts are comparator-modeling noise (lazy x86 flag
-  materialization, esp/segment bookkeeping conventions, I/O-port width
-  granularity, oracle-only symbolic-dispatch path asymmetry), NOT proven
-  port bugs. A small set (e.g. data+reg combos like sub_106a7,
-  sub_15f09, sub_169b6, sub_1b23d, sub_1bcaa) would reward manual triage
-  if deeper assurance is ever needed.
-- Known comparator gaps: unresolved dispatches -> indirect_call (honest),
-  guest-image bytes resolve on cand but not oracle (BSS vs embedded img),
-  label-entry callsite inlining expands path budget (timeouts).
-- straightline_ssa.py exits are now (guard,dst,jumpkind) triples —
-  aircmp.py adapted accordingly.
+## State at handoff
 
-UPDATE 2026-09-24 — MCGA blocker fixed; stopped at user request.
+Everything below is **verified working** (live dummy-driver run into
+real battle + test suite). The tree is dirty — modified files plus
+untracked `tools/names.map`, `tools/rename.py`, `NAMING.md`, probes;
+uncommitted. No commit was made.
 
-- build_sdl/ar_m2c rebuilt successfully from the corrected generated C++.
-- Fixed 11 numeric far-pointer/asset-descriptor relocations in ar.exe.cpp:
-  seven 3803:0001 values now use seg004, four 4723:0100 use seg005.
-  Verified against orig_image.bin: expected 29A5:0001 and 38C5:0100.
-  The incorrect title destination overlapped compressed TTLCHR.DTX input.
-- Added indirect dispatch for 01A2:4E9C, a RET callback installed by literal
-  address. Changes are in ar.exe.cpp and ar.exe_seg000.cpp.
-- Verified real SDL mode 13h output, control selection, credits, and RANGER
-  ASSIGNMENT past the previous missing-callback abort. Screenshot:
-  build_sdl/mcga.png. Full mission gameplay and sound are not verified.
-- Launch: ./run-mcga.sh, then select graphics 4 (MCGA), controls 2.
-- Rebuild current corrected sources: tools/build_sdl.sh.
-- tools/prepare_translation.py creates normalized listing + map with symbolic
-  relocations and callback label for future masm2c runs. A full fresh translation
-  was interrupted at user request; build_translate is incomplete, do not use
-  its output as a replacement for the working root sources.
-- No changes made to the external masm2c repository. No commit/push.
+### Session +1 (naming batch 2 + fast rename)
 
-Previous handoff (historical; black-screen/menu speculation superseded):
+- **`tools/rename.py` rewritten single-pass**: one combined longest-first
+  alternation per file instead of one regex scan per rename — ~9 min →
+  ~18 s. A/B-verified byte-identical output vs the old per-name loop on
+  `lifted.bak` seg000 + tandysnd + memimg + gen_port inputs.
+- **32 new evidence-based names** in `tools/names.map` (177 main + 7 tnd
+  total): battle-frame-loop cluster (`battle_key_check`, `obj_tick_all`,
+  `obj_motion_tick`, `render_tick`, `spawn_tick`, `enemy_spawn`,
+  `find_free_slot_b`, `obj_rec_clear`, `pick_spawn_xy`, `slot_weight_sum`,
+  `ai_param_fetch`, `target_pri_decay`, `sprite_reset`, `grid_cell_mark`,
+  `action_dispatch`, `unit_draw_walk`, `unit_draw_emit`,
+  `hud_weapon_update`, `fx_overlay_fill`), POD-screen cluster
+  (`pod_cursor_move`, `pod_hit_test`, `sprite_blit_flagged`),
+  descent/ground (`descent_steer`, `ground_map_draw`, `tile_blit`,
+  `load_palette_b`), and the 6 overlay `farjmp_ptr_102xx` slots.
+- Key decodes: `post_mission_loop` = ground-combat frame loop;
+  `battle_key_check` handles `+`/`-`/`0` → `word_26582` speed, SPC →
+  `byte_28cc0`, `K` → `byte_26dd5`, ext/digits → `byte_29711` weapon;
+  `spawn_tick`/`enemy_spawn` = difficulty-scaled enemy director
+  (`word_297f3` timer, `byte_2974f` alive-cap 2); `hud_setup` is the
+  POD-screen init (`word_1d920=5`) and `loc_159ee` its interact loop
+  (`pod_cursor_move` → `pod_hit_test` → `funcs_159e9` 3-way dispatch).
+- Rebuilt + re-verified after both batches: `make` clean,
+  `make check` 342/342, `tests/e2e.sh` PASS.
+- `word_1d955` pacing floor intact in lifted + gen (12 sites).
 
-You are continuing work on decompiling the DOS game "Airborne Ranger" located at
-/home/xor/games/airborn into recompilable C/C++ via the masm2c translator at
-/home/xor/masm2c. Read /home/xor/masm2c/AGENTS.md first for repo rules.
+### Build & test status (this session)
 
-SCOPE (user-set, do not expand):
-- KvikDOS (/home/xor/kvikdos) is ONLY for compiler validation and isolated
-  function tests - it has NO sound/video. Do NOT use it as a game runtime.
-- The playable target is the masm2c SDL runtime.
-- Implement ONLY MCGA (VGA mode 13h) graphics and TANDY sound. Do NOT touch
-  CGA/EGA/Hercules graphics or IBM sound.
-- DOSBox is the reference environment for comparing behavior against the
-  original. DOSBox requires 8.3 filenames.
+- `python3 tools/lift.py && python3 tools/gen_port.py && python3
+  tools/rename.py` — full regen ran clean
+- `cd port && make` — clean build of `ar_port`
+- `cd port && make check` — **342/342 checks pass**
+- `bash port/tests/e2e.sh` — **PASS** (632 frames, POD + airdrop reached)
+- Live run (`M2C_KEYS` script + `M2C_STATE`/`M2C_DUMP`): reached the
+  ground battle, ranger **moved** (position regs tracked), **killed 2
+  soldiers / 100 merit points**, mission ended at the assessment screen
+  ("not accomplished — did not survive" is expected for blind scripted
+  input). Battle pacing confirmed sane: `word_1d955` reloads to **1**,
+  frame counter ~18 Hz, mission clock ticks ~1/s.
 
-DONE SO FAR:
-1. Byte-exact rebuilt AR.EXE exists (ARN.EXE, 164528 bytes, 152 relocs, zero
-   instruction mismatches vs recovered image orig_image.bin). It loads and runs
-   in DOSBox identically to the packed original (ORIG.EXE). Verified it reaches
-   the same post-menu state (byte_1CEA2=3 MCGA selected, IRQ0 hooked, IBMSNDS
-   resident, black screen waiting for input - identical to ORIG.EXE). The rebuild
-   is CORRECT; the black screen after menu is the game's normal wait-for-input
-   state, not a bug.
+### Fixed this session
 
-2. m2c runtime: added BIOS INT 10h AH=10h palette/DAC subfunctions in
-   /home/xor/masm2c/asm.cpp (around line 2277). Implemented AL=00 (set palette
-   reg), AL=01/02 (overscan/all regs), AL=07/08/09 (reads), AL=10 (set DAC reg
-   BX/DH/CH/CL), AL=12 (DAC block write), AL=15/17 (DAC reads). These update
-   vgaPalette[] and set vga_render_dirty.
+**Hyperspeed battle / "everyone runs very fast"** — regression: the
+`word_1d955` pacing floor existed only as a manual `lifted/` edit and was
+wiped by the session's full regen. Now made durable:
 
-3. Rebuilt SDL binary: /home/xor/games/airborn/build_sdl/ar_m2c. Build recipe:
-     g++ -m32 -mno-ms-bitfields -O0 -ggdb3 -Wno-multichar \
-       -Wno-address-of-packed-member \
-       -I/home/xor/masm2c -I/usr/include/x86_64-linux-gnu -I/usr/include/SDL2 \
-       -D_REENTRANT -c /home/xor/masm2c/asm.cpp -o build_sdl/asm.o
-     g++ -m32 -mno-ms-bitfields -ggdb3 build_sdl/*.o -o build_sdl/ar_m2c \
-       /usr/lib/i386-linux-gnu/libSDL2-2.0.so.0 \
-       /usr/lib/i386-linux-gnu/libncurses.so.6 \
-       /usr/lib/i386-linux-gnu/libtinfo.so.6
-   (32-bit SDL2 dev .so symlink is missing; link against the versioned .so.
-   SDL2 config header is under /usr/include/x86_64-linux-gnu.)
+- `tools/lift.py`, `Lifter.op()` bare-statement passthrough rewrites
+  `word_1d955 = ax` → `word_1d955 = ax ? ax : 1` (12 emitted sites).
+  `word_1d949` speed table is 0 at the default index → countdown 0 →
+  `while(var!=0)` exits instantly → free-run. Floor of 1 int1c tick ≈
+  18 Hz = the game's fastest nonzero pace.
+- `HANDOFF.md` updated to point at the `lift.py` location.
 
-4. The translated game RUNS: '4' selects MCGA, then it loads COLMCG.DTX,
-   MAPDES.DTX, DCOL_TEM.DTX, ROSTER.DAT, TTLCHR.DTX - real asset loading. No
-   more "INT10 AX=1010 not supported" errors. It opens an SDL window titled
-   "masm2c VGA".
+**"Cannot move / invisible walls / background doesn't move"** — largely
+collateral of the same bug: at ~1500 iter/s, key-hold windows compress to
+microseconds (input effectively dropped) and the spinning guest thread
+starves the render loop (screen appears frozen). Verified movement works
+live post-fix. Remaining perceived walls are likely *legit*: trenches/
+berms are collidable, and the game has **no edge-scroll** — the ranger
+walks inside a fixed strip, Enter advances to the next map section
+(`draw_pos_advance` / `byte_2a9ca`, budget `byte_2a9e2`).
 
-CURRENT BLOCKER / WHAT TO FIX:
-- The game reaches a black screen after MCGA selection. vga stats show
-  mode=03 (text mode), framebuffer all-black, only 1 frame rendered. The game
-  loads title-screen assets then sits idle.
-- KEY UNCERTAINTY: the game's post-menu screens (SELECT CONTROL DEVICE, name
-  entry, mission select) are TEXT-MODE screens rendered via curses on the pty,
-  NOT the VGA window. The mode only switches to 13h when gameplay actually
-  starts. Need to confirm whether the game is truly stuck or just waiting for
-  input at a text menu that isn't being driven correctly.
-- Menu input sequence needed (from strings): graphics mode '4' -> SELECT
-  CONTROL DEVICE ('2'=KEYBOARD-DIRECTIONAL) -> "Your Ranger's name:" (type name
-  + ENTER) -> mission/difficulty select (ENTER) -> gameplay (mode 13h).
+### Carried forward from prior sessions (all verified)
 
-TESTING HARNESS (already built, reuse it):
-- /tmp/m2c_drv.py - runs ar_m2c under a pty, reads keys from FIFO /tmp/m2c_key,
-  writes ALL pty output to /tmp/m2c_screen.log (NOT the terminal - the curses
-  escape codes damage terminal rendering).
-  Run it detached:
-    cd /home/xor/games/airborn && setsid python3 /tmp/m2c_drv.py >/dev/null 2>&1 </dev/null &
-  Send keys: printf 'X' > /tmp/m2c_key
-  Read output: /tmp/m2c_screen.log (strip escape codes when displaying)
-- IMPORTANT: never let ar_m2c's raw curses output reach an interactive
-  terminal - it emits escape sequences that corrupt rendering. Always capture
-  to a file and grep/strip it.
-- Debug env vars already in asm.cpp:
-    M2C_VGA_DUMP_FRAME=/tmp/f.ppm   (dump framebuffer to PPM)
-    M2C_VGA_DUMP_FRAME_AT=N         (dump after N frames)
-    M2C_VGA_STATS=1                 (periodic mode/palette/pixel stats to stderr)
-- Runtime logs "dos open FILE" / "dos read" to the pty as it works.
+- **POD DONE fix** — guest-`sp` delta early-return at indirect dispatch
+  sites in `lift.py` (~line 309 idiom):
 
-NEXT STEPS:
-1. Drive the full menu sequence via /tmp/m2c_key (4 -> 2 -> NAME+CR -> CR x N)
-   and watch M2C_VGA_STATS for mode=13. Capture a dumped PPM frame to confirm
-   the mode-13 framebuffer + palette render correctly (COLMCG.DTX is the
-   palette data).
-2. If keys don't register: the game reads input via BIOS int16 - check how
-   m2c's curses frontend feeds the int16 buffer and whether the game polls it.
-3. Once graphics render, implement Tandy sound. Read
-   /home/xor/games/airborn/TANDYSND.EXE.lst (1934 lines) to map the overlay's
-   entry points, calling convention, and hardware interface. Tandy sound = the
-   SN76489-style 3-voice chip. Determine which ports/ints the game pokes and
-   add minimal emulation in the runtime. Do NOT implement IBM sound.
-4. Verify with `rtk make check` (runtime change) when done.
+```c
+{ vfn f_ = func_at(target); dw sp_ = sp;
+  if (f_) f_(); else fprintf(stderr, "unresolved ind call %x\n", ...);
+  if ((short)(sp - sp_) > 0) { sp = sp_; return; } }
+```
 
-REFERENCE: DOSBox comparison - run ORIG.EXE (packed original) and ARN.EXE
-(rebuilt) side by side; both must reach identical states. Both currently show
-the same black-screen wait state after '4', so the rebuilt exe is a faithful
-reference for expected behavior.
+  Propagated to 34 sites. Models callees that consume the guest return
+  frame (`pop di` + tail `retn`).
+- `fold_temps`/`_reg_dead_after` register-family liveness fix.
+- Absolute mouse on POD (`pod_abs_cursor`, `word_1D920==5` gate).
+- `M2C_HOLD` split into `M2C_HOLD`/`M2C_HOLD_AT` (video.c) and
+  `M2C_HOLDWALK` (input.c walk phase).
+- Intro pacing gates live in `build_ida/src/*.cpp` (lifter *input* —
+  committed, so they survive regen; 14 `sub_14723`/`delay_ticks` +
+  19 `word_1d94d` gate sites).
 
-## Working headless DOSBox reference harness (2024-09)
+## Key mechanics / symbols
 
-Xvfb + dosbox-staging can drive ORIG.EXE and capture real frames:
-- `Xvfb :99 -screen 0 800x600x24` (running)
-- `DISPLAY=:99 /home/xor/dosbox-staging/build/debug-linux/dosbox -conf /tmp/dosbox.conf --nolocale`
-  (/tmp/dosbox.conf mounts the game dir and runs ORIG.EXE)
-- Drive keys: `DISPLAY=:99 xdotool keydown --window <WID> <Key>; sleep; keyup` —
-  the game's custom INT9 ISR needs the key HELD (keydown+keyup with a delay),
-  a bare `xdotool key` press/release is too fast to register.
-- Capture: `DISPLAY=:99 import -window root out.png`, crop (104,78,744,558) = the
-  640x480 DOSBox window. Window title is "ORIG.EXE ...", find id via
-  `xdotool search --name ORIG.EXE`.
-- Flow to packing: 4(MCGA) -> title -> 2(kbd-dir) -> credits -> RANGER
-  ASSIGNMENTS -> Down+Enter = VETERAN -> mission select -> Enter -> difficulty
-  -> Enter -> briefing -> Enter -> SUPPLY POD SELECTION.
+- Two frame loops, separate pacing vars: mission/airdrop `sub_1aaaf`
+  gates on `word_1d94d` (reload `word_2a962`=1..2, never 0); ground
+  combat `sub_14a10` gates on `word_1d955` (reload `word_1d949` table).
+  AI cadence div: `word_265ae` ← `word_1d94b` table.
+- In-game speed control: `-`/`_` dec, `+`/`0` inc speed index
+  `word_26582` (default 4).
+- `word_26de4` is **active-low** (`= held ^ 0xFFFF`); `0xFF` = idle.
+  Divert table (seg002:0950): Up→1, Down→2, Left→4, Right→8,
+  Enter/KP5/KP0→bit4 action. `byte_26de6` = bit4 edge latch.
+- Walk/battle positions: `word_1DCFF`+`1DD1F` (X), `word_1DD3F` (Y);
+  `byte_2a9ca` landed flag, `byte_2a9d3` phase, `byte_2a9e1/e2/e3`
+  movement cadence/direction/budget, `word_2a9ce` descent counter.
+- Input chain: SDL event → `xt_scan` → `int9_update` → `word_1D959` →
+  `sub_1231C` → `word_1DCA2` → `word_26DE4`.
+- Movement: `sub_189e2` = ranger object tick in battle;
+  `move_dir_tick` (`sub_1adce`) in the walk/section-advance phase.
+  Both verified by probes (`port/tests/mv_probe`, `walk_probe`) and
+  live state dumps.
+- Emulated regs are C globals shared with the TANDYSND ISR —
+  `M2C_IRQSAVE=full` snapshots GPRs around `guest_irq0`.
 
-## Confirmed reference frames (what correct looks like)
+## Regen pipeline (use it — never hand-edit `port/gen/` or `lifted/`)
 
-- Difficulty "ruler" = a SLIDER between Easy/Hard: red-outlined track + white
-  movable knob + red end-caps. Palette indices in region: 4 (red track), 6 (bg),
-  2/5/3 (knob/caps). In the m2c build the region is pure index 6 = NOT DRAWN.
-- Supply pod interior is NOT empty: it renders stored-equipment artwork
-  (grenades, ammo boxes, a top rack) in palette indices 0/2/3 over black. In the
-  m2c build the pod interior is mostly black with only a bottom strip drawn.
-- Both are "a detailed bitmap graphic isn't reaching the mode-13 framebuffer."
-  Text, box outlines, and small item sprites all render fine.
+```sh
+cd /home/xor/games/airborn
+python3 tools/lift.py          # lifted/*.c   (LIFT_OUT env override exists)
+python3 tools/gen_port.py      # port/gen/*.c + port/memimg.c + procs.h
+python3 tools/rename.py        # applies tools/names.map in place
+cd port && make && make check && bash tests/e2e.sh
+```
 
-## Sprite-rendering fix (verified) — root cause of both missing graphics
+Gotchas seen:
+- A `make` racing the regen compiles stale objects — clean rebuild
+  (`rm -f gen/*.o *.o`) resolves phantom "undefined reference" noise.
+- Regen needs ~10 MB free in `/home`; check `df -h /home` first.
 
-The mission-difficulty slider AND the supply-pod item artwork were both gated by
-the same bug. The shared sprite-list renderer `sub_126b9` (called every frame by
-`sub_15996` on the packing screen, and for the slider) iterates 32 slots and tests
-each with `vis_mask[bx] & bitmask_table[si&7]`. The bitmask table lives at
-`ds:0x0DD5` (= `seg002:0x0DD5`, absolute `m+0xF675`) and must be
-`01 02 04 08 10 20 40 80 FE FD FB F7 EF DF BF 7F`. It read all zeros, so every
-sprite slot was skipped -> no slider, no pod items.
+## Live-test recipe
 
-Root cause: the stale `ar.exe.cpp` was generated by an older masm2c that parsed an
-all-decimal-digit hex `dup` count like `76h` as decimal 76 instead of hex 118.
-In `db 76h dup(0), 1,2,4,...` the table landed at field+76 (0x0DAB) instead of
-field+118 (0x0DD5). Live test: poking `01 02 04 08 ...` at `m+0xF675` made
-`sub_130ba` (the mode-13 blit) fire and sprites draw.
+Headless (works, used this session):
 
-Fix: `tools/fix_dup_fields.py` re-expands each `db/dw/dd` line in AR.EXE.lst with
-the correct hex `dup` count and rewrites the matching `tmp999` initializer in
-`Initializer_ar_exe` (ar.exe.cpp). It only writes a field when re-running the
-BUGGY (decimal) expansion reproduces the generated array exactly, so the only
-change is the corrected `dup` count. 27 fields fixed (slider table + text/border/
-sprite-adjacent data). Pure-zero `dup(0)` BSS fields are skipped (already zero).
+```sh
+SDL_VIDEODRIVER=dummy SDL_AUDIODRIVER=dummy \
+M2C_DUMP=/tmp/run M2C_DUMP_EVERY=60 M2C_STATE=1 M2C_TICKSTAT=1 \
+M2C_KEYS_DELAY=10 M2C_KEYS="..2..\r\r\r...(menus)...dirs+enters..." \
+timeout 240 ./port/ar_port 2>/tmp/run.log
+# /tmp/run.NNNN.ppm = frames, ST lines in the log carry game state
+```
 
-Verified: difficulty slider renders (red caps + track + white knob, knob tracks
-challenge level), packing pod shows the default loadout items, DONE unwinds to
-the map screen without crashing (StackPop path intact), assignment/credits/
-briefing/mission-select screens all render cleanly.
+Xvfb interactive:
 
-## Crash fix (verified)
+```sh
+Xvfb :99 -screen 0 1280x800x24 &
+DISPLAY=:99 M2C_MOUSEDBG=1 timeout 300 ./port/ar_port > /tmp/run.log &
+W=$(DISPLAY=:99 xdotool search --name "Airborne Ranger" | tail -1)
+DISPLAY=:99 xdotool windowfocus $W
+DISPLAY=:99 xdotool key 2 / Return / Up / ...
+```
 
-The packing DONE path is a deliberate return-two-levels: loc_15CBC does
-`pop di` (drops the `call cs:funcs_159E9[bx]` return) then `jmp sub_10116` ->
-`retn` pops the outer `call sub_15996` return (0x4832). asm.h now matches a
-shallower-depth native-return mark and throws StackPop(depth_delta) to unwind
-the skipped C++ call scopes. Verified: word_265a8=2, game reaches the map screen.
-rtk make check: 4038/4038 pass.
+`M2C_KEYS` escapes: `\r` Enter, `\e` Esc, `\u \d \l \R` arrows,
+`\H` = hold next key (no release), `.` = pause one delay window.
+`M2C_STATE` ST-line fields decoded in `port/input.c` dump routine.
 
-## Audio engines (verified)
+## Watch list / open risks
 
-Two live synthesis paths share the SN76496 register state in m2c_snd (asm.cpp).
-Select with `M2C_SND_ENGINE`:
+- The `sp`-delta early-return is broad (34 indirect-call sites).
+  Tests + e2e + live battle pass, but other screens aren't individually
+  exercised. If a regression appears, suspect this first — a callee
+  could legitimately net-`push`/`pop` unevenly.
+- `M2C_POD` diagnostic instrumentation was wiped by regen (by design);
+  re-add via `tools/gen_port.py` injection if it should be permanent.
+- TANDYSND proc names map via `names.map` `tnd` tag; `memimg.c` fmap
+  uses friendly names — keep `names.map`/`gen_port.py`/`memimg.c`
+  consistent on future regens.
+- `/home` hit 100% full mid-session: `~/.local/share/devin/cli/
+  sessions.db` had grown to 11.5 GB (it freed itself later — flag to
+  the user if it recurs). The regen needs only a few MB but make sure
+  there is some.
+- Nothing is committed. If asked to commit: `git status`/`git diff`,
+  match prior style, sign-off footer per repo convention.
 
-- unset / `midi` (default): live MIDI-style soft-synth. Tone channels 0-2 render
-  triangle-wave voices with attack/release envelope smoothing; channel 3 keeps
-  the PSG noise/percussion. `snd_engine()` returns 0.
-- `psg` / `square` / `tandy` / `chip`: original square-wave SN76496 output via
-  `snd_sample()`. `snd_engine()` returns 1.
+## Files that matter
 
-`snd_sdl_callback()` picks `midi_synth_sample(dt)` or `snd_sample()` per sample.
-Per-channel phase/amplitude accumulators are audio-thread-owned; register writes
-stay under the SDL device lock. `snd_sample_rate` is set to the real SDL rate in
-snd_init so the synth `dt` is correct.
-
-`M2C_MIDI_OUT=/path/file.mid` independently records a Standard MIDI File (note
-events derived from the same register state); it works under either live engine.
-
-Verified via SDL disk-audio capture (`SDL_AUDIODRIVER=disk`): default run gives a
-smooth multi-level waveform (727 distinct amplitudes), `psg` run gives a 2-level
-square wave; `M2C_MIDI_OUT` under the default engine produced a valid SMF
-(MThd, 96 tpq) with note-on events. This is a soft-synth approximation of the
-notes, not literal MIDI-device playback and not cycle-exact Tandy hardware.
-
-Do not commit or push unless asked. Keep changes minimal and in-scope.
-
-## Decompilation artifacts
-
-- `tools/lift.py` — source-level lifter: reads `build_ida/src/` (decomp-mode
-  sources), emits readable C to `lifted/`. Flag-folds cmp/test+jcc into real
-  conditions, names int21/int10/int16 calls from AH, renders REP string ops as
-  `while (cx--)`, structures goto loops into do-while/if, keeps original asm as
-  `/* */` comments. Run: `python3 tools/lift.py` (output parses clean with gcc).
-- `build_ida/ar_ida` — 32-bit non-PIE ELF for IDA/Hex-Rays (static analysis only,
-  not runnable). Built with `-DM2CDEBUG=-1 -m32 -O2 -fno-pic -no-pie
-  -fno-stack-protector`. asm.h gains a `M2CDEBUG==-1` override block (inline ops,
-  ZF/SF/CF/OF only, direct call/return/push/pop); playable build unaffected.
-- `build_ida/ar_lifted` — `lifted/*.c` compiled (`gcc -m32 -O1 -g -fno-pic
-  -no-pie -fno-inline -fno-tree-switch-conversion -falign-*=1` + stub + defs);
-  2013 named procs, 0 clones, mem[]-unified addressing. IDA was unstable on
-  these binaries — superseded by the Ghidra pipeline below.
-- `ghidra_c/` — AJenbo Ghidra fork decompiles of `AR_rebuilt.exe` (unpacked
-  image; packed AR.EXE/ORIG.EXE are the same 73K file). 498 functions, all
-  named from AR.EXE.map: code symbols land at `(map_seg+0x1000):off`, data
-  labels at `0000:off` (Ghidra collapses unresolved DS to segment 0 — verified
-  `_word_26582` renders). `int` calls post-processed by `tools/fix_swi.py`:
-  `swi(0x21)` artifacts → named `dos_*`/`bios_*` calls resolved per-address by
-  the lifter; `(*pcVar)()` → `= ax`. Quality: structured C, better than lifter
-  output on pure computation; lifter remains authoritative for syscall sites
-  and full coverage. Rerun:
-    GHIDRA_INSTALL_DIR=/home/xor/ghidra/build/dist/ghidra-run/ghidra_12.2_DEV \
-      ~/.config/ghidra/ghidra_12.2_DEV/venv/bin/pyghidra AR_rebuilt.exe \
-      /home/xor/ghidra_scripts/MapAndDecompile.py AR.EXE.map ghidra_c
-  then `python3 tools/fix_swi.py`. Saved project for GUI use:
-  /home/xor/ghidra/ar_proj (AR_rebuilt.exe, analyzed + labeled).
-
-## Lifter register-fold fix (verified) — root cause of invisible briefing text
-
-`_reg_dead_after` in `tools/lift.py` scanned linearly and treated the first
-register write after a fold candidate as a kill — ignoring that a label between
-them may be entered by paths that never passed the write. In `sub_14fb1` this
-dropped `mov si,0` at `loc_14fdc`: `si` kept whatever value the glyph renderer
-left, so the `0x0b` row-adjust handler read its operand at
-`[word_26DDE + dirty_si]` instead of the string byte. The footer terminator
-`0x0b 0xEB` (row += signed -21) computed 23+0x56=109 instead of 23-21=2, so
-`byte_26DE9 >= 25` disabled drawing (`byte_26DEF=1`) and the whole mission
-paragraph at `ds:0xA841` was consumed invisibly.
-
-Fix: `_reg_dead_after` now bails conservatively (reg=live) on labels,
-control-flow lines and calls — only straight-line write-kills count as dead;
-`_reads_reg` also treats `R++`/`R--` as reading the register. Regeneration
-restored ~4K lines of register writes (179 `si = 0` alone); briefing now
-renders "DESTROY A MUNITIONS DEPOT ... This is a Desert mission. ... press the
-ENTER key" matching the reference layout.
-
-## Signed-branch byte-width fix (verified) — root cause of POD right-edge noise
-
-`flagval()` in `tools/lift.py` folded `js`/`jns`/signed `jl|jg|jle|jge`
-conditions as `(short)(op)` regardless of operand width. For an 8-bit operand
-`0xFF` zero-extends to `+255`, so `js` on a byte never fired — the opposite of
-real hardware, where the sign flag tests bit 7 of the byte.
-
-Concrete failure: `sub_15BD5` walks the POD display list at `ds:0xBC53`;
-entries are item types 1-5 plus `0xFF` padding. `or al,al; js` should skip the
-`0xFF` entries (negative byte). The lifted `(short)(al) >= 0` inverted it, so
-every padding slot was spawned as an object whose sprite-id field
-(`word_1DCBF` == `ds:0xE3F`) held `0x00FF`. The draw loop's `cx < 0x200` check
-passed, `sub_130BA` did `bp = sprite_table[0x1FE]` — past PODSPR's 34-entry
-table — got `0xDDD8` (uninitialized `0xDD` scratch), read a fake sprite header
-from stack junk and painted a 16×83 block of `+0x18`-rebased noise at
-`38c5:8AB0` — the right-edge band (x304-319, y75-157).
-
-Fix: `pending` now carries operand width; `JS/JNS` and signed compares emit
-`(signed char)` for byte operands, `(short)` for words; `SAR` on byte regs also
-uses `(signed char)`. `js` after a non-zero `cmp` now tests the subtraction
-result, not the left operand. ~1300 sites in `ar.exe_seg000.c` affected; POD
-right edge now renders the correct "6"/"3" digits and labels, matching DOSBox
-pixel-for-pixel. `make check` green.
-
-## Status-screen truncation fix (verified) — '}' in asm comment corrupted brace depth
-
-`parse_func` in `tools/lift.py` counted `{`/`}` across the entire source line,
-including the trailing `//` asm comment. `sub_1BB0A` contains
-`mov ax, 7Dh ; '}'` — the quoted `}` decremented depth to 0 mid-function, so
-parsing stopped and everything from `BB1F` on was silently dropped: the entire
-status-panel field patcher plus the `call sub_14DA2` doc render and `retn`.
-The mid-entry stubs `loc_1BB51`/`loc_1BB59`/`loc_1BB9F` never emitted either.
-
-Effect: the equipment/status screen (doc program #32, `ds:0xB914`) never ran —
-the game jumped POD → deploy with the screen skipped and the `XX` stat slots
-unpatched.
-
-Fix: `parse_func` now counts braces on `_code_part()` — the line prefix before
-any `//` outside char/string literals. `sub_1bb0a` + the three stubs re-emitted
-into `lifted/` and `port/gen/` (verified byte-for-instruction against the lst).
-Only site in the whole .cpp: `grep "'[{}]'"` → 1 hit.
-
-## WOUNDS variable = `byte_29712`
-
-The status panel is a template at `ds:0xB91D` with `\x1fXX` fields — `0x1F` is
-a literal glyph; the two `XX` bytes are patched in place by `sub_1BBB9`
-(al → 2 ASCII digits at `ds:[si]`). `sub_1BB0A` loads each stat and calls it:
-
-| slot ds:off | label        | source |
-|-------------|--------------|--------|
-| 0xB930      | CARBINE MAGS | `byte_29715` (+`word_2B0C8` bonus) |
-| 0xB93F      | **WOUNDS**   | **`byte_29712`** = `seg002:C892` = `mem[0x1B132]` |
-| 0xB955      | GRENADES     | `byte_29716` |
-| 0xB964      | FIRST AID    | `byte_2971A` |
-| 0xB97A      | LAW ROCKETS  | `byte_29717` |
-| 0xB989      | WEIGHT       | `word_298C2 + word_2B0C8` |
-| 0xB99F      | TIME BOMBS   | `byte_29718` |
-|             | TIME         | `word_20D58` → `word_1D92E` |
-
-Wound writes: `sub_148B3` zeroes at mission start; `inc` at `sub_16BD2`+0x86
-(hit severity ≥0xF0), `sub_16C71`+0x57 (random severity add) and +0x81
-(probabilistic, gated by `byte_28CC1` = mission type & 3); forced 5 wounds at
-`sub_16B72`+0x14, 4 at `sub_1A8EC`+0x1C; first-aid key `8` does
-`dec byte_2971A; dec byte_29712` when `0 < wounds < 3` (`sub_15F09`+0x12A).
-`sub_17B10`+0x8B.. compares 0/1/2 for wound-level sprite/status rows.
-
-Verified: unit probe drives `sub_1bbb9` → `ds:0xB93F` reads 'XX'→'07';
-`M2C_WPOLL=0x1a1df` on a scripted run shows `58 -> 30` ('X'→'0') with
-`ds=0E8A` during the post-POD status screen. `make check` 320/320, e2e
-468 frames / 168 distinct.
+`tools/lift.py` (lifter — source of truth for generated code, incl. the
+pacing floor), `tools/gen_port.py`, `tools/rename.py`,
+`tools/names.map`, `port/input.c` (mouse+key), `port/video.c`,
+`port/rt.c`/`rt.h`, `port/dos.c`, `port/memimg.c` (fmap),
+`port/procs.h`, `port/tnd_procs.h`, `port/tests/*.c` (incl. probes:
+`mv_probe`, `walk_probe`, `col_probe`, `tbl_probe`, `replay_probe`,
+`dump_dir`), `port/gen/*.c` (generated — do not hand-edit),
+`lifted/*.c` (generated).

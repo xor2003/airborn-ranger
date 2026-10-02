@@ -78,6 +78,8 @@ void rt_call_vector(int n);
 void rt_timer_tick(void);
 void rt_bios_int8(void);
 extern volatile int rt_isr_ctx;
+/* TICKSTAT counters: BIOS int8 dispatches / int1c ticks (M2C_TICKSTAT=1) */
+extern dd rt_i8_cnt, rt_1c_cnt;
 /* TANDYSND.EXE overlay: image base mem addr / code-seg mem base / code seg para.
  * Set by dos_exec when the overlay loads (0x30000 / 0x30070 / 0x3007). */
 extern dd tnd_base, tnd_cbase; extern dw tnd_cseg;
@@ -86,6 +88,9 @@ typedef void(*vfn)(void); vfn func_at(dd addr);
 /* far seg:off pair -> flat mem addr */
 #define rt_far(v) (((((dd)(v)) >> 16) << 4) + (((dd)(v)) & 0xffff))
 dw mem_w(dd a); db mem_b(dd a); void mem_ww(dd a, dw v); void mem_wb(dd a, db v);
+
+/* debug hook for intro diagnostics */
+
 
 /* env-gated trace (M2C_TRACE=1) */
 extern int rt_trace;

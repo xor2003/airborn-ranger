@@ -29,9 +29,10 @@ void swi(int n){ /* printer/misc interrupt — not used by game */ }
 void indirect_jump(void){ fprintf(stderr,"indirect jump hit — unmodeled\n"); }
 void __dispatch_call_ext(void){ fprintf(stderr,"dispatch_call_ext hit\n"); }
 
-void rt_exit(int code){ fprintf(stderr,"exit code %d\n", code); exit(code); }
+void rt_exit(int code){ fprintf(stderr,"exit code %d caller=%p\n", code, __builtin_return_address(0)); exit(code); }
 
 int rt_trace;
+dd rt_i8_cnt, rt_1c_cnt;   /* TICKSTAT: BIOS int8 / int1c dispatch counts */
 __attribute__((constructor)) static void rt_trace_init(void){ rt_trace = getenv("M2C_TRACE") ? 1 : 0; }
 
 /* M2C_WPOLL=<linear-addr>: spawn a thread polling a mem cell; on each change
@@ -79,7 +80,40 @@ __attribute__((constructor)) static void wpoll_init(void){
         pthread_t t; pthread_create(&t, 0, wpoll_th, 0); pthread_detach(t);
     }
 }
+/* M2C_TRATE=1: per-tag call counters for rt_tracef — reported by tick_cb */
+struct trc_ent { const char *t; unsigned n; };
+static struct trc_ent *trate_tbl; static int trate_n;
+static void rt_trate_poke(void *tbl, int n){ trate_tbl = tbl; trate_n = n; }
+void rt_trate_report(void){
+    static unsigned prev[512];
+    if (!trate_tbl) return;
+    fprintf(stderr, "TRATE:");
+    /* print top 8 movers since last report */
+    struct { const char *t; unsigned d; } top[8]; int nt = 0;
+    for (int i = 0; i < trate_n; i++){
+        unsigned d = trate_tbl[i].n - prev[i]; prev[i] = trate_tbl[i].n;
+        if (!d) continue;
+        int j = nt < 8 ? nt++ : 7;
+        while (j > 0 && top[j-1].d < d){ if (j<8) top[j]=top[j-1]; j--; }
+        if (j < 8) top[j].t = trate_tbl[i].t, top[j].d = d;
+    }
+    for (int i = 0; i < nt; i++) fprintf(stderr, " %s=%u", top[i].t, top[i].d);
+    fputc('\n', stderr);
+}
 void rt_tracef(const char *tag){
+    static int trate = -1;
+    if (trate < 0) trate = getenv("M2C_TRATE") != NULL;
+    if (trate){
+        /* cheap per-tag call counter; report rates every 5s from tick_cb */
+        struct trc { const char *t; unsigned n; };
+        static struct trc cnt[512]; static int ncnt;
+        int i;
+        for (i = 0; i < ncnt && cnt[i].t != tag; i++);
+        if (i == ncnt && ncnt < 512){ cnt[ncnt].t = tag; cnt[ncnt].n = 0; ncnt++; }
+        if (i < ncnt) cnt[i].n++;
+        rt_trate_poke(cnt, ncnt);
+        return;
+    }
     if (!rt_trace) return;
     fprintf(stderr, "%-12s ax=%04x bx=%04x cx=%04x dx=%04x si=%04x di=%04x ds=%04x es=%04x sp=%04x\n",
             tag, (unsigned)ax, (unsigned)bx, (unsigned)cx, (unsigned)dx,
