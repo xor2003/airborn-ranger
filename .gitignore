@@ -13,3 +13,14 @@ __pycache__/
 *.pyc
 port/tests/t_*
 port/ar_port
+
+# Scratch/log/build artifacts
+*.log
+*.i64
+*.id0
+*.id1
+*.id2
+*.nam
+*.til
+*_ida.c
+.pytest_cache/
