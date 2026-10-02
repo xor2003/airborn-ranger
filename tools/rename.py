@@ -58,6 +58,27 @@ def sub_word(src, pat, map_):
     word_re = re.compile(r'\b(%s)\b' % pat.pattern)
     return word_re.sub(lambda m: map_[m.group(1)], src)
 
+def sub_word_nc(src, pat, map_):
+    """Whole-word rename outside /*...*/ comments — asm listing text keeps
+    original `loc_XXXX` names; code labels/gotos/defs follow the rename."""
+    if not pat:
+        return src
+    word_re = re.compile(r'\b(%s)\b' % pat.pattern)
+    out = []
+    for line in src.split('\n'):
+        i = line.find('/*')
+        if i < 0:
+            out.append(word_re.sub(lambda m: map_[m.group(1)], line))
+            continue
+        head = word_re.sub(lambda m: map_[m.group(1)], line[:i])
+        tail = line[i:]
+        j = tail.find('*/')
+        if j >= 0:  # rename again after the comment closes on the same line
+            tail = tail[:j+2] + word_re.sub(lambda m: map_[m.group(1)],
+                                            tail[j+2:])
+        out.append(head + tail)
+    return '\n'.join(out)
+
 def patch(path, fn):
     src = open(path, encoding='utf8', errors='replace').read()
     out = fn(src)
@@ -67,9 +88,12 @@ def patch(path, fn):
     return out != src
 
 main_pat = combined(main_map)
+loc_pat = combined({k: v for k, v in main_map.items() if k.startswith('loc_')})
 hits = 0
 for f in glob.glob(f'{AR}/lifted/ar.exe*.c') + glob.glob(f'{AR}/port/gen/ar.exe*.c'):
     hits += patch(f, lambda s: sub_call(s, main_pat, main_map))
+    # `loc_` entries additionally rename label defs/goto refs (not comments)
+    hits += patch(f, lambda s: sub_word_nc(s, loc_pat, {k: v for k, v in main_map.items() if k.startswith('loc_')}))
 for f in (f'{AR}/lifted/lifted_procs.h', f'{AR}/port/procs.h'):
     hits += patch(f, lambda s: sub_call(s, main_pat, main_map))
 

@@ -119,16 +119,21 @@ void rt_present(int pump);
 static Uint32 tick_cb(Uint32 interval, void *param){
     (void)param;
     /* M2C_GOD=1: pin the wounds counter (byte_29712) — hits can't accumulate.
-     * Also freeze the mission clock: word_295EB is an 18-tick divider — while
-     * it never reaches 0, sub_1927A never decrements the 3-digit display.
-     * And hold ammo (byte_29715-29718) at its high-water mark so firing can't
+     * Hold the mission clock: word_295EB is the 18-tick divider that drives
+     * the 3-digit BCD countdown (byte_28CD4 / word_28CD5) — pinning it stops
+     * the seconds. BUT only pin while >15s remain: the evac boarding window
+     * counts down through ~10s and reaching 1s triggers screen_state=0x14 —
+     * freezing the divider there would block evacuation forever.
+     * Also hold ammo (byte_29715-29718) at its high-water mark so firing can't
      * deplete it while resupply/pickups still raise it. */
     static int godmode = -1;
     static db ammo_hwm[4];
     if (godmode < 0) godmode = getenv("M2C_GOD") != NULL;
     if (godmode){
         mem[0x1b132] = 0;
-        *(dw*)&mem[0x1b00b] = 0x12;
+        int bcd_sec = mem[0x1a6f4]*100 + mem[0x1a6f5]*10 + mem[0x1a6f6];
+        if (bcd_sec > 15)
+            *(dw*)&mem[0x1b00b] = 0x12;
         for (int i = 0; i < 4; i++){
             db v = mem[0x1b135 + i];
             if (v > ammo_hwm[i]) ammo_hwm[i] = v;
