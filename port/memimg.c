@@ -10759,8 +10759,8 @@ extern void vidmode_herc_e11428(void);
 extern void vidmode_ega(void);
 extern void set_video_mode_e11448(void);
 extern void ega_reg_setup_e11451(void);
-extern void e_1145f_e11459(void);
-extern void e_11459_e1145f(void);
+extern void tick_isr_e1145f(void);
+extern void tick_isr_e11459(void);
 extern void timer_tick_isr(void);
 extern void tick_isr_e114f5(void);
 extern void tick_isr_e11500(void);
@@ -12334,10 +12334,10 @@ extern void objfld_load_b(void);
 extern void blk_free(void);
 extern void objup_0b(void);
 extern void map_probe_pair(void);
-extern void ret_e8a_cb30(void);
+extern void far_thunk_ax(void);
 extern void ret_e8a_d28f(void);
-extern void ret_e8a_d796(void);
-extern void ret_e8a_dab5(void);
+extern void ind_jmp_ax(void);
+extern void ind_jmp_ax_b(void);
 extern void emit_dash(void);
 extern void fmt3_dec_u16_zx(void);
 extern void farcall_ovl_a(void);
@@ -12370,10 +12370,10 @@ extern void vid_init(void);
 extern void menu_b_run(void);
 extern void map_probe_pair2(void);
 extern void objid_scan_b(void);
-extern void seg001_f_proc(void);
-extern void seg002_29e_proc(void);
-extern void seg002_b8b2_proc(void);
-extern void seg003_0_proc(void);
+extern void seg001_stub(void);
+extern void ivt_stubs(void);
+extern void ind_jmp_ptr(void);
+extern void seg003_stub(void);
 extern void start(void);
 extern void dispatch_phase(void);
 extern void ovl_farcall_b(void);
@@ -13268,8 +13268,8 @@ static const fent fmap[] = {
   {0x2e63, vidmode_ega},
   {0x2e68, set_video_mode_e11448},
   {0x2e71, ega_reg_setup_e11451},
-  {0x2e79, e_1145f_e11459},
-  {0x2e7f, e_11459_e1145f},
+  {0x2e79, tick_isr_e1145f},
+  {0x2e7f, tick_isr_e11459},
   {0x2f0a, timer_tick_isr},
   {0x2f15, tick_isr_e114f5},
   {0x2f20, tick_isr_e11500},
@@ -14835,10 +14835,10 @@ static const fent fmap[] = {
   {0xc611, menu_b_run},
   {0xcd56, map_probe_pair2},
   {0xd419, objid_scan_b},
-  {0xe46e, seg001_f_proc},
-  {0xeb3e, seg002_29e_proc},
-  {0x1a152, seg002_b8b2_proc},
-  {0x1cf30, seg003_0_proc},
+  {0xe46e, seg001_stub},
+  {0xeb3e, ivt_stubs},
+  {0x1a152, ind_jmp_ptr},
+  {0x1cf30, seg003_stub},
   {0x1a40, start},
   {0x1ae5, dispatch_phase},
   {0x1b0a, ovl_farcall_b},

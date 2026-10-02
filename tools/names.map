@@ -2863,3 +2863,165 @@ seg000_6bb9_proc_e16bce	stat_min6_e16bce
 seg000_6f0b_proc_e16f15	obj_peer_scan_e16f15
 seg000_6f0b_proc_e16f25	obj_peer_scan_e16f25
 seg000_4741_proc	beep40_key	# 8x beep_5x + read_key (fatal prompt)
+
+# --- seg001/002/003 stubs & dispatch entries ---
+seg002_29e_proc	ivt_stubs	# iret x2 + jmp far 0:0 x6 — vector stub table
+seg002_b8b2_proc	ind_jmp_ptr	# jmp word ptr [bx+si] dispatch
+ret_e8a_d796	ind_jmp_ax	# jmp ax register dispatch
+ret_e8a_dab5	ind_jmp_ax_b	# clc; jmp ax
+ret_e8a_cb30	far_thunk_ax	# push ax; retf
+seg001_f_proc	seg001_stub	# empty — data-only segment
+seg003_0_proc	seg003_stub	# empty — data-only segment
+
+# --- multi-owner vars (evidence: accessor family + asm context) ---
+# ISR-driven counters
+word_1d6e2	tick_count	var	# inc'd in tick_isr
+word_1d6e4	tick_count2	var	# adjacent up-counter in tick_isr
+word_1d951	delay_cnt2	var	# ISR-decremented (sibling of delay_cnt)
+word_1d953	delay_cnt3	var
+word_295eb	evac_div	var	# 18-tick divider for evac countdown
+byte_28cd4	evac_h	var	# BCD hundreds digit (objtype_0a_tick)
+word_28cd5	evac_tu	var	# BCD tens+units digits
+# adapter/gfx selectors
+byte_1d939	adpt_draw	var	# draw/clear adapter sel
+byte_1d93a	adpt_flip	var	# clrback_jt selector
+byte_1d93b	has_tandy	var	# set by tandy_detect
+byte_1cea2	adapter_id	var	# cmp==4 in gfx menus
+word_1d937	blit_sel	var	# blitflag_go_* dispatch sel
+word_1d916	glyph_rows	var	# glyph_blit_* row table ptr
+word_1d918	tile_src	var	# =0x8722 tilemap src (tilemap_init)
+word_1d920	menu_mode	var	# screen/menu mode sel (mode4_load=4)
+byte_1dd7f	hud_attr	var	# =0x50 in hud_setup
+byte_1d8d2	border_f	var	# border_sel/key_sound_test flag
+# clip-blit parameter block (clip_blit_* family)
+byte_1ddd9	clip_f	var
+word_1ddb4	clip_p	var
+word_1ddcd	clip_p2	var
+word_1e1bd	clip_base	var
+word_1e1c3	blitgo_a	var
+byte_1e1c5	blitgo_c	var
+word_1e1cb	clip_dx	var
+word_1e1ce	clip_si	var
+word_1e1d0	clip_bx	var
+word_1e1d2	clip_ax	var
+word_1e1d4	clip_cx	var
+# joystick/input
+byte_1dcab	joy_mask2	var	# test mask in joy funcs
+byte_1dcb0	joy_axes_sel	var	# ==2 selects alt axis pair
+byte_1dc7d	joy_pos_mask	var	# and-mask in joy_pos_read
+word_1d93f	mode_flag	var	# toggle_mode_flag target
+word_1d957	menu_state	var	# dispatch_phase/dlg/error shared
+# script/cursor
+byte_26dea	scr_a	var
+byte_26df2	curs_a	var
+byte_26dfb	curs_b	var
+byte_26dfc	curs_idx	var	# table index (color_sel)
+word_26dde	scr_ptr	var
+word_26deb	curs_ptr	var
+# sprite/state copies
+word_20d52	sprst_dst	var	# spr_state_copy dst
+byte_20d54	sprst_dstb	var
+word_20d56	emit_ptr	var	# emit_idx*/hex16 tbl ptr
+byte_11cf3	sprrow_k	var	# cs: constant in sprrow_ega
+byte_24e70	dcomp_lim	var	# decompress_res limit
+word_24e72	dcomp_mask	var	# and-mask in decompress_res
+word_2656c	frame_cnt	var	# draw_tilemap_frame/intro/scroll
+word_2656e	frame_cnt2	var
+# draw-param slots (stride 0x20, copy_draw_params family)
+word_1dcbf	dpar_0	var
+word_1dcdf	dpar_1	var
+word_1dcff	dpar_2	var
+word_1dd1f	dpar_3	var
+word_1dd3f	dpar_4	var
+word_1dd5f	dpar_5	var
+word_1dda1	hud_da1	var
+word_1dda5	hud_da5	var
+byte_2731e	msel_731e	var	# member_sel family
+# roster (copy_draw_params/roster_apply family)
+byte_28a50	roster_a50	var
+byte_28ad2	roster_ad2	var
+word_28ace	roster_ace	var
+word_28ad0	roster_ad0	var
+# mission/obj state bytes
+byte_28ca0	alert_lvl	var	# alert_raise/objstat_set
+byte_28cc3	mst_cc3	var
+byte_28ccb	mst_ccb	var
+byte_28cd2	mst_cd2	var
+byte_28cd3	mst_cd3	var
+byte_28cd8	mst_cd8	var
+byte_28dfb	camf_dfb	var	# cam_org_init/obj_wake field
+byte_28e1d	camf_e1d	var
+byte_28e3f	camf_e3f	var
+byte_28e61	camf_e61	var
+byte_29219	obj_9219	var
+byte_29710	mst_9710	var
+byte_29712	wounds	var	# godmode pins mem[0x1b132]
+byte_29716	mst_9716	var
+byte_29717	mst_9717	var
+byte_2971a	mst_971a	var
+byte_29722	mst_9722	var
+byte_29761	ai_dir	var	# ai_dir_pick result
+byte_2a7aa	wake_a7aa	var
+byte_2a7ac	alert_c	var	# alert_raise channel
+byte_2a7af	mst_a7af	var
+# route waypoints (arrive_chk/route_plan, contiguous 2a5ee..)
+byte_2a5b1	rte_b1	var
+byte_2a5ee	rte_ee	var
+byte_2a5ef	rte_ef	var
+byte_2a5f0	rte_f0	var
+byte_2a5f1	rte_f1	var
+byte_2a5f2	rte_f2	var
+byte_2a5f3	rte_f3	var
+byte_2a5f4	rte_f4	var
+byte_2a5f5	rte_f5	var
+byte_2a60f	rte_0f	var
+byte_2a605	ai_seek	var	# ai_seek_tgt [8 refs]
+byte_2a606	ai_seek2	var
+# obj motion/pos scratch
+byte_2aa5c	odelta_a5c	var	# obj_dx_abs
+byte_2aa5e	omove_a5e	var
+byte_2aa5f	omove_a5f	var
+byte_2aa62	omot_a62	var	# obj_motion_tick
+byte_2aa64	spawn_a64	var	# enemy_spawn
+byte_2aa6d	spawn_a6d	var
+byte_2aa6e	probe_a6e	var	# map_probe_xy
+byte_2aa6f	probe_a6f	var
+# res/file shared
+word_1d01a	res_f1a	var	# find/load/seek/write res
+# obj/target
+word_2966a	tgt_a	var	# tgt_vec_a/b + obj_field_copy
+word_2966e	oscr_66e	var	# apply_obj_scratch
+word_29676	cam_9676	var	# cam_org_init/snap_to_cell
+word_29678	cam_9678	var
+word_29681	cam_9681	var	# cam_pan_detect/cell_to_col
+word_29812	tmap_9812	var	# tilemap_init sets; scroll reads
+word_298c0	ai_cnt	var	# ai_state_eval counter
+word_29ebc	meter_b	var	# meter_add_cap50/fx_overlay_fill
+word_2a7b0	meter_a	var	# meter_over_chk reads
+word_2a9ce	mstep	var	# inc to 0x59 in mission_run
+word_2aa69	obj_sx	var	# obj_copy_xy scratch x
+word_2aa6b	obj_sy	var	# obj_copy_xy scratch y
+word_2b0c4	wgt_c4	var	# weight_pick/combat_setup
+
+# --- final multi-owner vars ---
+byte_27152	color_idx	var	# index into color adjust table
+byte_27157	mst_7157	var
+byte_27166	color_a	var	# color_sel/step -> draw_text_at
+byte_27167	color_b	var
+byte_2b127	mgen_127	var	# mapgen_fill/pick fields
+byte_2b128	mgen_128	var	# =0xD0 tile fill val
+byte_2b12a	mgen_12a	var	# =0x1F
+byte_2b12b	mgen_12b	var
+byte_2b243	cell_bx	var	# pixel bias in cell_to_px
+byte_2b244	cell_by	var
+word_100c3	game_phase	var	# dispatch_phase/game_main
+word_126da	blitdst_a	var	# SMC patch site (blit_dst_patch)
+word_126dc	blitdst_b	var
+word_13bd0	keytest_d0	var
+word_1ce9c	conv_dst	var	# glyph_conv_* di save
+word_1cea5	mst_ea5	var
+word_1d006	res_pos	var	# res_file_read/seek_res_entry
+word_1d8d2	border_f	var	# word! border_sel/keytest flag
+# --- mutual e_ entries inside tick_isr ---
+e_11459_e1145f	tick_isr_e11459
+e_1145f_e11459	tick_isr_e1145f

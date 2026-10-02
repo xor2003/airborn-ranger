@@ -2,7 +2,7 @@
 #include "lifted_data.h"
 #include "lifted_procs.h"
 
-void seg002_29e_proc(void) {
+void ivt_stubs(void) {
     /* iret ;~ 0E8A:029E */
     return;
     /* iret ;~ 0E8A:02A4 */
@@ -39,7 +39,7 @@ void farjmp_ptr_1024f(void) {
     /* jmp     far ptr 0:0 ;~ 0E8A:19AE */
     { vfn f_ = func_at(rt_far(*(dd*)&mem[0x1024f])); if (f_) f_(); else fprintf(stderr, "unresolved ind jmp %x\n", (dd)(rt_far(*(dd*)&mem[0x1024f]))); return; }
 }
-void ret_e8a_cb30(void) {
+void far_thunk_ax(void) {
     /* push    ax ;~ 0E8A:CB30 */
     push(ax);
     /* retf ;~ 0E8A:CB31 */
@@ -77,7 +77,7 @@ ret_e8a_dab5:
     /* jmp     ax ;~ 0E8A:DAB6 */
     { vfn f_ = func_at((dd)0xe8a0 + (ax)); if (f_) f_(); else fprintf(stderr, "unresolved ind jmp %x\n", (dd)((dd)0xe8a0 + (ax))); return; }
 }
-void ret_e8a_d796(void) {
+void ind_jmp_ax(void) {
     /* in      al, dx ;~ 0E8A:D796 */
     al = in(dx);
     /* push    word ptr [bp+si-1400h] ;~ 0E8A:D797 */
@@ -90,13 +90,13 @@ ret_e8a_dab5:
     /* jmp     ax ;~ 0E8A:DAB6 */
     { vfn f_ = func_at((dd)0xe8a0 + (ax)); if (f_) f_(); else fprintf(stderr, "unresolved ind jmp %x\n", (dd)((dd)0xe8a0 + (ax))); return; }
 }
-void ret_e8a_dab5(void) {
+void ind_jmp_ax_b(void) {
     /* clc ;~ 0E8A:DAB5 */
     CF = 0;
     /* jmp     ax ;~ 0E8A:DAB6 */
     { vfn f_ = func_at((dd)0xe8a0 + (ax)); if (f_) f_(); else fprintf(stderr, "unresolved ind jmp %x\n", (dd)((dd)0xe8a0 + (ax))); return; }
 }
-void seg002_b8b2_proc(void) {
+void ind_jmp_ptr(void) {
     /* jmp     word ptr [bx+si] ;~ 0E8A:B8B2 */
     { vfn f_ = func_at((dd)0xe8a0 + (*(dw*)(raddr(ds,bx+si)))); if (f_) f_(); else fprintf(stderr, "unresolved ind jmp %x\n", (dd)((dd)0xe8a0 + (*(dw*)(raddr(ds,bx+si))))); return; }
 ret_e8a_cb30:

@@ -294,14 +294,14 @@
 #define byte_26DFC (*(volatile db*)&mem[0x1881c])
 #define member_idx (*(volatile db*)&mem[0x18b69])
 #define mission_idx (*(volatile dw*)&mem[0x18b70])
-#define byte_27152 (*(volatile db*)&mem[0x18b72])
+#define color_idx (*(volatile db*)&mem[0x18b72])
 #define alarm_flag (*(volatile db*)&mem[0x18b73])
 #define sum_acc (*(volatile dw*)&mem[0x18b74])
 #define sum_ovf_b (*(volatile db*)&mem[0x18b76])
-#define byte_27157 (*(volatile db*)&mem[0x18b77])
+#define mst_7157 (*(volatile db*)&mem[0x18b77])
 #define sum_ovf_a (*(volatile db*)&mem[0x18b78])
-#define byte_27166 (*(volatile db*)&mem[0x18b86])
-#define byte_27167 (*(volatile db*)&mem[0x18b87])
+#define color_a (*(volatile db*)&mem[0x18b86])
+#define color_b (*(volatile db*)&mem[0x18b87])
 #define mselprep_7169 (*(volatile dw*)&mem[0x18b89])
 #define byte_271D5 (*(volatile db*)&mem[0x18bf5])
 #define byte_2731E (*(volatile db*)&mem[0x18d3e])
@@ -378,7 +378,7 @@
 #define csetup_9170 (*(volatile db*)&mem[0x1ab90])
 #define byte_291B3 (*(volatile db*)&mem[0x1abd3])
 #define byte_291D5 (*(volatile db*)&mem[0x1abf5])
-#define byte_29219 (*(volatile db*)&mem[0x1ac39])
+#define obj_9219 (*(volatile db*)&mem[0x1ac39])
 #define byte_2923B (*(volatile db*)&mem[0x1ac5b])
 #define ot23_tick_9307 (*(volatile db*)&mem[0x1ad27])
 #define aux7_9537 (*(volatile db*)&mem[0x1af57])
@@ -393,27 +393,27 @@
 #define word_2966C (*(volatile dw*)&mem[0x1b08c])
 #define word_2966E (*(volatile dw*)&mem[0x1b08e])
 #define apply_sc_9670 (*(volatile dw*)&mem[0x1b090])
-#define word_29676 (*(volatile dw*)&mem[0x1b096])
-#define word_29678 (*(volatile dw*)&mem[0x1b098])
+#define cam_9676 (*(volatile dw*)&mem[0x1b096])
+#define cam_9678 (*(volatile dw*)&mem[0x1b098])
 #define byte_2967A (*(volatile db*)&mem[0x1b09a])
 #define word_2967B (*(volatile dw*)&mem[0x1b09b])
 #define word_2967D (*(volatile dw*)&mem[0x1b09d])
-#define word_29681 (*(volatile dw*)&mem[0x1b0a1])
+#define cam_9681 (*(volatile dw*)&mem[0x1b0a1])
 #define cam_org_x (*(volatile dw*)&mem[0x1b0a3])
 #define byte_2970D (*(volatile db*)&mem[0x1b12d])
 #define byte_2970E (*(volatile db*)&mem[0x1b12e])
 #define byte_2970F (*(volatile db*)&mem[0x1b12f])
-#define byte_29710 (*(volatile db*)&mem[0x1b130])
+#define mst_9710 (*(volatile db*)&mem[0x1b130])
 #define weapon_sel (*(volatile db*)&mem[0x1b131])
-#define byte_29712 (*(volatile db*)&mem[0x1b132])
+#define wounds (*(volatile db*)&mem[0x1b132])
 #define flash_period (*(volatile db*)&mem[0x1b134])
 #define hit_flash (*(volatile db*)&mem[0x1b135])
-#define byte_29716 (*(volatile db*)&mem[0x1b136])
-#define byte_29717 (*(volatile db*)&mem[0x1b137])
+#define mst_9716 (*(volatile db*)&mem[0x1b136])
+#define mst_9717 (*(volatile db*)&mem[0x1b137])
 #define fade_cnt (*(volatile db*)&mem[0x1b138])
 #define byte_2971A (*(volatile db*)&mem[0x1b13a])
 #define ot13_tick_9721 (*(volatile db*)&mem[0x1b141])
-#define byte_29722 (*(volatile db*)&mem[0x1b142])
+#define mst_9722 (*(volatile db*)&mem[0x1b142])
 #define ot13_tick_9723 (*(volatile db*)&mem[0x1b143])
 #define ot14_tick_9724 (*(volatile db*)&mem[0x1b144])
 #define roster_9733 (*(volatile db*)&mem[0x1b153])
@@ -423,7 +423,7 @@
 #define roster_9738 (*(volatile db*)&mem[0x1b158])
 #define byte_2974F (*(volatile db*)&mem[0x1b16f])
 #define scan_tgt (*(volatile db*)&mem[0x1b170])
-#define byte_29761 (*(volatile db*)&mem[0x1b181])
+#define ai_dir (*(volatile db*)&mem[0x1b181])
 #define ai_seek__9762 (*(volatile db*)&mem[0x1b182])
 #define pri_best (*(volatile db*)&mem[0x1b183])
 #define pri_a (*(volatile db*)&mem[0x1b184])
@@ -437,7 +437,7 @@
 #define byte_2976C (*(volatile db*)&mem[0x1b18c])
 #define word_297E1 (*(volatile dw*)&mem[0x1b201])
 #define word_297F3 (*(volatile dw*)&mem[0x1b213])
-#define word_29812 (*(volatile dw*)&mem[0x1b232])
+#define tmap_9812 (*(volatile dw*)&mem[0x1b232])
 #define cam_px_x (*(volatile dw*)&mem[0x1b234])
 #define cam_px_y (*(volatile dw*)&mem[0x1b236])
 #define burst_dir (*(volatile dw*)&mem[0x1b238])
@@ -700,7 +700,7 @@ extern db seg000;
 #define seg_screen (*(volatile dw*)&mem[0x1a2e]) /* alias seg_1000E */
 extern dw dummy50a3c745_seg000_1a3a_48;
 extern dw dummy50a3c745_seg000_1a3c_49;
-#define word_100c3 (*(volatile dw*)&mem[0x1ae3]) /* alias word_100C3 */
+#define game_phase (*(volatile dw*)&mem[0x1ae3]) /* alias word_100C3 */
 extern db dummy50a3c745_seg000_1b1a_170;
 extern db dummy50a3c745_seg000_1d8e_565;
 extern db dummy50a3c745_seg000_1dac_589;
@@ -798,7 +798,7 @@ extern dw dummy50a3c745_seg000_3682_4446;
 extern dw dummy50a3c745_seg000_3684_4447;
 extern dw dummy50a3c745_seg000_3686_4448;
 extern dw dummy50a3c745_seg000_3688_4449;
-#define byte_11cf3 (*(volatile db*)&mem[0x3713]) /* alias byte_11CF3 */
+#define sprrow_k (*(volatile db*)&mem[0x3713]) /* alias byte_11CF3 */
 #define sprrow_tbl (*(volatile dw*)&mem[0x3714]) /* alias funcs_11D52 */
 extern dw dummy50a3c745_seg000_3716_4504;
 extern dw dummy50a3c745_seg000_3718_4505;
@@ -824,8 +824,8 @@ extern dw dummy50a3c745_seg000_40d1_5858;
 extern dw dummy50a3c745_seg000_40d3_5859;
 extern dw dummy50a3c745_seg000_40d5_5860;
 extern dw dummy50a3c745_seg000_40d7_5861;
-#define word_126da (*(volatile dw*)&mem[0x40fa]) /* alias word_126DA */
-#define word_126dc (*(volatile dw*)&mem[0x40fc]) /* alias word_126DC */
+#define blitdst_a (*(volatile dw*)&mem[0x40fa]) /* alias word_126DA */
+#define blitdst_b (*(volatile dw*)&mem[0x40fc]) /* alias word_126DC */
 extern db dummy50a3c745_seg000_489c_6805;
 #define blitflag_jt (*(volatile dw*)&mem[0x5087]) /* alias jpt_1367D */
 extern dw dummy50a3c745_seg000_5089_7772;
@@ -835,7 +835,7 @@ extern dw dummy50a3c745_seg000_508f_7775;
 #define ovl_3a90 (*(volatile dw*)&mem[0x54b0]) /* alias word_13A90 */
 #define ovl_3a92 (*(volatile dw*)&mem[0x54b2]) /* alias word_13A92 */
 extern db dummy50a3c745_seg000_55a4_8431;
-#define word_13bd0 (*(volatile dw*)&mem[0x55f0]) /* alias word_13BD0 */
+#define keytest_d0 (*(volatile dw*)&mem[0x55f0]) /* alias word_13BD0 */
 #define scroll_tbl_a (*(volatile dw*)&mem[0x5600]) /* alias funcs_13BF8 */
 extern dw dummy50a3c745_seg000_5602_8498;
 extern dw dummy50a3c745_seg000_5604_8499;
@@ -1032,11 +1032,11 @@ extern db seg002;
 #define start_ce94 (*(volatile dw*)&mem[0xe8b4]) /* alias word_1CE94 */
 #define blk_ce96 (*(volatile dw*)&mem[0xe8b6]) /* alias word_1CE96 */
 #define blk_ce98 (*(volatile dw*)&mem[0xe8b8]) /* alias word_1CE98 */
-#define word_1ce9c (*(volatile dw*)&mem[0xe8bc]) /* alias word_1CE9C */
+#define conv_dst (*(volatile dw*)&mem[0xe8bc]) /* alias word_1CE9C */
 #define palette_ptr (*(volatile dw*)&mem[0xe8c0]) /* alias word_1CEA0 */
-#define byte_1cea2 (*(volatile db*)&mem[0xe8c2]) /* alias byte_1CEA2 */
+#define adapter_id (*(volatile db*)&mem[0xe8c2]) /* alias byte_1CEA2 */
 #define textbuf_seg (*(volatile dw*)&mem[0xe8c3]) /* alias word_1CEA3 */
-#define word_1cea5 (*(volatile dw*)&mem[0xe8c5]) /* alias word_1CEA5 */
+#define mst_ea5 (*(volatile dw*)&mem[0xe8c5]) /* alias word_1CEA5 */
 #define gconv_ceb2 (*(volatile dw*)&mem[0xe8d2]) /* alias word_1CEB2 */
 #define gconv_ceb4 (*(volatile dw*)&mem[0xe8d4]) /* alias word_1CEB4 */
 #define gconv_ceb6 (*(volatile dw*)&mem[0xe8d6]) /* alias word_1CEB6 */
@@ -1044,7 +1044,7 @@ extern db seg002;
 #define res_stg_seg (*(volatile dw*)&mem[0xea14]) /* alias word_1CFF4 */
 #define res_off (*(volatile dw*)&mem[0xea16]) /* alias word_1CFF6 */
 #define load_res_d004 (*(volatile dw*)&mem[0xea24]) /* alias word_1D004 */
-#define word_1d006 (*(volatile dw*)&mem[0xea26]) /* alias word_1D006 */
+#define res_pos (*(volatile dw*)&mem[0xea26]) /* alias word_1D006 */
 #define res_cache_a (*(volatile dw*)&mem[0xea28]) /* alias word_1D008 */
 #define res_cache_b (*(volatile dw*)&mem[0xea2a]) /* alias word_1D00A */
 #define res_cache_c (*(volatile dw*)&mem[0xea2c]) /* alias word_1D00C */
@@ -1054,7 +1054,7 @@ extern db seg002;
 #define res_tmp (*(volatile dw*)&mem[0xea34]) /* alias word_1D014 */
 #define res_handle (*(volatile dw*)&mem[0xea36]) /* alias word_1D016 */
 #define res_name_ptr (*(volatile dw*)&mem[0xea38]) /* alias word_1D018 */
-#define word_1d01a (*(volatile dw*)&mem[0xea3a]) /* alias word_1D01A */
+#define res_f1a (*(volatile dw*)&mem[0xea3a]) /* alias word_1D01A */
 extern dw dummy50a3c745_seg002_ea4c_28452;
 extern dd dummy50a3c745_seg002_ea50_28454;
 extern dw dummy50a3c745_seg002_ea64_28457;
@@ -1183,11 +1183,11 @@ extern dd dummy50a3c745_seg002_eff0_28756;
 #define eblit_d6dc (*(volatile db*)&mem[0xf0fc]) /* alias byte_1D6DC */
 #define eblit_d6dd (*(volatile db*)&mem[0xf0fd]) /* alias byte_1D6DD */
 #define fmt8_dec_d6de (*(volatile dw*)&mem[0xf0fe]) /* alias word_1D6DE */
-#define word_1d6e2 (*(volatile dw*)&mem[0xf102]) /* alias word_1D6E2 */
-#define word_1d6e4 (*(volatile dw*)&mem[0xf104]) /* alias word_1D6E4 */
+#define tick_count (*(volatile dw*)&mem[0xf102]) /* alias word_1D6E2 */
+#define tick_count2 (*(volatile dw*)&mem[0xf104]) /* alias word_1D6E4 */
 #define tile_bli_d7c0 (*(volatile dw*)&mem[0xf1e0]) /* alias word_1D7C0 */
 #define modal_flag (*(volatile dw*)&mem[0xf2f0]) /* alias word_1D8D0 */
-#define word_1d8d2 (*(volatile dw*)&mem[0xf2f2]) /* alias word_1D8D2 */
+#define border_f (*(volatile dw*)&mem[0xf2f2]) /* alias word_1D8D2 */
 #define fwait_d8d4 (*(volatile dw*)&mem[0xf2f4]) /* alias word_1D8D4 */
 #define fwait_d8d6 (*(volatile dw*)&mem[0xf2f6]) /* alias word_1D8D6 */
 #define joy_cali_d8d8 (*(volatile dw*)&mem[0xf2f8]) /* alias word_1D8D8 */
@@ -1197,32 +1197,32 @@ extern dd dummy50a3c745_seg002_eff0_28756;
 #define map_base (*(volatile dw*)&mem[0xf318]) /* alias word_1D8F8 */
 #define draw_col (*(volatile dw*)&mem[0xf320]) /* alias word_1D900 */
 #define draw_row (*(volatile dw*)&mem[0xf322]) /* alias word_1D902 */
-#define word_1d916 (*(volatile dw*)&mem[0xf336]) /* alias word_1D916 */
-#define word_1d918 (*(volatile dw*)&mem[0xf338]) /* alias word_1D918 */
+#define glyph_rows (*(volatile dw*)&mem[0xf336]) /* alias word_1D916 */
+#define tile_src (*(volatile dw*)&mem[0xf338]) /* alias word_1D918 */
 #define print_width (*(volatile dw*)&mem[0xf33c]) /* alias word_1D91C */
 #define screen_state (*(volatile dw*)&mem[0xf33e]) /* alias word_1D91E */
-#define word_1d920 (*(volatile dw*)&mem[0xf340]) /* alias word_1D920 */
+#define menu_mode (*(volatile dw*)&mem[0xf340]) /* alias word_1D920 */
 #define wparm_a (*(volatile dw*)&mem[0xf34c]) /* alias word_1D92C */
 #define wparm_b (*(volatile dw*)&mem[0xf34e]) /* alias word_1D92E */
 #define extkey_mode (*(volatile dw*)&mem[0xf350]) /* alias word_1D930 */
 #define adapter_id (*(volatile dw*)&mem[0xf354]) /* alias word_1D934 */
 #define cellgfx__d936 (*(volatile db*)&mem[0xf356]) /* alias byte_1D936 */
-#define word_1d937 (*(volatile dw*)&mem[0xf357]) /* alias word_1D937 */
-#define byte_1d939 (*(volatile db*)&mem[0xf359]) /* alias byte_1D939 */
-#define byte_1d93a (*(volatile db*)&mem[0xf35a]) /* alias byte_1D93A */
-#define byte_1d93b (*(volatile db*)&mem[0xf35b]) /* alias byte_1D93B */
+#define blit_sel (*(volatile dw*)&mem[0xf357]) /* alias word_1D937 */
+#define adpt_draw (*(volatile db*)&mem[0xf359]) /* alias byte_1D939 */
+#define adpt_flip (*(volatile db*)&mem[0xf35a]) /* alias byte_1D93A */
+#define has_tandy (*(volatile db*)&mem[0xf35b]) /* alias byte_1D93B */
 #define keytest_d93e (*(volatile db*)&mem[0xf35e]) /* alias byte_1D93E */
-#define word_1d93f (*(volatile dw*)&mem[0xf35f]) /* alias word_1D93F */
+#define mode_flag (*(volatile dw*)&mem[0xf35f]) /* alias word_1D93F */
 #define eblit_d943 (*(volatile dw*)&mem[0xf363]) /* alias word_1D943 */
 #define exit_flag (*(volatile dw*)&mem[0xf365]) /* alias word_1D945 */
 #define stage_parm_a (*(volatile dw*)&mem[0xf369]) /* alias word_1D949 */
 #define stage_parm_b (*(volatile dw*)&mem[0xf36b]) /* alias word_1D94B */
 #define delay_cnt (*(volatile dw*)&mem[0xf36d]) /* alias word_1D94D */
 #define tick_isr_d94f (*(volatile dw*)&mem[0xf36f]) /* alias word_1D94F */
-#define word_1d951 (*(volatile dw*)&mem[0xf371]) /* alias word_1D951 */
-#define word_1d953 (*(volatile dw*)&mem[0xf373]) /* alias word_1D953 */
+#define delay_cnt2 (*(volatile dw*)&mem[0xf371]) /* alias word_1D951 */
+#define delay_cnt3 (*(volatile dw*)&mem[0xf373]) /* alias word_1D953 */
 #define timer_cnt (*(volatile dw*)&mem[0xf375]) /* alias word_1D955 */
-#define word_1d957 (*(volatile dw*)&mem[0xf377]) /* alias word_1D957 */
+#define menu_state (*(volatile dw*)&mem[0xf377]) /* alias word_1D957 */
 #define held_keys (*(volatile dw*)&mem[0xf379]) /* alias word_1D959 */
 #define print_de_d95d (*(volatile dw*)&mem[0xf37d]) /* alias word_1D95D */
 #define rand_s0 (*(volatile dw*)&mem[0xf37f]) /* alias word_1D95F */
@@ -1243,7 +1243,7 @@ extern db dummy50a3c745_seg002_f686_28925;
 #define inmenu_dc77 (*(volatile dw*)&mem[0xf697]) /* alias word_1DC77 */
 #define inmenu_dc79 (*(volatile db*)&mem[0xf699]) /* alias byte_1DC79 */
 #define inmenu_dc7a (*(volatile db*)&mem[0xf69a]) /* alias byte_1DC7A */
-#define byte_1dc7d (*(volatile db*)&mem[0xf69d]) /* alias byte_1DC7D */
+#define joy_pos_mask (*(volatile db*)&mem[0xf69d]) /* alias byte_1DC7D */
 #define joy_ax (*(volatile dw*)&mem[0xf6a0]) /* alias word_1DC80 */
 #define joy_ay (*(volatile dw*)&mem[0xf6a2]) /* alias word_1DC82 */
 #define joy_bx (*(volatile dw*)&mem[0xf6a6]) /* alias word_1DC86 */
@@ -1259,57 +1259,57 @@ extern db dummy50a3c745_seg002_f686_28925;
 #define input_a (*(volatile dw*)&mem[0xf6c2]) /* alias word_1DCA2 */
 #define input_b (*(volatile dw*)&mem[0xf6c4]) /* alias word_1DCA4 */
 #define joy_mask (*(volatile db*)&mem[0xf6ca]) /* alias byte_1DCAA */
-#define byte_1dcab (*(volatile db*)&mem[0xf6cb]) /* alias byte_1DCAB */
+#define joy_mask2 (*(volatile db*)&mem[0xf6cb]) /* alias byte_1DCAB */
 #define joy_acc_x (*(volatile dw*)&mem[0xf6cc]) /* alias word_1DCAC */
 #define joy_acc_y (*(volatile dw*)&mem[0xf6ce]) /* alias word_1DCAE */
-#define byte_1dcb0 (*(volatile db*)&mem[0xf6d0]) /* alias byte_1DCB0 */
+#define joy_axes_sel (*(volatile db*)&mem[0xf6d0]) /* alias byte_1DCB0 */
 #define poll_dcb1 (*(volatile dw*)&mem[0xf6d1]) /* alias word_1DCB1 */
 #define poll_dcb3 (*(volatile dw*)&mem[0xf6d3]) /* alias word_1DCB3 */
-#define word_1dcbf (*(volatile dw*)&mem[0xf6df]) /* alias word_1DCBF */
+#define dpar_0 (*(volatile dw*)&mem[0xf6df]) /* alias word_1DCBF */
 #define drawadv_dcc1 (*(volatile db*)&mem[0xf6e1]) /* alias byte_1DCC1 */
 extern db dummy50a3c745_seg002_f6e2_28995;
 #define find_fil_dcdd (*(volatile db*)&mem[0xf6fd]) /* alias byte_1DCDD */
 extern db dummy50a3c745_seg002_f6fe_28997;
-#define word_1dcdf (*(volatile dw*)&mem[0xf6ff]) /* alias word_1DCDF */
+#define dpar_1 (*(volatile dw*)&mem[0xf6ff]) /* alias word_1DCDF */
 #define drawadv_dce1 (*(volatile db*)&mem[0xf701]) /* alias byte_1DCE1 */
-#define word_1dcff (*(volatile dw*)&mem[0xf71f]) /* alias word_1DCFF */
+#define dpar_2 (*(volatile dw*)&mem[0xf71f]) /* alias word_1DCFF */
 #define mdir_dd01 (*(volatile db*)&mem[0xf721]) /* alias byte_1DD01 */
 #define phase_dd05 (*(volatile db*)&mem[0xf725]) /* alias byte_1DD05 */
-#define word_1dd1f (*(volatile dw*)&mem[0xf73f]) /* alias word_1DD1F */
+#define dpar_3 (*(volatile dw*)&mem[0xf73f]) /* alias word_1DD1F */
 #define mdir_dd21 (*(volatile db*)&mem[0xf741]) /* alias byte_1DD21 */
 #define phase_dd25 (*(volatile db*)&mem[0xf745]) /* alias byte_1DD25 */
-#define word_1dd3f (*(volatile dw*)&mem[0xf75f]) /* alias word_1DD3F */
+#define dpar_4 (*(volatile dw*)&mem[0xf75f]) /* alias word_1DD3F */
 #define mdir_dd41 (*(volatile db*)&mem[0xf761]) /* alias byte_1DD41 */
 #define phase_dd45 (*(volatile db*)&mem[0xf765]) /* alias byte_1DD45 */
-#define word_1dd5f (*(volatile dw*)&mem[0xf77f]) /* alias word_1DD5F */
-#define byte_1dd7f (*(volatile db*)&mem[0xf79f]) /* alias byte_1DD7F */
+#define dpar_5 (*(volatile dw*)&mem[0xf77f]) /* alias word_1DD5F */
+#define hud_attr (*(volatile db*)&mem[0xf79f]) /* alias byte_1DD7F */
 #define select_dd80 (*(volatile db*)&mem[0xf7a0]) /* alias byte_1DD80 */
 #define clip_mask_a (*(volatile dw*)&mem[0xf7bf]) /* alias word_1DD9F */
-#define word_1dda1 (*(volatile dw*)&mem[0xf7c1]) /* alias word_1DDA1 */
+#define hud_da1 (*(volatile dw*)&mem[0xf7c1]) /* alias word_1DDA1 */
 #define clip_mask_b (*(volatile dw*)&mem[0xf7c3]) /* alias word_1DDA3 */
-#define word_1dda5 (*(volatile dw*)&mem[0xf7c5]) /* alias word_1DDA5 */
+#define hud_da5 (*(volatile dw*)&mem[0xf7c5]) /* alias word_1DDA5 */
 #define dirtyrect_ptr (*(volatile dw*)&mem[0xf7d0]) /* alias word_1DDB0 */
 #define compose_gate (*(volatile dw*)&mem[0xf7d2]) /* alias word_1DDB2 */
-#define word_1ddb4 (*(volatile dw*)&mem[0xf7d4]) /* alias word_1DDB4 */
+#define clip_p (*(volatile dw*)&mem[0xf7d4]) /* alias word_1DDB4 */
 #define rectreg_base (*(volatile dw*)&mem[0xf7d9]) /* alias word_1DDB9 */
-#define word_1ddcd (*(volatile dw*)&mem[0xf7ed]) /* alias word_1DDCD */
+#define clip_p2 (*(volatile dw*)&mem[0xf7ed]) /* alias word_1DDCD */
 #define rectreg_off (*(volatile dw*)&mem[0xf7f3]) /* alias word_1DDD3 */
-#define byte_1ddd9 (*(volatile db*)&mem[0xf7f9]) /* alias byte_1DDD9 */
+#define clip_f (*(volatile db*)&mem[0xf7f9]) /* alias byte_1DDD9 */
 #define cframe_e0a3 (*(volatile db*)&mem[0xfac3]) /* alias byte_1E0A3 */
 #define cframe_e12f (*(volatile db*)&mem[0xfb4f]) /* alias byte_1E12F */
-#define word_1e1bd (*(volatile dw*)&mem[0xfbdd]) /* alias word_1E1BD */
+#define clip_base (*(volatile dw*)&mem[0xfbdd]) /* alias word_1E1BD */
 #define crest_e1bf (*(volatile dw*)&mem[0xfbdf]) /* alias word_1E1BF */
 #define crest_e1c1 (*(volatile dw*)&mem[0xfbe1]) /* alias word_1E1C1 */
-#define word_1e1c3 (*(volatile dw*)&mem[0xfbe3]) /* alias word_1E1C3 */
-#define byte_1e1c5 (*(volatile db*)&mem[0xfbe5]) /* alias byte_1E1C5 */
+#define blitgo_a (*(volatile dw*)&mem[0xfbe3]) /* alias word_1E1C3 */
+#define blitgo_c (*(volatile db*)&mem[0xfbe5]) /* alias byte_1E1C5 */
 #define cblit_e1c9 (*(volatile db*)&mem[0xfbe9]) /* alias byte_1E1C9 */
 #define cblit_e1ca (*(volatile db*)&mem[0xfbea]) /* alias byte_1E1CA */
-#define word_1e1cb (*(volatile dw*)&mem[0xfbeb]) /* alias word_1E1CB */
+#define clip_dx (*(volatile dw*)&mem[0xfbeb]) /* alias word_1E1CB */
 #define cblit_e1cd (*(volatile db*)&mem[0xfbed]) /* alias byte_1E1CD */
-#define word_1e1ce (*(volatile dw*)&mem[0xfbee]) /* alias word_1E1CE */
-#define word_1e1d0 (*(volatile dw*)&mem[0xfbf0]) /* alias word_1E1D0 */
-#define word_1e1d2 (*(volatile dw*)&mem[0xfbf2]) /* alias word_1E1D2 */
-#define word_1e1d4 (*(volatile dw*)&mem[0xfbf4]) /* alias word_1E1D4 */
+#define clip_si (*(volatile dw*)&mem[0xfbee]) /* alias word_1E1CE */
+#define clip_bx (*(volatile dw*)&mem[0xfbf0]) /* alias word_1E1D0 */
+#define clip_ax (*(volatile dw*)&mem[0xfbf2]) /* alias word_1E1D2 */
+#define clip_cx (*(volatile dw*)&mem[0xfbf4]) /* alias word_1E1D4 */
 #define ovl_e840 (*(volatile dw*)&mem[0x10260]) /* alias word_1E840 */
 #define ovl_e842 (*(volatile dw*)&mem[0x10262]) /* alias word_1E842 */
 #define ovl_e844 (*(volatile dw*)&mem[0x10264]) /* alias word_1E844 */
@@ -1321,22 +1321,22 @@ extern db dummy50a3c745_seg002_f6fe_28997;
 #define seg000_1_0d4c (*(volatile db*)&mem[0x1276c]) /* alias byte_20D4C */
 #define spcopy_0d4e (*(volatile dw*)&mem[0x1276e]) /* alias word_20D4E */
 #define spcopy_0d50 (*(volatile db*)&mem[0x12770]) /* alias byte_20D50 */
-#define word_20d52 (*(volatile dw*)&mem[0x12772]) /* alias word_20D52 */
-#define byte_20d54 (*(volatile db*)&mem[0x12774]) /* alias byte_20D54 */
-#define word_20d56 (*(volatile dw*)&mem[0x12776]) /* alias word_20D56 */
+#define sprst_dst (*(volatile dw*)&mem[0x12772]) /* alias word_20D52 */
+#define sprst_dstb (*(volatile db*)&mem[0x12774]) /* alias byte_20D54 */
+#define emit_ptr (*(volatile dw*)&mem[0x12776]) /* alias word_20D56 */
 #define legend_0d58 (*(volatile dw*)&mem[0x12778]) /* alias word_20D58 */
 extern dw dummy50a3c745_seg002_1277e_29407;
-#define byte_24e70 (*(volatile db*)raddr_(ds,0x7ff0)) /* ds-rel alias byte_24E70 */
+#define dcomp_lim (*(volatile db*)raddr_(ds,0x7ff0)) /* ds-rel alias byte_24E70 */
 #define dcomp_4e71 (*(volatile db*)raddr_(ds,0x7ff1)) /* ds-rel alias byte_24E71 */
-#define word_24e72 (*(volatile dw*)raddr_(ds,0x7ff2)) /* ds-rel alias word_24E72 */
+#define dcomp_mask (*(volatile dw*)raddr_(ds,0x7ff2)) /* ds-rel alias word_24E72 */
 #define dcomp_4e74 (*(volatile dw*)raddr_(ds,0x7ff4)) /* ds-rel alias word_24E74 */
 #define dcomp_4e76 (*(volatile db*)raddr_(ds,0x7ff6)) /* ds-rel alias byte_24E76 */
 #define dcomp_4e77 (*(volatile dw*)raddr_(ds,0x7ff7)) /* ds-rel alias word_24E77 */
 #define dcomp_4e79 (*(volatile dw*)raddr_(ds,0x7ff9)) /* ds-rel alias word_24E79 */
 #define dcomp_4e7b (*(volatile db*)raddr_(ds,0x7ffb)) /* ds-rel alias byte_24E7B */
 #define intro_656a (*(volatile dw*)&mem[0x17f8a]) /* alias word_2656A */
-#define word_2656c (*(volatile dw*)&mem[0x17f8c]) /* alias word_2656C */
-#define word_2656e (*(volatile dw*)&mem[0x17f8e]) /* alias word_2656E */
+#define frame_cnt (*(volatile dw*)&mem[0x17f8c]) /* alias word_2656C */
+#define frame_cnt2 (*(volatile dw*)&mem[0x17f8e]) /* alias word_2656E */
 #define game_mai_65a8 (*(volatile dw*)&mem[0x17fc8]) /* alias word_265A8 */
 #define frame_cnt (*(volatile dw*)&mem[0x17fca]) /* alias word_265AA */
 #define ot0a_tick_65ac (*(volatile dw*)&mem[0x17fcc]) /* alias word_265AC */
@@ -1353,7 +1353,7 @@ extern dw dummy50a3c745_seg002_1277e_29407;
 #define cur_idx (*(volatile dw*)&mem[0x187f8]) /* alias word_26DD8 */
 #define cur_end (*(volatile dw*)&mem[0x187fa]) /* alias word_26DDA */
 #define main_men_6ddc (*(volatile dw*)&mem[0x187fc]) /* alias word_26DDC */
-#define word_26dde (*(volatile dw*)&mem[0x187fe]) /* alias word_26DDE */
+#define scr_ptr (*(volatile dw*)&mem[0x187fe]) /* alias word_26DDE */
 #define script_ptr (*(volatile dw*)&mem[0x18800]) /* alias word_26DE0 */
 #define dlg_buf (*(volatile dw*)&mem[0x18802]) /* alias word_26DE2 */
 #define input_mask (*(volatile dw*)&mem[0x18804]) /* alias word_26DE4 */
@@ -1361,24 +1361,24 @@ extern dw dummy50a3c745_seg002_1277e_29407;
 #define run_6de7 (*(volatile db*)&mem[0x18807]) /* alias byte_26DE7 */
 #define dlg_col (*(volatile db*)&mem[0x18808]) /* alias byte_26DE8 */
 #define dlg_row (*(volatile db*)&mem[0x18809]) /* alias byte_26DE9 */
-#define byte_26dea (*(volatile db*)&mem[0x1880a]) /* alias byte_26DEA */
-#define word_26deb (*(volatile dw*)&mem[0x1880b]) /* alias word_26DEB */
+#define scr_a (*(volatile db*)&mem[0x1880a]) /* alias byte_26DEA */
+#define curs_ptr (*(volatile dw*)&mem[0x1880b]) /* alias word_26DEB */
 #define rowf_6ded (*(volatile dw*)&mem[0x1880d]) /* alias word_26DED */
 #define rowf_6def (*(volatile db*)&mem[0x1880f]) /* alias byte_26DEF */
 #define rowf_6df0 (*(volatile db*)&mem[0x18810]) /* alias byte_26DF0 */
 #define snap_v (*(volatile db*)&mem[0x18811]) /* alias byte_26DF1 */
-#define byte_26df2 (*(volatile db*)&mem[0x18812]) /* alias byte_26DF2 */
+#define curs_a (*(volatile db*)&mem[0x18812]) /* alias byte_26DF2 */
 #define csnap_6df3 (*(volatile db*)&mem[0x18813]) /* alias byte_26DF3 */
 #define csnap_6df4 (*(volatile dw*)&mem[0x18814]) /* alias word_26DF4 */
 #define csnap_6df6 (*(volatile dw*)&mem[0x18816]) /* alias word_26DF6 */
 #define csnap_6df8 (*(volatile dw*)&mem[0x18818]) /* alias word_26DF8 */
 #define csnap_6dfa (*(volatile db*)&mem[0x1881a]) /* alias byte_26DFA */
-#define byte_26dfb (*(volatile db*)&mem[0x1881b]) /* alias byte_26DFB */
-#define byte_26dfc (*(volatile db*)&mem[0x1881c]) /* alias byte_26DFC */
+#define curs_b (*(volatile db*)&mem[0x1881b]) /* alias byte_26DFB */
+#define curs_idx (*(volatile db*)&mem[0x1881c]) /* alias byte_26DFC */
 extern db dummy50a3c745_seg002_18b88_29554;
 extern db dummy50a3c745_seg002_18bf4_29564;
 #define mselprep_71d5 (*(volatile db*)&mem[0x18bf5]) /* alias byte_271D5 */
-#define byte_2731e (*(volatile db*)&mem[0x18d3e]) /* alias byte_2731E */
+#define msel_731e (*(volatile db*)&mem[0x18d3e]) /* alias byte_2731E */
 extern db dummy50a3c745_seg002_18d4e_29601;
 #define screen_c_732f (*(volatile dw*)&mem[0x18d4f]) /* alias word_2732F */
 #define brief_sc_762f (*(volatile dw*)&mem[0x1904f]) /* alias word_2762F */
@@ -1389,11 +1389,11 @@ extern db dummy50a3c745_seg002_18d4e_29601;
 extern db dummy50a3c745_seg002_1a14f_30088;
 #define file_fie_89e2 (*(volatile db*)&mem[0x1a402]) /* alias byte_289E2 */
 #define file_fie_89e3 (*(volatile db*)&mem[0x1a403]) /* alias byte_289E3 */
-#define byte_28a50 (*(volatile db*)&mem[0x1a470]) /* alias byte_28A50 */
+#define roster_a50 (*(volatile db*)&mem[0x1a470]) /* alias byte_28A50 */
 extern db dummy50a3c745_seg002_1a4ed_30177;
-#define word_28ace (*(volatile dw*)&mem[0x1a4ee]) /* alias word_28ACE */
-#define word_28ad0 (*(volatile dw*)&mem[0x1a4f0]) /* alias word_28AD0 */
-#define byte_28ad2 (*(volatile db*)&mem[0x1a4f2]) /* alias byte_28AD2 */
+#define roster_ace (*(volatile dw*)&mem[0x1a4ee]) /* alias word_28ACE */
+#define roster_ad0 (*(volatile dw*)&mem[0x1a4f0]) /* alias word_28AD0 */
+#define roster_ad2 (*(volatile db*)&mem[0x1a4f2]) /* alias byte_28AD2 */
 #define pod_hit__8c83 (*(volatile dw*)&mem[0x1a6a3]) /* alias word_28C83 */
 #define objblk_i_8c90 (*(volatile dw*)&mem[0x1a6b0]) /* alias word_28C90 */
 #define objblk_i_8c92 (*(volatile dw*)&mem[0x1a6b2]) /* alias word_28C92 */
@@ -1401,7 +1401,7 @@ extern db dummy50a3c745_seg002_1a4ed_30177;
 #define objblk_i_8c95 (*(volatile db*)&mem[0x1a6b5]) /* alias byte_28C95 */
 #define objblk_i_8c96 (*(volatile db*)&mem[0x1a6b6]) /* alias byte_28C96 */
 #define objblk_i_8c97 (*(volatile db*)&mem[0x1a6b7]) /* alias byte_28C97 */
-#define byte_28ca0 (*(volatile db*)&mem[0x1a6c0]) /* alias byte_28CA0 */
+#define alert_lvl (*(volatile db*)&mem[0x1a6c0]) /* alias byte_28CA0 */
 #define post_loo_8ca1 (*(volatile db*)&mem[0x1a6c1]) /* alias byte_28CA1 */
 #define ot01_8ca2 (*(volatile db*)&mem[0x1a6c2]) /* alias byte_28CA2 */
 #define csetup_8ca3 (*(volatile db*)&mem[0x1a6c3]) /* alias byte_28CA3 */
@@ -1413,19 +1413,19 @@ extern db dummy50a3c745_seg002_1a6d2_30239;
 #define space_flag (*(volatile db*)&mem[0x1a6e0]) /* alias byte_28CC0 */
 #define diff_parm (*(volatile db*)&mem[0x1a6e1]) /* alias byte_28CC1 */
 #define spawn_level (*(volatile db*)&mem[0x1a6e2]) /* alias byte_28CC2 */
-#define byte_28cc3 (*(volatile db*)&mem[0x1a6e3]) /* alias byte_28CC3 */
+#define mst_cc3 (*(volatile db*)&mem[0x1a6e3]) /* alias byte_28CC3 */
 #define call_fn_8cc4 (*(volatile db*)&mem[0x1a6e4]) /* alias byte_28CC4 */
 #define call_fn_8cc5 (*(volatile db*)&mem[0x1a6e5]) /* alias byte_28CC5 */
 #define cool_gate (*(volatile db*)&mem[0x1a6e8]) /* alias byte_28CC8 */
 #define ot01_8cca (*(volatile db*)&mem[0x1a6ea]) /* alias byte_28CCA */
-#define byte_28ccb (*(volatile db*)&mem[0x1a6eb]) /* alias byte_28CCB */
+#define mst_ccb (*(volatile db*)&mem[0x1a6eb]) /* alias byte_28CCB */
 #define sfx_ch (*(volatile db*)&mem[0x1a6f1]) /* alias byte_28CD1 */
-#define byte_28cd2 (*(volatile db*)&mem[0x1a6f2]) /* alias byte_28CD2 */
-#define byte_28cd3 (*(volatile db*)&mem[0x1a6f3]) /* alias byte_28CD3 */
-#define byte_28cd4 (*(volatile db*)&mem[0x1a6f4]) /* alias byte_28CD4 */
-#define word_28cd5 (*(volatile dw*)&mem[0x1a6f5]) /* alias word_28CD5 */
+#define mst_cd2 (*(volatile db*)&mem[0x1a6f2]) /* alias byte_28CD2 */
+#define mst_cd3 (*(volatile db*)&mem[0x1a6f3]) /* alias byte_28CD3 */
+#define evac_h (*(volatile db*)&mem[0x1a6f4]) /* alias byte_28CD4 */
+#define evac_tu (*(volatile dw*)&mem[0x1a6f5]) /* alias word_28CD5 */
 extern db dummy50a3c745_seg002_1a6f7_30271;
-#define byte_28cd8 (*(volatile db*)&mem[0x1a6f8]) /* alias byte_28CD8 */
+#define mst_cd8 (*(volatile db*)&mem[0x1a6f8]) /* alias byte_28CD8 */
 #define rstate_8cd9 (*(volatile db*)&mem[0x1a6f9]) /* alias byte_28CD9 */
 extern db dummy50a3c745_seg002_1a6fa_30276;
 #define bkey_8cdb (*(volatile db*)&mem[0x1a6fb]) /* alias byte_28CDB */
@@ -1434,10 +1434,10 @@ extern db dummy50a3c745_seg002_1a72c_30286;
 #define csetup_8d0d (*(volatile db*)&mem[0x1a72d]) /* alias byte_28D0D */
 #define csetup_8d0e (*(volatile db*)&mem[0x1a72e]) /* alias byte_28D0E */
 #define csetup_8d51 (*(volatile db*)&mem[0x1a771]) /* alias byte_28D51 */
-#define byte_28dfb (*(volatile db*)&mem[0x1a81b]) /* alias byte_28DFB */
-#define byte_28e1d (*(volatile db*)&mem[0x1a83d]) /* alias byte_28E1D */
-#define byte_28e3f (*(volatile db*)&mem[0x1a85f]) /* alias byte_28E3F */
-#define byte_28e61 (*(volatile db*)&mem[0x1a881]) /* alias byte_28E61 */
+#define camf_dfb (*(volatile db*)&mem[0x1a81b]) /* alias byte_28DFB */
+#define camf_e1d (*(volatile db*)&mem[0x1a83d]) /* alias byte_28E1D */
+#define camf_e3f (*(volatile db*)&mem[0x1a85f]) /* alias byte_28E3F */
+#define camf_e61 (*(volatile db*)&mem[0x1a881]) /* alias byte_28E61 */
 #define owake_8e83 (*(volatile db*)&mem[0x1a8a3]) /* alias byte_28E83 */
 #define csetup_8f2d (*(volatile db*)&mem[0x1a94d]) /* alias byte_28F2D */
 #define owake_901b (*(volatile db*)&mem[0x1aa3b]) /* alias byte_2901B */
@@ -1450,18 +1450,18 @@ extern db dummy50a3c745_seg002_1a72c_30286;
 #define csetup_91d5 (*(volatile db*)&mem[0x1abf5]) /* alias byte_291D5 */
 #define csetup_923b (*(volatile db*)&mem[0x1ac5b]) /* alias byte_2923B */
 #define objblk_i_95ea (*(volatile db*)&mem[0x1b00a]) /* alias byte_295EA */
-#define word_295eb (*(volatile dw*)&mem[0x1b00b]) /* alias word_295EB */
+#define evac_div (*(volatile dw*)&mem[0x1b00b]) /* alias word_295EB */
 #define csetup_95ef (*(volatile db*)&mem[0x1b00f]) /* alias byte_295EF */
-#define word_2966a (*(volatile dw*)&mem[0x1b08a]) /* alias word_2966A */
+#define tgt_a (*(volatile dw*)&mem[0x1b08a]) /* alias word_2966A */
 #define dmg_deal_966c (*(volatile dw*)&mem[0x1b08c]) /* alias word_2966C */
-#define word_2966e (*(volatile dw*)&mem[0x1b08e]) /* alias word_2966E */
+#define oscr_66e (*(volatile dw*)&mem[0x1b08e]) /* alias word_2966E */
 #define pan_flags (*(volatile db*)&mem[0x1b09a]) /* alias byte_2967A */
 #define cam_tgt_x (*(volatile dw*)&mem[0x1b09b]) /* alias word_2967B */
 #define cam_tgt_y (*(volatile dw*)&mem[0x1b09d]) /* alias word_2967D */
 #define ai_flag_out (*(volatile db*)&mem[0x1b12d]) /* alias byte_2970D */
 #define bkey_970e (*(volatile db*)&mem[0x1b12e]) /* alias byte_2970E */
 #define bkey_970f (*(volatile db*)&mem[0x1b12f]) /* alias byte_2970F */
-#define byte_2971a (*(volatile db*)&mem[0x1b13a]) /* alias byte_2971A */
+#define mst_971a (*(volatile db*)&mem[0x1b13a]) /* alias byte_2971A */
 #define enemy_cnt (*(volatile db*)&mem[0x1b16f]) /* alias byte_2974F */
 #define hit_flag (*(volatile db*)&mem[0x1b18a]) /* alias byte_2976A */
 #define trk_flag (*(volatile db*)&mem[0x1b18b]) /* alias byte_2976B */
@@ -1479,7 +1479,7 @@ extern db dummy50a3c745_seg002_1a72c_30286;
 #define burst_cnt (*(volatile dw*)&mem[0x1b2cc]) /* alias word_298AC */
 #define burst_src (*(volatile dw*)&mem[0x1b2ce]) /* alias word_298AE */
 #define place_x (*(volatile dw*)&mem[0x1b2d2]) /* alias word_298B2 */
-#define word_298c0 (*(volatile dw*)&mem[0x1b2e0]) /* alias word_298C0 */
+#define ai_cnt (*(volatile dw*)&mem[0x1b2e0]) /* alias word_298C0 */
 #define weight_sum (*(volatile dw*)&mem[0x1b2e2]) /* alias word_298C2 */
 #define follow_m_98c4 (*(volatile db*)&mem[0x1b2e4]) /* alias byte_298C4 */
 #define scan_a (*(volatile db*)&mem[0x1b3af]) /* alias byte_2998F */
@@ -1512,7 +1512,7 @@ extern db dummy50a3c745_seg002_1a72c_30286;
 #define wpn_9e3c (*(volatile dw*)&mem[0x1b85c]) /* alias word_29E3C */
 #define wpn_9e3e (*(volatile dw*)&mem[0x1b85e]) /* alias word_29E3E */
 #define wpn_9e40 (*(volatile dw*)&mem[0x1b860]) /* alias word_29E40 */
-#define word_29ebc (*(volatile dw*)&mem[0x1b8dc]) /* alias word_29EBC */
+#define meter_b (*(volatile dw*)&mem[0x1b8dc]) /* alias word_29EBC */
 #define fx_overl_9f5e (*(volatile db*)&mem[0x1b97e]) /* alias byte_29F5E */
 #define fx_overl_9f60 (*(volatile dw*)&mem[0x1b980]) /* alias word_29F60 */
 #define anim2_st_9f64 (*(volatile dw*)&mem[0x1b984]) /* alias word_29F64 */
@@ -1540,18 +1540,18 @@ extern db dummy50a3c745_seg002_1bfc2_30923;
 #define accum_a (*(volatile dw*)&mem[0x1bfc5]) /* alias word_2A5A5 */
 #define accum_b (*(volatile dw*)&mem[0x1bfc7]) /* alias word_2A5A7 */
 #define arr_flag (*(volatile db*)&mem[0x1bfd0]) /* alias byte_2A5B0 */
-#define byte_2a5b1 (*(volatile db*)&mem[0x1bfd1]) /* alias byte_2A5B1 */
+#define rte_b1 (*(volatile db*)&mem[0x1bfd1]) /* alias byte_2A5B1 */
 #define delta_a5b2 (*(volatile dw*)&mem[0x1bfd2]) /* alias word_2A5B2 */
 #define arr_bx (*(volatile dw*)&mem[0x1bfd4]) /* alias word_2A5B4 */
 #define arr_si (*(volatile dw*)&mem[0x1bfd6]) /* alias word_2A5B6 */
-#define byte_2a5ee (*(volatile db*)&mem[0x1c00e]) /* alias byte_2A5EE */
-#define byte_2a5ef (*(volatile db*)&mem[0x1c00f]) /* alias byte_2A5EF */
-#define byte_2a5f0 (*(volatile db*)&mem[0x1c010]) /* alias byte_2A5F0 */
-#define byte_2a5f1 (*(volatile db*)&mem[0x1c011]) /* alias byte_2A5F1 */
-#define byte_2a5f2 (*(volatile db*)&mem[0x1c012]) /* alias byte_2A5F2 */
-#define byte_2a5f3 (*(volatile db*)&mem[0x1c013]) /* alias byte_2A5F3 */
-#define byte_2a5f4 (*(volatile db*)&mem[0x1c014]) /* alias byte_2A5F4 */
-#define byte_2a5f5 (*(volatile db*)&mem[0x1c015]) /* alias byte_2A5F5 */
+#define rte_ee (*(volatile db*)&mem[0x1c00e]) /* alias byte_2A5EE */
+#define rte_ef (*(volatile db*)&mem[0x1c00f]) /* alias byte_2A5EF */
+#define rte_f0 (*(volatile db*)&mem[0x1c010]) /* alias byte_2A5F0 */
+#define rte_f1 (*(volatile db*)&mem[0x1c011]) /* alias byte_2A5F1 */
+#define rte_f2 (*(volatile db*)&mem[0x1c012]) /* alias byte_2A5F2 */
+#define rte_f3 (*(volatile db*)&mem[0x1c013]) /* alias byte_2A5F3 */
+#define rte_f4 (*(volatile db*)&mem[0x1c014]) /* alias byte_2A5F4 */
+#define rte_f5 (*(volatile db*)&mem[0x1c015]) /* alias byte_2A5F5 */
 #define rplan_a5f6 (*(volatile db*)&mem[0x1c016]) /* alias byte_2A5F6 */
 #define rplan_a5f7 (*(volatile db*)&mem[0x1c017]) /* alias byte_2A5F7 */
 #define rplan_a5f8 (*(volatile db*)&mem[0x1c018]) /* alias byte_2A5F8 */
@@ -1565,9 +1565,9 @@ extern db dummy50a3c745_seg002_1bfc2_30923;
 #define ai_seek__a602 (*(volatile db*)&mem[0x1c022]) /* alias byte_2A602 */
 #define rplan_a603 (*(volatile db*)&mem[0x1c023]) /* alias byte_2A603 */
 #define rplan_a604 (*(volatile db*)&mem[0x1c024]) /* alias byte_2A604 */
-#define byte_2a605 (*(volatile db*)&mem[0x1c025]) /* alias byte_2A605 */
-#define byte_2a606 (*(volatile db*)&mem[0x1c026]) /* alias byte_2A606 */
-#define byte_2a60f (*(volatile db*)&mem[0x1c02f]) /* alias byte_2A60F */
+#define ai_seek (*(volatile db*)&mem[0x1c025]) /* alias byte_2A605 */
+#define ai_seek2 (*(volatile db*)&mem[0x1c026]) /* alias byte_2A606 */
+#define rte_0f (*(volatile db*)&mem[0x1c02f]) /* alias byte_2A60F */
 #define spawn_a610 (*(volatile dw*)&mem[0x1c030]) /* alias word_2A610 */
 #define spawn_a612 (*(volatile db*)&mem[0x1c032]) /* alias byte_2A612 */
 #define spawn_a613 (*(volatile db*)&mem[0x1c033]) /* alias byte_2A613 */
@@ -1591,13 +1591,13 @@ extern db dummy50a3c745_seg002_1c0ce_31020;
 #define delta_a6c6 (*(volatile db*)&mem[0x1c0e6]) /* alias byte_2A6C6 */
 #define dmg_amt (*(volatile db*)&mem[0x1c16b]) /* alias byte_2A74B */
 #define otick_a7a8 (*(volatile dw*)&mem[0x1c1c8]) /* alias word_2A7A8 */
-#define byte_2a7aa (*(volatile db*)&mem[0x1c1ca]) /* alias byte_2A7AA */
+#define wake_a7aa (*(volatile db*)&mem[0x1c1ca]) /* alias byte_2A7AA */
 #define ot01_a7ab (*(volatile db*)&mem[0x1c1cb]) /* alias byte_2A7AB */
-#define byte_2a7ac (*(volatile db*)&mem[0x1c1cc]) /* alias byte_2A7AC */
+#define alert_c (*(volatile db*)&mem[0x1c1cc]) /* alias byte_2A7AC */
 #define alert_lvl (*(volatile db*)&mem[0x1c1cd]) /* alias byte_2A7AD */
 #define alert_aux (*(volatile db*)&mem[0x1c1ce]) /* alias byte_2A7AE */
-#define byte_2a7af (*(volatile db*)&mem[0x1c1cf]) /* alias byte_2A7AF */
-#define word_2a7b0 (*(volatile dw*)&mem[0x1c1d0]) /* alias word_2A7B0 */
+#define mst_a7af (*(volatile db*)&mem[0x1c1cf]) /* alias byte_2A7AF */
+#define meter_a (*(volatile dw*)&mem[0x1c1d0]) /* alias word_2A7B0 */
 #define ot0d_a86b (*(volatile db*)&mem[0x1c28b]) /* alias byte_2A86B */
 #define ot0d_a86c (*(volatile db*)&mem[0x1c28c]) /* alias byte_2A86C */
 #define objpair__a89c (*(volatile dw*)&mem[0x1c2bc]) /* alias word_2A89C */
@@ -1619,7 +1619,7 @@ extern db dummy50a3c745_seg002_1c0ce_31020;
 #define run_a9cb (*(volatile db*)&mem[0x1c3eb]) /* alias byte_2A9CB */
 extern db dummy50a3c745_seg002_1c3ec_31168;
 #define run_a9cd (*(volatile db*)&mem[0x1c3ed]) /* alias byte_2A9CD */
-#define word_2a9ce (*(volatile dw*)&mem[0x1c3ee]) /* alias word_2A9CE */
+#define mstep (*(volatile dw*)&mem[0x1c3ee]) /* alias word_2A9CE */
 #define run_a9d0 (*(volatile dw*)&mem[0x1c3f0]) /* alias word_2A9D0 */
 #define phase_cnt (*(volatile db*)&mem[0x1c3f2]) /* alias byte_2A9D2 */
 #define run_a9d3 (*(volatile db*)&mem[0x1c3f3]) /* alias byte_2A9D3 */
@@ -1644,27 +1644,27 @@ extern db dummy50a3c745_seg002_1c3ec_31168;
 #define probe_save_si (*(volatile dw*)&mem[0x1c46a]) /* alias word_2AA4A */
 #define map_prob_aa56 (*(volatile dw*)&mem[0x1c476]) /* alias word_2AA56 */
 #define map_prob_aa58 (*(volatile dw*)&mem[0x1c478]) /* alias word_2AA58 */
-#define byte_2aa5c (*(volatile db*)&mem[0x1c47c]) /* alias byte_2AA5C */
+#define odelta_a5c (*(volatile db*)&mem[0x1c47c]) /* alias byte_2AA5C */
 #define rplan_aa5d (*(volatile db*)&mem[0x1c47d]) /* alias byte_2AA5D */
-#define byte_2aa5e (*(volatile db*)&mem[0x1c47e]) /* alias byte_2AA5E */
-#define byte_2aa5f (*(volatile db*)&mem[0x1c47f]) /* alias byte_2AA5F */
+#define omove_a5e (*(volatile db*)&mem[0x1c47e]) /* alias byte_2AA5E */
+#define omove_a5f (*(volatile db*)&mem[0x1c47f]) /* alias byte_2AA5F */
 #define motion_t_aa60 (*(volatile db*)&mem[0x1c480]) /* alias byte_2AA60 */
 #define ot0d_aa61 (*(volatile db*)&mem[0x1c481]) /* alias byte_2AA61 */
-#define byte_2aa62 (*(volatile db*)&mem[0x1c482]) /* alias byte_2AA62 */
+#define omot_a62 (*(volatile db*)&mem[0x1c482]) /* alias byte_2AA62 */
 #define map_kind (*(volatile db*)&mem[0x1c483]) /* alias byte_2AA63 */
-#define byte_2aa64 (*(volatile db*)&mem[0x1c484]) /* alias byte_2AA64 */
+#define spawn_a64 (*(volatile db*)&mem[0x1c484]) /* alias byte_2AA64 */
 #define probe_px (*(volatile dw*)&mem[0x1c485]) /* alias word_2AA65 */
 #define probe_py (*(volatile dw*)&mem[0x1c487]) /* alias word_2AA67 */
-#define word_2aa69 (*(volatile dw*)&mem[0x1c489]) /* alias word_2AA69 */
-#define word_2aa6b (*(volatile dw*)&mem[0x1c48b]) /* alias word_2AA6B */
-#define byte_2aa6d (*(volatile db*)&mem[0x1c48d]) /* alias byte_2AA6D */
-#define byte_2aa6e (*(volatile db*)&mem[0x1c48e]) /* alias byte_2AA6E */
-#define byte_2aa6f (*(volatile db*)&mem[0x1c48f]) /* alias byte_2AA6F */
+#define obj_sx (*(volatile dw*)&mem[0x1c489]) /* alias word_2AA69 */
+#define obj_sy (*(volatile dw*)&mem[0x1c48b]) /* alias word_2AA6B */
+#define spawn_a6d (*(volatile db*)&mem[0x1c48d]) /* alias byte_2AA6D */
+#define probe_a6e (*(volatile db*)&mem[0x1c48e]) /* alias byte_2AA6E */
+#define probe_a6f (*(volatile db*)&mem[0x1c48f]) /* alias byte_2AA6F */
 #define map_scroll (*(volatile dw*)&mem[0x1ca90]) /* alias word_2B070 */
 #define route_ma_b074 (*(volatile dw*)&mem[0x1ca94]) /* alias word_2B074 */
 #define route_ma_b076 (*(volatile db*)&mem[0x1ca96]) /* alias byte_2B076 */
 #define ot16_b0c3 (*(volatile db*)&mem[0x1cae3]) /* alias byte_2B0C3 */
-#define word_2b0c4 (*(volatile dw*)&mem[0x1cae4]) /* alias word_2B0C4 */
+#define wgt_c4 (*(volatile dw*)&mem[0x1cae4]) /* alias word_2B0C4 */
 #define fill_a_b0c6 (*(volatile db*)&mem[0x1cae6]) /* alias byte_2B0C6 */
 #define fill_b_b0c7 (*(volatile db*)&mem[0x1cae7]) /* alias byte_2B0C7 */
 #define legend_b0c8 (*(volatile dw*)&mem[0x1cae8]) /* alias word_2B0C8 */
@@ -1692,11 +1692,11 @@ extern db dummy50a3c745_seg002_1c3ec_31168;
 #define pick_e_b123 (*(volatile db*)&mem[0x1cb43]) /* alias byte_2B123 */
 extern dw dummy50a3c745_seg002_1cb44_31340;
 #define retry_b126 (*(volatile db*)&mem[0x1cb46]) /* alias byte_2B126 */
-#define byte_2b127 (*(volatile db*)&mem[0x1cb47]) /* alias byte_2B127 */
-#define byte_2b128 (*(volatile db*)&mem[0x1cb48]) /* alias byte_2B128 */
+#define mgen_127 (*(volatile db*)&mem[0x1cb47]) /* alias byte_2B127 */
+#define mgen_128 (*(volatile db*)&mem[0x1cb48]) /* alias byte_2B128 */
 #define retry_b129 (*(volatile db*)&mem[0x1cb49]) /* alias byte_2B129 */
-#define byte_2b12a (*(volatile db*)&mem[0x1cb4a]) /* alias byte_2B12A */
-#define byte_2b12b (*(volatile db*)&mem[0x1cb4b]) /* alias byte_2B12B */
+#define mgen_12a (*(volatile db*)&mem[0x1cb4a]) /* alias byte_2B12A */
+#define mgen_12b (*(volatile db*)&mem[0x1cb4b]) /* alias byte_2B12B */
 #define spawn_b12c (*(volatile db*)&mem[0x1cb4c]) /* alias byte_2B12C */
 #define mgen6_b12d (*(volatile db*)&mem[0x1cb4d]) /* alias byte_2B12D */
 #define mgen6_b12e (*(volatile db*)&mem[0x1cb4e]) /* alias byte_2B12E */
@@ -1709,8 +1709,8 @@ extern dw dummy50a3c745_seg002_1cb44_31340;
 #define mrect_b23e (*(volatile dw*)&mem[0x1cc5e]) /* alias word_2B23E */
 #define mrect_b240 (*(volatile dw*)&mem[0x1cc60]) /* alias word_2B240 */
 #define mrect_b242 (*(volatile db*)&mem[0x1cc62]) /* alias byte_2B242 */
-#define byte_2b243 (*(volatile db*)&mem[0x1cc63]) /* alias byte_2B243 */
-#define byte_2b244 (*(volatile db*)&mem[0x1cc64]) /* alias byte_2B244 */
+#define cell_bx (*(volatile db*)&mem[0x1cc63]) /* alias byte_2B243 */
+#define cell_by (*(volatile db*)&mem[0x1cc64]) /* alias byte_2B244 */
 #define cellpx_b245 (*(volatile dw*)&mem[0x1cc65]) /* alias word_2B245 */
 #define cellpx_b247 (*(volatile dw*)&mem[0x1cc67]) /* alias word_2B247 */
 #define ot1b_tick_b24d (*(volatile db*)&mem[0x1cc6d]) /* alias byte_2B24D */

@@ -2,5 +2,5 @@
 #include "lifted_data.h"
 #include "lifted_procs.h"
 
-void seg001_f_proc(void) {
+void seg001_stub(void) {
 }
