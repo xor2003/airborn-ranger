@@ -2202,33 +2202,6 @@ void tnd_locret_107ba(void) {
 void tnd_locret_108bc(void) {
     return;
 }
-void tnd_irq8_chain(void) {
-    dd _sa = 0, _sb = 0;
-loc_1046b:
-    *(raddr(ds,0x69)) = 3;
-    byte_103e2 = 0;
-    ds = pop();
-    ax = pop();
-    { vfn f_ = func_at(rt_far(dword_103de)); if (f_) f_(); else fprintf(stderr, "unresolved ind jmp %x\n", (dd)(rt_far(dword_103de))); return; }
-edummylabel10:
-    IF = 0;
-    push(ds);
-    bx = *(dw*)(&dword_103de);
-    cx = *(dw*)(((db*)&dword_103de)+2);
-    { dd t_ = (dd)ax - (dd)ax; CF = (dd)ax < (dd)ax; ax = t_; ZF = ((dw)(ax) == 0); SF = (((dw)(ax)) >> 15); }
-    ds = ax;
-    *(dw*)(raddr(ds,0x20)) = bx;
-    *(dw*)(raddr(ds,0x22)) = cx;
-    ds = pop();
-    _sa = (ax);
-    out(0x43, 0x36);
-    ax = 0; CF = 0; OF = 0; ZF = 1; SF = 0;
-    out(0x40, al);
-    al = ah;
-    out(0x40, al);
-    IF = 1;
-    return;
-}
 void tnd_module_init(void) {
     tnd_install_timer();
 edummylabel1:
