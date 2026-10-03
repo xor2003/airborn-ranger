@@ -2,11 +2,13 @@
  * Register-level semantics matching the original calls used by the game:
  * filenames are ASCIZ in mem[] at ds:dx, handles are small ints, CF=error.
  */
-#include "rt.h"
+/* system headers first: rt.h's register macros (sp/si/di/bp...) corrupt
+ * arm64 kernel headers (asm/sigcontext.h declares a field named sp) */
 #include <dirent.h>
 #include <sys/stat.h>
 #include <ctype.h>
 #include <time.h>
+#include "rt.h"
 
 #define MAXH 16
 static FILE *htab[MAXH];

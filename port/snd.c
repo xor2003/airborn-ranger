@@ -6,9 +6,9 @@
  * Select: M2C_SND_ENGINE=midi|psg.  MIDI capture: M2C_MIDI_OUT=path (either engine).
  */
 #include <SDL2/SDL.h>
-#include "rt.h"
 #include <math.h>
 #include <time.h>
+#include "rt.h"
 
 #define SND_CLOCK 3579545
 #define SND_MAX_OUTPUT 0x7fff
