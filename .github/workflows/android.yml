@@ -18,14 +18,18 @@ jobs:
           distribution: temurin
           java-version: "17"
 
-      - uses: android-actions/setup-android@v3
+      # ubuntu-latest ships the Android SDK preinstalled (ANDROID_HOME set);
+      # android-actions/setup-android is broken on cmdline-tools 16.0 (tries
+      # to install the removed 'tools' package), so call sdkmanager directly
+      - name: Install Android NDK
+        run: |
+          SDKMANAGER=$(find "$ANDROID_HOME/cmdline-tools" -name sdkmanager -type f | head -1)
+          yes | "$SDKMANAGER" --licenses >/dev/null || true
+          "$SDKMANAGER" "ndk;26.3.11579264" "cmake;3.22.1"
 
       - uses: gradle/actions/setup-gradle@v4
         with:
           gradle-version: "8.10.2"
-
-      - name: Install Android NDK
-        run: sdkmanager "ndk;26.3.11579264" "cmake;3.22.1"
 
       - name: Stage SDL2 for ndk-build
         run: sh android/fetch-sdl.sh
