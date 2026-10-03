@@ -35,7 +35,8 @@ jobs:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           TAG: ${{ inputs.tag || github.ref_name }}
         run: |
-          gh release create "$TAG" --title "Airborne Ranger $TAG" \
+          gh release create "$TAG" --repo "$GITHUB_REPOSITORY" \
+            --title "Airborne Ranger $TAG" \
             --notes "Android APK (TV + gamepad key mapping) and Windows x64 zip. Bring your own copy of the DOS game: the APK imports the files on first launch (folder picker or adb push); on Windows, copy the *.DTX/*.DAT/*.MIJ/*.EXE files next to ar_port.exe." \
             artifacts/ar-android-apk/app-debug.apk \
             artifacts/ar-windows-x64/ar-windows-x64.zip
