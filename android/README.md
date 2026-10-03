@@ -1,11 +1,21 @@
 # Airborne Ranger — Android (TV) build
 
 Gradle + ndk-build project producing an APK. **The original game files are
-not bundled and not in the repo** (copyright): on first launch,
-`ImportActivity` asks for a folder containing your own DOS copy
-(`*.DTX`/`*.DAT`/`*.MIJ`/`*.EXE`, picked via SAF or `adb push` into
-`/sdcard/Android/data/org.airborn/files/`) and imports it into private
-storage.
+not bundled and not in the repo** (copyright): on first launch the
+asset-request menu (`ImportActivity`) shows a checklist of the required
+files and offers three ways to supply your own DOS copy
+(`*.DTX`/`*.DAT`/`*.MIJ`/`*.EXE`):
+
+1. **Import game folder** — SAF tree picker, recursive copy (works on
+   Android TV; point it at a USB stick or shared folder).
+2. **Import files** — SAF multi-select, for devices where a whole tree
+   can't be granted.
+3. **`adb push <gamedir>/. /sdcard/Android/data/org.airborn/files/`** —
+   lands directly in the app's private storage.
+
+Once all required files are present the menu launches the game
+automatically. If a device has no system file picker, the menu detects
+that and points to the adb method.
 
 ## Build
 
@@ -16,7 +26,8 @@ gradle -p android assembleDebug  # needs Android SDK + NDK 26.3
 
 `fetch-sdl.sh` fetches `SDL2-2.32.10.tar.gz` from libsdl-org releases and
 stages three things into `app/` (all gitignored): the source tree
-(`jni/SDL`, built by `include $(LOCAL_PATH)/SDL/Android.mk`), the
+(`jni/SDL`, picked up by `include $(call all-subdir-makefiles)` in
+`jni/Android.mk`), the
 `org.libsdl.app` Java glue (`src/main/java/org/libsdl`), and an include shim
 (`jni/include/SDL2` → SDL headers) so the port's `<SDL2/SDL.h>` resolves.
 Override the version with `SDL_VER=x.y.z`.
