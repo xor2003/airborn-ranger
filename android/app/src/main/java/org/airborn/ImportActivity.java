@@ -49,7 +49,9 @@ public final class ImportActivity extends Activity {
 
     private boolean assetsPresent() {
         for (String name : REQUIRED)
-            if (!new File(getFilesDir(), name).isFile()) return false;
+            if (!new File(getFilesDir(), name).isFile()
+                    && !new File(getExternalFilesDir(null), name).isFile())
+                return false;
         return true;
     }
 
@@ -156,7 +158,8 @@ public final class ImportActivity extends Activity {
         statusBox.removeAllViews();
         int found = 0;
         for (String name : REQUIRED) {
-            boolean ok = new File(getFilesDir(), name).isFile();
+            boolean ok = new File(getFilesDir(), name).isFile()
+                      || new File(getExternalFilesDir(null), name).isFile();
             if (ok) found++;
             TextView row = new TextView(this);
             row.setText(String.format(Locale.US, "%s  %s",
@@ -177,10 +180,13 @@ public final class ImportActivity extends Activity {
 
     private int countGameFiles() {
         int n = 0;
-        File[] files = getFilesDir().listFiles();
-        if (files == null) return 0;
-        for (File f : files)
-            if (f.isFile() && f.getName().toUpperCase(Locale.US).matches(WANT)) n++;
+        File[] dirs = { getFilesDir(), getExternalFilesDir(null) };
+        for (File dir : dirs) {
+            File[] files = dir == null ? null : dir.listFiles();
+            if (files == null) continue;
+            for (File f : files)
+                if (f.isFile() && f.getName().toUpperCase(Locale.US).matches(WANT)) n++;
+        }
         return n;
     }
 

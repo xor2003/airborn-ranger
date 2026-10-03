@@ -88,20 +88,15 @@ static void guest_irq0(void){
         if (park_in < id){ park_ack = id; return; }
     }
 #endif
-    /* a real IRET restores the flag image pushed on interrupt; the lifted
-     * ISR returns without one, so snapshot/restore the flag globals —
-     * otherwise an IRQ landing between a guest CMP and its Jcc flips the
-     * branch (corrupt tiles, misrouted sequencer state) */
+    /* A real interrupt pushes flags+CS:IP and the handler preserves every
+     * register it touches. The lifted ISR is plain C over the shared reg
+     * file — it can clobber anything — so snapshot/restore ALL registers.
+     * Flags-only left the guest resuming on ISR-mutated regs: corrupted
+     * sprite blits (garbled player/enemy tiles) and flipped CMP/Jcc pairs. */
     int cf=CF,zf=ZF,sf=SF,of=OF,pf=PF,af=AF,df=DF,iff=IF,tf=TF;
-    /* M2C_IRQSAVE=full: also snapshot GPRs/segment regs — diagnostic to tell
-     * apart a register leak (original semantics wouldn't leak) from a
-     * deterministic bug in scene decoding */
-    int full = getenv("M2C_IRQSAVE") != NULL;
     dd r[8]; dw s[7];
-    if (full){
-        r[0]=eax;r[1]=ebx;r[2]=ecx;r[3]=edx;r[4]=esi;r[5]=edi;r[6]=esp;r[7]=ebp;
-        s[0]=cs;s[1]=ds;s[2]=es;s[3]=fs;s[4]=gs;s[5]=ss;s[6]=ip;
-    }
+    r[0]=eax;r[1]=ebx;r[2]=ecx;r[3]=edx;r[4]=esi;r[5]=edi;r[6]=esp;r[7]=ebp;
+    s[0]=cs;s[1]=ds;s[2]=es;s[3]=fs;s[4]=gs;s[5]=ss;s[6]=ip;
     /* The lifted ISR runs on the interrupted stack like real hardware — but
      * guest code (the LZW decoder) parks scratch data below sp inside
      * push/pop chains, which ISR pushes would overwrite. Real hardware has
@@ -114,10 +109,8 @@ static void guest_irq0(void){
     rt_isr_ctx = 0;
     ss = sss; sp = ssp;
     CF=cf; ZF=zf; SF=sf; OF=of; PF=pf; AF=af; DF=df; IF=iff; TF=tf;
-    if (full){
-        eax=r[0];ebx=r[1];ecx=r[2];edx=r[3];esi=r[4];edi=r[5];esp=r[6];ebp=r[7];
-        cs=s[0];ds=s[1];es=s[2];fs=s[3];gs=s[4];ss=s[5];ip=s[6];
-    }
+    eax=r[0];ebx=r[1];ecx=r[2];edx=r[3];esi=r[4];edi=r[5];esp=r[6];ebp=r[7];
+    cs=s[0];ds=s[1];es=s[2];fs=s[3];gs=s[4];ss=s[5];ip=s[6];
 #ifdef _WIN32
     ResumeThread(cpu_hnd);
 #else
@@ -379,7 +372,7 @@ static void text_px(Uint32 *dst, int pitch, int x, int y, db chr, db attr){
 
 void rt_frame(void){ rt_present(1); }
 
-/* Directional-keyboard overlay, drawn into staging on top of the frame.
+/* Key-mapping menu overlay, drawn into staging on top of the frame.
  * Colors are direct ARGB — the game remaps the mode13 palette, so attr-text
  * would inherit random colors. */
 static void vkb_text(Uint32 *dst, int x, int y, const char *s, Uint32 fg){
@@ -395,14 +388,14 @@ static void vkb_text(Uint32 *dst, int x, int y, const char *s, Uint32 fg){
     }
 }
 
-static void vkb_draw(Uint32 *pix){
-    int rows, cols, cr, cc;
-    rt_vkb_geom(&rows, &cols, &cr, &cc);
-    /* local names dodge rt.h register macros (cx/ch/cy are taken) */
-    const int cw = 42, cellh = 30, pd = 10, hdr = 20;
-    const int w = cols*cw + pd*2, h = rows*cellh + hdr + pd*2;
-    const int x0 = (TW - w)/2, y0 = TH - h - 8;
-    /* panel */
+static void kmap_draw(Uint32 *pix){
+    const int rows = rt_kmap_rows();
+    const int sel = rt_kmap_cur();
+    const int cap = rt_kmap_capture();
+    const int ncol = 2, nrows = (rows + ncol - 1) / ncol;
+    const int cw = 292, rowh = 21, pd = 10, hdr = 22;
+    const int w = ncol*cw + pd*2, h = nrows*rowh + hdr + pd*2;
+    const int x0 = (TW - w)/2, y0 = (TH - h)/2;
     for (int y = y0; y < y0+h; y++)
         for (int x = x0; x < x0+w; x++)
             pix[y*TW + x] = 0xff141824;
@@ -412,28 +405,24 @@ static void vkb_draw(Uint32 *pix){
     for (int y = y0; y < y0+h; y++){
         pix[y*TW+x0] = pix[y*TW+x0+w-1] = 0xff5a6478;
     }
-    vkb_text(pix, x0+pd, y0+2, "KEYBOARD   d-pad:move  OK:key  Back:close", 0xff8a94a8);
-    for (int r = 0; r < rows; r++)
-        for (int c = 0; c < cols; c++){
-            int px = x0 + pd + c*cw, py = y0 + hdr + r*cellh;
-            int cur = (r == cr && c == cc);
-            Uint32 bg = cur ? 0xff3a4420 : 0xff1e2434;
-            Uint32 fg = cur ? 0xffffd040 : 0xffc8ccd4;
-            for (int y = py; y < py+cellh-4; y++)
-                for (int x = px; x < px+cw-4; x++)
-                    pix[y*TW+x] = bg;
-            const char *l = rt_vkb_label(r, c);
-            int n = 0; while (l[n]) n++;
-            vkb_text(pix, px + (cw-4-n*8)/2, py + 5, l, fg);
-            if (cur) for (int b = 0; b < 2; b++){
-                for (int x = px-1+b; x < px+cw-3-b; x++){
-                    pix[(py-1+b)*TW+x] = pix[(py+cellh-5-b)*TW+x] = 0xffffd040;
-                }
-                for (int y = py-1+b; y < py+cellh-4-b; y++){
-                    pix[y*TW+px-1+b] = pix[y*TW+px+cw-5-b] = 0xffffd040;
-                }
-            }
-        }
+    vkb_text(pix, x0+pd, y0+4,
+             cap ? "PRESS A BUTTON ON THE REMOTE...  (Back/Esc cancels)"
+                 : "KEY MAPPING   up/down:select  OK:bind  Back:close",
+             cap ? 0xffffd040 : 0xff8a94a8);
+    for (int i = 0; i < rows; i++){
+        int c = i / nrows, r = i % nrows;
+        int px = x0 + pd + c*cw, py = y0 + hdr + r*rowh;
+        int cur = (i == sel);
+        Uint32 bg = cur ? 0xff3a4420 : 0xff1e2434;
+        Uint32 fg = cur ? 0xffffd040 : 0xffc8ccd4;
+        for (int y = py; y < py+rowh-3; y++)
+            for (int x = px; x < px+cw-6; x++)
+                pix[y*TW+x] = bg;
+        vkb_text(pix, px + 4, py + 2, rt_kmap_name(i), fg);
+        const char *b = rt_kmap_bind(i);
+        int n = 0; while (b[n]) n++;
+        vkb_text(pix, px + cw - 10 - n*8, py + 2, b, 0xff7cc8a0);
+    }
 }
 
 /* Staging framebuffer — rendered by rt_present (any thread: pure CPU, no SDL).
@@ -461,7 +450,7 @@ void rt_present(int pump){
                 text_px(pix, TW, c*8, r*16, chr, at);
             }
     }
-    if (rt_vkb_open()) vkb_draw(pix);
+    if (rt_kmap_open()) kmap_draw(pix);
     frame_dirty = 1;
 
     static int fno;

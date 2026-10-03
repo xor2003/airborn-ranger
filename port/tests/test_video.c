@@ -16,9 +16,12 @@ void rt_tnd_write(dw p, dw v){ (void)p; (void)v; }
 void rt_speaker(dw v){ (void)v; }
 dw rt_kbd_port60(void){ return 0; }
 vfn func_at(dd a){ (void)a; return 0; }
-int rt_vkb_open(void){ return 0; }
-void rt_vkb_geom(int *a, int *b, int *c, int *d){ (void)a;(void)b;(void)c;(void)d; }
-const char *rt_vkb_label(int r, int c){ (void)r;(void)c; return ""; }
+int rt_kmap_open(void){ return 0; }
+int rt_kmap_rows(void){ return 0; }
+int rt_kmap_cur(void){ return 0; }
+int rt_kmap_capture(void){ return 0; }
+const char *rt_kmap_name(int r){ (void)r; return ""; }
+const char *rt_kmap_bind(int r){ (void)r; return ""; }
 /* rt_exit comes from rt.o */
 
 #include "../video.c"

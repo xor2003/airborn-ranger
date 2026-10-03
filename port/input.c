@@ -140,7 +140,15 @@ static int win_w = 960, win_h = 600;         /* window px; window is VW*3 x VH*3
 static int mouse_enabled(void){
     if (mouse_on < 0){
         const char *v = getenv("M2C_MOUSE");
+#ifdef __ANDROID__
+        /* TV remotes feed keys only — relative mouse deltas arriving via
+         * pointer/air-mouse modes make menus drift; discrete key presses
+         * (absolute directional stepping) is what the D-pad should give.
+         * M2C_MOUSE=1 re-enables pointer emulation. */
+        mouse_on = v && *v == '1';
+#else
         mouse_on = !(v && *v == '0');
+#endif
     }
     return mouse_on;
 }
@@ -374,12 +382,13 @@ out:
     SDL_UnlockMutex(mx);
 }
 
-/* directional-keyboard overlay — full definitions live after rt_pump_events */
-static int vkb_event(SDL_Event *e);
-static void vkb_tick(void);
-static void vkb_toggle(int on);
-static int vkb_wanted(void);
-static int vkb_on;
+/* key-mapping menu — full definitions live after rt_pump_events */
+static int kmap_event(SDL_Event *e);
+static void kmap_tick(void);
+static void kmap_toggle(int on);
+static int kmap_wanted(void);
+static int kmap_match(SDL_Event *e);
+static int kmap_on;
 static Uint32 back_dn;
 static int back_hold_opened;
 
@@ -425,37 +434,39 @@ void rt_pump_events(void){
             }
         }
     }
-    vkb_tick();
+    kmap_tick();
     SDL_Event e;
     while (SDL_PollEvent(&e)){
         if (e.type == SDL_QUIT) rt_exit(0);
         if (e.type == SDL_WINDOWEVENT && e.window.event == SDL_WINDOWEVENT_RESIZED &&
             e.window.data1 > 0 && e.window.data2 > 0)
             { win_w = e.window.data1; win_h = e.window.data2; }
-        /* on-screen keyboard is modal while open */
-        if (vkb_on && vkb_event(&e)) continue;
+        /* key-mapping menu is modal while open */
+        if (kmap_on && kmap_event(&e)) continue;
         /* open triggers when closed: MENU / F10 / gamepad GUIDE */
-        if (vkb_wanted() && e.type == SDL_KEYDOWN &&
+        if (kmap_wanted() && e.type == SDL_KEYDOWN &&
             (e.key.keysym.scancode == SDL_SCANCODE_MENU ||
              e.key.keysym.scancode == SDL_SCANCODE_F10))
-            { vkb_toggle(1); continue; }
-        if (vkb_wanted() && e.type == SDL_CONTROLLERBUTTONDOWN &&
+            { kmap_toggle(1); continue; }
+        if (kmap_wanted() && e.type == SDL_CONTROLLERBUTTONDOWN &&
             e.cbutton.button == SDL_CONTROLLER_BUTTON_GUIDE)
-            { vkb_toggle(1); continue; }
+            { kmap_toggle(1); continue; }
         /* AC_BACK (TV remote Back) defers its Esc to keyup: a short press is
-         * Esc, holding it 700ms opens the keyboard instead (vkb_tick). */
-        if (vkb_wanted() &&
+         * Esc, holding it 700ms opens the mapping menu instead (kmap_tick). */
+        if (kmap_wanted() &&
             (e.type == SDL_KEYDOWN || e.type == SDL_KEYUP) &&
             e.key.keysym.scancode == SDL_SCANCODE_AC_BACK){
             if (e.type == SDL_KEYDOWN && !e.key.repeat){
                 back_dn = SDL_GetTicks(); back_hold_opened = 0;
             } else if (e.type == SDL_KEYUP){
-                if (back_dn && !back_hold_opened && !vkb_on)
+                if (back_dn && !back_hold_opened && !kmap_on)
                     { synth_key(0x01, 0x1b, 1); synth_key(0x01, 0x1b, 0); }
                 back_dn = 0;
             }
             continue;
         }
+        /* a bound input fires its DOS key instead of the default mapping */
+        if (kmap_match(&e)) continue;
         if (e.type == SDL_KEYDOWN || e.type == SDL_KEYUP){
             int xs = xt_scan(e.key.keysym.scancode);
             if (!xs) continue;
@@ -567,146 +578,234 @@ void rt_pump_events(void){
 
 dw rt_kbd_port60(void){ dw v = port60; port60 = 0; return v; }
 
-/* ---- directional keyboard (on-screen keyboard driven by D-pad/stick) ----
- * The only way a stock TV remote (D-pad + OK + Back, no digits/letters) can
- * reach weapon-select digits, +/- or pilot-name letters. Default ON for
- * Android where no physical keyboard exists; elsewhere toggled by F10.
- * Toggle: MENU key / gamepad GUIDE / F10 / hold Back 700ms.
- * M2C_NOVKB=1 disables. While open it is modal: all key/controller events
- * are consumed for navigation; a pick taps the XT scancode via synth_key.
+/* ---- key mapping menu (F15-style controls setup) ----
+ * A list of the DOS keys the game reads, each bindable to a remote/keyboard
+ * scancode or a gamepad button. D-pad/stick navigates, OK arms capture,
+ * the next pressed input binds. Bindings persist to keymap.cfg in the
+ * working dir (app filesDir on Android). While open the menu is modal.
+ * Open: MENU / F10 / gamepad GUIDE / hold Back 700ms. M2C_NOKMAP=1 disables.
  */
-typedef struct { const char *lbl; db scan; db a; db sh; } vkb_cell;
-static const vkb_cell vkb[5][14] = {
-  {{"ESC",0x01,0x1b,0},{"1",0x02,'1',0},{"2",0x03,'2',0},{"3",0x04,'3',0},
-   {"4",0x05,'4',0},{"5",0x06,'5',0},{"6",0x07,'6',0},{"7",0x08,'7',0},
-   {"8",0x09,'8',0},{"9",0x0a,'9',0},{"0",0x0b,'0',0},{"-",0x0c,'-',0},
-   {"+",0x0d,'+',1},{"BS",0x0e,0x08,0}},
-  {{"TAB",0x0f,0x09,0},{"Q",0x10,'Q',1},{"W",0x11,'W',1},{"E",0x12,'E',1},
-   {"R",0x13,'R',1},{"T",0x14,'T',1},{"Y",0x15,'Y',1},{"U",0x16,'U',1},
-   {"I",0x17,'I',1},{"O",0x18,'O',1},{"P",0x19,'P',1},{"[",0x1a,'[',0},
-   {"]",0x1b,']',0},{"ENT",0x1c,0x0d,0}},
-  {{"CAP",0x3a,0,0},{"A",0x1e,'A',1},{"S",0x1f,'S',1},{"D",0x20,'D',1},
-   {"F",0x21,'F',1},{"G",0x22,'G',1},{"H",0x23,'H',1},{"J",0x24,'J',1},
-   {"K",0x25,'K',1},{"L",0x26,'L',1},{";",0x27,';',0},{"'",0x28,'\'',0},
-   {"\\",0x2b,'\\',0},{"RT",0x1c,0x0d,0}},
-  {{"SHF",0x2a,0,0},{"Z",0x2c,'Z',1},{"X",0x2d,'X',1},{"C",0x2e,'C',1},
-   {"V",0x2f,'V',1},{"B",0x30,'B',1},{"N",0x31,'N',1},{"M",0x32,'M',1},
-   {",",0x33,',',0},{".",0x34,'.',0},{"/",0x35,'/',0},{"RSH",0x36,0,0},
-   {"SPC",0x39,' ',0},{"BSP",0x0e,0x08,0}},
-  {{"<-",0x4b,0,0},{"^",0x48,0,0},{"v",0x50,0,0},{"->",0x4d,0,0},
-   {"KP5",0x4c,'5',0},{"K-",0x4a,'-',0},{"K+",0x4e,'+',0},
-   {"F1",0x3b,0,0},{"F2",0x3c,0,0},{"F3",0x3d,0,0},{"F4",0x3e,0,0},
-   {"F5",0x3f,0,0},{"F6",0x40,0,0},{"F7",0x41,0,0}},
+typedef struct { const char *name; db scan; db a; } doskey;
+static const doskey doskeys[] = {
+    {"UP",0x48,0},{"DOWN",0x50,0},{"LEFT",0x4b,0},{"RIGHT",0x4d,0},
+    {"ENTER",0x1c,0x0d},{"ESC",0x01,0x1b},{"SPACE",0x39,0x20},{"TAB",0x0f,0x09},
+    {"1",0x02,'1'},{"2",0x03,'2'},{"3",0x04,'3'},{"4",0x05,'4'},{"5",0x06,'5'},
+    {"6",0x07,'6'},{"7",0x08,'7'},{"8",0x09,'8'},{"9",0x0a,'9'},{"0",0x0b,'0'},
+    {"-",0x0c,'-'},{"=",0x0d,'='},{"KP5",0x4c,'5'},
+    {"F1",0x3b,0},{"F2",0x3c,0},{"F3",0x3d,0},{"F4",0x3e,0},
+    {"F5",0x3f,0},{"F6",0x40,0},{"F7",0x41,0},
+    {"RESET DEFAULTS",0,0},
 };
-#define VKB_ROWS 5
-#define VKB_COLS 14
+#define N_KMAP (int)(sizeof doskeys / sizeof doskeys[0])
 
-static int vkb_on, vkb_r, vkb_c;
-static int vkb_enabled = -1;
-static Uint32 back_dn;                 /* AC_BACK press time (long-press timer) */
+/* binding: kind 0=none 1=SDL scancode 2=controller button */
+typedef struct { db kind; dw code; } kbind;
+static kbind binds[N_KMAP];
+
+static int kmap_on, kmap_sel;
+static int kmap_enabled = -1;
+static int kmap_cap;                     /* capture armed: next input binds */
+static int kmap_loaded;
+static Uint32 back_dn;                   /* AC_BACK press time (long-press timer) */
 static int back_hold_opened;
 
-static int vkb_wanted(void){
-    if (vkb_enabled < 0)
-        vkb_enabled = getenv("M2C_NOVKB") ? 0 : 1;
-    return vkb_enabled;
+static int kmap_wanted(void){
+    if (kmap_enabled < 0)
+        kmap_enabled = getenv("M2C_NOKMAP") ? 0 : 1;
+    return kmap_enabled;
 }
 
-int rt_vkb_open(void){ return vkb_on; }
-void rt_vkb_geom(int *rows, int *cols, int *cur_r, int *cur_c){
-    if (rows) *rows = VKB_ROWS; if (cols) *cols = VKB_COLS;
-    if (cur_r) *cur_r = vkb_r; if (cur_c) *cur_c = vkb_c;
-}
-const char *rt_vkb_label(int r, int c){
-    return (r >= 0 && r < VKB_ROWS && c >= 0 && c < VKB_COLS) ? vkb[r][c].lbl : "?";
-}
-
-static void vkb_toggle(int on){
-    vkb_on = on;
-    if (on){ vkb_r = 0; vkb_c = 2; }    /* default cell: "2" */
-}
-
-static void vkb_pick(void){
-    const vkb_cell *k = &vkb[vkb_r][vkb_c];
-    if (!k->scan) return;
-    /* shifted chars (uppercase letters, '+') are a chord: LSH tap around */
-    if (k->sh) synth_key(0x2a, 0, 1);
-    synth_key(k->scan, k->a, 1);
-    synth_key(k->scan, k->a, 0);
-    if (k->sh) synth_key(0x2a, 0, 0);
+/* default map: keyboard keys bound to themselves; remote/gamepad extras
+ * layered on the most useful keys. */
+static void kmap_defaults(void){
+    memset(binds, 0, sizeof binds);
+    for (int i = 0; i < N_KMAP; i++){
+        binds[i].kind = 1;
+        switch (doskeys[i].scan){
+        case 0x48: binds[i].code = SDL_SCANCODE_UP; break;
+        case 0x50: binds[i].code = SDL_SCANCODE_DOWN; break;
+        case 0x4b: binds[i].code = SDL_SCANCODE_LEFT; break;
+        case 0x4d: binds[i].code = SDL_SCANCODE_RIGHT; break;
+        case 0x1c: binds[i].code = SDL_SCANCODE_RETURN; break;
+        case 0x01: binds[i].code = SDL_SCANCODE_ESCAPE; break;
+        case 0x39: binds[i].code = SDL_SCANCODE_SPACE; break;
+        case 0x0f: binds[i].code = SDL_SCANCODE_TAB; break;
+        default:   binds[i].kind = 0; break;
+        }
+    }
 }
 
-/* Returns 1 when the event was consumed by the overlay. */
-static int vkb_event(SDL_Event *e){
+#define KMAP_FILE "keymap.cfg"
+static void kmap_save(void){
+    FILE *f = fopen(KMAP_FILE, "w");
+    if (!f) return;
+    for (int i = 0; i < N_KMAP; i++)
+        fprintf(f, "%d=%u:%u\n", i, binds[i].kind, binds[i].code);
+    fclose(f);
+}
+static void kmap_load(void){
+    kmap_loaded = 1;
+    kmap_defaults();
+    FILE *f = fopen(KMAP_FILE, "r");
+    if (!f) return;
+    int i, k; unsigned c;
+    while (fscanf(f, "%d=%d:%u\n", &i, &k, &c) == 3)
+        if (i >= 0 && i < N_KMAP && k >= 0 && k <= 2)
+            { binds[i].kind = (db)k; binds[i].code = (dw)c; }
+    fclose(f);
+}
+static void kmap_ensure(void){ if (!kmap_loaded) kmap_load(); }
+
+int rt_kmap_open(void){ return kmap_on; }
+int rt_kmap_rows(void){ return N_KMAP; }
+int rt_kmap_cur(void){ return kmap_sel; }
+int rt_kmap_capture(void){ return kmap_cap; }
+const char *rt_kmap_name(int r){
+    return (r >= 0 && r < N_KMAP) ? doskeys[r].name : "?";
+}
+const char *rt_kmap_bind(int r){
+    static char buf[32];
+    if (r < 0 || r >= N_KMAP) return "?";
+    if (r == N_KMAP - 1) return "";
+    if (binds[r].kind == 0) return "-";
+    if (binds[r].kind == 1){
+        snprintf(buf, sizeof buf, "%s",
+                 SDL_GetScancodeName((SDL_Scancode)binds[r].code));
+        return buf;
+    }
+    snprintf(buf, sizeof buf, "PAD %s",
+             SDL_GameControllerGetStringForButton((SDL_GameControllerButton)binds[r].code));
+    return buf;
+}
+
+static void kmap_toggle(int on){
+    kmap_ensure();
+    kmap_on = on;
+    kmap_cap = 0;
+    if (on) kmap_sel = 0;
+}
+
+/* consume one event in capture mode: bind it to the selected DOS key */
+static int kmap_capture(SDL_Event *e){
+    if (e->type == SDL_KEYDOWN && !e->key.repeat){
+        SDL_Scancode s = e->key.keysym.scancode;
+        if (s == SDL_SCANCODE_ESCAPE || s == SDL_SCANCODE_AC_BACK){
+            kmap_cap = 0;                    /* cancel, don't bind */
+            return 1;
+        }
+        binds[kmap_sel].kind = 1; binds[kmap_sel].code = s;
+        kmap_cap = 0; kmap_save();
+        return 1;
+    }
+    if (e->type == SDL_CONTROLLERBUTTONDOWN){
+        binds[kmap_sel].kind = 2; binds[kmap_sel].code = e->cbutton.button;
+        kmap_cap = 0; kmap_save();
+        return 1;
+    }
+    /* swallow everything else while capturing */
+    return e->type == SDL_KEYUP || e->type == SDL_CONTROLLERBUTTONUP ||
+           e->type == SDL_CONTROLLERAXISMOTION;
+}
+
+/* closed-state dispatch: if this event matches a binding, inject the bound
+ * DOS key and consume the event (default key/controller maps never see it). */
+static int kmap_match(SDL_Event *e){
+    kmap_ensure();
+    if (e->type == SDL_KEYDOWN || e->type == SDL_KEYUP){
+        int down = e->type == SDL_KEYDOWN;
+        if (down && e->key.repeat) return 0;
+        for (int i = 0; i < N_KMAP - 1; i++)
+            if (binds[i].kind == 1 && binds[i].code == e->key.keysym.scancode){
+                synth_key(doskeys[i].scan, doskeys[i].a, down);
+                return 1;
+            }
+        return 0;
+    }
+    if (e->type == SDL_CONTROLLERBUTTONDOWN || e->type == SDL_CONTROLLERBUTTONUP){
+        int down = e->type == SDL_CONTROLLERBUTTONDOWN;
+        for (int i = 0; i < N_KMAP - 1; i++)
+            if (binds[i].kind == 2 && binds[i].code == e->cbutton.button){
+                synth_key(doskeys[i].scan, doskeys[i].a, down);
+                return 1;
+            }
+        return 0;
+    }
+    return 0;
+}
+
+/* Returns 1 when the event was consumed by the menu. */
+static int kmap_event(SDL_Event *e){
+    if (kmap_cap && kmap_capture(e)) return 1;
+    if (kmap_cap) return e->type == SDL_QUIT ||
+        (e->type == SDL_WINDOWEVENT && e->window.event == SDL_WINDOWEVENT_RESIZED) ? 0 : 1;
     if (e->type == SDL_KEYDOWN){
         switch (e->key.keysym.scancode){
-        case SDL_SCANCODE_LEFT:  vkb_c = (vkb_c + VKB_COLS - 1) % VKB_COLS; return 1;
-        case SDL_SCANCODE_RIGHT: vkb_c = (vkb_c + 1) % VKB_COLS; return 1;
-        case SDL_SCANCODE_UP:    vkb_r = (vkb_r + VKB_ROWS - 1) % VKB_ROWS; return 1;
-        case SDL_SCANCODE_DOWN:  vkb_r = (vkb_r + 1) % VKB_ROWS; return 1;
+        case SDL_SCANCODE_UP:   kmap_sel = (kmap_sel + N_KMAP - 1) % N_KMAP; return 1;
+        case SDL_SCANCODE_DOWN: kmap_sel = (kmap_sel + 1) % N_KMAP; return 1;
+        case SDL_SCANCODE_LEFT:
+        case SDL_SCANCODE_RIGHT: return 1;      /* ignored: column-less list */
         case SDL_SCANCODE_RETURN:
         case SDL_SCANCODE_KP_ENTER:
-        case SDL_SCANCODE_SPACE: vkb_pick(); return 1;
-        case SDL_SCANCODE_MENU:  vkb_toggle(0); return 1;
+        case SDL_SCANCODE_SPACE:
+            if (kmap_sel == N_KMAP - 1){ kmap_defaults(); kmap_save(); }
+            else kmap_cap = 1;
+            return 1;
+        case SDL_SCANCODE_MENU:
         case SDL_SCANCODE_AC_BACK:
-            back_dn = 0;                 /* release-side short-press logic off */
+            back_dn = 0;
             /* fall through */
-        case SDL_SCANCODE_ESCAPE: vkb_toggle(0); return 1;
-        case SDL_SCANCODE_F10:   vkb_toggle(0); return 1;
-        default: return 1;               /* modal: swallow all other keys */
+        case SDL_SCANCODE_ESCAPE:
+        case SDL_SCANCODE_F10:   kmap_toggle(0); return 1;
+        default: return 1;                     /* modal: swallow all other keys */
         }
     }
     if (e->type == SDL_KEYUP) return 1;
     if (e->type == SDL_CONTROLLERBUTTONDOWN){
         switch (e->cbutton.button){
-        case SDL_CONTROLLER_BUTTON_DPAD_LEFT:  vkb_c = (vkb_c + VKB_COLS - 1) % VKB_COLS; return 1;
-        case SDL_CONTROLLER_BUTTON_DPAD_RIGHT: vkb_c = (vkb_c + 1) % VKB_COLS; return 1;
-        case SDL_CONTROLLER_BUTTON_DPAD_UP:    vkb_r = (vkb_r + VKB_ROWS - 1) % VKB_ROWS; return 1;
-        case SDL_CONTROLLER_BUTTON_DPAD_DOWN:  vkb_r = (vkb_r + 1) % VKB_ROWS; return 1;
+        case SDL_CONTROLLER_BUTTON_DPAD_UP:   kmap_sel = (kmap_sel + N_KMAP - 1) % N_KMAP; return 1;
+        case SDL_CONTROLLER_BUTTON_DPAD_DOWN: kmap_sel = (kmap_sel + 1) % N_KMAP; return 1;
+        case SDL_CONTROLLER_BUTTON_DPAD_LEFT:
+        case SDL_CONTROLLER_BUTTON_DPAD_RIGHT: return 1;
         case SDL_CONTROLLER_BUTTON_A:
-        case SDL_CONTROLLER_BUTTON_START:      vkb_pick(); return 1;
+        case SDL_CONTROLLER_BUTTON_START:
+            if (kmap_sel == N_KMAP - 1){ kmap_defaults(); kmap_save(); }
+            else kmap_cap = 1;
+            return 1;
         case SDL_CONTROLLER_BUTTON_GUIDE:
         case SDL_CONTROLLER_BUTTON_B:
-        case SDL_CONTROLLER_BUTTON_BACK:       vkb_toggle(0); return 1;
+        case SDL_CONTROLLER_BUTTON_BACK:      kmap_toggle(0); return 1;
         default: return 1;
         }
     }
     if (e->type == SDL_CONTROLLERBUTTONUP) return 1;
     if (e->type == SDL_CONTROLLERAXISMOTION){
-        /* left stick edges navigate with a small repeat */
-        static int stk_dir; static Uint32 stk_rep;
+        static int stk_v; static Uint32 stk_rep;
         int dir = 0;
-        if (e->caxis.axis == SDL_CONTROLLER_AXIS_LEFTX)
-            dir = e->caxis.value > 16000 ? 3 : e->caxis.value < -16000 ? 1 : 0;
-        else if (e->caxis.axis == SDL_CONTROLLER_AXIS_LEFTY)
-            dir = e->caxis.value > 16000 ? 4 : e->caxis.value < -16000 ? 2 : 0;
+        if (e->caxis.axis == SDL_CONTROLLER_AXIS_LEFTY)
+            dir = e->caxis.value > 16000 ? 1 : e->caxis.value < -16000 ? -1 : 0;
         else return 1;
         Uint32 now = SDL_GetTicks();
-        if (dir && (dir != stk_dir || now >= stk_rep)){
-            stk_dir = dir;
-            stk_rep = now + 220;
-            if (dir == 1) vkb_c = (vkb_c + VKB_COLS - 1) % VKB_COLS;
-            if (dir == 3) vkb_c = (vkb_c + 1) % VKB_COLS;
-            if (dir == 2) vkb_r = (vkb_r + VKB_ROWS - 1) % VKB_ROWS;
-            if (dir == 4) vkb_r = (vkb_r + 1) % VKB_ROWS;
-        } else if (!dir) stk_dir = 0;
+        if (dir && (dir != stk_v || now >= stk_rep)){
+            stk_v = dir; stk_rep = now + 220;
+            kmap_sel = (kmap_sel + N_KMAP + dir) % N_KMAP;
+        } else if (!dir) stk_v = 0;
         return 1;
     }
-    /* QUIT/window events keep working while the keyboard is up */
     if (e->type == SDL_QUIT ||
         (e->type == SDL_WINDOWEVENT && e->window.event == SDL_WINDOWEVENT_RESIZED))
         return 0;
     return 1;
 }
 
-/* Long-press Back on a TV remote opens the keyboard. A short press still
- * sends Esc on release (keydown is deferred so holding never double-fires). */
-static void vkb_tick(void){
-    if (!vkb_wanted()) return;
+/* Long-press Back on a TV remote opens the mapping menu. A short press
+ * still sends Esc on release (keydown is deferred so holding never
+ * double-fires). */
+static void kmap_tick(void){
+    if (!kmap_wanted()) return;
     if (back_dn && !back_hold_opened &&
         SDL_GetTicks() - back_dn > 700){
         back_hold_opened = 1;
-        vkb_toggle(1);
+        kmap_toggle(1);
     }
 }
 

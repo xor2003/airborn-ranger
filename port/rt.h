@@ -74,10 +74,13 @@ void rt_set_cpu_thread(void);   /* worker thread: register as IRQ0 park target *
 void rt_pump_events(void);
 void rt_script_feed(void);          /* scripted-key step — mem-only, timer-safe */
 dw rt_kbd_port60(void);
-/* on-screen directional keyboard overlay (input.c); video.c draws it */
-int rt_vkb_open(void);
-void rt_vkb_geom(int *rows, int *cols, int *cur_r, int *cur_c);
-const char *rt_vkb_label(int r, int c);
+/* key-mapping menu overlay (input.c); video.c draws it */
+int rt_kmap_open(void);
+int rt_kmap_rows(void);
+int rt_kmap_cur(void);
+int rt_kmap_capture(void);
+const char *rt_kmap_name(int r);
+const char *rt_kmap_bind(int r);
 void rt_tnd_write(dw p, dw v);
 void rt_speaker(dw v);
 void rt_call_vector(int n);
