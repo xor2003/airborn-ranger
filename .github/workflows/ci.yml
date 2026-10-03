@@ -14,11 +14,23 @@ jobs:
       - name: Install SDL2
         run: sudo apt-get update && sudo apt-get install -y libsdl2-dev
 
+      # The port itself builds asset-free: the guest image is generated
+      # source (port/memimg.c + port/gen/). Only data-driven tests need the
+      # original files, which are not in the repo.
       - name: Build port
         run: make -C port -j"$(nproc)"
 
-      - name: Unit tests
-        run: make -C port check
+      - name: Unit tests (data-free subset)
+        run: |
+          make -C port tests/t_rt tests/t_dos tests/t_input tests/t_snd tests/t_video
+          for t in t_rt t_dos t_input t_snd t_video; do
+            port/tests/$t || exit 1
+          done
 
-      - name: Headless e2e
-        run: sh port/tests/e2e.sh
+      - name: Full tests + e2e (needs original game files)
+        if: hashFiles('ROSTER.DAT') != ''
+        run: make -C port check && sh port/tests/e2e.sh
+
+      - name: Note on gated tests
+        if: hashFiles('ROSTER.DAT') == ''
+        run: echo "::notice::original game data is not in the repo — test_game + e2e skipped"

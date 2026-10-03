@@ -33,3 +33,13 @@ android/.gradle/
 android/app/build/
 android/local.properties
 dist/
+
+# Original game binaries/data — never committed (bring-your-own-copy model).
+# port/memimg.c is generated from the original image by tools/gen_port.py.
+*.DTX
+*.DAT
+*.MIJ
+*.EXE
+*.exe
+orig_image.bin
+build_sdl/

@@ -26,11 +26,14 @@ $CC $CFLAGS -o "$OUT/ar_port.exe" $SRCS \
     -static-libgcc -Wl,-Bstatic -lpthread -Wl,-Bdynamic -lm
 
 cp "$SDL2_MINGW/bin/SDL2.dll" "$OUT/"
-cp ./*.DTX ./*.DAT ./*.MIJ ./*.EXE "$OUT/"
+# Original game files are NOT bundled (copyright) — the user drops their own
+# copy of the DOS game directory next to ar_port.exe.
 cat > "$OUT/README.txt" <<'EOF'
 Airborne Ranger — C port (Windows build)
 =========================================
-Run ar_port.exe from this directory (game data files must sit next to it).
+COPY YOUR OWN GAME FILES HERE FIRST: this zip ships no original assets.
+Copy every *.DTX, *.DAT, *.MIJ and *.EXE from your DOS Airborne Ranger
+directory into this folder, then run ar_port.exe.
 
 Controls: arrows = move, Enter/KP5/Ins = fire & confirm, Esc = back/menu,
 number keys = weapon select, +/- = throttle. Gamepads work too

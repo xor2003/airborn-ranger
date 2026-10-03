@@ -42,13 +42,9 @@ android {
     sourceSets {
         main {
             jni.srcDirs = []
-            // Game data ships inside the APK and is extracted to filesDir by
-            // MainActivity. Pull the files straight from the repo root instead
-            // of duplicating them under android/.
-            assets {
-                srcDir "../../"
-                include "*.DTX", "*.DAT", "*.MIJ", "*.EXE"
-            }
+            // Original game files are NOT bundled (copyright): ImportActivity
+            // asks the user to pick a folder and copies the files into the
+            // app's private storage on first run.
         }
     }
 

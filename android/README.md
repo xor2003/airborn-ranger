@@ -1,7 +1,11 @@
 # Airborne Ranger — Android (TV) build
 
-Gradle + ndk-build project producing an APK with all game data bundled
-(~470 KB — every `*.DTX`/`*.DAT`/`*.MIJ`/`*.EXE` from the repo root).
+Gradle + ndk-build project producing an APK. **The original game files are
+not bundled and not in the repo** (copyright): on first launch,
+`ImportActivity` asks for a folder containing your own DOS copy
+(`*.DTX`/`*.DAT`/`*.MIJ`/`*.EXE`, picked via SAF or `adb push` into
+`/sdcard/Android/data/org.airborn/files/`) and imports it into private
+storage.
 
 ## Build
 

@@ -227,9 +227,9 @@ Pipeline verified: rename.py -> make clean build, 342/342, e2e PASS
 
 - **Android TV APK** — `android/` Gradle + ndk-build project. SDL2 is staged
   by `android/fetch-sdl.sh` (sources into `app/jni/SDL`, `org.libsdl.app` java
-  into `app/src/main/java`); all game data files are bundled in the APK via
-  an assets `srcDir` pointing at the repo root and extracted to filesDir by
-  `MainActivity` (`main.c` chdir()s there). TV remote works out of the box
+  into `app/src/main/java`). Original game files are NOT in the repo or the
+  APK (bring-your-own-copy): `ImportActivity` imports them into filesDir via
+  SAF/`adb push`, `main.c` chdir()s there. TV remote works out of the box
   (dpad=arrows, OK=Enter, BACK→`SDL_SCANCODE_AC_BACK`→Esc); gamepads map in
   `input.c` (A=Enter/fire, B=Esc, stick+dpad=arrows, LB/RB=-/+).
 - **Windows x64** — `tools/build_windows.sh` cross-compiles with mingw-w64

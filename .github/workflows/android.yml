@@ -40,12 +40,12 @@ jobs:
           AR_ANDROID_KEYSTORE_PASSWORD: ${{ secrets.AR_ANDROID_KEYSTORE_PASSWORD }}
         run: gradle -p android --no-daemon assembleDebug
 
-      - name: Verify native entry point
+      - name: Verify native entry point (no original assets bundled)
         run: |
           unzip -p android/app/build/outputs/apk/debug/app-debug.apk \
             lib/arm64-v8a/libmain.so > /tmp/libmain.so
           nm -D /tmp/libmain.so | grep -q ' T SDL_main$'
-          unzip -l android/app/build/outputs/apk/debug/app-debug.apk | grep -q "assets/.*\.DTX"
+          ! unzip -l android/app/build/outputs/apk/debug/app-debug.apk | grep -q "\.DTX"
 
       - uses: actions/upload-artifact@v4
         with:
