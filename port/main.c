@@ -81,7 +81,12 @@ int main(int argc, char **argv){
                 if (!eq || eq == line) continue;
                 *eq = 0;
                 char *v = eq + 1; v[strcspn(v, "\r\n")] = 0;
+#ifdef _WIN32
+                { char *kv = malloc(strlen(line) + strlen(v) + 2);  /* putenv keeps the ptr */
+                  if (kv){ sprintf(kv, "%s=%s", line, v); putenv(kv); } }
+#else
                 setenv(line, v, 1);
+#endif
             }
             fclose(ef);
         }
