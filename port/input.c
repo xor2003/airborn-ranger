@@ -374,6 +374,15 @@ out:
     SDL_UnlockMutex(mx);
 }
 
+/* directional-keyboard overlay — full definitions live after rt_pump_events */
+static int vkb_event(SDL_Event *e);
+static void vkb_tick(void);
+static void vkb_toggle(int on);
+static int vkb_wanted(void);
+static int vkb_on;
+static Uint32 back_dn;
+static int back_hold_opened;
+
 void rt_pump_events(void){
     /* open every attached gamepad once (pads are enumerated at SDL init;
      * hot-plug arrives via SDL_CONTROLLERDEVICEADDED in the event loop) */
@@ -416,12 +425,37 @@ void rt_pump_events(void){
             }
         }
     }
+    vkb_tick();
     SDL_Event e;
     while (SDL_PollEvent(&e)){
         if (e.type == SDL_QUIT) rt_exit(0);
         if (e.type == SDL_WINDOWEVENT && e.window.event == SDL_WINDOWEVENT_RESIZED &&
             e.window.data1 > 0 && e.window.data2 > 0)
             { win_w = e.window.data1; win_h = e.window.data2; }
+        /* on-screen keyboard is modal while open */
+        if (vkb_on && vkb_event(&e)) continue;
+        /* open triggers when closed: MENU / F10 / gamepad GUIDE */
+        if (vkb_wanted() && e.type == SDL_KEYDOWN &&
+            (e.key.keysym.scancode == SDL_SCANCODE_MENU ||
+             e.key.keysym.scancode == SDL_SCANCODE_F10))
+            { vkb_toggle(1); continue; }
+        if (vkb_wanted() && e.type == SDL_CONTROLLERBUTTONDOWN &&
+            e.cbutton.button == SDL_CONTROLLER_BUTTON_GUIDE)
+            { vkb_toggle(1); continue; }
+        /* AC_BACK (TV remote Back) defers its Esc to keyup: a short press is
+         * Esc, holding it 700ms opens the keyboard instead (vkb_tick). */
+        if (vkb_wanted() &&
+            (e.type == SDL_KEYDOWN || e.type == SDL_KEYUP) &&
+            e.key.keysym.scancode == SDL_SCANCODE_AC_BACK){
+            if (e.type == SDL_KEYDOWN && !e.key.repeat){
+                back_dn = SDL_GetTicks(); back_hold_opened = 0;
+            } else if (e.type == SDL_KEYUP){
+                if (back_dn && !back_hold_opened && !vkb_on)
+                    { synth_key(0x01, 0x1b, 1); synth_key(0x01, 0x1b, 0); }
+                back_dn = 0;
+            }
+            continue;
+        }
         if (e.type == SDL_KEYDOWN || e.type == SDL_KEYUP){
             int xs = xt_scan(e.key.keysym.scancode);
             if (!xs) continue;
@@ -532,6 +566,150 @@ void rt_pump_events(void){
 }
 
 dw rt_kbd_port60(void){ dw v = port60; port60 = 0; return v; }
+
+/* ---- directional keyboard (on-screen keyboard driven by D-pad/stick) ----
+ * The only way a stock TV remote (D-pad + OK + Back, no digits/letters) can
+ * reach weapon-select digits, +/- or pilot-name letters. Default ON for
+ * Android where no physical keyboard exists; elsewhere toggled by F10.
+ * Toggle: MENU key / gamepad GUIDE / F10 / hold Back 700ms.
+ * M2C_NOVKB=1 disables. While open it is modal: all key/controller events
+ * are consumed for navigation; a pick taps the XT scancode via synth_key.
+ */
+typedef struct { const char *lbl; db scan; db a; db sh; } vkb_cell;
+static const vkb_cell vkb[5][14] = {
+  {{"ESC",0x01,0x1b,0},{"1",0x02,'1',0},{"2",0x03,'2',0},{"3",0x04,'3',0},
+   {"4",0x05,'4',0},{"5",0x06,'5',0},{"6",0x07,'6',0},{"7",0x08,'7',0},
+   {"8",0x09,'8',0},{"9",0x0a,'9',0},{"0",0x0b,'0',0},{"-",0x0c,'-',0},
+   {"+",0x0d,'+',1},{"BS",0x0e,0x08,0}},
+  {{"TAB",0x0f,0x09,0},{"Q",0x10,'Q',1},{"W",0x11,'W',1},{"E",0x12,'E',1},
+   {"R",0x13,'R',1},{"T",0x14,'T',1},{"Y",0x15,'Y',1},{"U",0x16,'U',1},
+   {"I",0x17,'I',1},{"O",0x18,'O',1},{"P",0x19,'P',1},{"[",0x1a,'[',0},
+   {"]",0x1b,']',0},{"ENT",0x1c,0x0d,0}},
+  {{"CAP",0x3a,0,0},{"A",0x1e,'A',1},{"S",0x1f,'S',1},{"D",0x20,'D',1},
+   {"F",0x21,'F',1},{"G",0x22,'G',1},{"H",0x23,'H',1},{"J",0x24,'J',1},
+   {"K",0x25,'K',1},{"L",0x26,'L',1},{";",0x27,';',0},{"'",0x28,'\'',0},
+   {"\\",0x2b,'\\',0},{"RT",0x1c,0x0d,0}},
+  {{"SHF",0x2a,0,0},{"Z",0x2c,'Z',1},{"X",0x2d,'X',1},{"C",0x2e,'C',1},
+   {"V",0x2f,'V',1},{"B",0x30,'B',1},{"N",0x31,'N',1},{"M",0x32,'M',1},
+   {",",0x33,',',0},{".",0x34,'.',0},{"/",0x35,'/',0},{"RSH",0x36,0,0},
+   {"SPC",0x39,' ',0},{"BSP",0x0e,0x08,0}},
+  {{"<-",0x4b,0,0},{"^",0x48,0,0},{"v",0x50,0,0},{"->",0x4d,0,0},
+   {"KP5",0x4c,'5',0},{"K-",0x4a,'-',0},{"K+",0x4e,'+',0},
+   {"F1",0x3b,0,0},{"F2",0x3c,0,0},{"F3",0x3d,0,0},{"F4",0x3e,0,0},
+   {"F5",0x3f,0,0},{"F6",0x40,0,0},{"F7",0x41,0,0}},
+};
+#define VKB_ROWS 5
+#define VKB_COLS 14
+
+static int vkb_on, vkb_r, vkb_c;
+static int vkb_enabled = -1;
+static Uint32 back_dn;                 /* AC_BACK press time (long-press timer) */
+static int back_hold_opened;
+
+static int vkb_wanted(void){
+    if (vkb_enabled < 0)
+        vkb_enabled = getenv("M2C_NOVKB") ? 0 : 1;
+    return vkb_enabled;
+}
+
+int rt_vkb_open(void){ return vkb_on; }
+void rt_vkb_geom(int *rows, int *cols, int *cur_r, int *cur_c){
+    if (rows) *rows = VKB_ROWS; if (cols) *cols = VKB_COLS;
+    if (cur_r) *cur_r = vkb_r; if (cur_c) *cur_c = vkb_c;
+}
+const char *rt_vkb_label(int r, int c){
+    return (r >= 0 && r < VKB_ROWS && c >= 0 && c < VKB_COLS) ? vkb[r][c].lbl : "?";
+}
+
+static void vkb_toggle(int on){
+    vkb_on = on;
+    if (on){ vkb_r = 0; vkb_c = 2; }    /* default cell: "2" */
+}
+
+static void vkb_pick(void){
+    const vkb_cell *k = &vkb[vkb_r][vkb_c];
+    if (!k->scan) return;
+    /* shifted chars (uppercase letters, '+') are a chord: LSH tap around */
+    if (k->sh) synth_key(0x2a, 0, 1);
+    synth_key(k->scan, k->a, 1);
+    synth_key(k->scan, k->a, 0);
+    if (k->sh) synth_key(0x2a, 0, 0);
+}
+
+/* Returns 1 when the event was consumed by the overlay. */
+static int vkb_event(SDL_Event *e){
+    if (e->type == SDL_KEYDOWN){
+        switch (e->key.keysym.scancode){
+        case SDL_SCANCODE_LEFT:  vkb_c = (vkb_c + VKB_COLS - 1) % VKB_COLS; return 1;
+        case SDL_SCANCODE_RIGHT: vkb_c = (vkb_c + 1) % VKB_COLS; return 1;
+        case SDL_SCANCODE_UP:    vkb_r = (vkb_r + VKB_ROWS - 1) % VKB_ROWS; return 1;
+        case SDL_SCANCODE_DOWN:  vkb_r = (vkb_r + 1) % VKB_ROWS; return 1;
+        case SDL_SCANCODE_RETURN:
+        case SDL_SCANCODE_KP_ENTER:
+        case SDL_SCANCODE_SPACE: vkb_pick(); return 1;
+        case SDL_SCANCODE_MENU:  vkb_toggle(0); return 1;
+        case SDL_SCANCODE_AC_BACK:
+            back_dn = 0;                 /* release-side short-press logic off */
+            /* fall through */
+        case SDL_SCANCODE_ESCAPE: vkb_toggle(0); return 1;
+        case SDL_SCANCODE_F10:   vkb_toggle(0); return 1;
+        default: return 1;               /* modal: swallow all other keys */
+        }
+    }
+    if (e->type == SDL_KEYUP) return 1;
+    if (e->type == SDL_CONTROLLERBUTTONDOWN){
+        switch (e->cbutton.button){
+        case SDL_CONTROLLER_BUTTON_DPAD_LEFT:  vkb_c = (vkb_c + VKB_COLS - 1) % VKB_COLS; return 1;
+        case SDL_CONTROLLER_BUTTON_DPAD_RIGHT: vkb_c = (vkb_c + 1) % VKB_COLS; return 1;
+        case SDL_CONTROLLER_BUTTON_DPAD_UP:    vkb_r = (vkb_r + VKB_ROWS - 1) % VKB_ROWS; return 1;
+        case SDL_CONTROLLER_BUTTON_DPAD_DOWN:  vkb_r = (vkb_r + 1) % VKB_ROWS; return 1;
+        case SDL_CONTROLLER_BUTTON_A:
+        case SDL_CONTROLLER_BUTTON_START:      vkb_pick(); return 1;
+        case SDL_CONTROLLER_BUTTON_GUIDE:
+        case SDL_CONTROLLER_BUTTON_B:
+        case SDL_CONTROLLER_BUTTON_BACK:       vkb_toggle(0); return 1;
+        default: return 1;
+        }
+    }
+    if (e->type == SDL_CONTROLLERBUTTONUP) return 1;
+    if (e->type == SDL_CONTROLLERAXISMOTION){
+        /* left stick edges navigate with a small repeat */
+        static int stk_dir; static Uint32 stk_rep;
+        int dir = 0;
+        if (e->caxis.axis == SDL_CONTROLLER_AXIS_LEFTX)
+            dir = e->caxis.value > 16000 ? 3 : e->caxis.value < -16000 ? 1 : 0;
+        else if (e->caxis.axis == SDL_CONTROLLER_AXIS_LEFTY)
+            dir = e->caxis.value > 16000 ? 4 : e->caxis.value < -16000 ? 2 : 0;
+        else return 1;
+        Uint32 now = SDL_GetTicks();
+        if (dir && (dir != stk_dir || now >= stk_rep)){
+            stk_dir = dir;
+            stk_rep = now + 220;
+            if (dir == 1) vkb_c = (vkb_c + VKB_COLS - 1) % VKB_COLS;
+            if (dir == 3) vkb_c = (vkb_c + 1) % VKB_COLS;
+            if (dir == 2) vkb_r = (vkb_r + VKB_ROWS - 1) % VKB_ROWS;
+            if (dir == 4) vkb_r = (vkb_r + 1) % VKB_ROWS;
+        } else if (!dir) stk_dir = 0;
+        return 1;
+    }
+    /* QUIT/window events keep working while the keyboard is up */
+    if (e->type == SDL_QUIT ||
+        (e->type == SDL_WINDOWEVENT && e->window.event == SDL_WINDOWEVENT_RESIZED))
+        return 0;
+    return 1;
+}
+
+/* Long-press Back on a TV remote opens the keyboard. A short press still
+ * sends Esc on release (keydown is deferred so holding never double-fires). */
+static void vkb_tick(void){
+    if (!vkb_wanted()) return;
+    if (back_dn && !back_hold_opened &&
+        SDL_GetTicks() - back_dn > 700){
+        back_hold_opened = 1;
+        vkb_toggle(1);
+    }
+}
+
 
 /* Detect the graphics-mode menu by its "DESIRED MODE" string in the text
  * buffer — its int16 read is the only BIOS-blocking pick in the game. */

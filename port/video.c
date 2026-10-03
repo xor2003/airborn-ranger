@@ -41,10 +41,11 @@ static pthread_t cpu_tid;
 #ifdef _WIN32
 static HANDLE cpu_hnd;
 #else
-static volatile sig_atomic_t park_req, park_ack;
+static volatile sig_atomic_t park_req, park_ack, park_in;
 static void isr_hold(int sig){
     (void)sig;
     sig_atomic_t id = park_req;
+    park_in = id;                       /* handshake: worker is now frozen */
     while (park_ack < id) sched_yield();
 }
 #endif
@@ -68,6 +69,16 @@ static void guest_irq0(void){
     if (!cpu_tid) return;                  /* worker not registered yet */
     sig_atomic_t id = ++park_req;
     pthread_kill(cpu_tid, SIGUSR1);
+    /* Wait for the worker to actually reach isr_hold before touching shared
+     * guest state — the kill only lands on the next kernel-entry, and running
+     * the ISR against live registers mid-instruction corrupts the guest
+     * (glitched tiles, wedged wait-loops — the Android black-screen bug).
+     * Bounded: if the signal is blocked/foreign, skip this IRQ rather than
+     * race the worker. */
+    {   int spins = 0;
+        while (park_in < id && spins++ < 300000) sched_yield();
+        if (park_in < id){ park_ack = id; return; }
+    }
 #endif
     /* a real IRET restores the flag image pushed on interrupt; the lifted
      * ISR returns without one, so snapshot/restore the flag globals —
@@ -360,6 +371,63 @@ static void text_px(Uint32 *dst, int pitch, int x, int y, db chr, db attr){
 
 void rt_frame(void){ rt_present(1); }
 
+/* Directional-keyboard overlay, drawn into staging on top of the frame.
+ * Colors are direct ARGB — the game remaps the mode13 palette, so attr-text
+ * would inherit random colors. */
+static void vkb_text(Uint32 *dst, int x, int y, const char *s, Uint32 fg){
+    for (int i = 0; s[i]; i++){
+        const uint8_t *g = (s[i] >= 0x20 && s[i] < 0x80)
+                           ? g_font1_bitmaps[s[i] - 0x20] : NULL;
+        for (int r = 0; r < 16 && y + r < TH; r++){
+            int bits = g ? g[r >> 1] : 0;
+            Uint32 *row = dst + (y + r) * TW + x + i * 8;
+            for (int c = 0; c < 8 && x + i*8 + c < TW; c++)
+                if (bits & (0x80 >> c)) row[c] = fg;
+        }
+    }
+}
+
+static void vkb_draw(Uint32 *pix){
+    int rows, cols, cr, cc;
+    rt_vkb_geom(&rows, &cols, &cr, &cc);
+    /* local names dodge rt.h register macros (cx/ch/cy are taken) */
+    const int cw = 42, cellh = 30, pd = 10, hdr = 20;
+    const int w = cols*cw + pd*2, h = rows*cellh + hdr + pd*2;
+    const int x0 = (TW - w)/2, y0 = TH - h - 8;
+    /* panel */
+    for (int y = y0; y < y0+h; y++)
+        for (int x = x0; x < x0+w; x++)
+            pix[y*TW + x] = 0xff141824;
+    for (int x = x0; x < x0+w; x++){
+        pix[y0*TW+x] = pix[(y0+h-1)*TW+x] = 0xff5a6478;
+    }
+    for (int y = y0; y < y0+h; y++){
+        pix[y*TW+x0] = pix[y*TW+x0+w-1] = 0xff5a6478;
+    }
+    vkb_text(pix, x0+pd, y0+2, "KEYBOARD   d-pad:move  OK:key  Back:close", 0xff8a94a8);
+    for (int r = 0; r < rows; r++)
+        for (int c = 0; c < cols; c++){
+            int px = x0 + pd + c*cw, py = y0 + hdr + r*cellh;
+            int cur = (r == cr && c == cc);
+            Uint32 bg = cur ? 0xff3a4420 : 0xff1e2434;
+            Uint32 fg = cur ? 0xffffd040 : 0xffc8ccd4;
+            for (int y = py; y < py+cellh-4; y++)
+                for (int x = px; x < px+cw-4; x++)
+                    pix[y*TW+x] = bg;
+            const char *l = rt_vkb_label(r, c);
+            int n = 0; while (l[n]) n++;
+            vkb_text(pix, px + (cw-4-n*8)/2, py + 5, l, fg);
+            if (cur) for (int b = 0; b < 2; b++){
+                for (int x = px-1+b; x < px+cw-3-b; x++){
+                    pix[(py-1+b)*TW+x] = pix[(py+cellh-5-b)*TW+x] = 0xffffd040;
+                }
+                for (int y = py-1+b; y < py+cellh-4-b; y++){
+                    pix[y*TW+px-1+b] = pix[y*TW+px+cw-5-b] = 0xffffd040;
+                }
+            }
+        }
+}
+
 /* Staging framebuffer — rendered by rt_present (any thread: pure CPU, no SDL).
  * SDL video calls may only run on the main thread: on X11 the software
  * renderer's SDL_RenderPresent does not display when invoked from a worker or
@@ -385,6 +453,7 @@ void rt_present(int pump){
                 text_px(pix, TW, c*8, r*16, chr, at);
             }
     }
+    if (rt_vkb_open()) vkb_draw(pix);
     frame_dirty = 1;
 
     static int fno;

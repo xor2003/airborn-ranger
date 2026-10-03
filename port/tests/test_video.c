@@ -16,6 +16,9 @@ void rt_tnd_write(dw p, dw v){ (void)p; (void)v; }
 void rt_speaker(dw v){ (void)v; }
 dw rt_kbd_port60(void){ return 0; }
 vfn func_at(dd a){ (void)a; return 0; }
+int rt_vkb_open(void){ return 0; }
+void rt_vkb_geom(int *a, int *b, int *c, int *d){ (void)a;(void)b;(void)c;(void)d; }
+const char *rt_vkb_label(int r, int c){ (void)r;(void)c; return ""; }
 /* rt_exit comes from rt.o */
 
 #include "../video.c"
