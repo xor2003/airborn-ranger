@@ -1,5 +1,5 @@
 CC ?= gcc
-CFLAGS ?= -O2 -g -fcommon -Wno-implicit-function-declaration -fno-strict-aliasing
+CFLAGS ?= -O2 -g -fcommon -fsigned-char -Wno-implicit-function-declaration -fno-strict-aliasing
 SDL_CFLAGS := $(shell sdl2-config --cflags)
 SDL_LIBS := $(shell sdl2-config --libs) -lm
 

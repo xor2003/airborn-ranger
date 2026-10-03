@@ -10,7 +10,7 @@ CC="${MINGW_CC:-x86_64-w64-mingw32-gcc}"
 SDL2_MINGW="${SDL2_MINGW:-/tmp/SDL2-2.32.10/x86_64-w64-mingw32}"
 OUT="${OUT:-dist/airborn-win64}"
 
-CFLAGS="-O2 -fcommon -Wno-implicit-function-declaration -fno-strict-aliasing"
+CFLAGS="-O2 -fcommon -fsigned-char -Wno-implicit-function-declaration -fno-strict-aliasing"
 CFLAGS="$CFLAGS -I$SDL2_MINGW/include -Iport"
 
 SRCS="port/rt.c port/dos.c port/video.c port/input.c port/snd.c port/main.c \

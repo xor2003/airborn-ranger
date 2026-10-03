@@ -26,7 +26,7 @@ LOCAL_SRC_FILES := \
     $(PORT)/gen/ar.exe_default_seg.c \
     $(PORT)/gen/tandysnd_seg001.c
 
-LOCAL_CFLAGS := -O2 -fcommon -Wno-implicit-function-declaration -fno-strict-aliasing
+LOCAL_CFLAGS := -O2 -fcommon -fsigned-char -Wno-implicit-function-declaration -fno-strict-aliasing
 
 LOCAL_SHARED_LIBRARIES := SDL2
 
