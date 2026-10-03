@@ -40,6 +40,6 @@ number keys = weapon select, +/- = throttle. Gamepads work too
 (A=fire, B=back, dpad/stick=move, LB/RB = -/+).
 
 M2C_GOD=1 enables god mode (infinite time past the evac window, pinned
-wounds/ammo). M2C_GFXMODE=1..5 pre-selects the graphics adapter.
+wounds/ammo).
 EOF
 echo "staged $OUT"

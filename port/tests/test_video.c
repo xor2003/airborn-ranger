@@ -57,35 +57,19 @@ int main(void){
     pidx_r = 0; rt_out(0x3c7, 5);
     CHECK(rt_in(0x3c9) == 10 && rt_in(0x3c9) == 20 && rt_in(0x3c9) == 30);
 
-    /* --- text output: char+attr write, cursor advance, wrap/scroll --- */
-    memset(&mem[TEXT_BASE], 0, 4000);
-    cur_mode = 3; cursor_pos[0] = 0; cursor_pos[1] = 0;
-    text_putc('H'); text_putc('i');
-    CHECK(mem[TEXT_BASE] == 'H' && mem[TEXT_BASE+1] == 7);
-    CHECK(mem[TEXT_BASE+2] == 'i');
-    CHECK(cursor_pos[1] == 2);
-    text_putc('\r'); CHECK(cursor_pos[1] == 0);
-    cursor_pos[1] = 79; text_putc('x');            /* wrap to next row */
-    CHECK(cursor_pos[0] == 1 && cursor_pos[1] == 0);
-    /* scroll at bottom */
-    cursor_pos[0] = 24; cursor_pos[1] = 0;
-    mem[TEXT_BASE + 160] = 'Q';                    /* row1 marker */
-    for (int i = 0; i < 80; i++) text_putc('z');   /* fill row24 -> scroll */
-    CHECK(cursor_pos[0] == 24);
-    CHECK(mem[TEXT_BASE] == 'Q');                  /* row1 moved to row0 */
+    /* --- console output: text_putc echoes to stderr (no text screen) --- */
+    text_putc('H'); text_putc('i'); text_putc('\n');
 
-    /* --- bios_palette cases --- */
-    al = 0x00; bl = 3; bh = 9; bios_palette();     /* set attr reg */
-    CHECK(attrpal[3] == 9);
-    al = 0x07; bl = 3; bios_palette();             /* read it back */
-    CHECK(bh == 9);
+    /* --- bios_palette DAC cases (attr regs removed: MCGA only) --- */
     al = 0x10; bx = 7; dh = 1; ch = 2; cl = 3;     /* set DAC reg 7 */
     bios_palette();
     CHECK(pal[21] == 1 && pal[22] == 2 && pal[23] == 3);
     al = 0x15; bx = 7; bios_palette();             /* read DAC reg */
     CHECK(dh == 1 && ch == 2 && cl == 3);
+    al = 0x00; bl = 3; bh = 9; bios_palette();     /* attr-reg write: no-op */
+    CHECK(pal[9] == 0);                           /* DAC untouched */
 
-    /* --- bios_video get/set mode & page --- */
+    /* --- bios_video get/set mode --- */
     ax = 0x0013; bios_video(0x0013);
     CHECK(cur_mode == 0x13);
     ax = 0; bios_video(0x0f00);

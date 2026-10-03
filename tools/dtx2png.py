@@ -9,13 +9,16 @@ decompress_res @ ar.exe_seg000.c):
              one entry added per decoded code including the first
 
 Verified payload layouts (from the exe's resource table + blit code):
-  *CHR.DTX   u16 tile_count, u32 pad, then tile_count 8x8 tiles of
-             32 bytes (4 bytes/row, 4bpp packed, hi nibble = left px)
+  *CHR.DTX   u16 tile_count, u32 pad, 60-byte fill/pattern block,
+             then tile_count 8x8 tiles of 32 bytes (4 bytes/row,
+             4bpp packed, hi nibble = left px); tiles start at +66
+             (game stages CHR at ds:3EE0, glyph_rows = ds:3F22)
   *SCR.DTX   40x25 cell map of u16 tile indices into the companion
              *CHR bank (menu screens); region maps are record streams
-  COL*.DTX   256B remap + 256B hi-nibble LUT + 256B lo-nibble LUT
-             (+0x100/+0x200 of stage addr ds:3B70) + 16x6B VGA palette
-             at offset 0x310 (r,g,b each duplicated)
+  COL*.DTX   per-adapter LUT/remap tables staged at ds:3B70; the
+             +0x100/+0x200 byte->2px LUTs are identity for MCGA
+             (no RGB data here — the MCGA palette is the fixed
+             16-colour table at ds:00B8/C8/D8 in the exe image)
   *COL_*.DTX theatre remap tables
   *SPR.DTX   u16 offset table -> variable-size sprite records (WIP)
   MAP*.DTX   campaign map data (dumped raw)
@@ -119,25 +122,22 @@ def png_write(path, w, h, rgba):
 
 # ------------------------------------------------------------- palette
 
-# MCGA palette from COLMCG.DTX tail (offset 0x310, 16 colors, each
-# channel byte duplicated).  Fallback if no COL file is supplied.
+# The game's MCGA palette: 16 colours held as three byte-planes at
+# ds:00B8 (R), ds:00C8 (G), ds:00D8 (B), 6-bit VGA values — uploaded by
+# pal_upload_mcga via int10 AX=1010h.  Index 13 is deliberately black
+# (the attr map routes it to colour 0).  COL*.DTX has no RGB data —
+# its +0x100/+0x200 tables are the byte->2px LUTs (identity for MCGA,
+# so 4bpp nibbles are literal colour indices).
+_vga6 = lambda v: (v << 2) | (v >> 4)
+_MCGA6 = [(0,0,0),(0,0,42),(0,42,0),(0,42,42),(42,0,0),(42,0,42),
+          (42,21,0),(42,42,42),(21,21,21),(21,21,63),(21,63,21),
+          (21,63,63),(63,21,21),(0,0,0),(63,63,21),(63,63,63)]
+
 def default_pal():
-    return [(0x99, 0x00, 0xff), (0x44, 0x33, 0x11), (0xee, 0xff, 0x11),
-            (0x66, 0x00, 0x44), (0xff, 0x00, 0xff), (0x22, 0xff, 0xff),
-            (0x66, 0xff, 0x66), (0x33, 0xee, 0x99), (0x11, 0x44, 0x66),
-            (0x00, 0xff, 0x22), (0x11, 0xff, 0x44), (0xff, 0xff, 0xff),
-            (0xff, 0x00, 0x00), (0x00, 0x00, 0x00), (0x22, 0x77, 0x22),
-            (0x22, 0x22, 0x22)]
+    return [(_vga6(r), _vga6(g), _vga6(b)) for r, g, b in _MCGA6]
 
 def col_palette(raw):
-    """Extract the 16-colour VGA palette embedded at COL*.DTX+0x310."""
-    if len(raw) < 0x310 + 96:
-        return default_pal()
-    pal = []
-    for i in range(16):
-        o = 0x310 + i * 6
-        pal.append((raw[o], raw[o + 2], raw[o + 4]))
-    return pal
+    return default_pal()
 
 def grey_pal():
     return [(i, i, i) for i in range(256)]
@@ -145,6 +145,7 @@ def grey_pal():
 # ------------------------------------------------------------- tiles
 
 TILE = 32          # 8x8 px, 4bpp packed
+CHRHDR = 66        # u16 count + u32 pad + 60-byte pattern block
 
 def tile_pixels(raw, toff):
     """Yield 64 pixel indices (0-15) from a 32-byte tile."""
@@ -155,15 +156,14 @@ def tile_pixels(raw, toff):
             yield b & 15
 
 def parse_chr(raw):
-    """CHR bank: u16 count, u32 pad, count*32B tiles.  Returns tile
+    """CHR bank: 66-byte header, count*32B tiles.  Returns tile
     pixel arrays, or None."""
-    if len(raw) < 6:
+    if len(raw) < CHRHDR:
         return None
     count = struct.unpack_from("<H", raw, 0)[0]
-    # count*32B tiles + 6B header + <=64B trailer
-    if count == 0 or not (0 <= len(raw) - (6 + count * TILE) <= 64):
+    if count == 0 or not (0 <= len(raw) - (CHRHDR + count * TILE) <= 64):
         return None
-    return [bytes(tile_pixels(raw, 6 + i * TILE)) for i in range(count)]
+    return [bytes(tile_pixels(raw, CHRHDR + i * TILE)) for i in range(count)]
 
 def draw_indexed(px, w, h, pal, transparent=True):
     rgba = bytearray(w * h * 4)

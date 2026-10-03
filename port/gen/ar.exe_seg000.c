@@ -3079,33 +3079,10 @@ gfx_mode_menu_e10655:
     textbuf_seg = ax;
     /* mov     es, ax ;~ 01A2:0658 */
     es = ax;
-    /* call    sub_106C0 ;~ 01A2:065A */
-    draw_text_table();
-    /* mov     ah, 2 ;~ 01A2:065D */
-    ah = 2;
-    /* mov     bh, 0 ;~ 01A2:065F */
-    bh = 0;
-    /* mov     dh, 11h ;~ 01A2:0661 */
-    dh = 0x11;
-    /* mov     dl, 31h ; '1' ;~ 01A2:0663 */
-    dl = 0x31;
-    /* int     10h             ; - VIDEO - SET CURSOR POSITION ;~ 01A2:0665 */
-    bios_set_cursor();
+    /* driver menu removed — no text-table draw / cursor set */
 gfx_mode_menu_e10667:
-    do {
-        do {
-            /* mov     ah, 0 ;~ 01A2:0667 */
-            ah = 0;
-            /* int     16h             ; KEYBOARD - READ CHAR FROM BUFFER, WAIT IF EMPTY ;~ 01A2:0669 */
-            bios_getch();
-            /* cmp     al, 31h ; '1' ;~ 01A2:066B */
-            CF = (dd)al < (dd)0x31; ZF = ((db)((al) - (0x31)) == 0); SF = (((db)((al) - (0x31))) >> 7);
-            /* jb      short loc_10667 ;~ 01A2:066D */
-        } while (al < 0x31);
-        /* cmp     al, 35h ; '5' ;~ 01A2:066F */
-        CF = (dd)al < (dd)0x35; ZF = ((db)((al) - (0x35)) == 0); SF = (((db)((al) - (0x35))) >> 7);
-        /* ja      short loc_10667 ;~ 01A2:0671 */
-    } while (al > 0x35);
+    /* driver menu removed — MCGA only, al = '4' pick */
+    al = 0x34;
     /* sub     al, 31h ; '1' ;~ 01A2:0673 */
     { dd t_ = (dd)al - (dd)0x31; CF = (dd)al < (dd)0x31; al = t_; ZF = ((db)(al) == 0); SF = (((db)(al)) >> 7); }
     /* mov     byte_1CEA2, al ;~ 01A2:0675 */
@@ -3148,33 +3125,10 @@ gfx_mode_menu_e10655:
     textbuf_seg = ax;
     /* mov     es, ax ;~ 01A2:0658 */
     es = ax;
-    /* call    sub_106C0 ;~ 01A2:065A */
-    draw_text_table();
-    /* mov     ah, 2 ;~ 01A2:065D */
-    ah = 2;
-    /* mov     bh, 0 ;~ 01A2:065F */
-    bh = 0;
-    /* mov     dh, 11h ;~ 01A2:0661 */
-    dh = 0x11;
-    /* mov     dl, 31h ; '1' ;~ 01A2:0663 */
-    dl = 0x31;
-    /* int     10h             ; - VIDEO - SET CURSOR POSITION ;~ 01A2:0665 */
-    bios_set_cursor();
+    /* driver menu removed — no text-table draw / cursor set */
 gfx_mode_menu_e10667:
-    do {
-        do {
-            /* mov     ah, 0 ;~ 01A2:0667 */
-            ah = 0;
-            /* int     16h             ; KEYBOARD - READ CHAR FROM BUFFER, WAIT IF EMPTY ;~ 01A2:0669 */
-            bios_getch();
-            /* cmp     al, 31h ; '1' ;~ 01A2:066B */
-            CF = (dd)al < (dd)0x31; ZF = ((db)((al) - (0x31)) == 0); SF = (((db)((al) - (0x31))) >> 7);
-            /* jb      short loc_10667 ;~ 01A2:066D */
-        } while (al < 0x31);
-        /* cmp     al, 35h ; '5' ;~ 01A2:066F */
-        CF = (dd)al < (dd)0x35; ZF = ((db)((al) - (0x35)) == 0); SF = (((db)((al) - (0x35))) >> 7);
-        /* ja      short loc_10667 ;~ 01A2:0671 */
-    } while (al > 0x35);
+    /* driver menu removed — MCGA only, al = '4' pick */
+    al = 0x34;
     /* sub     al, 31h ; '1' ;~ 01A2:0673 */
     { dd t_ = (dd)al - (dd)0x31; CF = (dd)al < (dd)0x31; al = t_; ZF = ((db)(al) == 0); SF = (((db)(al)) >> 7); }
     /* mov     byte_1CEA2, al ;~ 01A2:0675 */
@@ -3212,33 +3166,10 @@ gfx_mode_menu_e10655:
     textbuf_seg = ax;
     /* mov     es, ax ;~ 01A2:0658 */
     es = ax;
-    /* call    sub_106C0 ;~ 01A2:065A */
-    draw_text_table();
-    /* mov     ah, 2 ;~ 01A2:065D */
-    ah = 2;
-    /* mov     bh, 0 ;~ 01A2:065F */
-    bh = 0;
-    /* mov     dh, 11h ;~ 01A2:0661 */
-    dh = 0x11;
-    /* mov     dl, 31h ; '1' ;~ 01A2:0663 */
-    dl = 0x31;
-    /* int     10h             ; - VIDEO - SET CURSOR POSITION ;~ 01A2:0665 */
-    bios_set_cursor();
+    /* driver menu removed — no text-table draw / cursor set */
 gfx_mode_menu_e10667:
-    do {
-        do {
-            /* mov     ah, 0 ;~ 01A2:0667 */
-            ah = 0;
-            /* int     16h             ; KEYBOARD - READ CHAR FROM BUFFER, WAIT IF EMPTY ;~ 01A2:0669 */
-            bios_getch();
-            /* cmp     al, 31h ; '1' ;~ 01A2:066B */
-            CF = (dd)al < (dd)0x31; ZF = ((db)((al) - (0x31)) == 0); SF = (((db)((al) - (0x31))) >> 7);
-            /* jb      short loc_10667 ;~ 01A2:066D */
-        } while (al < 0x31);
-        /* cmp     al, 35h ; '5' ;~ 01A2:066F */
-        CF = (dd)al < (dd)0x35; ZF = ((db)((al) - (0x35)) == 0); SF = (((db)((al) - (0x35))) >> 7);
-        /* ja      short loc_10667 ;~ 01A2:0671 */
-    } while (al > 0x35);
+    /* driver menu removed — MCGA only, al = '4' pick */
+    al = 0x34;
     /* sub     al, 31h ; '1' ;~ 01A2:0673 */
     { dd t_ = (dd)al - (dd)0x31; CF = (dd)al < (dd)0x31; al = t_; ZF = ((db)(al) == 0); SF = (((db)(al)) >> 7); }
     /* mov     byte_1CEA2, al ;~ 01A2:0675 */
@@ -3273,33 +3204,10 @@ void gfx_mode_menu_e10655(void) {
     textbuf_seg = ax;
     /* mov     es, ax ;~ 01A2:0658 */
     es = ax;
-    /* call    sub_106C0 ;~ 01A2:065A */
-    draw_text_table();
-    /* mov     ah, 2 ;~ 01A2:065D */
-    ah = 2;
-    /* mov     bh, 0 ;~ 01A2:065F */
-    bh = 0;
-    /* mov     dh, 11h ;~ 01A2:0661 */
-    dh = 0x11;
-    /* mov     dl, 31h ; '1' ;~ 01A2:0663 */
-    dl = 0x31;
-    /* int     10h             ; - VIDEO - SET CURSOR POSITION ;~ 01A2:0665 */
-    bios_set_cursor();
+    /* driver menu removed — no text-table draw / cursor set */
 gfx_mode_menu_e10667:
-    do {
-        do {
-            /* mov     ah, 0 ;~ 01A2:0667 */
-            ah = 0;
-            /* int     16h             ; KEYBOARD - READ CHAR FROM BUFFER, WAIT IF EMPTY ;~ 01A2:0669 */
-            bios_getch();
-            /* cmp     al, 31h ; '1' ;~ 01A2:066B */
-            CF = (dd)al < (dd)0x31; ZF = ((db)((al) - (0x31)) == 0); SF = (((db)((al) - (0x31))) >> 7);
-            /* jb      short loc_10667 ;~ 01A2:066D */
-        } while (al < 0x31);
-        /* cmp     al, 35h ; '5' ;~ 01A2:066F */
-        CF = (dd)al < (dd)0x35; ZF = ((db)((al) - (0x35)) == 0); SF = (((db)((al) - (0x35))) >> 7);
-        /* ja      short loc_10667 ;~ 01A2:0671 */
-    } while (al > 0x35);
+    /* driver menu removed — MCGA only, al = '4' pick */
+    al = 0x34;
     /* sub     al, 31h ; '1' ;~ 01A2:0673 */
     { dd t_ = (dd)al - (dd)0x31; CF = (dd)al < (dd)0x31; al = t_; ZF = ((db)(al) == 0); SF = (((db)(al)) >> 7); }
     /* mov     byte_1CEA2, al ;~ 01A2:0675 */
@@ -3331,20 +3239,8 @@ gfx_mode_menu_e1068d:
 }
 void gfx_mode_menu_e10667(void) {
 gfx_mode_menu_e10667:
-    do {
-        do {
-            /* mov     ah, 0 ;~ 01A2:0667 */
-            ah = 0;
-            /* int     16h             ; KEYBOARD - READ CHAR FROM BUFFER, WAIT IF EMPTY ;~ 01A2:0669 */
-            bios_getch();
-            /* cmp     al, 31h ; '1' ;~ 01A2:066B */
-            CF = (dd)al < (dd)0x31; ZF = ((db)((al) - (0x31)) == 0); SF = (((db)((al) - (0x31))) >> 7);
-            /* jb      short loc_10667 ;~ 01A2:066D */
-        } while (al < 0x31);
-        /* cmp     al, 35h ; '5' ;~ 01A2:066F */
-        CF = (dd)al < (dd)0x35; ZF = ((db)((al) - (0x35)) == 0); SF = (((db)((al) - (0x35))) >> 7);
-        /* ja      short loc_10667 ;~ 01A2:0671 */
-    } while (al > 0x35);
+    /* driver menu removed — MCGA only, al = '4' pick */
+    al = 0x34;
     /* sub     al, 31h ; '1' ;~ 01A2:0673 */
     { dd t_ = (dd)al - (dd)0x31; CF = (dd)al < (dd)0x31; al = t_; ZF = ((db)(al) == 0); SF = (((db)(al)) >> 7); }
     /* mov     byte_1CEA2, al ;~ 01A2:0675 */
@@ -3438,33 +3334,10 @@ gfx_mode_menu_e10655:
     textbuf_seg = ax;
     /* mov     es, ax ;~ 01A2:0658 */
     es = ax;
-    /* call    sub_106C0 ;~ 01A2:065A */
-    draw_text_table();
-    /* mov     ah, 2 ;~ 01A2:065D */
-    ah = 2;
-    /* mov     bh, 0 ;~ 01A2:065F */
-    bh = 0;
-    /* mov     dh, 11h ;~ 01A2:0661 */
-    dh = 0x11;
-    /* mov     dl, 31h ; '1' ;~ 01A2:0663 */
-    dl = 0x31;
-    /* int     10h             ; - VIDEO - SET CURSOR POSITION ;~ 01A2:0665 */
-    bios_set_cursor();
+    /* driver menu removed — no text-table draw / cursor set */
 gfx_mode_menu_e10667:
-    do {
-        do {
-            /* mov     ah, 0 ;~ 01A2:0667 */
-            ah = 0;
-            /* int     16h             ; KEYBOARD - READ CHAR FROM BUFFER, WAIT IF EMPTY ;~ 01A2:0669 */
-            bios_getch();
-            /* cmp     al, 31h ; '1' ;~ 01A2:066B */
-            CF = (dd)al < (dd)0x31; ZF = ((db)((al) - (0x31)) == 0); SF = (((db)((al) - (0x31))) >> 7);
-            /* jb      short loc_10667 ;~ 01A2:066D */
-        } while (al < 0x31);
-        /* cmp     al, 35h ; '5' ;~ 01A2:066F */
-        CF = (dd)al < (dd)0x35; ZF = ((db)((al) - (0x35)) == 0); SF = (((db)((al) - (0x35))) >> 7);
-        /* ja      short loc_10667 ;~ 01A2:0671 */
-    } while (al > 0x35);
+    /* driver menu removed — MCGA only, al = '4' pick */
+    al = 0x34;
     /* sub     al, 31h ; '1' ;~ 01A2:0673 */
     { dd t_ = (dd)al - (dd)0x31; CF = (dd)al < (dd)0x31; al = t_; ZF = ((db)(al) == 0); SF = (((db)(al)) >> 7); }
     /* mov     byte_1CEA2, al ;~ 01A2:0675 */

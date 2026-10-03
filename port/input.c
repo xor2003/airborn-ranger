@@ -868,21 +868,6 @@ void rt_kmap_exclusive(void){
 }
 
 
-/* Scan the text buffer for a menu's title string — the graphics and control
- * menus are the only BIOS-blocking picks in the game. */
-static int text_menu_has(const char *tag){
-    int len = 0; while (tag[len]) len++;
-    for (int row = 0; row < 25; row++){
-        const unsigned char *p = &mem[0xb8000 + row*160];
-        for (int col = 0; col + len <= 80; col++){
-            int i; for (i = 0; i < len; i++)
-                if (p[(col+i)*2] != (unsigned char)tag[i]) break;   /* chars at even ofs */
-            if (i == len) return 1;
-        }
-    }
-    return 0;
-}
-
 /* SELECT CONTROL DEVICE: 1=joystick 2=keyboard-directional 3=rotational.
  * The menu renders in graphics mode (no text buffer to scan), but the guest
  * marks it with menu_mode=8 (mem[0xf340], set only by input_device_menu).
@@ -907,19 +892,9 @@ static void ctrl_menu_autopick(void){
 /* BIOS int 16h */
 void bios_getch(void){      /* AH=0: block -> AX */
     int v;
-    static int gfx_done;    /* auto-select MCGA once, on the mode menu */
     while ((v = kpop()) < 0){
         kbd_polls++; rt_frame(); SDL_Delay(1);
         ctrl_menu_autopick();
-        if (!gfx_done && text_menu_has("DESIRED MODE")){
-            const char *g = getenv("M2C_GFXMODE");
-            char pick = g ? *g : '4';       /* 4 = MCGA / mode 13h */
-            if (pick >= '1' && pick <= '5'){
-                gfx_done = 1;
-                if (getenv("M2C_KTRACE")) fprintf(stderr, "getch <- gfxmode '%c'\n", pick);
-                ax = pick; return;
-            }
-        }
     }
     if (getenv("M2C_KTRACE")) fprintf(stderr, "getch <- %04x caller=%p\n", v, __builtin_return_address(0));
     ax = v;

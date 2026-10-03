@@ -30,7 +30,7 @@ arrows = move, Enter / KP5 / Ins = fire & confirm, Esc = back/menu,
 digits = weapon select, `+`/`-` = throttle. Gamepads: A=fire, B=back,
 dpad/stick=move, LB/RB=−/+.
 
-Env: `M2C_GOD=1` god mode, `M2C_GFXMODE=1..5` adapter preselect,
+Env: `M2C_GOD=1` god mode,
 `M2C_KEYS`/`M2C_KEYS_DELAY` scripted input (see `port/tests/e2e.sh`).
 
 ## CI

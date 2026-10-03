@@ -1,7 +1,6 @@
-/* VGA video via SDL2.
- * Mode 13h: pixels at A000:0000 (mem[0xa0000]), palette via 0x3c8/0x3c9,
+/* VGA video via SDL2 — MCGA mode 13h only (other drivers removed).
+ * Pixels at A000:0000 (mem[0xa0000]), palette via 0x3c8/0x3c9,
  *   vertical retrace polled on 0x3da bit3 — we present there.
- * Text modes: 80x25 char+attr cells at B800:0000 (color) / B000:0000 (mono).
  */
 #include <SDL2/SDL.h>
 #include <math.h>
@@ -22,7 +21,7 @@ static Uint32 pal32[256];
 static db pal[768];
 static int pidx, pwrote;               /* 0x3c8 write index state */
 static int pidx_r;                     /* 0x3c7 read index */
-static db attrpal[17];                 /* int10 AX=100x palette regs 0-15 + border */
+static int cur_mode = 3;               /* DOS boots in mode 3; game switches to 0x13 */
 static Uint32 last_frame;
 int m2c_glyph_calls;
 dd m2c_dmc_rects, m2c_dmc_calls, m2c_scroll_calls, m2c_dtc_calls;
@@ -119,18 +118,11 @@ static void guest_irq0(void){
 }
 
 #define VGA_BASE 0xa0000
-#define TEXT_BASE 0xb8000
-#define MONO_BASE 0xb0000
+#define TEXT_BASE 0xb8000            /* guest text buffer (debug dumps only) */
 #define VW 320
 #define VH 200
 #define TW 640
 #define TH 400                       /* 80x25 at 8x16 */
-
-/* CGA/EGA 16-color palette -> RGB */
-static const Uint32 cgapal[16] = {
-    0xff000000,0xff0000aa,0xff00aa00,0xff00aaaa,0xffaa0000,0xffaa00aa,0xffaa5500,0xffaaaaaa,
-    0xff555555,0xff5555ff,0xff55ff55,0xff55ffff,0xffff5555,0xffff55ff,0xffffff55,0xffffffff
-};
 
 /* program one DAC color register; r/g/b are 6-bit VGA values */
 static void set_dac(int i, int r, int g, int b){
@@ -139,9 +131,6 @@ static void set_dac(int i, int r, int g, int b){
     pal[i*3+2] = b & 0x3f;
     pal32[i] = 0xff000000 | (Uint32)(r&0x3f)<<18 | (Uint32)(g&0x3f)<<10 | (Uint32)(b&0x3f)<<2;
 }
-
-static int cur_mode = 3;             /* DOS boots in mode 3 (80x25 color text) */
-static db cursor_pos[2] = {0,0};     /* dh,dl from set_cursor */
 
 void rt_present(int pump);
 
@@ -347,27 +336,10 @@ void video_init(void){
 #ifndef _WIN32
     signal(SIGUSR1, isr_hold);
 #endif
-    for (int i=0;i<256;i++) pal32[i] = 0xff000000;
-    for (int i=0;i<16;i++){           /* power-on palette: identity attr regs, CGA DAC */
-        attrpal[i] = i;
-        set_dac(i, (cgapal[i]>>18)&0x3f, (cgapal[i]>>10)&0x3f, (cgapal[i]>>2)&0x3f);
-    }
-    attrpal[16] = 0;
+    for (int i=0;i<256;i++) pal32[i] = 0xff000000;   /* DAC powers on black */
     /* fast base tick: IRQ0s are accumulated in tick_cb at the guest's PIT rate
      * (18.2Hz default, ~60Hz under TANDYSND) — 4ms gives clean subdivisions */
     SDL_AddTimer(4, tick_cb, NULL);
-}
-
-/* render one text cell: ch at font row r, attribute attr -> 8 pixels */
-static void text_px(Uint32 *dst, int pitch, int x, int y, db chr, db attr){
-    /* attr nibbles index the attr-controller palette regs, which select DAC colors */
-    Uint32 fg = pal32[attrpal[attr & 0x0f]], bg = pal32[attrpal[(attr >> 4) & 7]];
-    const uint8_t *g = (chr >= 0x20 && chr < 0x80) ? g_font1_bitmaps[chr - 0x20] : NULL;
-    for (int r = 0; r < 16; r++){            /* stretch 8 rows -> 16 */
-        int bits = g ? g[r >> 1] : (chr ? 0xff : 0);
-        Uint32 *row = dst + (y + r) * pitch + x;
-        for (int c = 0; c < 8; c++) row[c] = (bits & (0x80 >> c)) ? fg : bg;
-    }
 }
 
 void rt_frame(void){ rt_present(1); }
@@ -451,20 +423,11 @@ void rt_kmap_frame(void){
 void rt_present(int pump){
     (void)pump;                              /* pump now lives in video_run_loop */
     Uint32 *pix = staging;
-    if (cur_mode == 0x13){
-        const db *v = &mem[VGA_BASE];
-        for (int y = 0; y < VH; y++)
-            for (int x = 0; x < VW; x++)
-                for (int s = 0; s < 2; s++)          /* pixel-double to 640x400 */
-                    pix[(y*2)*TW + x*2 + s] = pix[(y*2+1)*TW + x*2 + s] = pal32[v[y*VW+x]];
-    } else {
-        dd tb = (cur_mode == 7) ? MONO_BASE : TEXT_BASE;
-        for (int r = 0; r < 25; r++)
-            for (int c = 0; c < 80; c++){
-                db chr = mem[tb + (r*80+c)*2], at = mem[tb + (r*80+c)*2 + 1];
-                text_px(pix, TW, c*8, r*16, chr, at);
-            }
-    }
+    const db *v = &mem[VGA_BASE];
+    for (int y = 0; y < VH; y++)
+        for (int x = 0; x < VW; x++)
+            for (int s = 0; s < 2; s++)              /* pixel-double to 640x400 */
+                pix[(y*2)*TW + x*2 + s] = pix[(y*2+1)*TW + x*2 + s] = pal32[v[y*VW+x]];
     if (rt_kmap_open()) kmap_draw(pix);
     frame_dirty = 1;
 
@@ -497,7 +460,7 @@ void rt_present(int pump){
             if ((f = fopen(r, "wb"))){ fwrite(pal, 1, 768, f); fclose(f); }
         }
         char q[256]; snprintf(q, sizeof q, "%s.%04d.txt", dump, fno/every);
-        if ((f = fopen(q, "wb"))){ dd tb = (cur_mode==7)?MONO_BASE:TEXT_BASE;
+        if ((f = fopen(q, "wb"))){ dd tb = TEXT_BASE;
             for (int r=0;r<25;r++){ for(int c=0;c<80;c++){ db cc=mem[tb+(r*80+c)*2];
                 fputc(cc>=0x20&&cc<0x7f?cc:'.',f);} fputc('\n',f);} fclose(f);}
         /* unit-draw slot tables (ds:C6B7..C6D6): in-use flag, sort keys — for
@@ -602,53 +565,19 @@ void rt_out(dw p, dw v){
     }
 }
 
-/* teletype-style character output at cursor, with CR/LF/wrap/scroll */
-void text_putc(db chr){
-    int r = cursor_pos[0], c = cursor_pos[1];
-    dd tb = (cur_mode == 7) ? MONO_BASE : TEXT_BASE;
-    if (chr == '\r'){ c = 0; goto done; }
-    if (chr == '\n'){ r++; goto scroll; }
-    if (ch == 7){ goto done; }                       /* bell: ignore */
-    mem[tb + (r*80+c)*2]     = chr;
-    mem[tb + (r*80+c)*2 + 1] = 7;
-    if (++c >= 80){ c = 0; r++; }
-scroll:
-    if (r >= 25){
-        memmove(&mem[tb], &mem[tb + 160], 24*160);
-        memset(&mem[tb + 24*160], 0, 160);
-        r = 24;
-    }
-done:
-    cursor_pos[0] = r; cursor_pos[1] = c;
-}
+/* DOS/BIOS console output — echoed to stderr (no text screen: MCGA only) */
+void text_putc(db chr){ fputc(chr, stderr); }
 
 /* BIOS int 10h */
 void bios_set_mode(void){ cur_mode = al & 0x7f; }
-void bios_set_cursor(void){ if (ah == 2){ cursor_pos[0] = dh; cursor_pos[1] = dl; } }
+void bios_set_cursor(void){}
 void bios_scroll(void){}
 void bios_putc(void){          /* AH=0Eh teletype */
-    if (cur_mode == 0x13) return;
     text_putc(al);
 }
-/* int 10h AH=10h — palette/DAC functions, dispatched on AL */
+/* int 10h AH=10h — DAC functions, dispatched on AL */
 void bios_palette(void){
     switch (al){
-    case 0x00:                                   /* set palette register: BL=reg, BH=color */
-        if (bl < 16) attrpal[bl] = bh;
-        break;
-    case 0x01:                                   /* set border color */
-        attrpal[16] = bh;
-        break;
-    case 0x02: {                                 /* set all palette regs: ES:DX -> 17 bytes */
-        memcpy(attrpal, raddr_(es, dx), 17);
-        break;
-    }
-    case 0x07:                                   /* read palette register -> BH */
-        bh = bl < 17 ? attrpal[bl] : 0;
-        break;
-    case 0x09:                                   /* read all palette regs -> ES:DX */
-        memcpy(raddr_(es, dx), attrpal, 17);
-        break;
     case 0x10:                                   /* set DAC reg BX = DH:r, CH:g, CL:b */
         set_dac(bx, dh, ch, cl);
         break;
@@ -667,23 +596,9 @@ void bios_palette(void){
     }
     }
 }
-static int video_page;                                    /* 0..7 -> 160-byte pages */
 void bios_video(dw a){
     switch (a >> 8){
-    case 0x0f: ax = (0x28 << 8) | cur_mode; bh = video_page; break;  /* get mode */
+    case 0x0f: ax = (0x28 << 8) | cur_mode; bh = 0; break;           /* get mode */
     case 0x00: cur_mode = a & 0x7f; break;                           /* set mode */
-    case 0x05: video_page = a & 7; break;                            /* select page */
-    case 0x09: {                       /* write attr/char at cursor, cx reps */
-        int r = cursor_pos[0], c = cursor_pos[1];
-        dd tb = (cur_mode == 7) ? MONO_BASE : TEXT_BASE;
-        for (int i = 0; i < cx; i++){
-            if (c + i < 80){
-                mem[tb + video_page*0x800 + (r*80 + c + i)*2]     = al;
-                mem[tb + video_page*0x800 + (r*80 + c + i)*2 + 1] = bl;
-            }
-        }
-        break;
-    }
-    case 0x0b: break;                  /* set border/palette — n/a for text */
     }
 }
