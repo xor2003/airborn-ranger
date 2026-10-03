@@ -128,7 +128,7 @@ def png_write(path, w, h, rgba):
 # (the attr map routes it to colour 0).  COL*.DTX has no RGB data —
 # its +0x100/+0x200 tables are the byte->2px LUTs (identity for MCGA,
 # so 4bpp nibbles are literal colour indices).
-_vga6 = lambda v: (v << 2) | (v >> 4)
+_vga6 = lambda v: v << 2   # same 6-bit DAC expansion the port uses (set_dac)
 _MCGA6 = [(0,0,0),(0,0,42),(0,42,0),(0,42,42),(42,0,0),(42,0,42),
           (42,21,0),(42,42,42),(21,21,21),(21,21,63),(21,63,21),
           (21,63,63),(63,21,21),(0,0,0),(63,63,21),(63,63,63)]
