@@ -38,7 +38,8 @@ __attribute__((constructor)) static void rt_trace_init(void){ rt_trace = getenv(
 /* M2C_WPOLL=<linear-addr>: spawn a thread polling a mem cell; on each change
  * dump the guest stack so the writing proc can be identified offline.
  * M2C_WTRAP=1: also SIGUSR2 the main thread; its handler prints the host RIP
- * (interrupted C proc) from ucontext. */
+ * (interrupted C proc) from ucontext. Debug-only: needs glibc x86_64 ucontext. */
+#if defined(__GLIBC__) && defined(__x86_64__)
 #include <pthread.h>
 #include <unistd.h>
 #include <signal.h>
@@ -80,6 +81,7 @@ __attribute__((constructor)) static void wpoll_init(void){
         pthread_t t; pthread_create(&t, 0, wpoll_th, 0); pthread_detach(t);
     }
 }
+#endif /* __GLIBC__ && __x86_64__ — M2C_WPOLL debug block */
 /* M2C_TRATE=1: per-tag call counters for rt_tracef — reported by tick_cb */
 struct trc_ent { const char *t; unsigned n; };
 static struct trc_ent *trate_tbl; static int trate_n;

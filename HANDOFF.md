@@ -220,3 +220,26 @@ Major decoded families:
 Weak-evidence symbols intentionally left as word_/byte_/loc_ names.
 Pipeline verified: rename.py -> make clean build, 342/342, e2e PASS
 (292 frames, 203 distinct).
+
+## Build targets (portability)
+
+`port/` is now multi-platform (Linux was already working):
+
+- **Android TV APK** — `android/` Gradle + ndk-build project. SDL2 is staged
+  by `android/fetch-sdl.sh` (sources into `app/jni/SDL`, `org.libsdl.app` java
+  into `app/src/main/java`); all game data files are bundled in the APK via
+  an assets `srcDir` pointing at the repo root and extracted to filesDir by
+  `MainActivity` (`main.c` chdir()s there). TV remote works out of the box
+  (dpad=arrows, OK=Enter, BACK→`SDL_SCANCODE_AC_BACK`→Esc); gamepads map in
+  `input.c` (A=Enter/fire, B=Esc, stick+dpad=arrows, LB/RB=-/+).
+- **Windows x64** — `tools/build_windows.sh` cross-compiles with mingw-w64
+  (`gcc-mingw-w64-x86-64-posix` + SDL2 mingw devel package). POSIX signal IRQ
+  park is `#ifdef`'d to `SuspendThread`/`ResumeThread` on `_WIN32`;
+  `SDL_MAIN_HANDLED` keeps a plain `main()` so no SDL2main is needed.
+- **CI** — `.github/workflows/`: `ci.yml` (build + make check + e2e),
+  `android.yml`, `windows.yml` (artifacts), `release.yml` (v* tag → GitHub
+  release with APK + zip), `wasm.yml` (borrowed skeleton — compile-smoke
+  only; the IRQ0 park model has no wasm equivalent yet).
+
+Local Linux build/test unchanged: `make -C port`, `make -C port check`,
+`sh port/tests/e2e.sh`.

@@ -1,0 +1,38 @@
+name: Windows build
+
+on:
+  workflow_dispatch:
+  workflow_call:
+  push:
+    branches: [master]
+    tags: ["v*"]
+
+jobs:
+  win64:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install MinGW toolchain
+        run: sudo apt-get update && sudo apt-get install -y gcc-mingw-w64-x86-64-posix
+
+      - name: Fetch SDL2 MinGW development package
+        run: |
+          curl -fL --retry 3 -o /tmp/sdl2-mingw.tar.gz \
+            https://github.com/libsdl-org/SDL/releases/download/release-2.32.10/SDL2-devel-2.32.10-mingw.tar.gz
+          mkdir -p /tmp/SDL2
+          tar -xzf /tmp/sdl2-mingw.tar.gz -C /tmp/SDL2 --strip-components=1
+
+      - name: Build ar_port.exe
+        run: sh tools/build_windows.sh
+        env:
+          MINGW_CC: x86_64-w64-mingw32-gcc-posix
+          SDL2_MINGW: /tmp/SDL2/x86_64-w64-mingw32
+
+      - name: Zip distribution
+        run: cd dist && zip -r ar-windows-x64.zip airborn-win64
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: ar-windows-x64
+          path: dist/ar-windows-x64.zip

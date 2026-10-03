@@ -15,6 +15,7 @@ static int kpop(void){ if(khead==ktail) return -1; int v=kq[ktail]; ktail=(ktail
 static int xt_scan(SDL_Scancode s){
     switch (s){
     case SDL_SCANCODE_ESCAPE: return 0x01;
+    case SDL_SCANCODE_AC_BACK: return 0x01;   /* Android TV remote BACK -> Esc */
     case SDL_SCANCODE_1: return 0x02; case SDL_SCANCODE_2: return 0x03;
     case SDL_SCANCODE_3: return 0x04; case SDL_SCANCODE_4: return 0x05;
     case SDL_SCANCODE_5: return 0x06; case SDL_SCANCODE_6: return 0x07;
@@ -374,6 +375,12 @@ out:
 }
 
 void rt_pump_events(void){
+    /* open every attached gamepad once (pads are enumerated at SDL init;
+     * hot-plug arrives via SDL_CONTROLLERDEVICEADDED in the event loop) */
+    {   static int pad_init;
+        if (!pad_init){ pad_init = 1;
+            for (int i = 0; i < SDL_NumJoysticks(); i++)
+                if (SDL_IsGameController(i)) SDL_GameControllerOpen(i); } }
     static int tbl_ok = -1;
     if (tnd_base){
         unsigned v = *(dw*)&mem[tnd_base+0x380];
@@ -461,6 +468,46 @@ void rt_pump_events(void){
                     fprintf(stderr, "mouse mv %d,%d acc=%d,%d held=%04x\n",
                             e.motion.xrel, e.motion.yrel, macc_x, macc_y,
                             *(dw*)&mem[DS_BASE + 0xad9]);
+            }
+        }
+        /* Gamepad / Android-TV remote-as-controller: map buttons and the left
+         * stick onto the same XT scancodes the keyboard path produces.
+         * A=Enter(select/fire) B=Esc(back) X=Space Y=KP5(alt fire)
+         * Start=Enter Back=Esc LB='-' RB='+'(=) dpad/stick=arrows */
+        if (e.type == SDL_CONTROLLERDEVICEADDED){
+            SDL_GameControllerOpen(e.cdevice.which);
+        }
+        if (e.type == SDL_CONTROLLERBUTTONDOWN || e.type == SDL_CONTROLLERBUTTONUP){
+            int down = e.type == SDL_CONTROLLERBUTTONDOWN;
+            int xs = 0; db a = 0;
+            switch (e.cbutton.button){
+            case SDL_CONTROLLER_BUTTON_A:
+            case SDL_CONTROLLER_BUTTON_START:          xs = 0x1c; a = 0x0d; break;
+            case SDL_CONTROLLER_BUTTON_B:
+            case SDL_CONTROLLER_BUTTON_BACK:           xs = 0x01; a = 0x1b; break;
+            case SDL_CONTROLLER_BUTTON_X:              xs = 0x39; a = 0x20; break;
+            case SDL_CONTROLLER_BUTTON_Y:              xs = 0x4c; break;
+            case SDL_CONTROLLER_BUTTON_DPAD_UP:        xs = 0x48; break;
+            case SDL_CONTROLLER_BUTTON_DPAD_DOWN:      xs = 0x50; break;
+            case SDL_CONTROLLER_BUTTON_DPAD_LEFT:      xs = 0x4b; break;
+            case SDL_CONTROLLER_BUTTON_DPAD_RIGHT:     xs = 0x4d; break;
+            case SDL_CONTROLLER_BUTTON_LEFTSHOULDER:   xs = 0x0c; a = '-'; break;
+            case SDL_CONTROLLER_BUTTON_RIGHTSHOULDER:  xs = 0x0d; a = '='; break;
+            }
+            if (xs) synth_key(xs, a, down);
+        }
+        if (e.type == SDL_CONTROLLERAXISMOTION){
+            /* left stick -> held arrow scans (menus read held bits; combat
+             * samples them per tick — either way arrows are right) */
+            static int axh, axv;
+            int v = e.caxis.value, dir;
+            const int TH = 16000;
+            if (e.caxis.axis == SDL_CONTROLLER_AXIS_LEFTX){
+                dir = v > TH ? 0x4d : v < -TH ? 0x4b : 0;
+                if (dir != axh){ if (axh) synth_key(axh, 0, 0); if (dir) synth_key(dir, 0, 1); axh = dir; }
+            } else if (e.caxis.axis == SDL_CONTROLLER_AXIS_LEFTY){
+                dir = v > TH ? 0x50 : v < -TH ? 0x48 : 0;
+                if (dir != axv){ if (axv) synth_key(axv, 0, 0); if (dir) synth_key(dir, 0, 1); axv = dir; }
             }
         }
         if ((e.type == SDL_MOUSEBUTTONDOWN || e.type == SDL_MOUSEBUTTONUP) &&

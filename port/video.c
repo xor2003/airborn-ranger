@@ -6,8 +6,12 @@
 #include <SDL2/SDL.h>
 #include <math.h>
 #include <pthread.h>
+#ifdef _WIN32
+#include <windows.h>
+#else
 #include <signal.h>
 #include <sched.h>
+#endif
 #include "rt.h"
 #include "font8x8.h"
 
@@ -29,25 +33,42 @@ static double irq_accum;             /* ms elapsed toward next IRQ0 dispatch */
 
 /* Guest int8 handlers (TANDYSND ISR) are lifted C on the shared register file —
  * they may only run while the CPU (worker) thread is parked, like a real IRQ
- * preempting the CPU. SIGUSR1 parks the worker in a handler that spins on
- * atomics (no guest state touched) until the ISR completes. */
+ * preempting the CPU. POSIX: SIGUSR1 parks the worker in a handler that spins
+ * on atomics (no guest state touched) until the ISR completes. Windows has no
+ * per-thread signals: SuspendThread freezes the worker instead — the lifted
+ * ISR then runs on this timer thread exactly as on POSIX. */
 static pthread_t cpu_tid;
-void rt_set_cpu_thread(void){ cpu_tid = pthread_self(); }
+#ifdef _WIN32
+static HANDLE cpu_hnd;
+#else
 static volatile sig_atomic_t park_req, park_ack;
-volatile int rt_isr_ctx;             /* inside a timer-thread guest ISR */
-
 static void isr_hold(int sig){
     (void)sig;
     sig_atomic_t id = park_req;
     while (park_ack < id) sched_yield();
 }
+#endif
+volatile int rt_isr_ctx;             /* inside a timer-thread guest ISR */
+
+void rt_set_cpu_thread(void){
+    cpu_tid = pthread_self();
+#ifdef _WIN32
+    DuplicateHandle(GetCurrentProcess(), GetCurrentThread(), GetCurrentProcess(),
+                    &cpu_hnd, 0, FALSE, DUPLICATE_SAME_ACCESS);
+#endif
+}
 
 static unsigned g8_cnt;                  /* IRQ0 dispatches, for TICKSTAT */
 static void guest_irq0(void){
     ++g8_cnt;
+#ifdef _WIN32
+    if (!cpu_hnd) return;                  /* worker not registered yet */
+    SuspendThread(cpu_hnd);
+#else
     if (!cpu_tid) return;                  /* worker not registered yet */
     sig_atomic_t id = ++park_req;
     pthread_kill(cpu_tid, SIGUSR1);
+#endif
     /* a real IRET restores the flag image pushed on interrupt; the lifted
      * ISR returns without one, so snapshot/restore the flag globals —
      * otherwise an IRQ landing between a guest CMP and its Jcc flips the
@@ -78,7 +99,11 @@ static void guest_irq0(void){
         eax=r[0];ebx=r[1];ecx=r[2];edx=r[3];esi=r[4];edi=r[5];esp=r[6];ebp=r[7];
         cs=s[0];ds=s[1];es=s[2];fs=s[3];gs=s[4];ss=s[5];ip=s[6];
     }
+#ifdef _WIN32
+    ResumeThread(cpu_hnd);
+#else
     park_ack = id;
+#endif
 }
 
 #define VGA_BASE 0xa0000
@@ -291,15 +316,25 @@ static Uint32 tick_cb(Uint32 interval, void *param){
 }
 
 void video_init(void){
-    SDL_Init(SDL_INIT_VIDEO | SDL_INIT_AUDIO | SDL_INIT_TIMER);
+#ifdef __ANDROID__
+    SDL_SetHint(SDL_HINT_ORIENTATIONS, "LandscapeLeft LandscapeRight");
+#endif
+    SDL_Init(SDL_INIT_VIDEO | SDL_INIT_AUDIO | SDL_INIT_TIMER | SDL_INIT_GAMECONTROLLER);
+#ifdef __ANDROID__
+    win = SDL_CreateWindow("Airborne Ranger", 0, 0, VW, VH,
+                           SDL_WINDOW_FULLSCREEN);
+#else
     win = SDL_CreateWindow("Airborne Ranger", SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED,
                            VW*3, VH*3, SDL_WINDOW_SHOWN);
+#endif
     /* software renderer: SDL calls happen only on the main thread
      * (video_run_loop) — see rt_present note */
     ren = SDL_CreateRenderer(win, -1, SDL_RENDERER_SOFTWARE);
     tex = SDL_CreateTexture(ren, SDL_PIXELFORMAT_ARGB8888, SDL_TEXTUREACCESS_STREAMING, TW, TH);
     /* worker-park hook must exist before the timer starts */
+#ifndef _WIN32
     signal(SIGUSR1, isr_hold);
+#endif
     for (int i=0;i<256;i++) pal32[i] = 0xff000000;
     for (int i=0;i<16;i++){           /* power-on palette: identity attr regs, CGA DAC */
         attrpal[i] = i;

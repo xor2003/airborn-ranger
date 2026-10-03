@@ -1,0 +1,35 @@
+name: Browser build (experimental)
+
+# Borrowed from the f15se2-ex-integration multiplatform setup. Compile-smoke
+# only for now: the port's IRQ0 model relies on POSIX signals / SuspendThread
+# to park the guest CPU thread while the timer-thread ISR runs, which has no
+# wasm equivalent yet (needs pthread workers or an Asyncify redesign).
+# Manual trigger until it produces something playable.
+
+on:
+  workflow_dispatch:
+
+jobs:
+  wasm:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install Emscripten
+        run: |
+          git clone --depth 1 https://github.com/emscripten-core/emsdk.git "$RUNNER_TEMP/emsdk"
+          "$RUNNER_TEMP/emsdk/emsdk" install latest
+          "$RUNNER_TEMP/emsdk/emsdk" activate latest
+
+      - name: Compile-smoke all port objects
+        shell: bash
+        run: |
+          source "$RUNNER_TEMP/emsdk/emsdk_env.sh"
+          mkdir -p /tmp/wasm-obj
+          for f in port/rt.c port/dos.c port/video.c port/input.c port/snd.c \
+                   port/main.c port/memimg.c port/data_defs.c port/gen/*.c; do
+            echo "== $f"
+            emcc -O2 -sUSE_SDL=2 -Iport -fcommon -Wno-implicit-function-declaration \
+                 -fno-strict-aliasing -c "$f" -o "/tmp/wasm-obj/$(basename "$f" .c).o"
+          done
+          echo "all objects compiled"

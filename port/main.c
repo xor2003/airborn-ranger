@@ -1,8 +1,14 @@
 /* port entry — mirrors what DOS does when loading AR.EXE plus SDL bring-up */
+#ifdef _WIN32
+#define SDL_MAIN_HANDLED   /* keep a plain main() so -mconsole links without SDL2main */
+#endif
 #include <SDL2/SDL.h>
 #include <pthread.h>
 #include <signal.h>
 #include <unistd.h>
+#ifdef __ANDROID__
+#include <SDL2/SDL_system.h>
+#endif
 #include "rt.h"
 
 /* load module sits at para 0x1a2; PSP would be 0x192 (unused: game uses its own ds).
@@ -46,7 +52,15 @@ static void *guest_main(void *arg){
 
 int main(int argc, char **argv){
     (void)argc; (void)argv;
+#ifdef _WIN32
+    SDL_SetMainReady();
+#endif
     video_init();
+#ifdef __ANDROID__
+    /* bundled assets were extracted to filesDir by MainActivity before the
+     * native thread started — game data files resolve relative to cwd */
+    chdir(SDL_AndroidGetInternalStoragePath());
+#endif
     /* SDL installs SIGINT/SIGTERM handlers that only post SDL_QUIT — useless if
      * the game isn't pumping events; force a real exit so timeouts work. */
     signal(SIGINT, on_signal); signal(SIGTERM, on_signal);

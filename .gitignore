@@ -24,3 +24,12 @@ port/ar_port
 *.til
 *_ida.c
 .pytest_cache/
+
+# Android/CI staged artifacts
+android/app/jni/SDL/
+android/app/jni/include/SDL2
+android/app/src/main/java/org/libsdl/
+android/.gradle/
+android/app/build/
+android/local.properties
+dist/

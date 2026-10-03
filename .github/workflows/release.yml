@@ -1,0 +1,41 @@
+name: Release
+
+on:
+  push:
+    tags: ["v*"]
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: "Release tag (created if missing)"
+        required: true
+        default: "v0.1"
+
+permissions:
+  contents: write
+
+jobs:
+  apk:
+    uses: ./.github/workflows/android.yml
+    secrets: inherit
+
+  win64:
+    uses: ./.github/workflows/windows.yml
+    secrets: inherit
+
+  publish:
+    needs: [apk, win64]
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/download-artifact@v4
+        with:
+          path: artifacts
+
+      - name: Create GitHub release
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          TAG: ${{ inputs.tag || github.ref_name }}
+        run: |
+          gh release create "$TAG" --title "Airborne Ranger $TAG" \
+            --notes "Android APK (TV + gamepad key mapping) and Windows x64 zip. Sideload the APK or unzip and run ar_port.exe with the data files alongside." \
+            artifacts/ar-android-apk/app-debug.apk \
+            artifacts/ar-windows-x64/ar-windows-x64.zip

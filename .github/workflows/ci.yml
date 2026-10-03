@@ -1,0 +1,24 @@
+name: CI
+
+on:
+  push:
+    branches: [master]
+  pull_request:
+
+jobs:
+  linux:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install SDL2
+        run: sudo apt-get update && sudo apt-get install -y libsdl2-dev
+
+      - name: Build port
+        run: make -C port -j"$(nproc)"
+
+      - name: Unit tests
+        run: make -C port check
+
+      - name: Headless e2e
+        run: sh port/tests/e2e.sh

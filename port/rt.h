@@ -9,7 +9,9 @@
 #include <string.h>
 #include <stdio.h>
 #include <stdlib.h>
+#if !defined(_WIN32) && !defined(__ANDROID__)
 #include <execinfo.h>
+#endif
 
 typedef uint8_t db; typedef uint16_t dw; typedef uint32_t dd;
 
