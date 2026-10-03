@@ -703,7 +703,8 @@ static void kmap_toggle(int on){
     if (on) kmap_sel = 0;
 }
 
-/* consume one event in capture mode: bind it to the selected DOS key */
+/* consume one event in capture mode: bind it to the selected DOS key;
+ * a key already bound elsewhere is moved (cleared from the old action) */
 static int kmap_capture(SDL_Event *e){
     if (e->type == SDL_KEYDOWN && !e->key.repeat){
         SDL_Scancode s = e->key.keysym.scancode;
@@ -711,11 +712,18 @@ static int kmap_capture(SDL_Event *e){
             kmap_cap = 0;                    /* cancel, don't bind */
             return 1;
         }
+        for (int i = 0; i < N_KMAP; i++)
+            if (i != kmap_sel && binds[i].kind == 1 && binds[i].code == s)
+                binds[i].kind = 0;
         binds[kmap_sel].kind = 1; binds[kmap_sel].code = s;
         kmap_cap = 0; kmap_save();
         return 1;
     }
     if (e->type == SDL_CONTROLLERBUTTONDOWN){
+        for (int i = 0; i < N_KMAP; i++)
+            if (i != kmap_sel && binds[i].kind == 2 &&
+                binds[i].code == e->cbutton.button)
+                binds[i].kind = 0;
         binds[kmap_sel].kind = 2; binds[kmap_sel].code = e->cbutton.button;
         kmap_cap = 0; kmap_save();
         return 1;
