@@ -75,6 +75,8 @@ void rt_pump_events(void);
 void rt_script_feed(void);          /* scripted-key step — mem-only, timer-safe */
 dw rt_kbd_port60(void);
 /* key-mapping menu overlay (input.c); video.c draws it */
+void rt_kmap_frame(void);
+void rt_kmap_exclusive(void);
 int rt_kmap_open(void);
 int rt_kmap_rows(void);
 int rt_kmap_cur(void);

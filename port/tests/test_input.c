@@ -5,6 +5,7 @@
 #include <stdio.h>
 
 void rt_frame(void){}                              /* video.c stubs */
+void rt_kmap_frame(void){}
 dd tnd_base;
 dw rt_in(dw p){ (void)p; return 0; }
 void rt_out(dw p, dw v){ (void)p; (void)v; }
@@ -140,46 +141,59 @@ int main(void){
     synth_key(0x1c, 0x0d, 0);
     CHECK(rel_n == 1);                              /* release deferred */
 
-    /* motion -> discrete arrow keycodes on an int16 menu */
+    /* absolute pointer position -> direction areas on an int16 menu:
+     * entering an edge zone fires one discrete step; center is neutral */
     *(dw*)&mem[DS_BASE + 0xad7] = 0;
+    *(dw*)&mem[0xf340] = 0;                         /* not POD */
     khead = ktail = 0;
-    macc_x = 0; macc_y = 50;                        /* 50px down = 2x20px steps */
-    mouse_dir_step();
+    mgx = 160; mgy = 150;                           /* bottom third -> DOWN */
+    mouse_zone_step();
     int n = 0; while (kpop() >= 0) n++;
-    CHECK(n == 2); CHECK(macc_y == 10);             /* 50-40 leftover */
+    CHECK(n == 1);                                  /* one step on zone entry */
+    mgx = 160; mgy = 100;                           /* center -> nothing */
+    mouse_zone_step();
+    n = 0; while (kpop() >= 0) n++;
+    CHECK(n == 0);
+    mgx = 60;                                       /* left third -> LEFT */
+    mouse_zone_step();
+    n = 0; while (kpop() >= 0) n++;
+    CHECK(n == 1);
+    CHECK(kpop() == -1);
 
-    /* motion -> held arrow bit on a held-mask (POD) screen */
+    /* absolute position -> held arrow bit on a held-mask (gameplay) screen */
     memset(&mem[DS_BASE], 0, 0x1000);
     *(dw*)&mem[DS_BASE + 0xad7] = 1;
+    *(dw*)&mem[0xf340] = 0;
     *(dw*)&mem[DS_BASE + 0x950 + 0x4d*2] = 0x0040;  /* RIGHT -> bit6 */
     *(dw*)&mem[DS_BASE + 0x950 + 0x4b*2] = 0x0080;  /* LEFT  -> bit7 */
-    macc_x = 30; macc_y = 0;
-    mouse_dir_step();
+    mgx = 300; mgy = 100;                           /* right edge */
+    mouse_zone_step();
     CHECK(*(dw*)&mem[DS_BASE + 0xad9] == 0x0040);   /* RIGHT held */
-    CHECK(macc_x == 18);                            /* drained 12px */
-    mouse_dir_step();
-    CHECK(*(dw*)&mem[DS_BASE + 0xad9] == 0x0040);   /* still held mid-drain */
-    macc_x = 0;
-    for (int i = 0; i < 8; i++) mouse_dir_step();
-    CHECK(*(dw*)&mem[DS_BASE + 0xad9] == 0);        /* released when spent */
+    mouse_zone_step();
+    CHECK(*(dw*)&mem[DS_BASE + 0xad9] == 0x0040);   /* still held while parked */
+    mgx = 160;                                      /* recenter -> release */
+    mouse_zone_step();
+    CHECK(*(dw*)&mem[DS_BASE + 0xad9] == 0);
 
-    /* opposite direction flips the held bit, not just adds */
-    macc_x = -15;
-    mouse_dir_step();
+    /* opposite edge flips the held bit, not just adds */
+    mgx = 20;
+    mouse_zone_step();
     CHECK(*(dw*)&mem[DS_BASE + 0xad9] == 0x0080);   /* LEFT held */
 
     /* --- SDL event loop integration: real MOUSEMOTION/BUTTON events --- */
     SDL_Init(SDL_INIT_EVENTS);
     *(dw*)&mem[DS_BASE + 0xad7] = 0;                /* int16 menu */
+    *(dw*)&mem[0xf340] = 0;
     memset(&mem[DS_BASE + 0x950], 0, 0x200);
-    khead = ktail = 0; macc_x = macc_y = 0; rel_n = 0;
+    khead = ktail = 0; mgx = mgy = -1; rel_n = 0;
     SDL_FlushEvents(SDL_FIRSTEVENT, SDL_LASTEVENT);
     SDL_Event me; memset(&me, 0, sizeof me);
-    me.type = SDL_MOUSEMOTION; me.motion.xrel = 40; me.motion.yrel = 0;
+    me.type = SDL_MOUSEMOTION;                      /* right edge of 960x600 */
+    me.motion.x = 900; me.motion.y = 300;
     SDL_PushEvent(&me);
-    rt_pump_events();                               /* drain -> dir_step */
+    rt_pump_events();                               /* area -> dir step */
     n = 0; while (kpop() >= 0) n++;
-    CHECK(n == 2);                                  /* 40px -> 2 right arrows */
+    CHECK(n == 1);                                  /* one right-arrow press */
 
     memset(&me, 0, sizeof me);
     me.type = SDL_MOUSEBUTTONDOWN; me.button.button = SDL_BUTTON_LEFT;

@@ -393,7 +393,7 @@ static void kmap_draw(Uint32 *pix){
     const int sel = rt_kmap_cur();
     const int cap = rt_kmap_capture();
     const int ncol = 2, nrows = (rows + ncol - 1) / ncol;
-    const int cw = 292, rowh = 21, pd = 10, hdr = 22;
+    const int cw = 292, rowh = 19, pd = 10, hdr = 22;
     const int w = ncol*cw + pd*2, h = nrows*rowh + hdr + pd*2;
     const int x0 = (TW - w)/2, y0 = (TH - h)/2;
     for (int y = y0; y < y0+h; y++)
@@ -432,6 +432,21 @@ static void kmap_draw(Uint32 *pix){
  * like the intro drop, where the guest never polls 0x3da). */
 static Uint32 staging[TW*TH];
 static volatile int frame_dirty;
+
+/* Standalone controls-setup screen (before the guest starts): paint the
+ * mapping panel on a dark background and present directly — the guest thread
+ * isn't running so video_run_loop hasn't started yet. */
+void rt_kmap_frame(void){
+    memset(staging, 0, sizeof staging);
+    for (int y = 0; y < TH; y++)             /* subtle dark backdrop */
+        for (int x = 0; x < TW; x++)
+            staging[y*TW + x] = 0xff0b0e16;
+    kmap_draw(staging);
+    SDL_UpdateTexture(tex, NULL, staging, TW*4);
+    SDL_RenderClear(ren);
+    SDL_RenderCopy(ren, tex, NULL, NULL);
+    SDL_RenderPresent(ren);
+}
 
 void rt_present(int pump){
     (void)pump;                              /* pump now lives in video_run_loop */
@@ -485,6 +500,26 @@ void rt_present(int pump){
         if ((f = fopen(q, "wb"))){ dd tb = (cur_mode==7)?MONO_BASE:TEXT_BASE;
             for (int r=0;r<25;r++){ for(int c=0;c<80;c++){ db cc=mem[tb+(r*80+c)*2];
                 fputc(cc>=0x20&&cc<0x7f?cc:'.',f);} fputc('\n',f);} fclose(f);}
+        /* unit-draw slot tables (ds:C6B7..C6D6): in-use flag, sort keys — for
+         * diagnosing "ranger/enemies not drawn" reports on other platforms */
+        if (getenv("M2C_SLOTDBG")){
+            static const dd SL = 0xE8A0 + 0xC6B7;     /* slot flag table */
+            fprintf(stderr, "SLOTDBG flag:");
+            for (int i = 0; i < 8; i++) fprintf(stderr, " %02x", mem[SL + i]);
+            fprintf(stderr, " key1:");
+            for (int i = 0; i < 8; i++) fprintf(stderr, " %02x", mem[SL + 0x10 + i]);
+            fprintf(stderr, " key2:");
+            for (int i = 0; i < 8; i++) fprintf(stderr, " %02x", mem[SL + 8 + i]);
+            fprintf(stderr, " pass:");
+            for (int i = 0; i < 8; i++) fprintf(stderr, " %02x", mem[SL + 0x18 + i]);
+            fprintf(stderr, " x:");
+            for (int i = 0; i < 8; i++)
+                fprintf(stderr, " %02x%02x", mem[SL + 0x60 + i], mem[SL + 0x38 + i]);
+            fprintf(stderr, " y:");
+            for (int i = 0; i < 8; i++)
+                fprintf(stderr, " %02x%02x", mem[SL + 0x74 + i], mem[SL + 0x4C + i]);
+            fprintf(stderr, "\n");
+        }
     }
 }
 

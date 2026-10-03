@@ -71,6 +71,25 @@ int main(int argc, char **argv){
     }
     if (dir) chdir(dir);
 #endif
+    /* optional m2c.env in the game dir: KEY=VALUE lines -> setenv. Debug aid
+     * for platforms where env vars can't be passed (Android). */
+    {   FILE *ef = fopen("m2c.env", "r");
+        if (ef){
+            char line[256];
+            while (fgets(line, sizeof line, ef)){
+                char *eq = strchr(line, '=');
+                if (!eq || eq == line) continue;
+                *eq = 0;
+                char *v = eq + 1; v[strcspn(v, "\r\n")] = 0;
+                setenv(line, v, 1);
+            }
+            fclose(ef);
+        }
+    }
+    /* TV remotes can't type — offer the controls-setup screen up front so
+     * buttons can be bound before the game needs them. Always on Android;
+     * desktop opt-in via M2C_KMAPSTART=1 (in-game: F8/MENU/hold-Back). */
+    rt_kmap_exclusive();
     /* SDL installs SIGINT/SIGTERM handlers that only post SDL_QUIT — useless if
      * the game isn't pumping events; force a real exit so timeouts work. */
     signal(SIGINT, on_signal); signal(SIGTERM, on_signal);

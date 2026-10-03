@@ -30,6 +30,7 @@ static int xt_scan(SDL_Scancode s){
     case SDL_SCANCODE_O: return 0x18; case SDL_SCANCODE_P: return 0x19;
     case SDL_SCANCODE_LEFTBRACKET: return 0x1a; case SDL_SCANCODE_RIGHTBRACKET: return 0x1b;
     case SDL_SCANCODE_RETURN: return 0x1c; case SDL_SCANCODE_LCTRL: return 0x1d;
+    case SDL_SCANCODE_SELECT: return 0x1c;   /* Android TV DPAD_CENTER -> Enter */
     case SDL_SCANCODE_A: return 0x1e; case SDL_SCANCODE_S: return 0x1f;
     case SDL_SCANCODE_D: return 0x20; case SDL_SCANCODE_F: return 0x21;
     case SDL_SCANCODE_G: return 0x22; case SDL_SCANCODE_H: return 0x23;
@@ -128,27 +129,24 @@ static void rel_cancel(int scan){
 /* ---- mouse -> keyboard emulation --------------------------------------
  * The DOS original is keyboard-only (no int 33h): menus navigate with the
  * arrow keys and confirm with Enter, so mouse input is folded into the
- * same int9/int16 path a physical keypress uses. Motion accumulates into a
- * pending pixel delta that rt_pump_events folds into arrow keys once per
- * pump — diverted (held-mask) screens get the arrow's bitmask bit held,
- * int16 screens get discrete keycodes. Left button = Enter (select),
- * right button = Escape (back). Set M2C_MOUSE=0 to disable. */
+ * same int9/int16 path a physical keypress uses. The pointer's ABSOLUTE
+ * position drives everything — no deltas:
+ *  - POD/crosshair screens: the guest cursor is written to the pointer's
+ *    guest coordinates directly.
+ *  - held-mask screens (gameplay): the pointer is a joystick knob — edge
+ *    areas hold direction bits, center releases.
+ *  - menu screens: pointer areas step the highlight toward that edge —
+ *    bottom third scrolls down, top third scrolls up (repeats while held).
+ * Left button = Enter (select), right button = Escape (back).
+ * Set M2C_MOUSE=0 to disable. */
 static int mouse_on = -1;                    /* lazy: -1 unknown, else 0/1 */
-static int macc_x, macc_y;                   /* pending deltas (window px) */
+static int mgx = -1, mgy = -1;               /* pointer pos in guest px */
 static int win_w = 960, win_h = 600;         /* window px; window is VW*3 x VH*3 */
 
 static int mouse_enabled(void){
     if (mouse_on < 0){
         const char *v = getenv("M2C_MOUSE");
-#ifdef __ANDROID__
-        /* TV remotes feed keys only — relative mouse deltas arriving via
-         * pointer/air-mouse modes make menus drift; discrete key presses
-         * (absolute directional stepping) is what the D-pad should give.
-         * M2C_MOUSE=1 re-enables pointer emulation. */
-        mouse_on = v && *v == '1';
-#else
         mouse_on = !(v && *v == '0');
-#endif
     }
     return mouse_on;
 }
@@ -178,34 +176,6 @@ static void synth_key(int xs, db a, int down){
     /* non-diverted releases queue nothing (BIOS buffers only presses) */
 }
 
-/* Fold accumulated mouse deltas into arrow keys. Runs once per pump so the
- * guest samples each held bit inside its own polling window. */
-static void mouse_dir_step(void){
-    static int mhx, mhy;                     /* arrow scans held by the mouse */
-    if (!mouse_enabled()){ macc_x = macc_y = 0; return; }
-    if (*(dw*)&mem[DS_BASE + 0xad7] == 1){
-        /* Held-mask screens (POD, gameplay): hold a direction bit while delta
-         * is pending. The cursor moves ~4 game-px per guest poll = ~12 window
-         * px on the 3x window, so drain 12/poll and it tracks the mouse ~1:1. */
-        const int DRAIN = 12;
-        int hx = 0, hy = 0;
-        if (macc_x > 0){ hx = 0x4d; macc_x = macc_x > DRAIN ? macc_x - DRAIN : 0; }
-        else if (macc_x < 0){ hx = 0x4b; macc_x = macc_x < -DRAIN ? macc_x + DRAIN : 0; }
-        if (macc_y > 0){ hy = 0x50; macc_y = macc_y > DRAIN ? macc_y - DRAIN : 0; }
-        else if (macc_y < 0){ hy = 0x48; macc_y = macc_y < -DRAIN ? macc_y + DRAIN : 0; }
-        if (hx != mhx){ if (mhx) mrelease(mhx); if (hx) int9_update(hx, 1); mhx = hx; }
-        if (hy != mhy){ if (mhy) mrelease(mhy); if (hy) int9_update(hy, 1); mhy = hy; }
-    } else {
-        if (mhx){ mrelease(mhx); mhx = 0; }  /* divert dropped mid-drag: release */
-        if (mhy){ mrelease(mhy); mhy = 0; }
-        const int STEP = 20;                 /* window px of motion per item step */
-        while (macc_x >=  STEP){ synth_key(0x4d, 0, 1); synth_key(0x4d, 0, 0); macc_x -= STEP; }
-        while (macc_x <= -STEP){ synth_key(0x4b, 0, 1); synth_key(0x4b, 0, 0); macc_x += STEP; }
-        while (macc_y >=  STEP){ synth_key(0x50, 0, 1); synth_key(0x50, 0, 0); macc_y -= STEP; }
-        while (macc_y <= -STEP){ synth_key(0x48, 0, 1); synth_key(0x48, 0, 0); macc_y += STEP; }
-    }
-}
-
 /* POD cursor screens: drop the guest crosshair at the absolute pointer
  * position (window px -> 320x200 guest px, clamped to the cursor bounds). */
 static void pod_abs_cursor(int wx, int wy){
@@ -216,9 +186,49 @@ static void pod_abs_cursor(int wx, int wy){
     *(db*)&mem[0xf71f] = (db)gx;         /* word_1DCFF (cursor X lo) */
     *(db*)&mem[0xf73f] = (db)(gx >> 8);  /* word_1DD1F (cursor X hi) */
     *(db*)&mem[0xf75f] = (db)gy;         /* word_1DD3F (cursor Y)    */
-    macc_x = macc_y = 0;
     if (getenv("M2C_MOUSEDBG"))
         fprintf(stderr, "mouse abs win=%d,%d -> cur=%d,%d\n", wx, wy, gx, gy);
+}
+
+/* Direction areas for the pointer's absolute position: the screen's edge
+ * thirds mean "step/hold toward that edge", the middle is a dead zone. */
+static void mouse_zone(int *hx, int *hy){
+    *hx = *hy = 0;
+    if (mgx < 0) return;
+    if (mgx < 128)      *hx = 0x4b;      /* left  */
+    else if (mgx >= 192) *hx = 0x4d;     /* right */
+    if (mgy < 80)       *hy = 0x48;      /* up    */
+    else if (mgy >= 120) *hy = 0x50;     /* down  */
+}
+
+/* Apply the pointer's absolute position once per pump. POD screens take the
+ * real cursor position at motion time already; held-mask screens get the
+ * direction bits held while the pointer parks in an edge area; menu screens
+ * get a discrete step when the pointer enters an edge area, repeating while
+ * it stays there. */
+static void mouse_zone_step(void){
+    static int mhx, mhy;                     /* arrow scans held by the mouse */
+    static Uint32 rep; static int lhx, lhy;
+    if (!mouse_enabled() || mgx < 0){ mhx = mhy = lhx = lhy = 0; return; }
+    if (*(dw*)&mem[0xf340] == 5) return;     /* POD: absolute cursor, no zones */
+    int hx, hy; mouse_zone(&hx, &hy);
+    if (*(dw*)&mem[DS_BASE + 0xad7] == 1){
+        if (hx != mhx){ if (mhx) mrelease(mhx); if (hx) int9_update(hx, 1); mhx = hx; }
+        if (hy != mhy){ if (mhy) mrelease(mhy); if (hy) int9_update(hy, 1); mhy = hy; }
+    } else {
+        if (mhx){ mrelease(mhx); mhx = 0; }  /* divert dropped mid-drag: release */
+        if (mhy){ mrelease(mhy); mhy = 0; }
+        Uint32 now = SDL_GetTicks();
+        if (hx != lhx || hy != lhy){
+            if (hx){ synth_key(hx, 0, 1); synth_key(hx, 0, 0); }
+            if (hy){ synth_key(hy, 0, 1); synth_key(hy, 0, 0); }
+            lhx = hx; lhy = hy; rep = now + 350;
+        } else if ((hx || hy) && now >= rep){
+            if (hx){ synth_key(hx, 0, 1); synth_key(hx, 0, 0); }
+            if (hy){ synth_key(hy, 0, 1); synth_key(hy, 0, 0); }
+            rep = now + 250;
+        }
+    }
 }
 
 /* scripted key feeder for headless testing: M2C_KEYS="1245 " drips one
@@ -443,10 +453,12 @@ void rt_pump_events(void){
             { win_w = e.window.data1; win_h = e.window.data2; }
         /* key-mapping menu is modal while open */
         if (kmap_on && kmap_event(&e)) continue;
-        /* open triggers when closed: MENU / F10 / gamepad GUIDE */
+        /* open triggers when closed: MENU / F8 / gamepad GUIDE / hold-Back.
+         * F10 is not a trigger — the game uses it (run/walk toggle); F8 is
+         * free. */
         if (kmap_wanted() && e.type == SDL_KEYDOWN &&
             (e.key.keysym.scancode == SDL_SCANCODE_MENU ||
-             e.key.keysym.scancode == SDL_SCANCODE_F10))
+             e.key.keysym.scancode == SDL_SCANCODE_F8))
             { kmap_toggle(1); continue; }
         if (kmap_wanted() && e.type == SDL_CONTROLLERBUTTONDOWN &&
             e.cbutton.button == SDL_CONTROLLER_BUTTON_GUIDE)
@@ -498,22 +510,19 @@ void rt_pump_events(void){
             }
         }
         if (e.type == SDL_MOUSEMOTION && mouse_enabled()){
-            /* Screens with a free pixel cursor (POD selection: word_1D920==5)
-             * take the absolute pointer position — the guest cursor globals are
-             * written directly, matching the original "move crosshair to point"
-             * feel. Other menus stay on relative deltas -> synthesized arrows. */
+            /* The pointer's absolute position is the input everywhere —
+             * edge areas steer, the center is neutral. POD screens
+             * (word_1D920==5) additionally get the real cursor position. */
+            int gx = e.motion.x * 320 / (win_w > 0 ? win_w : 960);
+            int gy = e.motion.y * 200 / (win_h > 0 ? win_h : 600);
+            if (gx < 0) gx = 0; if (gx > 319) gx = 319;
+            if (gy < 0) gy = 0; if (gy > 199) gy = 199;
+            mgx = gx; mgy = gy;
             if (*(dw*)&mem[0xf340] == 5)            /* word_1D920 == POD */
                 pod_abs_cursor(e.motion.x, e.motion.y);
-            else {
-                macc_x += e.motion.xrel; macc_y += e.motion.yrel;
-                /* clamp backlog: a fast fling shouldn't queue seconds of input */
-                if (macc_x >  480) macc_x =  480; else if (macc_x < -480) macc_x = -480;
-                if (macc_y >  480) macc_y =  480; else if (macc_y < -480) macc_y = -480;
-                if (getenv("M2C_MOUSEDBG"))
-                    fprintf(stderr, "mouse mv %d,%d acc=%d,%d held=%04x\n",
-                            e.motion.xrel, e.motion.yrel, macc_x, macc_y,
-                            *(dw*)&mem[DS_BASE + 0xad9]);
-            }
+            else if (getenv("M2C_MOUSEDBG"))
+                fprintf(stderr, "mouse pos %d,%d held=%04x\n", gx, gy,
+                        *(dw*)&mem[DS_BASE + 0xad9]);
         }
         /* Gamepad / Android-TV remote-as-controller: map buttons and the left
          * stick onto the same XT scancodes the keyboard path produces.
@@ -573,7 +582,7 @@ void rt_pump_events(void){
                         *(dw*)&mem[DS_BASE + 0xad9]);
         }
     }
-    mouse_dir_step();
+    mouse_zone_step();
 }
 
 dw rt_kbd_port60(void){ dw v = port60; port60 = 0; return v; }
@@ -583,20 +592,29 @@ dw rt_kbd_port60(void){ dw v = port60; port60 = 0; return v; }
  * scancode or a gamepad button. D-pad/stick navigates, OK arms capture,
  * the next pressed input binds. Bindings persist to keymap.cfg in the
  * working dir (app filesDir on Android). While open the menu is modal.
- * Open: MENU / F10 / gamepad GUIDE / hold Back 700ms. M2C_NOKMAP=1 disables.
+ * Open: MENU / F8 / gamepad GUIDE / hold Back 700ms. M2C_NOKMAP=1 disables.
+ * (F10 is the game's run/walk key — deliberately not a trigger.)
  */
 typedef struct { const char *name; db scan; db a; } doskey;
 static const doskey doskeys[] = {
-    {"UP",0x48,0},{"DOWN",0x50,0},{"LEFT",0x4b,0},{"RIGHT",0x4d,0},
-    {"ENTER",0x1c,0x0d},{"ESC",0x01,0x1b},{"SPACE",0x39,0x20},{"TAB",0x0f,0x09},
-    {"1",0x02,'1'},{"2",0x03,'2'},{"3",0x04,'3'},{"4",0x05,'4'},{"5",0x06,'5'},
-    {"6",0x07,'6'},{"7",0x08,'7'},{"8",0x09,'8'},{"9",0x0a,'9'},{"0",0x0b,'0'},
-    {"-",0x0c,'-'},{"=",0x0d,'='},{"KP5",0x4c,'5'},
+    {"MOVE UP (UP)",0x48,0},{"MOVE DOWN (DOWN)",0x50,0},
+    {"MOVE LEFT (LEFT)",0x4b,0},{"MOVE RIGHT (RIGHT)",0x4d,0},
+    {"SELECT (ENTER)",0x1c,0x0d},{"BACK (ESC)",0x01,0x1b},
+    {"FIRE (SPACE)",0x39,0x20},{"TAB",0x0f,0x09},
+    {"WEAPON/MENU 1",0x02,'1'},{"WEAPON/MENU 2",0x03,'2'},
+    {"WEAPON/MENU 3",0x04,'3'},{"WEAPON/MENU 4",0x05,'4'},
+    {"WEAPON/MENU 5",0x06,'5'},{"WEAPON/MENU 6",0x07,'6'},
+    {"WEAPON/MENU 7",0x08,'7'},{"WEAPON/MENU 8",0x09,'8'},
+    {"WEAPON/MENU 9",0x0a,'9'},{"SPEED RESET (0)",0x0b,'0'},
+    {"GAME SPEED (-)",0x0c,'-'},{"GAME SPEED (=)",0x0d,'='},
+    {"CENTER (KP5)",0x4c,'5'},
     {"F1",0x3b,0},{"F2",0x3c,0},{"F3",0x3d,0},{"F4",0x3e,0},
-    {"F5",0x3f,0},{"F6",0x40,0},{"F7",0x41,0},
-    {"RESET DEFAULTS",0,0},
+    {"F5",0x3f,0},{"F6",0x40,0},{"F7",0x41,0},{"F8 (free)",0x42,0},
+    {"MAP (F9)",0x43,0},{"RUN/WALK (F10)",0x44,0},
+    {"RESET DEFAULTS",0,0},{"START GAME",0,0},
 };
 #define N_KMAP (int)(sizeof doskeys / sizeof doskeys[0])
+#define N_BINDABLE (N_KMAP - 2)            /* last two rows are actions */
 
 /* binding: kind 0=none 1=SDL scancode 2=controller button */
 typedef struct { db kind; dw code; } kbind;
@@ -666,7 +684,7 @@ const char *rt_kmap_name(int r){
 const char *rt_kmap_bind(int r){
     static char buf[32];
     if (r < 0 || r >= N_KMAP) return "?";
-    if (r == N_KMAP - 1) return "";
+    if (r >= N_BINDABLE) return "";
     if (binds[r].kind == 0) return "-";
     if (binds[r].kind == 1){
         snprintf(buf, sizeof buf, "%s",
@@ -714,7 +732,7 @@ static int kmap_match(SDL_Event *e){
     if (e->type == SDL_KEYDOWN || e->type == SDL_KEYUP){
         int down = e->type == SDL_KEYDOWN;
         if (down && e->key.repeat) return 0;
-        for (int i = 0; i < N_KMAP - 1; i++)
+        for (int i = 0; i < N_BINDABLE; i++)
             if (binds[i].kind == 1 && binds[i].code == e->key.keysym.scancode){
                 synth_key(doskeys[i].scan, doskeys[i].a, down);
                 return 1;
@@ -723,7 +741,7 @@ static int kmap_match(SDL_Event *e){
     }
     if (e->type == SDL_CONTROLLERBUTTONDOWN || e->type == SDL_CONTROLLERBUTTONUP){
         int down = e->type == SDL_CONTROLLERBUTTONDOWN;
-        for (int i = 0; i < N_KMAP - 1; i++)
+        for (int i = 0; i < N_BINDABLE; i++)
             if (binds[i].kind == 2 && binds[i].code == e->cbutton.button){
                 synth_key(doskeys[i].scan, doskeys[i].a, down);
                 return 1;
@@ -746,8 +764,10 @@ static int kmap_event(SDL_Event *e){
         case SDL_SCANCODE_RIGHT: return 1;      /* ignored: column-less list */
         case SDL_SCANCODE_RETURN:
         case SDL_SCANCODE_KP_ENTER:
+        case SDL_SCANCODE_SELECT:              /* Android TV DPAD_CENTER */
         case SDL_SCANCODE_SPACE:
-            if (kmap_sel == N_KMAP - 1){ kmap_defaults(); kmap_save(); }
+            if (kmap_sel == N_KMAP - 2){ kmap_defaults(); kmap_save(); }
+            else if (kmap_sel == N_KMAP - 1) kmap_on = 0;   /* START GAME */
             else kmap_cap = 1;
             return 1;
         case SDL_SCANCODE_MENU:
@@ -755,7 +775,7 @@ static int kmap_event(SDL_Event *e){
             back_dn = 0;
             /* fall through */
         case SDL_SCANCODE_ESCAPE:
-        case SDL_SCANCODE_F10:   kmap_toggle(0); return 1;
+        case SDL_SCANCODE_F8:   kmap_toggle(0); return 1;
         default: return 1;                     /* modal: swallow all other keys */
         }
     }
@@ -768,7 +788,8 @@ static int kmap_event(SDL_Event *e){
         case SDL_CONTROLLER_BUTTON_DPAD_RIGHT: return 1;
         case SDL_CONTROLLER_BUTTON_A:
         case SDL_CONTROLLER_BUTTON_START:
-            if (kmap_sel == N_KMAP - 1){ kmap_defaults(); kmap_save(); }
+            if (kmap_sel == N_KMAP - 2){ kmap_defaults(); kmap_save(); }
+            else if (kmap_sel == N_KMAP - 1) kmap_on = 0;   /* START GAME */
             else kmap_cap = 1;
             return 1;
         case SDL_CONTROLLER_BUTTON_GUIDE:
@@ -807,6 +828,35 @@ static void kmap_tick(void){
         back_hold_opened = 1;
         kmap_toggle(1);
     }
+}
+
+/* Exclusive controls-setup screen: shown on its own before the guest starts
+ * (Android TV default; M2C_KMAPSTART=1 forces it on other builds). Runs its
+ * own event/draw loop on the main thread — the game isn't running yet, so
+ * nothing is drawn behind it. Returns when the user picks START GAME /
+ * closes the menu; Esc/Back also leaves so a plain remote can't wedge. */
+void rt_kmap_exclusive(void){
+    if (!kmap_wanted()) return;
+#ifndef __ANDROID__
+    if (!getenv("M2C_KMAPSTART")) return;      /* desktop: opt-in only */
+#endif
+    kmap_ensure();
+    kmap_on = 1; kmap_cap = 0;
+    kmap_sel = N_KMAP - 1;                 /* land on START GAME */
+    while (kmap_on){
+        SDL_Event e;
+        while (SDL_PollEvent(&e)){
+            if (e.type == SDL_QUIT) rt_exit(0);
+            if (e.type == SDL_WINDOWEVENT &&
+                e.window.event == SDL_WINDOWEVENT_RESIZED &&
+                e.window.data1 > 0 && e.window.data2 > 0)
+                { win_w = e.window.data1; win_h = e.window.data2; }
+            kmap_event(&e);
+        }
+        rt_kmap_frame();
+        SDL_Delay(16);
+    }
+    back_dn = 0; back_hold_opened = 0;     /* stray Back shouldn't reopen */
 }
 
 
