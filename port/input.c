@@ -711,19 +711,40 @@ static void vkb_tick(void){
 }
 
 
-/* Detect the graphics-mode menu by its "DESIRED MODE" string in the text
- * buffer — its int16 read is the only BIOS-blocking pick in the game. */
-static int gfx_menu_visible(void){
-    static const char tag[] = "DESIRED MODE";
+/* Scan the text buffer for a menu's title string — the graphics and control
+ * menus are the only BIOS-blocking picks in the game. */
+static int text_menu_has(const char *tag){
+    int len = 0; while (tag[len]) len++;
     for (int row = 0; row < 25; row++){
         const unsigned char *p = &mem[0xb8000 + row*160];
-        for (int col = 0; col + (int)sizeof(tag)-1 <= 80; col++){
-            int i; for (i = 0; i < (int)sizeof(tag)-1; i++)
+        for (int col = 0; col + len <= 80; col++){
+            int i; for (i = 0; i < len; i++)
                 if (p[(col+i)*2] != (unsigned char)tag[i]) break;   /* chars at even ofs */
-            if (i == (int)sizeof(tag)-1) return 1;
+            if (i == len) return 1;
         }
     }
     return 0;
+}
+
+/* SELECT CONTROL DEVICE: 1=joystick 2=keyboard-directional 3=rotational.
+ * The menu renders in graphics mode (no text buffer to scan), but the guest
+ * marks it with menu_mode=8 (mem[0xf340], set only by input_device_menu).
+ * The pick is injected as a real BIOS-buffer entry while the menu is up and
+ * the queue is empty — kbhit reports it and read_key consumes it like a
+ * typed key. TV remotes only have directional arrows, so Android defaults
+ * to 2; M2C_CTRL overrides; other platforms wait for the user. */
+static int ctrl_done;
+static void ctrl_menu_autopick(void){
+    if (ctrl_done || *(volatile dw*)&mem[0xf340] != 8) return;   /* menu_mode */
+    const char *g = getenv("M2C_CTRL");
+    char pick = g ? *g : 0;
+#ifdef __ANDROID__
+    if (!pick) pick = '2';
+#endif
+    if (pick < '1' || pick > '3') return;
+    ctrl_done = 1;
+    if (getenv("M2C_KTRACE")) fprintf(stderr, "ctrldev autopick '%c'\n", pick);
+    kpush((dw)(((pick - '0' + 1) << 8) | pick));   /* '1'->0x0231 etc */
 }
 
 /* BIOS int 16h */
@@ -732,7 +753,8 @@ void bios_getch(void){      /* AH=0: block -> AX */
     static int gfx_done;    /* auto-select MCGA once, on the mode menu */
     while ((v = kpop()) < 0){
         kbd_polls++; rt_frame(); SDL_Delay(1);
-        if (!gfx_done && gfx_menu_visible()){
+        ctrl_menu_autopick();
+        if (!gfx_done && text_menu_has("DESIRED MODE")){
             const char *g = getenv("M2C_GFXMODE");
             char pick = g ? *g : '4';       /* 4 = MCGA / mode 13h */
             if (pick >= '1' && pick <= '5'){
@@ -748,6 +770,7 @@ void bios_getch(void){      /* AH=0: block -> AX */
 void bios_kbhit(void){      /* AH=1: ZF=0 & AX=key if pending */
     kbd_polls++;
     rt_frame();
+    if (khead == ktail) ctrl_menu_autopick();
     if (khead == ktail){ ZF=1; return; }
     ZF=0; ax = kq[ktail];
 }

@@ -57,9 +57,19 @@ int main(int argc, char **argv){
 #endif
     video_init();
 #ifdef __ANDROID__
-    /* bundled assets were extracted to filesDir by MainActivity before the
-     * native thread started — game data files resolve relative to cwd */
-    chdir(SDL_AndroidGetInternalStoragePath());
+    /* SAF imports land in internal storage; adb-pushed files land on the
+     * external app dir — use whichever actually holds the game data. */
+    const char *dir = SDL_AndroidGetInternalStoragePath();
+    const char *ext = SDL_AndroidGetExternalStoragePath();
+    if (dir && ext){
+        char probe[512];
+        snprintf(probe, sizeof probe, "%s/TTLSCR.DTX", dir);
+        if (access(probe, R_OK) != 0){
+            snprintf(probe, sizeof probe, "%s/TTLSCR.DTX", ext);
+            if (access(probe, R_OK) == 0) dir = ext;
+        }
+    }
+    if (dir) chdir(dir);
 #endif
     /* SDL installs SIGINT/SIGTERM handlers that only post SDL_QUIT — useless if
      * the game isn't pumping events; force a real exit so timeouts work. */

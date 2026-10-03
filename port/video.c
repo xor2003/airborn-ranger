@@ -53,7 +53,15 @@ volatile int rt_isr_ctx;             /* inside a timer-thread guest ISR */
 
 void rt_set_cpu_thread(void){
     cpu_tid = pthread_self();
-#ifdef _WIN32
+#ifndef _WIN32
+    /* SDL spawns threads with SIGUSR1 masked (observed on Android: the park
+     * signal sat pending forever, the handshake skipped every IRQ0, and the
+     * guest froze at boot on a flat fill). The worker must take the signal. */
+    sigset_t usr1;
+    sigemptyset(&usr1);
+    sigaddset(&usr1, SIGUSR1);
+    pthread_sigmask(SIG_UNBLOCK, &usr1, NULL);
+#else
     DuplicateHandle(GetCurrentProcess(), GetCurrentThread(), GetCurrentProcess(),
                     &cpu_hnd, 0, FALSE, DUPLICATE_SAME_ACCESS);
 #endif
