@@ -43,3 +43,6 @@ dist/
 *.exe
 orig_image.bin
 build_sdl/
+
+# Per-user runtime key bindings
+keymap.cfg
