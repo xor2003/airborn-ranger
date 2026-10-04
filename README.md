@@ -24,6 +24,12 @@ Regenerating the port pipeline (`port/memimg.c`, `port/gen/`,
 `port/data_syms.h`) needs the original binaries locally —
 `tools/gen_port.py` reads `AR_rebuilt.exe`, `AR.EXE.map`, `AR.EXE.lst`.
 
+Asset tools (work on your own copies, nothing bundled):
+`tools/dtx2png.py` decodes DOS `.DTX` art; `tools/dat2png.py` decodes
+Atari ST / Amiga `.DAT` + `.ST` graphics (title/combat screens with
+palette, planar sprite sheets); `tools/snd2wav.py` extracts the Amiga
+`.snd` containers' embedded 8SVX samples to WAV.
+
 ## Controls
 
 arrows = move, Enter / KP5 / Ins = fire & confirm, Esc = back/menu,
