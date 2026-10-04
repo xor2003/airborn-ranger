@@ -10,16 +10,27 @@ rm -f "$T".*.ppm "$T".*.txt "$T".log
 mkdir -p /tmp
 
 cd ..
+# Binary is not part of `make check` — ensure it's built and current rather
+# than fail on status 127 (missing) or silently test a stale build.
+make -C port ar_port >/dev/null || { echo "FAIL: ar_port build failed"; exit 1; }
 # Flow: 4=VGA/MCGA at the device menu, 2=keyboard-directional. Enters walk the
 # title->credits->mission-select->difficulty->briefing chain. On the POD screen
 # the divert mask only consumes arrows+Enter, so cycle focus over the item grid
 # and the CLEAR/STANDARD/DONE row until Enter lands on DONE. Then idle so the
 # airdrop (Osprey -> pod drop -> parafoil descent) runs on its own.
+rc=0
 SDL_VIDEODRIVER=dummy SDL_AUDIODRIVER=dummy \
 M2C_DUMP="$T" M2C_DUMP_EVERY=120 \
 M2C_KEYS="..2..\r\r\r\r\r\r\r\r\r\r\r\r\r\r..\R..\d..\r..\R..\d..\r..\l..\d..\r..\R..\d..\r..\u..\r..\R..\R..\d..\r..\R..\l..\u..\r..\R..\d..\r............................................................................................................................................................................................................................................................................................" \
 M2C_KEYS_DELAY=10 \
-timeout 150 ./port/ar_port 2>"$T".log || true
+timeout 150 ./port/ar_port 2>"$T".log || rc=$?
+# 0 = guest exited on its own, 124 = killed by timeout, 128 = on_signal's
+# _exit(128). Anything else (segv=139, abort=134, ...) is a real crash even
+# if frames were already dumped.
+case "$rc" in
+0|124|128) ;;
+*) echo "FAIL: ar_port terminated abnormally (status $rc)"; exit 1;;
+esac
 
 cd port
 python3 - "$T" <<'EOF'

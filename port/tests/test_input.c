@@ -1,8 +1,10 @@
 /* unit tests for input.c: scancode table, script feeder, int9 held-mask,
- * BIOS key queue. includes input.c to reach statics. */
+ * BIOS key queue, key-mapping menu. includes input.c to reach statics. */
 #include <SDL2/SDL.h>
 #include "../rt.h"
 #include <stdio.h>
+#include <unistd.h>
+#include <sys/stat.h>
 
 void rt_frame(void){}                              /* video.c stubs */
 void rt_kmap_frame(void){}
@@ -37,6 +39,8 @@ int main(void){
     CHECK(ascii_of('5') == '5');
     CHECK(ascii_of('\r') == '\r');
     CHECK(ascii_of(0x1000) == 0);
+    CHECK(ascii_of(SDLK_RETURN) == '\r');
+    CHECK(ascii_of(SDLK_ESCAPE) == 27);
 
     /* --- script_key parsing --- */
     int sc; db asc;
@@ -58,6 +62,10 @@ int main(void){
     CHECK(sc == -1);                                /* pause token */
     p = script_key("q", &sc, &asc);
     CHECK(sc == 0x10 && asc == 'q');
+    p = script_key("\\H", &sc, &asc);              /* hold-next-key flag */
+    CHECK(sc == -3);
+    p = script_key("\\F", &sc, &asc);              /* F9 -> map overlay */
+    CHECK(sc == 0x43);
 
     /* --- int9_update: held-key bitmask --- */
     memset(&mem[DS_BASE], 0, 0x1000);
@@ -204,6 +212,281 @@ int main(void){
     rt_pump_events();
     bios_kbhit();
     CHECK(ZF == 0); CHECK(ax == 0x1c0d);            /* click -> Enter */
+    kpop();
+
+    /* --- rt_kbd_port60: set by key path, read clears --- */
+    khead = ktail = 0;
+    *(dw*)&mem[DS_BASE + 0xad7] = 0;
+    synth_key(0x48, 0, 1);
+    CHECK(rt_kbd_port60() == 0x48);
+    CHECK(rt_kbd_port60() == 0);
+    synth_key(0x48, 0, 0);                          /* break code */
+    CHECK(rt_kbd_port60() == (0x48 | 0x80));
+    while (kpop() >= 0);                            /* drain queued presses */
+
+    /* --- bios_getch: returns pending key --- */
+    khead = ktail = 0; kpush(0x2e03);
+    bios_getch();
+    CHECK(ax == 0x2e03 && khead == ktail);
+
+    /* --- bios_time: int1Ah ticks --- */
+    bios_time();
+    CHECK(al == 0);
+
+    /* --- POD screens: pointer sets cursor coords, zones suppressed --- */
+    memset(&mem[DS_BASE], 0, 0x1000);               /* NB: 0xf340 is inside this range */
+    *(dw*)&mem[0xf340] = 5;                          /* POD mode */
+    win_w = 960; win_h = 600;
+    pod_abs_cursor(960, 600);                        /* bottom-right corner */
+    CHECK(mem[0xf71f] == 0x38 && mem[0xf73f] == 0x01);  /* X clamped 0x138 */
+    CHECK(mem[0xf75f] == 0xc4);                         /* Y clamped 0xc4  */
+    *(dw*)&mem[DS_BASE + 0xad7] = 1;
+    *(dw*)&mem[DS_BASE + 0x950 + 0x4d*2] = 0x0040;
+    mgx = 300; mgy = 100;
+    mouse_zone_step();
+    CHECK(*(dw*)&mem[DS_BASE + 0xad9] == 0);         /* zones off in POD */
+    *(dw*)&mem[0xf340] = 0;
+
+    /* --- deferred release: diverted keyup defers, rel_expire completes --- */
+    memset(&mem[DS_BASE], 0, 0x1000);
+    *(dw*)&mem[DS_BASE + 0xad7] = 1;
+    *(dw*)&mem[DS_BASE + 0x950 + 0x4d*2] = 0x0040;
+    *(dw*)&mem[DS_BASE + 0xad9] = 0;
+    rel_n = 0;
+    down_at[0x4d] = SDL_GetTicks();                  /* pressed just now */
+    int9_update(0x4d, 1);
+    rel_defer(0x4d);
+    CHECK(rel_n == 1);                               /* deferred, still held */
+    CHECK(*(dw*)&mem[DS_BASE + 0xad9] == 0x0040);
+    rel_pend[0].at = 0;                              /* force expiry */
+    rel_expire();
+    CHECK(rel_n == 0);
+    CHECK(*(dw*)&mem[DS_BASE + 0xad9] == 0);
+
+    /* --- mrelease: clears held bit even with divert off --- */
+    *(dw*)&mem[DS_BASE + 0xad7] = 0;
+    *(dw*)&mem[DS_BASE + 0x950 + 0x4b*2] = 0x0080;
+    *(dw*)&mem[DS_BASE + 0xad9] = 0x0080;
+    mrelease(0x4b);
+    CHECK(*(dw*)&mem[DS_BASE + 0xad9] == 0);
+
+    /* --- ctrl_menu_autopick: menu_mode=8 + M2C_CTRL -> typed key --- */
+    ctrl_done = 0;
+    *(dw*)&mem[0xf340] = 8;
+    khead = ktail = 0;
+    setenv("M2C_CTRL", "2", 1);
+    bios_kbhit();
+    CHECK(ZF == 0); CHECK(ax == 0x0332);             /* '2' -> 0x03<<8|0x32 */
+    kpop();
+    bios_kbhit();                                    /* picked once only */
+    CHECK(ZF == 1);
+    ctrl_done = 0;
+    setenv("M2C_CTRL", "9", 1);                      /* out of range: no pick */
+    bios_kbhit();
+    CHECK(ZF == 1);
+    setenv("M2C_CTRL", "1", 1);
+    *(dw*)&mem[0xf340] = 0;                          /* not the device menu */
+    bios_kbhit();
+    CHECK(ZF == 1);
+    unsetenv("M2C_CTRL");
+
+    /* --- key-mapping menu --- */
+    {   char oldcwd[512];
+        CHECK(getcwd(oldcwd, sizeof oldcwd) != NULL);
+        mkdir("/tmp/ar_kmap", 0755);
+        CHECK(chdir("/tmp/ar_kmap") == 0);
+        unlink(KMAP_FILE);
+
+        /* defaults: movement/select keys self-bound, F10 NOT bound */
+        kmap_loaded = 0; kmap_load();
+        CHECK(binds[0].kind == 1 && binds[0].code == SDL_SCANCODE_UP);
+        CHECK(binds[4].kind == 1 && binds[4].code == SDL_SCANCODE_RETURN);
+        CHECK(binds[30].kind == 0);                  /* RUN/WALK (F10) row */
+        CHECK(N_KMAP == 33 && N_BINDABLE == 31);
+
+        /* save/load roundtrip */
+        binds[0].kind = 1; binds[0].code = SDL_SCANCODE_G;
+        kmap_save();
+        kmap_defaults();
+        CHECK(binds[0].code == SDL_SCANCODE_UP);     /* back to default */
+        kmap_load();
+        CHECK(binds[0].kind == 1 && binds[0].code == SDL_SCANCODE_G);
+
+        /* malformed file: keeps defaults, no crash */
+        FILE *bf = fopen(KMAP_FILE, "w");
+        fputs("garbage\n99=9:99999\n-1=1:5\n", bf); fclose(bf);
+        kmap_defaults();
+        kmap_load();
+        CHECK(binds[0].kind == 1 && binds[0].code == SDL_SCANCODE_UP);
+        unlink(KMAP_FILE);
+
+        /* capture binds; an input bound elsewhere is stolen */
+        kmap_sel = 0; kmap_cap = 1;
+        SDL_Event ev; memset(&ev, 0, sizeof ev);
+        ev.type = SDL_KEYDOWN; ev.key.keysym.scancode = SDL_SCANCODE_J;
+        CHECK(kmap_capture(&ev) == 1);
+        CHECK(binds[0].kind == 1 && binds[0].code == SDL_SCANCODE_J);
+        CHECK(kmap_cap == 0);
+        kmap_sel = 1; kmap_cap = 1;
+        kmap_capture(&ev);                           /* same key -> stolen */
+        CHECK(binds[0].kind == 0);
+        CHECK(binds[1].kind == 1 && binds[1].code == SDL_SCANCODE_J);
+
+        /* Esc cancels capture without rebinding */
+        kmap_sel = 2; kmap_cap = 1;
+        int oldk = binds[2].kind; unsigned oldc = binds[2].code;
+        ev.key.keysym.scancode = SDL_SCANCODE_ESCAPE;
+        kmap_capture(&ev);
+        CHECK(binds[2].kind == oldk && binds[2].code == oldc);
+        CHECK(kmap_cap == 0);
+
+        /* controller button capture -> kind 2 */
+        kmap_sel = 2; kmap_cap = 1;
+        memset(&ev, 0, sizeof ev);
+        ev.type = SDL_CONTROLLERBUTTONDOWN;
+        ev.cbutton.button = SDL_CONTROLLER_BUTTON_X;
+        kmap_capture(&ev);
+        CHECK(binds[2].kind == 2 && binds[2].code == SDL_CONTROLLER_BUTTON_X);
+
+        /* accessors */
+        CHECK(rt_kmap_rows() == N_KMAP);
+        CHECK(rt_kmap_capture() == 0);
+        CHECK(!strcmp(rt_kmap_name(0), "MOVE UP (UP)"));
+        CHECK(!strcmp(rt_kmap_bind(1), "J"));        /* scancode name */
+        CHECK(!strcmp(rt_kmap_bind(0), "-"));        /* unbound */
+
+        /* kmap_match: bound input injects its DOS key, repeats ignored */
+        memset(&mem[DS_BASE], 0, 0x1000);
+        *(dw*)&mem[DS_BASE + 0xad7] = 0;
+        khead = ktail = 0;
+        memset(&ev, 0, sizeof ev);
+        ev.type = SDL_KEYDOWN; ev.key.keysym.scancode = SDL_SCANCODE_J;
+        CHECK(kmap_match(&ev) == 1);
+        bios_kbhit();
+        CHECK(ZF == 0); CHECK(ax == (0x50 << 8));    /* row1 = MOVE DOWN */
+        kpop();
+        ev.key.repeat = 1;
+        CHECK(kmap_match(&ev) == 0);                 /* autorepeat ignored */
+        ev.key.repeat = 0;
+        ev.type = SDL_KEYUP;
+        CHECK(kmap_match(&ev) == 1);                 /* release also bound */
+        memset(&ev, 0, sizeof ev);
+        ev.type = SDL_KEYDOWN; ev.key.keysym.scancode = SDL_SCANCODE_K;
+        CHECK(kmap_match(&ev) == 0);                 /* unbound key falls through */
+
+        /* modal navigation: arrows move selection, Enter arms capture,
+         * START GAME and Esc close the menu */
+        kmap_on = 1; kmap_sel = 0; kmap_cap = 0;
+        memset(&ev, 0, sizeof ev);
+        ev.type = SDL_KEYDOWN; ev.key.keysym.scancode = SDL_SCANCODE_DOWN;
+        CHECK(kmap_event(&ev) == 1); CHECK(kmap_sel == 1);
+        ev.key.keysym.scancode = SDL_SCANCODE_UP;
+        kmap_event(&ev); CHECK(kmap_sel == 0);
+        ev.key.keysym.scancode = SDL_SCANCODE_RETURN;
+        kmap_event(&ev); CHECK(kmap_cap == 1);       /* Enter on row -> capture */
+        kmap_cap = 0;
+        kmap_sel = N_KMAP - 1;                       /* START GAME */
+        kmap_event(&ev); CHECK(kmap_on == 0);
+        kmap_on = 1; kmap_sel = 0;
+        ev.key.keysym.scancode = SDL_SCANCODE_ESCAPE;
+        kmap_event(&ev); CHECK(kmap_on == 0);
+        kmap_on = 0;
+
+        /* RESET DEFAULTS row restores the map */
+        binds[0].kind = 0;
+        kmap_on = 1; kmap_sel = N_KMAP - 2;
+        ev.key.keysym.scancode = SDL_SCANCODE_RETURN;
+        kmap_event(&ev);
+        CHECK(binds[0].kind == 1 && binds[0].code == SDL_SCANCODE_UP);
+        kmap_on = 0;
+
+        /* kmap_wanted: M2C_NOKMAP disables */
+        kmap_enabled = -1;
+        setenv("M2C_NOKMAP", "1", 1);
+        CHECK(kmap_wanted() == 0);
+        kmap_enabled = -1;
+        unsetenv("M2C_NOKMAP");
+        CHECK(kmap_wanted() == 1);
+        kmap_enabled = -1;
+
+        CHECK(chdir(oldcwd) == 0);
+        kmap_defaults();                             /* leave clean state */
+    }
+
+    /* --- through the event pump: F8 opens the menu, F10 stays a game key --- */
+    SDL_FlushEvents(SDL_FIRSTEVENT, SDL_LASTEVENT);
+    kmap_on = 0; kmap_enabled = -1;
+    memset(&mem[DS_BASE], 0, 0x1000);
+    *(dw*)&mem[DS_BASE + 0xad7] = 0;
+    khead = ktail = 0;
+    memset(&me, 0, sizeof me);
+    me.type = SDL_KEYDOWN; me.key.keysym.scancode = SDL_SCANCODE_F8;
+    SDL_PushEvent(&me);
+    rt_pump_events();
+    CHECK(rt_kmap_open() == 1);                      /* menu opened */
+    SDL_PushEvent(&me);                              /* F8 again: closes */
+    rt_pump_events();
+    CHECK(rt_kmap_open() == 0);
+
+    me.key.keysym.scancode = SDL_SCANCODE_F10;
+    SDL_PushEvent(&me);
+    rt_pump_events();
+    CHECK(rt_kmap_open() == 0);                      /* NOT a menu trigger */
+    bios_kbhit();
+    CHECK(ZF == 0); CHECK(ax == (0x44 << 8));        /* F10 reached the game */
+    kpop();
+
+    /* --- controller button/axis through the pump --- */
+    memset(&me, 0, sizeof me);
+    me.type = SDL_CONTROLLERBUTTONDOWN;
+    me.cbutton.button = SDL_CONTROLLER_BUTTON_A;
+    SDL_PushEvent(&me);
+    rt_pump_events();
+    bios_kbhit();
+    CHECK(ZF == 0); CHECK(ax == 0x1c0d);             /* A -> Enter */
+    kpop();
+
+    memset(&mem[DS_BASE], 0, 0x1000);
+    *(dw*)&mem[DS_BASE + 0xad7] = 1;
+    *(dw*)&mem[DS_BASE + 0x950 + 0x4d*2] = 0x0040;   /* RIGHT -> bit6 */
+    memset(&me, 0, sizeof me);
+    me.type = SDL_CONTROLLERAXISMOTION;
+    me.caxis.axis = SDL_CONTROLLER_AXIS_LEFTX;
+    me.caxis.value = 30000;
+    SDL_PushEvent(&me);
+    rt_pump_events();
+    CHECK(*(dw*)&mem[DS_BASE + 0xad9] == 0x0040);    /* stick -> held RIGHT */
+    me.caxis.value = 0;                              /* recenter */
+    SDL_PushEvent(&me);
+    rt_pump_events();                                /* release is deferred */
+    for (int i = 0; i < rel_n; i++) rel_pend[i].at = 0;
+    rel_expire();
+    CHECK(*(dw*)&mem[DS_BASE + 0xad9] == 0);
+
+    /* --- AC_BACK: short press = Esc, hold = mapping menu --- */
+    memset(&mem[DS_BASE], 0, 0x1000);
+    *(dw*)&mem[DS_BASE + 0xad7] = 0;
+    khead = ktail = 0;
+    memset(&me, 0, sizeof me);
+    me.type = SDL_KEYDOWN; me.key.keysym.scancode = SDL_SCANCODE_AC_BACK;
+    SDL_PushEvent(&me);
+    rt_pump_events();
+    CHECK(khead == ktail);                           /* Esc deferred to keyup */
+    back_dn = SDL_GetTicks() - 800;                  /* simulate >700ms hold */
+    rt_pump_events();
+    CHECK(rt_kmap_open() == 1);                      /* hold opened the menu */
+    me.type = SDL_KEYUP;
+    SDL_PushEvent(&me);
+    rt_pump_events();
+    CHECK(khead == ktail);                           /* no Esc after hold-open */
+    kmap_toggle(0);
+    CHECK(rt_kmap_open() == 0);
+
+    me.type = SDL_KEYDOWN; SDL_PushEvent(&me);       /* short press -> Esc */
+    me.type = SDL_KEYUP; SDL_PushEvent(&me);
+    rt_pump_events();
+    bios_kbhit();
+    CHECK(ZF == 0); CHECK(ax == 0x011b);
     kpop();
 
     fprintf(stderr, "test_input: %d checks, %d failures\n", checks, fails);

@@ -5,6 +5,13 @@
  *   - LZW resource decoder decompress_res vs an independent reference implementation
  *     over every *CHR/*.SCR/misc .DTX file in the game dir
  */
+/* pull setup_psp out of main.c for testing: the app's main() is renamed away
+ * (never called); its other externs resolve against GAME_OBJS. main.c must
+ * come first — it includes SDL before rt.h, whose reg macros break SDL's
+ * prototypes if rt.h is already in force. */
+#define main m2c_app_main
+#include "../main.c"
+#undef main
 #include "../rt.h"
 #include "../procs.h"
 #include <stdio.h>
@@ -94,6 +101,15 @@ int main(void){
     long nz = 0; for (long i = 0x1a20; i < 0x1a20 + 163888; i++) nz += mem[i] != 0;
     CHECK(nz > 60000);                             /* real code+data present */
 
+    /* ---- setup_psp (from main.c): minimal PSP contract at 0x192:0 ---- */
+    setup_psp();
+    {   const db *psp = &mem[0x192 << 4];
+        CHECK(psp[0] == 0xcd && psp[1] == 0x20);      /* int 20h */
+        CHECK(*(const dw*)(psp + 2) == 0xa000);       /* top of memory */
+        CHECK(psp[0x2c] == 0 && psp[0x2d] == 0);      /* env seg 0 */
+        CHECK(psp[0x80] == 1 && psp[0x81] == ' ' && psp[0x82] == 0x0d);
+    }
+
     /* ---- func_at ---- */
     CHECK(func_at(0xffea5) == rt_bios_int8);
     { vfn z = func_at(0); CHECK(z != 0); z(); }
@@ -119,13 +135,22 @@ int main(void){
     *(dw*)&mem[0xf36d] = 1; rt_call_vector(0x1c); rt_call_vector(0x1c);
     CHECK(*(dw*)&mem[0xf36d] == 0);
 
-    /* ---- LZW: every .DTX decodes identically under both implementations ---- */
-    const char *gdir = "/home/xor/games/airborn";
-    DIR *d = opendir(gdir);
-    CHECK(d != NULL);
+    /* ---- LZW: every .DTX decodes identically under both implementations ----
+     * Corpus needs the original game files (not in the repo): env override,
+     * the parent dir (tests run from port/), then the dev path as fallback.
+     * No corpus -> skip that section, the rest of the test is asset-free. */
+    const char *gdir = getenv("M2C_GAMEDIR");
+    if (!gdir){
+        static const char *cand[] = { "..", "/home/xor/games/airborn" };
+        for (size_t i = 0; i < sizeof cand / sizeof *cand; i++){
+            DIR *t = opendir(cand[i]);
+            if (t){ closedir(t); gdir = cand[i]; break; }
+        }
+    }
+    DIR *d = gdir ? opendir(gdir) : NULL;
     struct dirent *e; int ndtx = 0;
     static unsigned char ref_out[0x20000];
-    while ((e = readdir(d))){
+    while (d && (e = readdir(d))){
         const char *nm = e->d_name;
         size_t l = strlen(nm);
         if (l < 4 || strcasecmp(nm + l - 4, ".DTX")) continue;
@@ -160,9 +185,14 @@ int main(void){
             CHECK(bad == 0);
         }
     }
-    closedir(d);
-    CHECK(ndtx > 20);                              /* really exercised the corpus */
-    fprintf(stderr, "  (%d DTX files decoded identically)\n", ndtx);
+    if (d) closedir(d);
+    if (ndtx){
+        CHECK(ndtx > 20);                          /* really exercised the corpus */
+        fprintf(stderr, "  (%d DTX files decoded identically)\n", ndtx);
+    } else {
+        fprintf(stderr, "  SKIP: no .DTX corpus (gdir=%s)\n",
+                gdir ? gdir : "(none found)");
+    }
 
     /* ---- status-panel digit patcher: WOUNDS field ds:0xB93F <- byte_29712
      * template lives in the image with literal "XX" placeholders; sub_1BBB9

@@ -51,14 +51,21 @@ int main(void){
     CHECK(ror16(0x8001,1) == 0xc000);
     CHECK(ror16(0x1234,4) == 0x4123);
     CHECK(rol16(0xffff,0) == 0xffff);
+    /* count mod 16: 16 -> identity, 17 -> rotate by 1 */
+    CHECK(rol16(0x1234,16) == 0x1234);
+    CHECK(ror16(0x1234,17) == ror16(0x1234,1));
+    CHECK(rol16(0x1234,33) == rol16(0x1234,1));
 
     /* rcl16: rotate through carry, count mod 17 */
     CF=0; CHECK(rcl16(0x8000,1) == 0x0000);     /* top bit -> CF */
     CF=1; CHECK(rcl16(0x0000,1) == 0x0001);     /* CF -> bit0 */
     CF=1; CHECK(rcl16(0x0000,17) == 0x0000);    /* 17 = full circle w/ carry */
+    CF=1; CHECK(rcl16(0x0000,18) == 0x0001);    /* 18 % 17 = 1 */
     /* rcr16 */
     CF=1; CHECK(rcr16(0x0000,1) == 0x8000);     /* CF -> bit15 */
     CF=0; CHECK(rcr16(0x0001,1) == 0x0000);
+    CF=1; CHECK(rcr16(0x0003,1) == 0x8001);     /* bit0 out -> CF, CF in -> bit15 */
+    CF=1; CHECK(rcr16(0x0000,18) == 0x8000);    /* 18 % 17 = 1 */
 
     /* 8/16-bit register views share storage (partial-register aliasing) */
     eax = 0; al = 0x12; CHECK(ax == 0x12); ah = 0x34; CHECK(ax == 0x3412);

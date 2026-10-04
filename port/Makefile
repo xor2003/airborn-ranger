@@ -16,18 +16,18 @@ ar_port: $(OBJS)
 
 GAME_OBJS = $(filter-out main.o,$(OBJS))
 
-tests/t_rt: tests/test_rt.c rt.o
+tests/t_rt: tests/test_rt.c rt.o rt.h
 	$(CC) $(CFLAGS) -I. -o $@ $< rt.o
-tests/t_dos: tests/test_dos.c dos.c rt.o
+tests/t_dos: tests/test_dos.c dos.c rt.o rt.h data_syms.h
 	$(CC) $(CFLAGS) -I. -o $@ $< rt.o
-tests/t_input: tests/test_input.c input.c rt.o
+tests/t_input: tests/test_input.c input.c rt.o rt.h data_syms.h
 	$(CC) $(CFLAGS) $(SDL_CFLAGS) -I. -o $@ $< rt.o $(SDL_LIBS)
-tests/t_snd: tests/test_snd.c snd.c rt.o
+tests/t_snd: tests/test_snd.c snd.c rt.o rt.h data_syms.h
 	$(CC) $(CFLAGS) $(SDL_CFLAGS) -I. -o $@ $< rt.o $(SDL_LIBS)
-tests/t_video: tests/test_video.c video.c rt.o
+tests/t_video: tests/test_video.c video.c rt.o rt.h data_syms.h
 	$(CC) $(CFLAGS) $(SDL_CFLAGS) -I. -o $@ $< rt.o $(SDL_LIBS) -lpthread
-tests/t_game: tests/test_game.c $(GAME_OBJS)
-	$(CC) $(CFLAGS) $(SDL_CFLAGS) -I. -o $@ $< $(GAME_OBJS) $(SDL_LIBS)
+tests/t_game: tests/test_game.c main.c $(GAME_OBJS) rt.h data_syms.h procs.h
+	$(CC) $(CFLAGS) $(SDL_CFLAGS) -I. -o $@ $< $(GAME_OBJS) $(SDL_LIBS) -lpthread
 
 check: tests/t_rt tests/t_dos tests/t_input tests/t_snd tests/t_video tests/t_game
 	@fail=0; for t in tests/t_rt tests/t_dos tests/t_input tests/t_snd tests/t_video tests/t_game; do \

@@ -17,6 +17,8 @@ static int fails, checks;
     fprintf(stderr, "FAIL %s:%d: %s\n", __FILE__, __LINE__, #cond); } }while(0)
 
 int main(void){
+    setenv("SDL_AUDIODRIVER", "dummy", 0);     /* snd_init must not hit real audio */
+
     /* --- volume table: non-increasing, capped top steps, 0xF = silence --- */
     snd_reset();
     CHECK(vol_table[15] == 0);
@@ -34,9 +36,10 @@ int main(void){
     snd_write(0x80 | 0x00);          /* low nibble 0 keeps high bits */
     CHECK(period[0] == (0x24 << 4));
 
-    /* period 0 in reg -> clamped 0x400 */
+    /* period 0 in reg -> clamped to 0x400 (1 << 10, "never toggle") */
     snd_write(0x80 | 0x00); snd_write(0x80 | 0x00); snd_write(0x00);
-    CHECK(period[0] == 0x400 || (snd_reg[0] && period[0]==snd_reg[0]));
+    CHECK(snd_reg[0] == 0);
+    CHECK(period[0] == 0x400);
 
     /* --- volume regs: odd latch numbers write attenuation index --- */
     snd_write(0x80 | 0x10 | 0x0f);   /* ch0 volume = 15 -> silent */
@@ -85,6 +88,59 @@ int main(void){
     CHECK(fgetc(f) == 0x81); CHECK(fgetc(f) == 0x00);
     CHECK(fgetc(f) == 0xc0); CHECK(fgetc(f) == 0x00);
     fclose(f);
+
+    /* --- in_noise_mode reflects reg6 bit2 --- */
+    snd_write(0x80 | 0x60 | 0x04);
+    CHECK(in_noise_mode() == 1);
+    snd_write(0x80 | 0x60 | 0x00);
+    CHECK(in_noise_mode() == 0);
+
+    /* --- snd_sample: negated mix of gated volumes --- */
+    snd_reset();
+    output[0] = 1; volume[0] = vol_table[0];
+    CHECK(snd_sample() == -vol_table[0]);
+    output[0] = 0; output[1] = 1; volume[1] = vol_table[2];
+    CHECK(snd_sample() == -vol_table[2]);
+    output[0] = output[1] = 1;
+    CHECK(snd_sample() == -(vol_table[0] + vol_table[2]));
+
+    /* --- rt_tnd_write: the port-0xc0 entry point --- */
+    rt_tnd_write(0xc0, 0x80 | 0x10 | 0x0f);       /* ch0 vol = silent */
+    CHECK(volume[0] == 0);
+    rt_tnd_write(0xc0, 0x80 | 0x00 | 0x07);       /* ch0 freq lo 7 */
+    CHECK((snd_reg[0] & 0x0f) == 7);
+
+    /* --- evt_cmp ordering for the MIDI flush sort --- */
+    {   MidiEvt a = {5,0,0,0}, b = {9,0,0,0}, c = {9,0,0,0};
+        CHECK(evt_cmp(&a, &b) < 0);
+        CHECK(evt_cmp(&b, &a) > 0);
+        CHECK(evt_cmp(&b, &c) == 0);
+    }
+
+    /* --- MIDI capture: note on/off land in the file --- */
+    {   const char *mp = "/tmp/ar_t_snd.mid";
+        remove(mp);
+        setenv("M2C_MIDI_OUT", mp, 1);
+        mevn = 0; note_state[0] = -1;
+        midi_init();
+        CHECK(midi_on == 1);
+        snd_reset();
+        snd_write(0x80 | 0x00 | 0x05);            /* ch0 freq lo */
+        snd_write(0x10);                          /* ch0 freq hi -> period set */
+        snd_write(0x80 | 0x10 | 0x00);            /* ch0 vol max -> note on */
+        int non = mevn;
+        snd_write(0x80 | 0x10 | 0x0f);            /* ch0 vol 15 -> note off */
+        CHECK(non >= 1 && mevn > non);            /* both events recorded */
+        midi_flush();
+        FILE *f = fopen(mp, "rb");
+        CHECK(f != NULL);
+        if (f){
+            CHECK(fgetc(f) == 'M' && fgetc(f) == 'T' &&
+                  fgetc(f) == 'h' && fgetc(f) == 'd');
+            fclose(f);
+        }
+        unsetenv("M2C_MIDI_OUT"); midi_on = 0;
+    }
 
     /* --- engine select --- */
     engine_sel = -1; unsetenv("M2C_SND_ENGINE"); CHECK(snd_engine() == 0);

@@ -31,8 +31,8 @@ behavior. Read `HANDOFF.md` first for current state and history;
 python3 tools/lift.py && python3 tools/gen_port.py && python3 tools/rename.py
 
 make -C port            # build ar_port
-make -C port check      # unit checks (expect 342/342)
-bash port/tests/e2e.sh  # headless end-to-end run
+make -C port check      # unit checks (must print ALL TESTS PASSED)
+bash port/tests/e2e.sh  # headless end-to-end run (needs game files in repo root)
 ```
 
 Live headless run: `SDL_VIDEODRIVER=dummy SDL_AUDIODRIVER=dummy

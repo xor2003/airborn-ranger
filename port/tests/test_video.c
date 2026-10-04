@@ -68,6 +68,44 @@ int main(void){
     CHECK(dh == 1 && ch == 2 && cl == 3);
     al = 0x00; bl = 3; bh = 9; bios_palette();     /* attr-reg write: no-op */
     CHECK(pal[9] == 0);                           /* DAC untouched */
+    al = 0x10; bx = 8; dh = 0xff; ch = 0x41; cl = 0x3f;  /* 6-bit masking */
+    bios_palette();
+    CHECK(pal[24] == 0x3f && pal[25] == 0x01 && pal[26] == 0x3f);
+
+    /* block write 0x12: CX triplets from ES:DX into DAC BX.. */
+    es = 0x200; dx = 0x100;
+    for (int i = 0; i < 9; i++) mem[0x2100 + i] = 10 + i;
+    al = 0x12; bx = 20; cx = 3;
+    bios_palette();
+    CHECK(pal[60] == 10 && pal[64] == 14 && pal[68] == 18);
+    /* block read 0x17: DAC BX.. into ES:DX triplets */
+    memset(&mem[0x2200], 0, 16);
+    es = 0x200; dx = 0x200;
+    al = 0x17; bx = 20; cx = 3;
+    bios_palette();
+    CHECK(mem[0x2200] == 10 && mem[0x2205] == 15 && mem[0x2208] == 18);
+
+    /* DAC write index wraps at 768 -> next write restarts at reg 0 */
+    rt_out(0x3c8, 255);
+    rt_out(0x3c9, 1); rt_out(0x3c9, 2); rt_out(0x3c9, 3);   /* reg 255 */
+    rt_out(0x3c9, 9);                                        /* wraps -> reg 0 r */
+    CHECK(pal[0] == 9);
+
+    /* --- 0x3da input-status: vblank toggles within a frame period --- */
+    {   int saw_off = 0, saw_on = 0, bad = 0;
+        Uint32 t0 = SDL_GetTicks();
+        while (SDL_GetTicks() - t0 < 500 && !(saw_off && saw_on)){
+            dw v = rt_in(0x3da);
+            bad |= v & ~9;                        /* only bits 0+3 used */
+            if (v == 9) saw_on = 1; else if (v == 0) saw_off = 1;
+        }
+        CHECK(bad == 0);
+        CHECK(saw_off && saw_on);                 /* real 70Hz beam timing */
+    }
+    CHECK(rt_in(0x3c7) == 0);                     /* DAC state: ready */
+    CHECK(rt_in(0x9999) == 0);                    /* unhandled port -> 0 */
+    rt_out(0x3c4, 0x01); rt_out(0x3d4, 0x11);     /* seq/CRT: harmless no-ops */
+    rt_out(0x20, 0x20);                           /* PIC EOI: no-op */
 
     /* --- bios_video get/set mode --- */
     ax = 0x0013; bios_video(0x0013);
