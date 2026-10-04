@@ -4,6 +4,7 @@
 #include <stdio.h>
 #include <unistd.h>
 #include <time.h>
+#include <sys/wait.h>
 
 static char tbuf[256]; static int tn;    /* text_putc capture */
 void text_putc(db c){ if (tn < (int)sizeof tbuf - 1) tbuf[tn++] = (char)c; }
@@ -275,6 +276,31 @@ int main(void){
         dos_get_date();    CHECK(cx == (dw)yr);
     }
     dos_get_time();    CHECK(ch <= 23 && cl <= 59);
+
+    /* --- unmodeled/no-op services must not crash --- */
+    dos_read_string();                     /* AH=0Ah buffered input: no-op */
+    dos_int21(0x4c);                       /* dispatch stub */
+
+    /* --- console input: stdin -> /dev/null returns EOF --- */
+    {   FILE *nf = freopen("/dev/null", "r", stdin);
+        CHECK(nf != NULL);
+        dos_read_char_noecho(); CHECK(al == 0xff);
+        dos_read_char_echo();   CHECK(al == 0xff);
+    }
+
+    /* --- dos_exit propagates the rt_exit code to the process exit status --- */
+    {   pid_t p = fork();
+        int st;
+        CHECK(p >= 0);
+        if (p == 0){ al = 0; dos_exit(); _exit(127); }
+        waitpid(p, &st, 0);
+        CHECK(WIFEXITED(st) && WEXITSTATUS(st) == 0);
+        p = fork();
+        CHECK(p >= 0);
+        if (p == 0){ al = 7; dos_exit_code(); _exit(127); }
+        waitpid(p, &st, 0);
+        CHECK(WIFEXITED(st) && WEXITSTATUS(st) == 7);
+    }
 
     fprintf(stderr, "test_dos: %d checks, %d failures\n", checks, fails);
     return fails ? 1 : 0;

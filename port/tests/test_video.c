@@ -4,6 +4,7 @@
 #include <SDL2/SDL.h>
 #include <pthread.h>
 #include <signal.h>
+#include <unistd.h>
 #include "../rt.h"
 #include <stdio.h>
 
@@ -17,14 +18,23 @@ void rt_speaker(dw v){ (void)v; }
 dw rt_kbd_port60(void){ return 0; }
 vfn func_at(dd a){ (void)a; return 0; }
 int rt_kmap_open(void){ return 0; }
-int rt_kmap_rows(void){ return 0; }
-int rt_kmap_cur(void){ return 0; }
-int rt_kmap_capture(void){ return 0; }
-const char *rt_kmap_name(int r){ (void)r; return ""; }
-const char *rt_kmap_bind(int r){ (void)r; return ""; }
+static int fake_rows, fake_cur, fake_cap;
+int rt_kmap_rows(void){ return fake_rows; }
+int rt_kmap_cur(void){ return fake_cur; }
+int rt_kmap_capture(void){ return fake_cap; }
+const char *rt_kmap_name(int r){ (void)r; return "ACTION"; }
+const char *rt_kmap_bind(int r){ (void)r; return "KEY"; }
 /* rt_exit comes from rt.o */
 
 #include "../video.c"
+
+volatile int th_done;
+static void *irq_th(void *a){
+    (void)a;
+    for (int i = 0; i < 3; i++){ guest_irq0(); usleep(1000); }
+    th_done = 1;
+    return 0;
+}
 
 static int fails, checks;
 #define CHECK(cond) do{ checks++; if(!(cond)){ fails++; \
@@ -117,6 +127,70 @@ int main(void){
     CHECK((rt_in(0x40) & ~0xff) == 0);
     /* --- port 0x61 speaker bits --- */
     CHECK(rt_in(0x61) == 0x30);
+    CHECK(rt_in(0x60) == 0);                        /* kbd port -> stub */
+    rt_out(0xc0, 0x9f); rt_out(0x61, 3);            /* tnd/speaker routes */
+
+    /* --- BIOS text funcs --- */
+    al = 'X'; bios_putc();                          /* echoes X to stderr */
+    al = 0x13; bios_set_mode(); CHECK(cur_mode == 0x13);
+    bios_set_cursor(); bios_scroll();               /* no-ops must not crash */
+
+    /* --- rt_present: staging render + M2C_DUMP sidecar files --- */
+    setenv("M2C_DUMP", "/tmp/ar_t_vid", 1);
+    setenv("M2C_DUMP_EVERY", "1", 1);
+    memset(&mem[VGA_BASE], 0, 4);
+    mem[VGA_BASE] = 7;
+    rt_present(0);
+    CHECK(staging[0] == pal32[7] && staging[0] == staging[1]);
+    CHECK(staging[TW] == pal32[7]);                 /* pixel-doubled row */
+    {   FILE *pf = fopen("/tmp/ar_t_vid.0001.ppm", "rb");
+        CHECK(pf != NULL);
+        if (pf){
+            CHECK(fgetc(pf) == 'P' && fgetc(pf) == '6');
+            fclose(pf);
+        }
+        FILE *tf = fopen("/tmp/ar_t_vid.0001.txt", "rb");
+        CHECK(tf != NULL); if (tf) fclose(tf);
+    }
+    unsetenv("M2C_DUMP"); unsetenv("M2C_DUMP_EVERY");
+
+    /* --- tick_cb: IRQ0 dispatch path (stub vector -> rt_bios_int8 stub) --- */
+    *(dd*)&mem[0x20] = 0xf000fea5;
+    irq_accum = 100;                                /* force dispatches */
+    tick_cb(4, NULL);
+    /* guest vector -> guest_irq0 early return (no cpu thread registered) */
+    *(dd*)&mem[0x20] = 0x12345678;
+    tick_cb(4, NULL);
+
+    /* --- kmap_draw: overlay renders into a scratch buffer --- */
+    fake_rows = 4; fake_cur = 1; fake_cap = 1;
+    {   static Uint32 buf[TW*TH];
+        memset(buf, 0, sizeof buf);
+        kmap_draw(buf);
+        int nz = 0; for (int i = 0; i < TW*TH; i++) nz += buf[i] != 0;
+        CHECK(nz > 1000);
+    }
+    fake_rows = fake_cur = fake_cap = 0;
+
+    /* --- guest_irq0 + isr_hold: real park handshake on a second thread --- */
+    {   signal(SIGUSR1, isr_hold);
+        rt_set_cpu_thread();                        /* main = park target */
+        *(dd*)&mem[0x20] = 0x12345678;              /* non-stub -> guest ISR */
+        unsigned before = g8_cnt;
+        th_done = 0;
+        pthread_t th; pthread_create(&th, 0, irq_th, 0);
+        while (!th_done) sched_yield();
+        pthread_join(th, 0);
+        CHECK(g8_cnt >= before + 3);
+    }
+
+    /* --- video_init + rt_kmap_frame under the dummy driver (last: starts
+     * the real SDL timer; process exit reaps it) --- */
+    setenv("SDL_VIDEODRIVER", "dummy", 1);
+    setenv("SDL_AUDIODRIVER", "dummy", 1);
+    video_init();
+    CHECK(win != NULL && ren != NULL && tex != NULL);
+    rt_kmap_frame();                                /* real tex/ren update path */
 
     fprintf(stderr, "test_video: %d checks, %d failures\n", checks, fails);
     return fails ? 1 : 0;

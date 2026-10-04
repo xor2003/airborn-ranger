@@ -110,6 +110,26 @@ int main(void){
     rt_tnd_write(0xc0, 0x80 | 0x00 | 0x07);       /* ch0 freq lo 7 */
     CHECK((snd_reg[0] & 0x0f) == 7);
 
+    /* --- snd_init: idempotent; snd_cb renders into the stream buffer --- */
+    snd_init();                                   /* second call early-returns */
+    CHECK(started == 1);
+    {   int16_t buf[256];
+        engine_sel = 1;                           /* psg engine -> snd_sample */
+        memset(buf, 0x11, sizeof buf);
+        snd_cb(NULL, (Uint8*)buf, sizeof buf);
+        int sum = 0; for (int i = 0; i < 256; i++) sum += buf[i] != 0x1111;
+        CHECK(sum > 0);                           /* buffer was filled */
+        engine_sel = 0;                           /* midi engine -> synth path */
+        memset(buf, 0x11, sizeof buf);
+        snd_cb(NULL, (Uint8*)buf, sizeof buf);
+        sum = 0; for (int i = 0; i < 256; i++) sum += buf[i] != 0x1111;
+        CHECK(sum > 0);
+        engine_sel = -1;
+    }
+
+    /* --- rt_speaker: Tandy build routes all sound via 0xc0 (no-op) --- */
+    rt_speaker(0); rt_speaker(3);
+
     /* --- evt_cmp ordering for the MIDI flush sort --- */
     {   MidiEvt a = {5,0,0,0}, b = {9,0,0,0}, c = {9,0,0,0};
         CHECK(evt_cmp(&a, &b) < 0);

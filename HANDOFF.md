@@ -14,8 +14,11 @@ the test-suite commit is pushed to `origin/master`.
 
 ### Test suite (reviewed + expanded)
 
-- `make -C port check` — **501 checks, 0 failures** across 6 binaries
-  (t_rt 34, t_dos 102, t_input 139, t_snd 62, t_video 25, t_game 139).
+- `make -C port check` — **716 checks, 0 failures** across 6 binaries
+  (t_rt 34, t_dos 109, t_input 334, t_snd 65, t_video 35, t_game 139).
+  gcov on the hand-written port: input.c 96%, dos.c 95%, rt.c ~96%,
+  snd.c 94%, video.c 63% (rest is debug/env-gated dumps + SDL thread
+  machinery covered by e2e, not units).
 - `bash port/tests/e2e.sh` — **PASS** (POD + airdrop reached). The
   script now fails on abnormal exits (segv/abort — was `|| true`),
   auto-builds `ar_port` when missing, and self-skips (exit 0) when
