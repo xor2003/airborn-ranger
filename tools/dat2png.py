@@ -29,6 +29,12 @@ def _rgb9(w):
     return (r * 255 // 7, g * 255 // 7, b * 255 // 7)
 
 
+def _bgr9(w):
+    """ST palette words as stored inside .DAT picture headers: $0BGR."""
+    r, g, b = w & 7, (w >> 4) & 7, (w >> 8) & 7
+    return (r * 255 // 7, g * 255 // 7, b * 255 // 7)
+
+
 def _rgb12(w):
     """Amiga OCS $0RGB (4 bits/channel) -> (r,g,b) 8-bit."""
     r, g, b = (w >> 8) & 0xF, (w >> 4) & 0xF, w & 0xF
@@ -105,7 +111,7 @@ def read_pic(d, off):
     for po in range(0, 0x12, 2):
         words = [struct.unpack_from(">H", d, off + po + 2 * i)[0] for i in range(16)]
         if all(w <= 0x777 for w in words) and len(set(words)) > 4:
-            pal = [_rgb9(w) for w in words]
+            pal = [_bgr9(w) for w in words]
             break
     if pal is None:
         return None

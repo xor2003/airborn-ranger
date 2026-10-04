@@ -44,5 +44,15 @@ dist/
 orig_image.bin
 build_sdl/
 
+# Other-platform disk images / ripped media — same BYO policy, never committed.
+*.stx
+*.adf
+*.lha
+*.stk
+*.snd
+*.zip
+*.wav
+png/
+
 # Per-user runtime key bindings
 keymap.cfg

@@ -30,6 +30,13 @@ Atari ST / Amiga `.DAT` + `.ST` graphics (title/combat screens with
 palette, planar sprite sheets); `tools/snd2wav.py` extracts the Amiga
 `.snd` containers' embedded 8SVX samples to WAV.
 
+The Amiga title music (`armdat.snd` sequenced bank + `armdrv.snd` 68k
+Paula player) exists as a standard SoundTracker module — any `.stk`/.mod
+player (e.g. `openmpt123 airborne_ranger.stk`, or `openmpt123 --render`
+for WAV) plays it; its six instruments match `armdat.snd` byte-for-byte.
+ST/Amiga Ghidra decompiles (reading aid, not compiled): see
+`/home/xor/ghidra/ar_st/NOTES.md` and `/home/xor/ghidra/ar_amiga/NOTES.md`.
+
 ## Controls
 
 arrows = move, Enter / KP5 / Ins = fire & confirm, Esc = back/menu,
