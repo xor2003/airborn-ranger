@@ -63,12 +63,6 @@ def _rgb9(w):
     return (r * 255 // 7, g * 255 // 7, b * 255 // 7)
 
 
-def _bgr9(w):
-    """ST palette words as stored inside .DAT picture headers: $0BGR."""
-    r, g, b = w & 7, (w >> 4) & 7, (w >> 8) & 7
-    return (r * 255 // 7, g * 255 // 7, b * 255 // 7)
-
-
 def _rgb12(w):
     """Amiga OCS $0RGB (4 bits/channel) -> (r,g,b) 8-bit."""
     r, g, b = (w >> 8) & 0xF, (w >> 4) & 0xF, w & 0xF
@@ -324,15 +318,12 @@ def looks_like_palette(d, off, n=16):
 
 
 def read_pic(d, off):
-    """128-byte header picture: $0BGR palette + dims, then 4-plane data."""
-    pal = None
-    for po in range(0, 0x12, 2):
-        words = [struct.unpack_from(">H", d, off + po + 2 * i)[0] for i in range(16)]
-        if all(w <= 0x777 for w in words) and len(set(words)) > 4:
-            pal = [_bgr9(w) for w in words]
-            break
-    if pal is None:
+    """128-byte header picture: $0RGB palette (16 words at +4) + dims,
+    then 4-plane data."""
+    words = [struct.unpack_from(">H", d, off + 4 + 2 * i)[0] for i in range(16)]
+    if not (all(w <= 0x777 for w in words) and len(set(words)) > 4):
         return None
+    pal = [_rgb9(w) for w in words]
     data = d[off + 0x80:]
     w = struct.unpack_from(">H", d, off + 0x3A)[0]
     h = struct.unpack_from(">H", d, off + 0x3C)[0]
