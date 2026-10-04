@@ -20,17 +20,12 @@ jobs:
       - name: Build port
         run: make -C port -j"$(nproc)"
 
-      - name: Unit tests (data-free subset)
-        run: |
-          make -C port tests/t_rt tests/t_dos tests/t_input tests/t_snd tests/t_video
-          for t in t_rt t_dos t_input t_snd t_video; do
-            port/tests/$t || exit 1
-          done
+      # make check builds+runs all six test binaries; test_game self-skips
+      # its .DTX corpus when game data is absent (CI is always asset-free).
+      - name: Unit tests
+        run: make -C port check
 
-      - name: Full tests + e2e (needs original game files)
-        if: hashFiles('ROSTER.DAT') != ''
-        run: make -C port check && sh port/tests/e2e.sh
-
-      - name: Note on gated tests
-        if: hashFiles('ROSTER.DAT') == ''
-        run: echo "::notice::original game data is not in the repo — test_game + e2e skipped"
+      # e2e drives real gameplay and needs the original files; it prints
+      # SKIP and exits 0 when they are absent (always the case on CI).
+      - name: E2E (self-skips without game data)
+        run: bash port/tests/e2e.sh

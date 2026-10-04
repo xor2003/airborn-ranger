@@ -10,6 +10,12 @@ rm -f "$T".*.ppm "$T".*.txt "$T".log
 mkdir -p /tmp
 
 cd ..
+# Needs the original game data (never in the repo) — same probe file the
+# Android importer uses. CI runs this script unconditionally; it self-skips.
+if [ ! -f TTLSCR.DTX ]; then
+    echo "SKIP: no original game data (TTLSCR.DTX) — e2e needs it"
+    exit 0
+fi
 # Binary is not part of `make check` — ensure it's built and current rather
 # than fail on status 127 (missing) or silently test a stale build.
 make -C port ar_port >/dev/null || { echo "FAIL: ar_port build failed"; exit 1; }

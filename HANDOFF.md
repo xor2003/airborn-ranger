@@ -17,8 +17,11 @@ the test-suite commit is pushed to `origin/master`.
 - `make -C port check` — **501 checks, 0 failures** across 6 binaries
   (t_rt 34, t_dos 102, t_input 139, t_snd 62, t_video 25, t_game 139).
 - `bash port/tests/e2e.sh` — **PASS** (POD + airdrop reached). The
-  script now fails on abnormal exits (segv/abort — was `|| true`)
-  and auto-builds `ar_port` when missing.
+  script now fails on abnormal exits (segv/abort — was `|| true`),
+  auto-builds `ar_port` when missing, and self-skips (exit 0) when
+  `TTLSCR.DTX` is absent.
+- `ci.yml` runs the full `make check` plus e2e on every push — both
+  self-gate on missing assets, so CI stays green asset-free.
 - Tests `#include "../x.c"` for static helpers — intentional, covers
   `xt_scan`, `match_pat`, `snd_write`, `kmap_*`, `bios_palette`, etc.
 - `t_game` pulls `main.c` with `main` renamed for `setup_psp`; the
