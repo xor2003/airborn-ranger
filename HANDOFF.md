@@ -9,11 +9,44 @@ recompiles cleanly, gameplay/menus/input/graphics match the reference
 ## State at handoff
 
 Everything below is **verified working** (live dummy-driver run into
-real battle + test suite). The tree is dirty — modified files plus
-untracked `tools/names.map`, `tools/rename.py`, `NAMING.md`, probes;
-uncommitted. No commit was made.
+real battle + test suite). Working tree is clean; everything through
+`6633b84` is committed and pushed to `origin/master`.
 
-### Session +1 (naming batch 2 + fast rename)
+### Latest sessions (controls, releases, resource decoding)
+
+- **Releases**: `v0.2`/`v0.3` on GitHub — Android TV APK + Windows x64
+  zip via `release.yml` on v* tags. **No original assets** in repo or
+  releases; `ImportActivity` imports user files (.DTX/.DAT/.MIJ/.EXE/
+  .ADF/.STX/.SND/.STK) into filesDir at runtime.
+- **Controls**: F15-style action-mapping menu (F8 opens it; F10 stays
+  run/walk), key-steal rebinding, keyboard+controller bindings persisted
+  to `keymap.cfg`. Absolute mouse zones (not relative). Android defaults
+  to control option 2 "KEYBOARD - DIRECTIONAL"; TV dpad=arrows,
+  OK=Enter, BACK=Esc.
+- **Video**: non-MCGA driver code physically removed (MCGA only).
+- **`tools/dat2png.py`** now decodes essentially every ST+Amiga
+  resource (details in `/home/xor/ghidra/ar_amiga/NOTES.md`):
+  - LZ backward-bitstream decompressor, checksum-gated
+    (`seed == bitlong0 ^ XOR(stream longs)`); format identical ST/Amiga.
+  - Sprite banks `[p0][p1][p2][mask]` word rows — all banks decode.
+  - Pictures `[128B hdr w/ $0RGB palette@+4][planar]` → MENUP1-5,
+    TITLEPIC, COMBAT as true-color PNGs.
+  - Amiga TITLEPIC: `[5x8000 blocked planes][32-col $0RGB tail]`.
+  - `.ST` bitmaps use real palettes recovered from `LOADER.PRG`.
+  - Known-incomplete: FGRAPH records, CHAR09 glyph cells, *BLK terrain
+    tiles, decoded-map inner layout, *STRIP tables, AIRCHARS stride.
+- **`adf_x.py` bug found+fixed**: OFS data blocks start at `0x18`, not
+  `0x14` — old extraction injected sector checksums every 488B and lost
+  real bytes; `/home/xor/ghidra/ar_amiga/files/` re-extracted clean.
+  All earlier "Amiga format differences" were this corruption.
+- **Amiga decompile usable as reference oracle** for rewriting DOS
+  procs in readable C (match by constants/resources; verify against
+  the port). Same algorithms minus x86 segmentation noise.
+- `ROADMAP.md` = enhancement ideas (Classic/Enhanced split, mod
+  pipeline incl. ST/Amiga art override) — parked but feasible now
+  that asset decoding works.
+
+### Carried: naming batch 2 + fast rename
 
 - **`tools/rename.py` rewritten single-pass**: one combined longest-first
   alternation per file instead of one regex scan per rename — ~9 min →
@@ -176,19 +209,27 @@ DISPLAY=:99 xdotool key 2 / Return / Up / ...
   sessions.db` had grown to 11.5 GB (it freed itself later — flag to
   the user if it recurs). The regen needs only a few MB but make sure
   there is some.
-- Nothing is committed. If asked to commit: `git status`/`git diff`,
-  match prior style, sign-off footer per repo convention.
+- Reported Android TV screen "little corrupted" — unconfirmed source;
+  investigate separately if it resurfaces (video/scaling vs palette).
 
 ## Files that matter
 
 `tools/lift.py` (lifter — source of truth for generated code, incl. the
 pacing floor), `tools/gen_port.py`, `tools/rename.py`,
-`tools/names.map`, `port/input.c` (mouse+key), `port/video.c`,
-`port/rt.c`/`rt.h`, `port/dos.c`, `port/memimg.c` (fmap),
+`tools/names.map`, `tools/dat2png.py` (ST/Amiga resource decoder),
+`tools/dtx2png.py` (DOS .DTX art), `tools/snd2wav.py` (Amiga .snd),
+`port/input.c` (mouse+key+mapping menu, `keymap.cfg`), `port/video.c`
+(MCGA only), `port/rt.c`/`rt.h`, `port/dos.c`, `port/memimg.c` (fmap),
 `port/procs.h`, `port/tnd_procs.h`, `port/tests/*.c` (incl. probes:
 `mv_probe`, `walk_probe`, `col_probe`, `tbl_probe`, `replay_probe`,
 `dump_dir`), `port/gen/*.c` (generated — do not hand-edit),
-`lifted/*.c` (generated).
+`lifted/*.c` (generated), `android/` (Gradle+ndk-build TV APK),
+`.github/workflows/` (ci/android/windows/release/wasm),
+`ROADMAP.md`, `/home/xor/ghidra/ar_amiga/NOTES.md` + `decomp/`
+(Amiga reference), `/home/xor/ghidra/ar_st/` (ST twin).
+
+Never commit original game assets (.DTX/.DAT/.MIJ/.EXE/.ADF/.STX/.SND/
+.STK or decoded PNG/WAV of them) — releases are BYO-assets by design.
 
 ## Naming pass (evidence-driven, applied)
 
