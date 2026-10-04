@@ -26,6 +26,22 @@ import zlib
 _ST_DEFAULT_PAL = [0x777, 0x000, 0x700, 0x070, 0x007, 0x770, 0x077, 0x707,
                    0x555, 0x333, 0x733, 0x373, 0x337, 0x773, 0x757, 0x357]
 
+# Loader palette, from LOADER.PRG @ 0x1dc (same art palette as TITLEPIC).
+# Used by the loader-sequence .ST bitmaps (AIRPANEL/AIRWINGS/AIRCHARS).
+_LOADER_PAL = [0x111, 0x642, 0x531, 0x420, 0x552, 0x441, 0x331, 0x220,
+               0x010, 0x310, 0x400, 0x300, 0x000, 0x223, 0x334, 0x555]
+
+# Menu palette, embedded at +4 in every MENUP* pic (also in RANGER.BIN).
+# Used by CURSOR weapon/item icons.
+_MENU_PAL = [0x000, 0x332, 0x327, 0x431, 0x220, 0x111, 0x333, 0x320,
+             0x555, 0x443, 0x554, 0x665, 0x777, 0x300, 0x666, 0x444]
+
+# bitmap -> palette override
+_BITMAP_PAL = {
+    "AIRPANEL": _LOADER_PAL, "AIRWINGS": _LOADER_PAL,
+    "AIRCHARS": _LOADER_PAL, "CURSOR": _MENU_PAL,
+}
+
 # Sprite banks: name -> (w, h) of one record; count = filesize/(w*h/2).
 # [p0,p1,p2,mask] 4-word groups, 8 colours + mask, row-interleaved.
 SPRITE_BANKS = {
@@ -337,21 +353,18 @@ def read_pic(d, off):
 
 
 def read_amiga_pic(d):
-    """[4-byte prefix] + 5-plane blocked 320x200 + trailing $0RGB palette."""
-    for off in (4, 0):
-        body = d[off:]
-        extra = len(body) - 40000
-        if extra <= 0 or extra > 0x80 or extra % 2:
-            continue
-        ncol = extra // 2
-        palw = [struct.unpack_from(">H", body, 40000 + 2 * i)[0] & 0xFFF for i in range(ncol)]
-        if len(set(palw)) < 4:
-            continue
-        pal = [_rgb12(w) for w in palw]
-        pal += [pal[-1]] * (32 - ncol)
-        px = planar_pixels_blocked(body[:40000], 320, 200, 5)
-        return 320, 200, px, pal
-    return None
+    """5-plane blocked 320x200 + trailing 32-colour $0RGB palette."""
+    extra = len(d) - 40000
+    if extra <= 0 or extra > 0x80 or extra % 2:
+        return None
+    ncol = extra // 2
+    palw = [struct.unpack_from(">H", d, 40000 + 2 * i)[0] & 0xFFF for i in range(ncol)]
+    if len(set(palw)) < 4:
+        return None
+    pal = [_rgb12(w) for w in palw]
+    pal += [pal[-1]] * (32 - ncol)
+    px = planar_pixels_blocked(d[:40000], 320, 200, 5)
+    return 320, 200, px, pal
 
 
 # ---------------------------------------------------------------- driver
@@ -370,42 +383,8 @@ def _convert_payload(d, base, path, outdir, depth):
         if name.endswith(suf):
             name = name[:-len(suf)]
 
-    # Amiga files carry a 4-byte tag before the (ST-format) payload. Only
-    # strip it when the resulting bytes actually decode as a known format.
-    offs = [0]
-    if len(d) % 8 == 4 and len(d) > 8:
-        offs.append(4)
-    for off in offs:
-        dd = d[off:]
-        if _known_format(dd, name, path):
-            return _emit(dd, base, path, outdir, name, depth)
-    # unknown: emit a sheet of the most plausible payload
-    dd = d[4:] if len(offs) == 2 else d
-    return _emit(dd, base, path, outdir, name, depth)
-
-
-def _known_format(dd, name, path):
-    if dd[:2] == b"\x60\x1a":          # PRG wrapper
-        return True
-    if name in TEXT_FILES:
-        return True
-    if name in SPRITE_BANKS:
-        w, h = SPRITE_BANKS[name]
-        if len(dd) % (w * h // 2) == 0:
-            return True
-    if name in BITMAPS and len(dd) % (BITMAPS[name] // 2) == 0:
-        return True
-    if name in BITMAPS_BI and len(dd) % (BITMAPS_BI[name] // 2) == 0:
-        return True
-    if len(dd) >= 0x80 and read_pic(dd, 0):
-        return True
-    if len(dd) >= 40032 and read_amiga_pic(dd):
-        return True
-    if mask_score(dd) >= 0.98:
-        return True
-    if decompress(dd) is not None:
-        return True
-    return False
+    # clean Amiga extractions carry no tag; everything decodes at offset 0
+    return _emit(d, base, path, outdir, name, depth)
 
 
 def _emit(dd, base, path, outdir, name, depth):
@@ -454,13 +433,13 @@ def _convert_inner(dd, base, path, outdir, name, depth):
 
     # known plain bitmaps (size must tile at the known width)
     if name in BITMAPS and len(dd) % (BITMAPS[name] // 2) == 0:
-        pal = [_rgb9(c) for c in _ST_DEFAULT_PAL]
+        pal = [_rgb9(c) for c in _BITMAP_PAL.get(name, _ST_DEFAULT_PAL)]
         return emit_bitmap(outdir, base, dd, BITMAPS[name], pal)
 
     if name in BITMAPS_BI and len(dd) % (BITMAPS_BI[name] // 2) == 0:
         w = BITMAPS_BI[name]
         h = len(dd) * 8 // (w * 4)
-        pal = [_rgb9(c) for c in _ST_DEFAULT_PAL]
+        pal = [_rgb9(c) for c in _BITMAP_PAL.get(name, _ST_DEFAULT_PAL)]
         px = planar_pixels_byte(dd, w, h)
         rgba = bytearray()
         for b in px:
