@@ -1061,6 +1061,63 @@ int main(void){
                 checks);
     }
 
+    /* ---- scroll_edge_a..d: per-edge cell_tile_compose sweep loops.
+     * [ds:0xC7FD]&4 selects the double-step variant; the staged fields
+     * at 0xA80/0xA82/0xDBE5/0xDBE7 + bounds at 0x96F0..0x96FA drive the
+     * compose calls. ds pinned to seg_data; video segs to scratch. --- */
+    {
+        dw s0 = seg_flip, s1 = seg_draw, s2 = seg_screen;
+        seg_flip = 0x9000; seg_draw = 0x9800; seg_screen = 0xA000;
+        ss = 0x8000; sp = 0xFFFE;
+        ds = seg_data; adapter_id = 3;
+        *(dw*)raddr_(ds, 0x0C801) = 3;        /* scroll off a           */
+        *(dw*)raddr_(ds, 0x0C803) = 5;        /* scroll off b           */
+        *(db*)raddr_(ds, 0x0C7FD) = 0;        /* normal step            */
+        ab_res("edge a", scroll_edge_a_lifted, scroll_edge_a, 0);
+        ab_res("edge d", scroll_edge_d_lifted, scroll_edge_d, 0);
+        ab_res("edge b", scroll_edge_b_lifted, scroll_edge_b, 0);
+        ab_res("edge c", scroll_edge_c_lifted, scroll_edge_c, 0);
+        *(db*)raddr_(ds, 0x0C7FD) = 4;        /* double-step variant    */
+        ab_res("edge a x2", scroll_edge_a_lifted, scroll_edge_a, 0);
+        ab_res("edge d x2", scroll_edge_d_lifted, scroll_edge_d, 0);
+        ab_res("edge b x2", scroll_edge_b_lifted, scroll_edge_b, 0);
+        ab_res("edge c x2", scroll_edge_c_lifted, scroll_edge_c, 0);
+        /* mid-entries: ax/cx live for the store mids; fields preset    */
+        ax = 2; cx = 0x18;
+        ab_res("edge a mid9f", scroll_edge_a_e1429f_lifted,
+               scroll_edge_a_e1429f, 0);
+        *(dw*)raddr_(ds, 0x96F2) = 0x18; *(dw*)raddr_(ds, 0x96F0) = 0;
+        ab_res("edge a midac", scroll_edge_a_e142ac_lifted,
+               scroll_edge_a_e142ac, 0);
+        ax = 1;
+        ab_res("edge d mided", scroll_edge_d_e142ed_lifted,
+               scroll_edge_d_e142ed, 0);
+        *(dw*)raddr_(ds, 0x96F0) = 0;
+        ab_res("edge d midf6", scroll_edge_d_e142f6_lifted,
+               scroll_edge_d_e142f6, 0);
+        ax = 0; cx = 8; bx = 0x18;
+        ab_res("edge b midcd", scroll_edge_b_e143cd_lifted,
+               scroll_edge_b_e143cd, 0);
+        *(dw*)raddr_(ds, 0x96F2) = 0x18; *(dw*)raddr_(ds, 0x96F0) = 0;
+        *(dw*)raddr_(ds, 0x96F8) = 8; *(dw*)raddr_(ds, 0x96FA) = 0;
+        ab_res("edge b mide1", scroll_edge_b_e143e1_lifted,
+               scroll_edge_b_e143e1, 0);
+        ab_res("edge b mid30", scroll_edge_b_e14430_lifted,
+               scroll_edge_b_e14430, 0);
+        ax = 0; cx = 8; bx = 0x18;
+        ab_res("edge c mid45", scroll_edge_c_e14345_lifted,
+               scroll_edge_c_e14345, 0);
+        *(dw*)raddr_(ds, 0x96F2) = 0x18; *(dw*)raddr_(ds, 0x96F0) = 0;
+        *(dw*)raddr_(ds, 0x96F8) = 8; *(dw*)raddr_(ds, 0x96FA) = 0;
+        ab_res("edge c mid59", scroll_edge_c_e14359_lifted,
+               scroll_edge_c_e14359, 0);
+        ab_res("edge c mida9", scroll_edge_c_e143a9_lifted,
+               scroll_edge_c_e143a9, 0);
+        seg_flip = s0; seg_draw = s1; seg_screen = s2;
+        fprintf(stderr, "  (scroll_edge: lifted vs C, %d checks)\n",
+                checks);
+    }
+
     /* ---- status-panel digit patcher: WOUNDS field ds:0xB93F <- byte_29712
      * template lives in the image with literal "XX" placeholders; sub_1BBB9
      * converts al to two ASCII digits and stores at ds:[si]/ds:[si+1]. ---- */

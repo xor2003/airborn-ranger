@@ -237,6 +237,20 @@ void scroll_go_e_c(void); void scroll_go_e_lifted(void);
 void scroll_go_f_c(void); void scroll_go_f_lifted(void);
 void scroll_go_g_c(void); void scroll_go_g_lifted(void);
 void scroll_go_h_c(void); void scroll_go_h_lifted(void);
+void scroll_edge_a_c(void); void scroll_edge_a_lifted(void);
+void scroll_edge_a_e1429f_c(void); void scroll_edge_a_e1429f_lifted(void);
+void scroll_edge_a_e142ac_c(void); void scroll_edge_a_e142ac_lifted(void);
+void scroll_edge_d_c(void); void scroll_edge_d_lifted(void);
+void scroll_edge_d_e142ed_c(void); void scroll_edge_d_e142ed_lifted(void);
+void scroll_edge_d_e142f6_c(void); void scroll_edge_d_e142f6_lifted(void);
+void scroll_edge_b_c(void); void scroll_edge_b_lifted(void);
+void scroll_edge_b_e143cd_c(void); void scroll_edge_b_e143cd_lifted(void);
+void scroll_edge_b_e143e1_c(void); void scroll_edge_b_e143e1_lifted(void);
+void scroll_edge_b_e14430_c(void); void scroll_edge_b_e14430_lifted(void);
+void scroll_edge_c_c(void); void scroll_edge_c_lifted(void);
+void scroll_edge_c_e14345_c(void); void scroll_edge_c_e14345_lifted(void);
+void scroll_edge_c_e14359_c(void); void scroll_edge_c_e14359_lifted(void);
+void scroll_edge_c_e143a9_c(void); void scroll_edge_c_e143a9_lifted(void);
 
 /* env-gated trace (M2C_TRACE=1) */
 extern int rt_trace;

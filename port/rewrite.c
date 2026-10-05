@@ -1856,3 +1856,180 @@ void scroll_go_h_c(void){                   /* diagonal: edge c+a        */
     scroll_go_idx();
     scroll_go_common((db*)&scroll_tbl_h, scroll_edge_c, scroll_edge_a);
 }
+
+/* ---- scroll_edge_a..d (seg000:42xx..44xx) ------------------------------
+ * Per-edge tile compose loops driven off the mode flag [ds:0xC7FD]&4
+ * (double-step variant) and the scroll offsets at [0xC801]/[0xC803];
+ * each iteration stages [0xA80]/[0xA82]/[0xDBE5]/[0xDBE7] then calls
+ * cell_tile_compose. a = bottom row sweep, d = top row, b = right col,
+ * c = left col; b/c carry the e143e1-style re-entry loop for the
+ * wraparound column.
+ */
+void scroll_edge_a_e142ac_c(void){          /* 40-col sweep loop         */
+    do {
+        ax = *(dw*)raddr(ds, 0x96F2);
+        { dd t_ = (dd)ax + (dd)*(dw*)raddr(ds, 0x0C801); CF = t_ > 0xFFFF;
+          ax = t_; ZF = (ax == 0); SF = (ax >> 15); }
+        *(dw*)(raddr(ds, 0x0DBE7)) = ax;
+        *(dw*)(raddr(ds, 0x0A82)) = 0x0C4;
+        ax = *(dw*)raddr(ds, 0x96F0);
+        *(dw*)(raddr(ds, 0x0A80)) = ax;
+        { dd t_ = (dd)ax + (dd)*(dw*)raddr(ds, 0x0C803); CF = t_ > 0xFFFF;
+          ax = t_; ZF = (ax == 0); SF = (ax >> 15); }
+        *(dw*)(raddr(ds, 0x0DBE5)) = ax;
+        cell_tile_compose();
+        (*(dw*)raddr(ds, 0x96F0))++; ZF = (*(dw*)raddr(ds,0x96F0) == 0);
+        SF = (*(dw*)raddr(ds,0x96F0) >> 15);
+        CF = (dd)*(dw*)raddr(ds,0x96F0) < (dd)0x28;
+        ZF = (*(dw*)raddr(ds,0x96F0) == 0x28);
+        SF = ((dw)(*(dw*)raddr(ds,0x96F0) - 0x28) >> 15);
+    } while (*(dw*)raddr(ds,0x96F0) < 0x28);
+    si = pop();
+    bx = pop();
+}
+void scroll_edge_a_e1429f_c(void){
+    *(dw*)(raddr(ds,0x0C992)) = ax;
+    *(dw*)(raddr(ds,0x96F0)) = 0;
+    *(dw*)(raddr(ds,0x96F2)) = cx;
+    scroll_edge_a_e142ac_c();
+}
+void scroll_edge_a_c(void){
+    push(bx);
+    push(si);
+    ax = 2;
+    cx = 0x18;
+    CF = 0; OF = 0; ZF = ((*(db*)raddr(ds,0x0C7FD) & 4) == 0);
+    SF = (((db)(*(db*)raddr(ds,0x0C7FD) & 4)) >> 7);
+    if ((*(db*)raddr(ds,0x0C7FD) & 4) != 0){ ax = 1; cx = 0x19; }
+    scroll_edge_a_e1429f_c();
+}
+void scroll_edge_d_e142f6_c(void){          /* top-row sweep loop        */
+    do {
+        ax = *(dw*)raddr(ds,0x0C801);
+        *(dw*)(raddr(ds,0x0DBE7)) = ax;
+        *(dw*)(raddr(ds,0x0A82)) = 0;
+        ax = *(dw*)raddr(ds,0x96F0);
+        *(dw*)(raddr(ds,0x0A80)) = ax;
+        { dd t_ = (dd)ax + (dd)*(dw*)raddr(ds,0x0C803); CF = t_ > 0xFFFF;
+          ax = t_; ZF = (ax == 0); SF = (ax >> 15); }
+        *(dw*)(raddr(ds,0x0DBE5)) = ax;
+        cell_tile_compose();
+        (*(dw*)raddr(ds,0x96F0))++; ZF = (*(dw*)raddr(ds,0x96F0) == 0);
+        SF = (*(dw*)raddr(ds,0x96F0) >> 15);
+        CF = (dd)*(dw*)raddr(ds,0x96F0) < (dd)0x28;
+        ZF = (*(dw*)raddr(ds,0x96F0) == 0x28);
+        SF = ((dw)(*(dw*)raddr(ds,0x96F0) - 0x28) >> 15);
+    } while (*(dw*)raddr(ds,0x96F0) < 0x28);
+    si = pop();
+    bx = pop();
+}
+void scroll_edge_d_e142ed_c(void){
+    *(dw*)(raddr(ds,0x0C992)) = ax;
+    *(dw*)(raddr(ds,0x96F0)) = 0;
+    scroll_edge_d_e142f6_c();
+}
+void scroll_edge_d_c(void){
+    push(bx);
+    push(si);
+    ax = 1;
+    dx = *(dw*)raddr(ds,0x0C7FD);
+    CF = 0; OF = 0; ZF = ((*(db*)raddr(ds,0x0C7FD) & 4) == 0);
+    SF = (((db)(*(db*)raddr(ds,0x0C7FD) & 4)) >> 7);
+    if ((*(db*)raddr(ds,0x0C7FD) & 4) != 0) ax = 2;
+    scroll_edge_d_e142ed_c();
+}
+static void scroll_edge_bc_body(int left){  /* shared b/c column loop    */
+    for (;;){                                 /* goto e143xx re-enters   */
+        do {
+            push(*(dw*)raddr(ds,0x0A82));
+            if (left){
+                ax = 0x27;
+                *(dw*)(raddr(ds,0x0A80)) = ax;
+                { dd t_ = (dd)ax + (dd)*(dw*)raddr(ds,0x0C803);
+                  CF = t_ > 0xFFFF; ax = t_; ZF = (ax == 0);
+                  SF = (ax >> 15); }
+                *(dw*)(raddr(ds,0x0DBE5)) = ax;
+                ax = *(dw*)raddr(ds,0x96F0);
+                { dd t_ = (dd)ax + (dd)*(dw*)raddr(ds,0x0C801);
+                  CF = t_ > 0xFFFF; ax = t_; ZF = (ax == 0);
+                  SF = (ax >> 15); }
+                *(dw*)(raddr(ds,0x0DBE7)) = ax;
+            } else {
+                *(dw*)(raddr(ds,0x0A80)) = 0;
+                ax = *(dw*)raddr(ds,0x0C803);
+                *(dw*)(raddr(ds,0x0DBE5)) = ax;
+                ax = *(dw*)raddr(ds,0x96F0);
+                { dd t_ = (dd)ax + (dd)*(dw*)raddr(ds,0x0C801);
+                  CF = t_ > 0xFFFF; ax = t_; ZF = (ax == 0);
+                  SF = (ax >> 15); }
+                *(dw*)(raddr(ds,0x0DBE7)) = ax;
+            }
+            cell_tile_compose();
+            ax = pop();
+            { dd t_ = (dd)ax + (dd)*(dw*)raddr(ds,0x96F8);
+              CF = t_ > 0xFFFF; ax = t_; ZF = (ax == 0); SF = (ax >> 15); }
+            *(dw*)(raddr(ds,0x0A82)) = ax;
+            *(dw*)(raddr(ds,0x96F8)) = 8;
+            *(dw*)(raddr(ds,0x0C992)) = 0;
+            (*(dw*)raddr(ds,0x96F0))++; ZF = (*(dw*)raddr(ds,0x96F0) == 0);
+            SF = (*(dw*)raddr(ds,0x96F0) >> 15);
+            ax = *(dw*)raddr(ds,0x96F0);
+            CF = (dd)ax < (dd)*(dw*)raddr(ds,0x96F2);
+            ZF = (ax == *(dw*)raddr(ds,0x96F2));
+            SF = ((dw)(ax - *(dw*)raddr(ds,0x96F2)) >> 15);
+        } while (ax < *(dw*)raddr(ds,0x96F2));
+        if (!(ax <= *(dw*)raddr(ds,0x96F2))) break;
+        CF = (dd)*(dw*)raddr(ds,0x96FA) < (dd)0;
+        ZF = (*(dw*)raddr(ds,0x96FA) == 0);
+        SF = ((dw)(*(dw*)raddr(ds,0x96FA) - 0) >> 15);
+        if (*(dw*)raddr(ds,0x96FA) != 0)
+            *(dw*)(raddr(ds,0x0C992)) = 1;
+    }
+    si = pop();
+    bx = pop();
+}
+void scroll_edge_b_e143e1_c(void){ scroll_edge_bc_body(0); }
+void scroll_edge_b_e143cd_c(void){
+    *(dw*)(raddr(ds,0x0C992)) = ax;
+    *(dw*)(raddr(ds,0x96FA)) = ax;
+    *(dw*)(raddr(ds,0x96F8)) = cx;
+    *(dw*)(raddr(ds,0x96F2)) = bx;
+    *(dw*)(raddr(ds,0x96F0)) = 0;
+    scroll_edge_bc_body(0);
+}
+void scroll_edge_b_e14430_c(void){ si = pop(); bx = pop(); }
+void scroll_edge_b_c(void){
+    push(bx);
+    push(si);
+    *(dw*)(raddr(ds,0x0A82)) = 0;
+    ax = 0;
+    cx = 8;
+    bx = 0x18;
+    CF = 0; OF = 0; ZF = ((*(db*)raddr(ds,0x0C7FD) & 4) == 0);
+    SF = (((db)(*(db*)raddr(ds,0x0C7FD) & 4)) >> 7);
+    if ((*(db*)raddr(ds,0x0C7FD) & 4) != 0){ ax = 2; cx = 4; bx = 0x19; }
+    scroll_edge_b_e143cd_c();
+}
+void scroll_edge_c_e14359_c(void){ scroll_edge_bc_body(1); }
+void scroll_edge_c_e14345_c(void){
+    *(dw*)(raddr(ds,0x0C992)) = ax;
+    *(dw*)(raddr(ds,0x96FA)) = ax;
+    *(dw*)(raddr(ds,0x96F8)) = cx;
+    *(dw*)(raddr(ds,0x96F2)) = bx;
+    *(dw*)(raddr(ds,0x96F0)) = 0;
+    scroll_edge_bc_body(1);
+}
+void scroll_edge_c_e143a9_c(void){ si = pop(); bx = pop(); }
+void scroll_edge_c_c(void){
+    push(bx);
+    push(si);
+    *(dw*)(raddr(ds,0x0A82)) = 0;
+    ax = 0;
+    cx = 8;
+    bx = 0x18;
+    dx = *(dw*)raddr(ds,0x0C7FD);
+    CF = 0; OF = 0; ZF = ((*(db*)raddr(ds,0x0C7FD) & 4) == 0);
+    SF = (((db)(*(db*)raddr(ds,0x0C7FD) & 4)) >> 7);
+    if ((*(db*)raddr(ds,0x0C7FD) & 4) != 0){ ax = 2; cx = 4; bx = 0x19; }
+    scroll_edge_c_e14345_c();
+}

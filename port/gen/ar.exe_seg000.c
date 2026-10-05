@@ -19032,7 +19032,8 @@ void scroll_h_mcga(void) {
     return;
 }
 
-void scroll_edge_a_e1429f(void) {
+void scroll_edge_a_e1429f(void) { scroll_edge_a_e1429f_c(); }
+void scroll_edge_a_e1429f_lifted(void) {
     dd _sa = 0, _sb = 0;
     /* mov     ds:0C992h, ax ;~ 01A2:429F */
     *(dw*)(raddr(ds,0x0C992)) = ax;
@@ -19075,7 +19076,8 @@ scroll_edge_a_e142ac:
     /* retn ;~ 01A2:42D9 */
     return;
 }
-void scroll_edge_a_e142ac(void) {
+void scroll_edge_a_e142ac(void) { scroll_edge_a_e142ac_c(); }
+void scroll_edge_a_e142ac_lifted(void) {
     dd _sa = 0, _sb = 0;
 scroll_edge_a_e142ac:
     do {
@@ -19112,7 +19114,8 @@ scroll_edge_a_e142ac:
     /* retn ;~ 01A2:42D9 */
     return;
 }
-void scroll_edge_a(void) {
+void scroll_edge_a(void) { scroll_edge_a_c(); }
+void scroll_edge_a_lifted(void) {
     dd _sa = 0, _sb = 0;
     /* push    bx ;~ 01A2:428A */
     push(bx);
@@ -19173,7 +19176,8 @@ scroll_edge_a_e142ac:
     /* retn ;~ 01A2:42D9 */
     return;
 }
-void scroll_edge_d_e142ed(void) {
+void scroll_edge_d_e142ed(void) { scroll_edge_d_e142ed_c(); }
+void scroll_edge_d_e142ed_lifted(void) {
     /* mov     ds:0C992h, ax ;~ 01A2:42ED */
     *(dw*)(raddr(ds,0x0C992)) = ax;
     /* mov     word ptr ds:96F0h, 0 ;~ 01A2:42F0 */
@@ -19209,7 +19213,8 @@ scroll_edge_d_e142f6:
     /* retn ;~ 01A2:431F */
     return;
 }
-void scroll_edge_d_e142f6(void) {
+void scroll_edge_d_e142f6(void) { scroll_edge_d_e142f6_c(); }
+void scroll_edge_d_e142f6_lifted(void) {
 scroll_edge_d_e142f6:
     do {
         /* mov     ax, ds:0C801h ;~ 01A2:42F6 */
@@ -19241,7 +19246,8 @@ scroll_edge_d_e142f6:
     /* retn ;~ 01A2:431F */
     return;
 }
-void scroll_edge_d(void) {
+void scroll_edge_d(void) { scroll_edge_d_c(); }
+void scroll_edge_d_lifted(void) {
     /* push    bx ;~ 01A2:42DA */
     push(bx);
     /* push    si ;~ 01A2:42DB */
@@ -19293,7 +19299,8 @@ scroll_edge_d_e142f6:
     /* retn ;~ 01A2:431F */
     return;
 }
-void scroll_edge_c_e14345(void) {
+void scroll_edge_c_e14345(void) { scroll_edge_c_e14345_c(); }
+void scroll_edge_c_e14345_lifted(void) {
     dd _sa = 0, _sb = 0;
     /* mov     ds:0C992h, ax ;~ 01A2:4345 */
     *(dw*)(raddr(ds,0x0C992)) = ax;
@@ -19366,7 +19373,8 @@ scroll_edge_c_e143a9:
     /* retn ;~ 01A2:43AB */
     return;
 }
-void scroll_edge_c_e14359(void) {
+void scroll_edge_c_e14359(void) { scroll_edge_c_e14359_c(); }
+void scroll_edge_c_e14359_lifted(void) {
     dd _sa = 0, _sb = 0;
 scroll_edge_c_e14359:
     do {
@@ -19429,7 +19437,8 @@ scroll_edge_c_e143a9:
     /* retn ;~ 01A2:43AB */
     return;
 }
-void scroll_edge_c_e143a9(void) {
+void scroll_edge_c_e143a9(void) { scroll_edge_c_e143a9_c(); }
+void scroll_edge_c_e143a9_lifted(void) {
     /* pop     si ;~ 01A2:43A9 */
     si = pop();
     /* pop     bx ;~ 01A2:43AA */
@@ -19437,7 +19446,8 @@ void scroll_edge_c_e143a9(void) {
     /* retn ;~ 01A2:43AB */
     return;
 }
-void scroll_edge_c(void) {
+void scroll_edge_c(void) { scroll_edge_c_c(); }
+void scroll_edge_c_lifted(void) {
     dd _sa = 0, _sb = 0;
     /* push    bx ;~ 01A2:4320 */
     push(bx);
@@ -19536,7 +19546,8 @@ scroll_edge_c_e143a9:
     /* retn ;~ 01A2:43AB */
     return;
 }
-void scroll_edge_b_e143cd(void) {
+void scroll_edge_b_e143cd(void) { scroll_edge_b_e143cd_c(); }
+void scroll_edge_b_e143cd_lifted(void) {
     dd _sa = 0, _sb = 0;
     /* mov     ds:0C992h, ax ;~ 01A2:43CD */
     *(dw*)(raddr(ds,0x0C992)) = ax;
@@ -19605,7 +19616,8 @@ scroll_edge_b_e14430:
     /* retn ;~ 01A2:4432 */
     return;
 }
-void scroll_edge_b_e143e1(void) {
+void scroll_edge_b_e143e1(void) { scroll_edge_b_e143e1_c(); }
+void scroll_edge_b_e143e1_lifted(void) {
     dd _sa = 0, _sb = 0;
 scroll_edge_b_e143e1:
     do {
@@ -19664,7 +19676,8 @@ scroll_edge_b_e14430:
     /* retn ;~ 01A2:4432 */
     return;
 }
-void scroll_edge_b_e14430(void) {
+void scroll_edge_b_e14430(void) { scroll_edge_b_e14430_c(); }
+void scroll_edge_b_e14430_lifted(void) {
     /* pop     si ;~ 01A2:4430 */
     si = pop();
     /* pop     bx ;~ 01A2:4431 */
@@ -19672,7 +19685,8 @@ void scroll_edge_b_e14430(void) {
     /* retn ;~ 01A2:4432 */
     return;
 }
-void scroll_edge_b(void) {
+void scroll_edge_b(void) { scroll_edge_b_c(); }
+void scroll_edge_b_lifted(void) {
     dd _sa = 0, _sb = 0;
     /* push    bx ;~ 01A2:43AC */
     push(bx);

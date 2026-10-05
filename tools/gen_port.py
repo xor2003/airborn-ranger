@@ -602,6 +602,20 @@ REWRITES = {
     'scroll_go_f': 'scroll_go_f_c',
     'scroll_go_g': 'scroll_go_g_c',
     'scroll_go_h': 'scroll_go_h_c',
+    'scroll_edge_a': 'scroll_edge_a_c',
+    'scroll_edge_a_e1429f': 'scroll_edge_a_e1429f_c',
+    'scroll_edge_a_e142ac': 'scroll_edge_a_e142ac_c',
+    'scroll_edge_d': 'scroll_edge_d_c',
+    'scroll_edge_d_e142ed': 'scroll_edge_d_e142ed_c',
+    'scroll_edge_d_e142f6': 'scroll_edge_d_e142f6_c',
+    'scroll_edge_b': 'scroll_edge_b_c',
+    'scroll_edge_b_e143cd': 'scroll_edge_b_e143cd_c',
+    'scroll_edge_b_e143e1': 'scroll_edge_b_e143e1_c',
+    'scroll_edge_b_e14430': 'scroll_edge_b_e14430_c',
+    'scroll_edge_c': 'scroll_edge_c_c',
+    'scroll_edge_c_e14345': 'scroll_edge_c_e14345_c',
+    'scroll_edge_c_e14359': 'scroll_edge_c_e14359_c',
+    'scroll_edge_c_e143a9': 'scroll_edge_c_e143a9_c',
 }
 # Commit 4366e7c removed the gfx driver-selection menu ('1'..'5' getch
 # loop → forced MCGA pick) by hand-editing the generated file, so every
