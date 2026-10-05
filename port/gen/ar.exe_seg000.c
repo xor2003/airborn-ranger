@@ -395,7 +395,8 @@ void locret_101d8(void) {
     return;
 }
 
-void build_tile_tables_e101f1(void) {
+void build_tile_tables_e101f1(void) { build_tile_tables_e101f1_c(); }
+void build_tile_tables_e101f1_lifted(void) {
 build_tile_tables_e101f1:
     do {
         /* stosw ;~ 01A2:01F1 */
@@ -443,7 +444,8 @@ void locret_1020b(void) {
     /* retn ;~ 01A2:020B */
     return;
 }
-void build_tile_tables(void) {
+void build_tile_tables(void) { build_tile_tables_c(); }
+void build_tile_tables_lifted(void) {
     /* mov     ax, cs:seg_data ;~ 01A2:01D9 */
     ax = seg_data;
     /* mov     ds, ax ;~ 01A2:01DD */
@@ -2687,7 +2689,8 @@ void clr_flip_mcga(void) {
     return;
 }
 
-void clear_flipbuf(void) {
+void clear_flipbuf(void) { clear_flipbuf_c(); }
+void clear_flipbuf_lifted(void) {
     /* push    ds ;~ 01A2:0ABF */
     push(ds);
     /* push    es ;~ 01A2:0AC0 */
@@ -2721,7 +2724,8 @@ clr_flip_cga:
     /* retn ;~ 01A2:0AE5 */
     return;
 }
-void clear_drawbuf(void) {
+void clear_drawbuf(void) { clear_drawbuf_c(); }
+void clear_drawbuf_lifted(void) {
     /* push    ds ;~ 01A2:0B20 */
     push(ds);
     /* push    es ;~ 01A2:0B21 */
@@ -3054,7 +3058,8 @@ void glyph_put_mcga_10c1c_lifted(void) {
     return;
 }
 
-void glyph_put_backbuf(void) {
+void glyph_put_backbuf(void) { glyph_put_backbuf_c(); }
+void glyph_put_backbuf_lifted(void) {
     /* push    es ;~ 01A2:0BD6 */
     push(es);
     /* mov     di, cs:seg_data ;~ 01A2:0BD7 */
@@ -3090,7 +3095,8 @@ glyph_put_mcga:
     /* retn ;~ 01A2:0C1B */
     return;
 }
-void glyph_put_flipbuf_e10c3c(void) {
+void glyph_put_flipbuf_e10c3c(void) { glyph_put_flipbuf_e10c3c_c(); }
+void glyph_put_flipbuf_e10c3c_lifted(void) {
     /* mov     es, di ;~ 01A2:0C3C */
     es = di;
     /* mov     di, cs:seg_data ;~ 01A2:0C3E */
@@ -3141,7 +3147,8 @@ void glyph_put2_mcga_lifted(void) {
 
 
 
-void glyph_put_flipbuf(void) {
+void glyph_put_flipbuf(void) { glyph_put_flipbuf_c(); }
+void glyph_put_flipbuf_lifted(void) {
     /* push    es ;~ 01A2:0C36 */
     push(es);
     /* mov     di, cs:seg_flip ;~ 01A2:0C37 */
@@ -5205,7 +5212,8 @@ locret_11598:
     /* retn ;~ 01A2:1598 */
     return;
 }
-void glyph_put_wrap(void) {
+void glyph_put_wrap(void) { glyph_put_wrap_c(); }
+void glyph_put_wrap_lifted(void) {
     /* push    ax ;~ 01A2:1599 */
     push(ax);
     /* push    word ptr ds:0A82h ;~ 01A2:159A */
@@ -5244,7 +5252,8 @@ dispatch_a9c_e115e5:
     /* jmp     cs:funcs_115E7[di] ;~ 01A2:15E7 */
     { vfn f_ = func_at((dd)0x1a20 + (*(dw*)(((db*)&glyph_put_tbl)+di))); if (f_) f_(); else fprintf(stderr, "unresolved ind jmp %x\n", (dd)((dd)0x1a20 + (*(dw*)(((db*)&glyph_put_tbl)+di)))); return; }
 }
-void dispatch_a9c_e115e5(void) {
+void dispatch_a9c_e115e5(void) { dispatch_a9c_e115e5_c(); }
+void dispatch_a9c_e115e5_lifted(void) {
     /* shl     di, 1 ;~ 01A2:15E5 */
     { if (1) { CF = (((dd)di << (1)) >> 16) & 1; di <<= 1; ZF = ((dw)(di) == 0); SF = (((dw)(di)) >> 15); } }
     /* jmp     cs:funcs_115E7[di] ;~ 01A2:15E7 */
@@ -5254,7 +5263,8 @@ void locret_11598(void) {
     /* retn ;~ 01A2:1598 */
     return;
 }
-void dispatch_a9c(void) {
+void dispatch_a9c(void) { dispatch_a9c_c(); }
+void dispatch_a9c_lifted(void) {
     /* mov     di, ds:0A9Ch ;~ 01A2:15D1 */
     di = *(dw*)raddr(ds,0x0A9C);
     /* cmp     di, 0Ah ;~ 01A2:15D5 */
@@ -5381,7 +5391,8 @@ scr_cell_mark_e11612:
     /* retn ;~ 01A2:1638 */
     return;
 }
-void bufsel_mcga(void) {
+void bufsel_mcga(void) { bufsel_mcga_c(); }
+void bufsel_mcga_lifted(void) {
     dd _sa = 0, _sb = 0;
     /* mov     ax, cs:seg_draw ; jumptable 0001164F case 3 ;~ 01A2:1654 */
     ax = seg_draw;
@@ -6255,7 +6266,8 @@ adapter_compose_flip_e11c59:
     /* retn ;~ 01A2:1C5F */
     return;
 }
-void tilemap_compose_e11c82(void) {
+void tilemap_compose_e11c82(void) { tilemap_compose_e11c82_c(); }
+void tilemap_compose_e11c82_lifted(void) {
     dd _sa = 0, _sb = 0;
     /* mov     ax, cs:seg_draw ;~ 01A2:1C82 */
     ax = seg_draw;
@@ -6318,7 +6330,8 @@ tilemap_compose_e11c98:
     /* retn ;~ 01A2:1CD8 */
     return;
 }
-void tilemap_compose_e11c92(void) {
+void tilemap_compose_e11c92(void) { tilemap_compose_e11c92_c(); }
+void tilemap_compose_e11c92_lifted(void) {
     dd _sa = 0, _sb = 0;
 tilemap_compose_e11c92:
     do {
@@ -6373,7 +6386,8 @@ tilemap_compose_e11c98:
     /* retn ;~ 01A2:1CD8 */
     return;
 }
-void tilemap_compose_e11c98(void) {
+void tilemap_compose_e11c98(void) { tilemap_compose_e11c98_c(); }
+void tilemap_compose_e11c98_lifted(void) {
     dd _sa = 0, _sb = 0;
 tilemap_compose_e11c98:
     do {
@@ -18425,7 +18439,8 @@ sub_13c06:
 
 
 
-void scroll_a_mcga(void) {
+void scroll_a_mcga(void) { scroll_a_mcga_c(); }
+void scroll_a_mcga_lifted(void) {
     /* mov     ax, cs:seg_flip ;~ 01A2:3C84 */
     ax = seg_flip;
     /* mov     es, ax ;~ 01A2:3C88 */
@@ -18509,7 +18524,8 @@ sub_13cd7:
 
 
 
-void scroll_b_mcga(void) {
+void scroll_b_mcga(void) { scroll_b_mcga_c(); }
+void scroll_b_mcga_lifted(void) {
     /* mov     ax, cs:seg_flip ;~ 01A2:3D5A */
     ax = seg_flip;
     /* mov     es, ax ;~ 01A2:3D5E */
@@ -18593,7 +18609,8 @@ sub_13daf:
 
 
 
-void scroll_c_mcga(void) {
+void scroll_c_mcga(void) { scroll_c_mcga_c(); }
+void scroll_c_mcga_lifted(void) {
     /* mov     ax, cs:seg_flip ;~ 01A2:3E2D */
     ax = seg_flip;
     /* mov     es, ax ;~ 01A2:3E31 */
@@ -18677,7 +18694,8 @@ sub_13e80:
 
 
 
-void scroll_d_mcga(void) {
+void scroll_d_mcga(void) { scroll_d_mcga_c(); }
+void scroll_d_mcga_lifted(void) {
     /* mov     ax, cs:seg_flip ;~ 01A2:3F01 */
     ax = seg_flip;
     /* mov     es, ax ;~ 01A2:3F05 */
@@ -18765,7 +18783,8 @@ sub_13f59:
 
 
 
-void scroll_e_mcga(void) {
+void scroll_e_mcga(void) { scroll_e_mcga_c(); }
+void scroll_e_mcga_lifted(void) {
     /* mov     ax, cs:seg_flip ;~ 01A2:3FDA */
     ax = seg_flip;
     /* mov     es, ax ;~ 01A2:3FDE */
@@ -18853,7 +18872,8 @@ sub_14032:
 
 
 
-void scroll_f_mcga(void) {
+void scroll_f_mcga(void) { scroll_f_mcga_c(); }
+void scroll_f_mcga_lifted(void) {
     /* mov     ax, cs:seg_flip ;~ 01A2:40B3 */
     ax = seg_flip;
     /* mov     es, ax ;~ 01A2:40B7 */
@@ -18939,7 +18959,8 @@ sub_1410b:
 
 
 
-void scroll_g_mcga(void) {
+void scroll_g_mcga(void) { scroll_g_mcga_c(); }
+void scroll_g_mcga_lifted(void) {
     /* mov     ax, cs:seg_flip ;~ 01A2:4189 */
     ax = seg_flip;
     /* mov     es, ax ;~ 01A2:418D */
@@ -19023,7 +19044,8 @@ sub_141df:
 
 
 
-void scroll_h_mcga(void) {
+void scroll_h_mcga(void) { scroll_h_mcga_c(); }
+void scroll_h_mcga_lifted(void) {
     /* mov     ax, cs:seg_flip ;~ 01A2:425D */
     ax = seg_flip;
     /* mov     es, ax ;~ 01A2:4261 */
@@ -20278,7 +20300,8 @@ scroll_d_direct_e1450e:
     /* retn ;~ 01A2:453C */
     return;
 }
-void draw_tilemap_frame_e1454f(void) {
+void draw_tilemap_frame_e1454f(void) { draw_tilemap_frame_e1454f_c(); }
+void draw_tilemap_frame_e1454f_lifted(void) {
     dd _sa = 0, _sb = 0;
 draw_tilemap_frame_e1454f:
     do {
@@ -20335,7 +20358,8 @@ draw_tilemap_frame_e14555:
     /* retn ;~ 01A2:459C */
     return;
 }
-void draw_tilemap_frame_e14555(void) {
+void draw_tilemap_frame_e14555(void) { draw_tilemap_frame_e14555_c(); }
+void draw_tilemap_frame_e14555_lifted(void) {
     dd _sa = 0, _sb = 0;
 draw_tilemap_frame_e14555:
     do {
@@ -20394,7 +20418,8 @@ draw_tilemap_frame_e1454f:
         frame_cnt = 0;
     } while (1);
 }
-void draw_tilemap_frame(void) {
+void draw_tilemap_frame(void) { draw_tilemap_frame_c(); }
+void draw_tilemap_frame_lifted(void) {
     dd _sa = 0, _sb = 0;
     /* mov     tmap_9812, 0 ;~ 01A2:453D */
     tmap_9812 = 0;
@@ -100390,7 +100415,8 @@ render_bit_row_e18302:
     /* retn ;~ 01A2:8305 */
     return;
 }
-void rec5_cmp_e1831b(void) {
+void rec5_cmp_e1831b(void) { rec5_cmp_e1831b_c(); }
+void rec5_cmp_e1831b_lifted(void) {
 rec5_cmp_e1831b:
     do {
         /* mov     al, [di] ;~ 01A2:831B */
@@ -100426,7 +100452,8 @@ rec5_cmp_e18339:
     /* retn ;~ 01A2:833D */
     return;
 }
-void rec5_cmp_e18339(void) {
+void rec5_cmp_e18339(void) { rec5_cmp_e18339_c(); }
+void rec5_cmp_e18339_lifted(void) {
 rec5_cmp_e18339:
     do {
         do {
@@ -100464,7 +100491,8 @@ rec5_cmp_e1831b:
         rec5_cmp_a506 = 1;
     } while (1);
 }
-void rec5_cmp(void) {
+void rec5_cmp(void) { rec5_cmp_c(); }
+void rec5_cmp_lifted(void) {
     /* mov     di, word_265B2 ;~ 01A2:8306 */
     di = rec_ptr_b;
     /* mov     si, word_265B0 ;~ 01A2:830A */
@@ -154256,7 +154284,8 @@ locret_1a9a2:
     /* retn ;~ 01A2:A9A2 */
     return;
 }
-void render_dispatch(void) {
+void render_dispatch(void) { render_dispatch_c(); }
+void render_dispatch_lifted(void) {
     /* mov     ax, cs:seg_draw ;~ 01A2:A9BA */
     ax = seg_draw;
     /* mov     es, ax ;~ 01A2:A9BE */
@@ -159881,7 +159910,8 @@ void px_to_cell_lifted(void) {
     /* retn ;~ 01A2:B23C */
     return;
 }
-void xy_to_cell(void) {
+void xy_to_cell(void) { xy_to_cell_c(); }
+void xy_to_cell_lifted(void) {
     dd _sa = 0, _sb = 0;
     /* mov     al, byte ptr word_2AA69 ;~ 01A2:B23D */
     al = *(db*)(&obj_sx);
@@ -160040,13 +160070,15 @@ map_probe_xy_e1b2b2:
         /* jmp     short loc_1B29D ;~ 01A2:B2B5 */
     } while (1);
 }
-void cell_to_col_e1b2e5(void) {
+void cell_to_col_e1b2e5(void) { cell_to_col_e1b2e5_c(); }
+void cell_to_col_e1b2e5_lifted(void) {
     /* stc ;~ 01A2:B2E5 */
     CF = 1;
     /* retn ;~ 01A2:B2E6 */
     return;
 }
-void cell_to_col(void) {
+void cell_to_col(void) { cell_to_col_c(); }
+void cell_to_col_lifted(void) {
     dd _sa = 0, _sb = 0;
     /* mov     ax, word_2AA65 ;~ 01A2:B2B7 */
     ax = probe_px;
@@ -160175,7 +160207,8 @@ void obj_cell_tile_e1b34f_lifted(void) {
     /* retn ;~ 01A2:B35D */
     return;
 }
-void map_probe_pair2(void) {
+void map_probe_pair2(void) { map_probe_pair2_c(); }
+void map_probe_pair2_lifted(void) {
     /* mov     word_2AA56, bx ;~ 01A2:B336 */
     map_prob_aa56 = bx;
     /* mov     word_2AA58, si ;~ 01A2:B33A */
@@ -160625,7 +160658,8 @@ mapgen_fill_b_e1b48b:
     /* retn ;~ 01A2:B4B6 */
     return;
 }
-void cell_to_px(void) {
+void cell_to_px(void) { cell_to_px_c(); }
+void cell_to_px_lifted(void) {
     dd _sa = 0, _sb = 0;
     /* shl     al, 1 ;~ 01A2:B4B7 */
     { if (1) { CF = (((dd)al << (1)) >> 8) & 1; al <<= 1; ZF = ((db)(al) == 0); SF = (((db)(al)) >> 7); } }

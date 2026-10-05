@@ -1458,6 +1458,106 @@ int main(void){
         fprintf(stderr, "  (redraw: lifted vs C, %d checks)\n", checks);
     }
 
+    /* ---- scroll_mcga pixel shifters, glyph_put dispatchers, tilemap
+     * grids (draw_tilemap_frame / tilemap_compose tail), geometry
+     * helpers (xy_to_cell/cell_to_px/cell_to_col/pair2), rec5_cmp. ---- */
+    {
+        dw s0 = seg_flip, s1 = seg_draw, s2 = seg_screen, s3 = seg_10018;
+        seg_flip = 0x9000; seg_draw = 0x9800; seg_screen = 0xA000;
+        ss = 0x8000; sp = 0xFFFE;
+        ds = seg_data; adapter_id = 3;
+        ab_res("scroll a", scroll_a_mcga_lifted, scroll_a_mcga, 0);
+        ab_res("scroll b", scroll_b_mcga_lifted, scroll_b_mcga, 0);
+        ab_res("scroll c", scroll_c_mcga_lifted, scroll_c_mcga, 0);
+        ab_res("scroll d", scroll_d_mcga_lifted, scroll_d_mcga, 0);
+        ab_res("scroll e", scroll_e_mcga_lifted, scroll_e_mcga, 0);
+        ab_res("scroll f", scroll_f_mcga_lifted, scroll_f_mcga, 0);
+        ab_res("scroll g", scroll_g_mcga_lifted, scroll_g_mcga, 0);
+        ab_res("scroll h", scroll_h_mcga_lifted, scroll_h_mcga, 0);
+        al = 'A';
+        ab_res("gput fb", glyph_put_flipbuf_lifted, glyph_put_flipbuf, 0);
+        al = '^';
+        ab_res("gput fb^", glyph_put_flipbuf_lifted, glyph_put_flipbuf, 0);
+        al = 'A'; di = seg_flip;
+        ab_res("gput fbm", glyph_put_flipbuf_e10c3c_lifted,
+               glyph_put_flipbuf_e10c3c, 0);
+        al = 'B';
+        ab_res("gput bb", glyph_put_backbuf_lifted, glyph_put_backbuf, 0);
+        al = 'C';
+        ab_res("gput wrap", glyph_put_wrap_lifted, glyph_put_wrap, 0);
+        for (int i = 0; i < 5; i++) {
+            adapter_id = i;
+            ab_res("rdr disp", render_dispatch_lifted, render_dispatch, 0);
+            ab_res("clr flip", clear_flipbuf_lifted, clear_flipbuf, 0);
+            ab_res("clr draw", clear_drawbuf_lifted, clear_drawbuf, 0);
+        }
+        adapter_id = 3;
+        *(dw*)raddr_(ds,0x0A9C) = 3;
+        ab_res("disp a9c", dispatch_a9c_lifted, dispatch_a9c, 0);
+        *(dw*)raddr_(ds,0x0A9C) = 0xC;
+        ab_res("disp a9c+", dispatch_a9c_lifted, dispatch_a9c, 0);
+        di = 4;
+        ab_res("disp 5e5", dispatch_a9c_e115e5_lifted,
+               dispatch_a9c_e115e5, 0);
+        frame_cnt2 = 0; tmframe_6566 = 0; tmframe_6570 = 0;
+        ab_res("tmframe", draw_tilemap_frame_lifted, draw_tilemap_frame, 0);
+        tmframe_6570 = 0;
+        ab_res("tmf 54f", draw_tilemap_frame_e1454f_lifted,
+               draw_tilemap_frame_e1454f, 0);
+        frame_cnt = 0; tmframe_6570 = 0;
+        ab_res("tmf 555", draw_tilemap_frame_e14555_lifted,
+               draw_tilemap_frame_e14555, 0);
+        seg000_1_d969 = 0x10; seg000_1_d965 = 4;
+        tile_src = 0x4000; glyph_rows = 0x5000;
+        ab_res("tmc 1c82", tilemap_compose_e11c82_lifted,
+               tilemap_compose_e11c82, 0);
+        map_base = 0; tile_src = 0x4000;
+        si = tile_src;
+        ab_res("tmc 1c92", tilemap_compose_e11c92_lifted,
+               tilemap_compose_e11c92, 0);
+        map_base = 0; routemap_d8f6 = 0; si = 0x4000;
+        ab_res("tmc 1c98", tilemap_compose_e11c98_lifted,
+               tilemap_compose_e11c98, 0);
+        adapter_id = 3;
+        ab_res("lut mcga", build_tile_tables_lifted, build_tile_tables, 0);
+        adapter_id = 2;
+        ab_res("lut ega", build_tile_tables_lifted, build_tile_tables, 0);
+        adapter_id = 3; di = 0x0BD5; ax = 0; cx = 0x0C8;
+        ds = seg_data; es = seg_data;
+        ab_res("lut mid", build_tile_tables_e101f1_lifted,
+               build_tile_tables_e101f1, 0);
+        ab_res("bufsel", bufsel_mcga_lifted, bufsel_mcga, 0);
+        ds = seg_data; adapter_id = 3;
+        *(db*)(&obj_sx) = 0x48; *(db*)(((db*)&obj_sx) + 1) = 0;
+        *(db*)(&obj_sy) = 0x60; *(db*)(((db*)&obj_sy) + 1) = 0;
+        ab_res("xy2cell", xy_to_cell_lifted, xy_to_cell, 0);
+        al = 5;
+        ab_res("cell2px", cell_to_px_lifted, cell_to_px, 0);
+        probe_px = 0x48; probe_py = 0x30;
+        cam_org_x = 0x20; cam_9681 = 0x10;
+        ab_res("cell2col", cell_to_col_lifted, cell_to_col, 0);
+        probe_px = 0x08;                      /* left of window -> CF  */
+        ab_res("cell2col oob", cell_to_col_lifted, cell_to_col, 0);
+        ab_res("c2col e5", cell_to_col_e1b2e5_lifted, cell_to_col_e1b2e5, 0);
+        bx = 0x1111; si = 0x2222;
+        cell_x = 9; cell_y = 6; probe_px = 0x48; probe_py = 0x30;
+        ab_res("pair2", map_probe_pair2_lifted, map_probe_pair2, 0);
+        rec_ptr_a = 0x7000; rec_ptr_b = 0x7010;
+        for (int i = 0; i < 6; i++) {
+            *(db*)raddr_(ds, 0x7000 + i) = '1' + i;
+            *(db*)raddr_(ds, 0x7010 + i) = '4' + i;
+        }
+        ab_res("rec5", rec5_cmp_lifted, rec5_cmp, 0);
+        di = rec_ptr_b + 5; si = rec_ptr_a + 5; cx = 5;
+        rec5_cmp_a506 = 0;
+        ab_res("rec5 31b", rec5_cmp_e1831b_lifted, rec5_cmp_e1831b, 0);
+        si = rec_ptr_a + 5; di = rec_ptr_b + 5; cx = 4;
+        rec5_cmp_a506 = 1;
+        ab_res("rec5 339", rec5_cmp_e18339_lifted, rec5_cmp_e18339, 0);
+        seg_flip = s0; seg_draw = s1; seg_screen = s2; seg_10018 = s3;
+        fprintf(stderr, "  (scrl+geo: lifted vs C, %d checks)\n", checks);
+    }
+
     /* ---- status-panel digit patcher: WOUNDS field ds:0xB93F <- byte_29712
      * template lives in the image with literal "XX" placeholders; sub_1BBB9
      * converts al to two ASCII digits and stores at ds:[si]/ds:[si+1]. ---- */

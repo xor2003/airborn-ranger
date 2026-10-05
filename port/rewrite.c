@@ -3289,3 +3289,380 @@ void scroll_d_direct_e1450e_c(void) {
         CF = (dd)frame_cnt < (dd)0x28; ZF = (frame_cnt == 0x28); SF = ((dw)(frame_cnt - 0x28) >> 15);
     } while (frame_cnt < 0x28);
 }
+
+/* ---- scroll_*_mcga: seg_flip block-move pixel shifters ---- */
+static void scroll_move(dw sioff, dw dioff, dw cnt, int dir) {
+    ax = seg_flip;
+    es = ax;
+    ds = ax;
+    DF = dir;
+    si = sioff;
+    di = dioff;
+    cx = cnt;
+    while (cx--) { *(dw*)raddr_(es,di) = *(dw*)raddr_(ds,si); si += DF?-2:2; di += DF?-2:2; }
+}
+void scroll_a_mcga_c(void) { scroll_move(0x500, 0, 0x7A80, 0); }
+void scroll_b_mcga_c(void) { scroll_move(0x0F9F8, 0x0FA00, 0x7CFC, 1); DF = 0; }
+void scroll_c_mcga_c(void) { scroll_move(8, 0, 0x7CFC, 0); }
+void scroll_d_mcga_c(void) { scroll_move(0x0F4FE, 0x0F9FE, 0x7A80, 1); DF = 0; }
+void scroll_e_mcga_c(void) { scroll_move(0x0F4F6, 0x0F9FE, 0x7A80, 1); DF = 0; }
+void scroll_f_mcga_c(void) { scroll_move(0x0F4FE, 0x0F9F6, 0x7A80, 1); DF = 0; }
+void scroll_g_mcga_c(void) { scroll_move(0x500, 8, 0x7A80, 0); }
+void scroll_h_mcga_c(void) { scroll_move(0x508, 0, 0x7A80, 0); }
+
+/* ---- glyph output: flipbuf/backbuf dispatchers + wrap ---- */
+void glyph_put_flipbuf_e10c3c_c(void);
+void glyph_put_flipbuf_c(void) {
+    push(es);
+    di = seg_flip;
+    glyph_put_flipbuf_e10c3c_c();
+}
+void glyph_put_flipbuf_e10c3c_c(void) {
+    es = di;
+    di = seg_data;
+    ds = di;
+    CF = (dd)al < (dd)0x5E; ZF = (al == 0x5E); SF = ((db)(al - 0x5E) >> 7);
+    if (al != 0x5E) {
+        di = adapter_id;
+        { CF = (((dd)di << (1)) >> 16) & 1; di <<= 1; ZF = ((dw)(di) == 0); SF = (((dw)(di)) >> 15); }
+        { vfn f_ = func_at((dd)0x1a20 + (*(dw*)(((db*)&glyphblit2_jt)+di))); if (f_) f_(); else fprintf(stderr, "unresolved ind jmp %x\n", (dd)((dd)0x1a20 + (*(dw*)(((db*)&glyphblit2_jt)+di)))); return; }
+    }
+    text_cursor_next();
+    es = pop();
+}
+void glyph_put_backbuf_c(void) {
+    push(es);
+    ds = (seg_data);
+    di = seg_screen;
+    es = di;
+    CF = (dd)al < (dd)0x5E; ZF = (al == 0x5E); SF = ((db)(al - 0x5E) >> 7);
+    if (al != 0x5E) {
+        di = adapter_id;
+        { CF = (((dd)di << (1)) >> 16) & 1; di <<= 1; ZF = ((dw)(di) == 0); SF = (((dw)(di)) >> 15); }
+        { vfn f_ = func_at((dd)0x1a20 + (*(dw*)(((db*)&glyphblit_jt)+di))); if (f_) f_(); else fprintf(stderr, "unresolved ind jmp %x\n", (dd)((dd)0x1a20 + (*(dw*)(((db*)&glyphblit_jt)+di)))); return; }
+    }
+    text_cursor_next();
+    es = pop();
+}
+void glyph_put_wrap_c(void) {
+    push(ax);
+    push(*(dw*)(raddr(ds,0x0A82)));
+    push(*(dw*)(raddr(ds,0x0A80)));
+    glyph_put_backbuf();
+    *(dw*)(raddr(ds,0x0A80)) = pop();
+    *(dw*)(raddr(ds,0x0A82)) = pop();
+    ax = pop();
+    glyph_put_flipbuf();
+}
+
+/* ---- render_dispatch / dispatch_a9c: indirect call wrappers ---- */
+void render_dispatch_c(void) {
+    ax = seg_draw;
+    es = ax;
+    di = adapter_id;
+    { CF = (((dd)di << (1)) >> 16) & 1; di <<= 1; ZF = ((dw)(di) == 0); SF = (((dw)(di)) >> 15); }
+    ds = ax;
+    { vfn f_ = func_at((dd)0x1a20 + (*(dw*)(((db*)&rdr_copy_tbl)+di))); dw sp_ = sp; if (f_) f_(); else fprintf(stderr, "unresolved ind call %x\n", (dd)((dd)0x1a20 + (*(dw*)(((db*)&rdr_copy_tbl)+di)))); if ((short)(sp - sp_) > 0) { sp = sp_; return; } }
+    ax = seg_data;
+    ds = ax;
+}
+void dispatch_a9c_e115e5_c(void);
+void dispatch_a9c_c(void) {
+    di = *(dw*)raddr(ds,0x0A9C);
+    CF = (dd)di < (dd)0x0A; ZF = (di == 0x0A); SF = ((dw)(di - 0x0A) >> 15);
+    if (di >= 0x0A) {
+        { dd t_ = (dd)di - (dd)0x0A; CF = (dd)di < (dd)0x0A; di = t_; ZF = ((dw)(di) == 0); SF = (((dw)(di)) >> 15); }
+        dispatch_a9c_e115e5_c();
+        return;
+    }
+    *(dw*)(raddr(ds,0x0A96)) = 0x1B52;
+    dispatch_a9c_e115e5_c();
+}
+void dispatch_a9c_e115e5_c(void) {
+    { CF = (((dd)di << (1)) >> 16) & 1; di <<= 1; ZF = ((dw)(di) == 0); SF = (((dw)(di)) >> 15); }
+    { vfn f_ = func_at((dd)0x1a20 + (*(dw*)(((db*)&glyph_put_tbl)+di))); if (f_) f_(); else fprintf(stderr, "unresolved ind jmp %x\n", (dd)((dd)0x1a20 + (*(dw*)(((db*)&glyph_put_tbl)+di)))); return; }
+}
+
+/* ---- draw_tilemap_frame: 25x40 tile grid -> draw_tile_compose ---- */
+static void tmf_cols(void) {
+    do {
+        ax = tmframe_6570;
+        { CF = (((dd)ax << (1)) >> 16) & 1; ax <<= 1; ZF = ((dw)(ax) == 0); SF = (((dw)(ax)) >> 15); }
+        { CF = (((dd)ax << (1)) >> 16) & 1; ax <<= 1; ZF = ((dw)(ax) == 0); SF = (((dw)(ax)) >> 15); }
+        { CF = (((dd)ax << (1)) >> 16) & 1; ax <<= 1; ZF = ((dw)(ax) == 0); SF = (((dw)(ax)) >> 15); }
+        draw_row = ax;
+        bx = frame_cnt2;
+        { CF = (((dd)bx << (1)) >> 16) & 1; bx <<= 1; ZF = ((dw)(bx) == 0); SF = (((dw)(bx)) >> 15); }
+        di = *(dw*)raddr(ds,bx + 0x0B71);
+        bx = frame_cnt;
+        draw_col = bx;
+        { dd t_ = (dd)di + (dd)bx; CF = t_ > 0xFFFF; di = t_; ZF = ((dw)(di) == 0); SF = (((dw)(di)) >> 15); }
+        { dd t_ = (dd)di + (dd)tmframe_6566; CF = t_ > 0xFFFF; di = t_; ZF = ((dw)(di) == 0); SF = (((dw)(di)) >> 15); }
+        { CF = (((dd)di << (1)) >> 16) & 1; di <<= 1; ZF = ((dw)(di) == 0); SF = (((dw)(di)) >> 15); }
+        ax = *(dw*)raddr(ds,di + 0x3F22);
+        draw_tile_compose();
+        (frame_cnt)++; ZF = ((dw)(frame_cnt) == 0); SF = (((dw)(frame_cnt)) >> 15);
+        CF = (dd)frame_cnt < (dd)0x28; ZF = (frame_cnt == 0x28); SF = ((dw)(frame_cnt - 0x28) >> 15);
+    } while (frame_cnt < 0x28);
+}
+static void tmf_nextrow(void) {
+    (frame_cnt2)++; ZF = ((dw)(frame_cnt2) == 0); SF = (((dw)(frame_cnt2)) >> 15);
+    (tmframe_6570)++; ZF = ((dw)(tmframe_6570) == 0); SF = (((dw)(tmframe_6570)) >> 15);
+    CF = (dd)tmframe_6570 < (dd)0x19; ZF = (tmframe_6570 == 0x19); SF = ((dw)(tmframe_6570 - 0x19) >> 15);
+}
+void draw_tilemap_frame_e1454f_c(void);
+void draw_tilemap_frame_c(void) {
+    tmap_9812 = 0;
+    tmframe_6570 = 0;
+    draw_row = 0;
+    draw_tilemap_frame_e1454f_c();
+}
+void draw_tilemap_frame_e1454f_c(void) {
+    do {
+        frame_cnt = 0;
+        tmf_cols();
+        tmf_nextrow();
+    } while (tmframe_6570 < 0x19);
+}
+void draw_tilemap_frame_e14555_c(void) {
+    for (;;) {
+        tmf_cols();
+        tmf_nextrow();
+        if (tmframe_6570 >= 0x19) return;
+        frame_cnt = 0;
+    }
+}
+
+/* ---- tilemap_compose tail: map_base/d8f6 grid -> tilerow_tbl ---- */
+static void tmc_row(void) {
+    do {
+        ax = routemap_d8f6;
+        { dd t_ = (dd)ax + (dd)seg000_1_d969; CF = t_ > 0xFFFF; ax = t_; ZF = ((dw)(ax) == 0); SF = (((dw)(ax)) >> 15); }
+        draw_col = ax;
+        ax = map_base;
+        draw_row = ax;
+        ax = *(dw*)raddr(ds,si);
+        { dd t_ = (dd)si + (dd)2; CF = t_ > 0xFFFF; si = t_; ZF = ((dw)(si) == 0); SF = (((dw)(si)) >> 15); }
+        push(si);
+        si = glyph_rows;
+        di = adapter_id;
+        { CF = (((dd)di << (1)) >> 16) & 1; di <<= 1; ZF = ((dw)(di) == 0); SF = (((dw)(di)) >> 15); }
+        { vfn f_ = func_at((dd)0x1a20 + (*(dw*)(((db*)&tilerow_tbl)+di))); dw sp_ = sp; if (f_) f_(); else fprintf(stderr, "unresolved ind call %x\n", (dd)((dd)0x1a20 + (*(dw*)(((db*)&tilerow_tbl)+di)))); if ((short)(sp - sp_) > 0) { sp = sp_; return; } }
+        si = pop();
+        (routemap_d8f6)++; ZF = ((dw)(routemap_d8f6) == 0); SF = (((dw)(routemap_d8f6)) >> 15);
+        ax = routemap_d8f6;
+        CF = (dd)ax < (dd)seg000_1_d965; ZF = (ax == seg000_1_d965); SF = ((dw)(ax - seg000_1_d965) >> 15);
+    } while (ax < seg000_1_d965);
+}
+void tilemap_compose_e11c82_c(void) {
+    ax = seg_draw;
+    es = ax;
+    si = tile_src;
+    map_base = 0;
+    do {
+        routemap_d8f6 = 0;
+        tmc_row();
+        { dd t_ = (dd)map_base + (dd)8; CF = t_ > 0xFFFF; map_base = t_; ZF = ((dw)(map_base) == 0); SF = (((dw)(map_base)) >> 15); }
+        CF = (dd)map_base < (dd)0xC8; ZF = (map_base == 0xC8); SF = ((dw)(map_base - 0xC8) >> 15);
+    } while (map_base < 0xC8);
+}
+void tilemap_compose_e11c92_c(void) {
+    do {
+        routemap_d8f6 = 0;
+        tmc_row();
+        { dd t_ = (dd)map_base + (dd)8; CF = t_ > 0xFFFF; map_base = t_; ZF = ((dw)(map_base) == 0); SF = (((dw)(map_base)) >> 15); }
+        CF = (dd)map_base < (dd)0xC8; ZF = (map_base == 0xC8); SF = ((dw)(map_base - 0xC8) >> 15);
+    } while (map_base < 0xC8);
+}
+void tilemap_compose_e11c98_c(void) {
+    for (;;) {
+        tmc_row();
+        { dd t_ = (dd)map_base + (dd)8; CF = t_ > 0xFFFF; map_base = t_; ZF = ((dw)(map_base) == 0); SF = (((dw)(map_base)) >> 15); }
+        CF = (dd)map_base < (dd)0xC8; ZF = (map_base == 0xC8); SF = ((dw)(map_base - 0xC8) >> 15);
+        if (map_base >= 0xC8) return;
+        routemap_d8f6 = 0;
+    }
+}
+
+/* ---- buffer clears: clrflip_jt / clrdraw_jt dispatchers ---- */
+void clear_flipbuf_c(void) {
+    push(ds);
+    push(es);
+    ds = (seg_data);
+    ax = seg_flip;
+    es = ax;
+    di = adapter_id;
+    { CF = (((dd)di << (1)) >> 16) & 1; di <<= 1; ZF = ((dw)(di) == 0); SF = (((dw)(di)) >> 15); }
+    { vfn f_ = func_at((dd)0x1a20 + (*(dw*)(((db*)&jpt_10ad3)+di))); if (f_) f_(); else fprintf(stderr, "unresolved ind jmp %x\n", (dd)((dd)0x1a20 + (*(dw*)(((db*)&jpt_10ad3)+di)))); return; }
+}
+void clear_drawbuf_c(void) {
+    push(ds);
+    push(es);
+    ds = (seg_data);
+    ax = seg_draw;
+    es = ax;
+    di = adapter_id;
+    { CF = (((dd)di << (1)) >> 16) & 1; di <<= 1; ZF = ((dw)(di) == 0); SF = (((dw)(di)) >> 15); }
+    { vfn f_ = func_at((dd)0x1a20 + (*(dw*)(((db*)&jpt_10b34)+di))); if (f_) f_(); else fprintf(stderr, "unresolved ind jmp %x\n", (dd)((dd)0x1a20 + (*(dw*)(((db*)&jpt_10b34)+di)))); return; }
+}
+
+/* ---- build_tile_tables: MCGA row-start LUT (adapter==3 only) ---- */
+void build_tile_tables_e101f1_c(void);
+void build_tile_tables_c(void) {
+    ax = seg_data;
+    ds = ax;
+    es = ax;
+    CF = (dd)adapter_id < (dd)3; ZF = (adapter_id == 3); SF = ((dw)(adapter_id - 3) >> 15);
+    if (adapter_id != 3) return;
+    di = 0x0BD5;
+    ax = 0;
+    cx = 0x0C8;
+    build_tile_tables_e101f1_c();
+}
+void build_tile_tables_e101f1_c(void) {
+    do {
+        *(dw*)raddr_(es,di) = ax; di += DF?-2:2;
+        { dd t_ = (dd)ax + (dd)0x140; CF = t_ > 0xFFFF; ax = t_; ZF = ((dw)(ax) == 0); SF = (((dw)(ax)) >> 15); }
+    } while (--cx != 0);
+    cx = 0x38;
+    while (cx--) { *(dw*)raddr_(es,di) = ax; di += DF?-2:2; }
+    di = 0x0AEF;
+    ax = 0;
+    cx = 0x28;
+    do {
+        *(dw*)raddr_(es,di) = ax; di += DF?-2:2;
+        { dd t_ = (dd)ax + (dd)8; CF = t_ > 0xFFFF; ax = t_; ZF = ((dw)(ax) == 0); SF = (((dw)(ax)) >> 15); }
+    } while (--cx != 0);
+}
+void bufsel_mcga_c(void) {
+    ax = seg_draw;
+    { dd t_ = (dd)ax + (dd)0x1000; CF = t_ > 0xFFFF; ax = t_; ZF = ((dw)(ax) == 0); SF = (((dw)(ax)) >> 15); }
+    seg_flip = ax;
+    { dd t_ = (dd)ax + (dd)0x1000; CF = t_ > 0xFFFF; ax = t_; ZF = ((dw)(ax) == 0); SF = (((dw)(ax)) >> 15); }
+    seg_10018 = ax;
+    ax = 0x0A000;
+    seg_screen = ax;
+    build_tile_tables();
+}
+
+/* ---- geometry helpers: xy_to_cell, cell_to_px, cell_to_col, pair2 ---- */
+void xy_to_cell_c(void) {
+    al = *(db*)(&obj_sx);
+    ah = *(db*)(((db*)&obj_sx) + 1);
+    cl = 2;
+    { if (cl) { CF = (ax >> ((cl)-1)) & 1; ax = ax >> cl; ZF = ((dw)(ax) == 0); SF = (((dw)(ax)) >> 15); } }
+    probe_px = ax;
+    cl = 3;
+    { if (cl) { CF = (ax >> ((cl)-1)) & 1; ax = ax >> cl; ZF = ((dw)(ax) == 0); SF = (((dw)(ax)) >> 15); } }
+    cell_x = al;
+    al = *(db*)(&obj_sy);
+    ah = *(db*)(((db*)&obj_sy) + 1);
+    cl = 3;
+    { if (cl) { CF = (ax >> ((cl)-1)) & 1; ax = ax >> cl; ZF = ((dw)(ax) == 0); SF = (((dw)(ax)) >> 15); } }
+    probe_py = ax;
+    cl = 3;
+    { if (cl) { CF = (ax >> ((cl)-1)) & 1; ax = ax >> cl; ZF = ((dw)(ax) == 0); SF = (((dw)(ax)) >> 15); } }
+    cell_y = al;
+}
+void cell_to_px_c(void) {
+    { CF = (((dd)al << (1)) >> 8) & 1; al <<= 1; ZF = ((db)(al) == 0); SF = (((db)(al)) >> 7); }
+    ah = 0; CF = 0; OF = 0; ZF = 1; SF = 0;
+    si = ax;
+    bx = cellpx_b245;
+    ax = *(dw*)raddr(ds,bx + si);
+    { dd t_ = (dd)ah + (dd)cell_bx; CF = t_ > 0xFF; ah = t_; ZF = ((db)(ah) == 0); SF = (((db)(ah)) >> 7); }
+    { CF = (ax >> 0) & 1; ax = ax >> 1; ZF = ((dw)(ax) == 0); SF = (((dw)(ax)) >> 15); }
+    { CF = ax & 1; ax = ax >> 1; ZF = ((dw)(ax) == 0); SF = (((dw)(ax)) >> 15); }
+    { CF = ax & 1; ax = ax >> 1; ZF = ((dw)(ax) == 0); SF = (((dw)(ax)) >> 15); }
+    ax &= 0x0FFFC; CF = 0; OF = 0; ZF = ((dw)(ax) == 0); SF = (((dw)(ax)) >> 15);
+    cellpx_a6b0 = al;
+    cellpx_a6b1 = ah;
+    bx = cellpx_b247;
+    ax = *(dw*)raddr(ds,bx + si);
+    { dd t_ = (dd)ah + (dd)cell_by; CF = t_ > 0xFF; ah = t_; ZF = ((db)(ah) == 0); SF = (((db)(ah)) >> 7); }
+    { CF = ax & 1; ax = ax >> 1; ZF = ((dw)(ax) == 0); SF = (((dw)(ax)) >> 15); }
+    { CF = ax & 1; ax = ax >> 1; ZF = ((dw)(ax) == 0); SF = (((dw)(ax)) >> 15); }
+    ax &= 0x0FFFC; CF = 0; OF = 0; ZF = ((dw)(ax) == 0); SF = (((dw)(ax)) >> 15);
+    cellpx_a6b2 = al;
+    cellpx_a6b3 = ah;
+}
+void cell_to_col_e1b2e5_c(void);
+void cell_to_col_c(void) {
+    ax = probe_px;
+    cx = cam_org_x;
+    { dd t_ = (dd)ax - (dd)cx; CF = (dd)ax < (dd)cx; ax = t_; ZF = ((dw)(ax) == 0); SF = (((dw)(ax)) >> 15); }
+    if ((short)(ax) >= 0) {
+        CF = (dd)ax < (dd)0x28; ZF = (ax == 0x28); SF = ((dw)(ax - 0x28) >> 15);
+        if (ax <= 0x28) {
+            draw_col = ax;
+            ax = probe_py;
+            cx = cam_9681;
+            { dd t_ = (dd)ax - (dd)cx; CF = (dd)ax < (dd)cx; ax = t_; ZF = ((dw)(ax) == 0); SF = (((dw)(ax)) >> 15); }
+            if ((short)(ax) >= 0) {
+                CF = (dd)ax < (dd)0x19; ZF = (ax == 0x19); SF = ((dw)(ax - 0x19) >> 15);
+                if (ax <= 0x19) {
+                    { CF = (((dd)ax << (1)) >> 16) & 1; ax <<= 1; ZF = ((dw)(ax) == 0); SF = (((dw)(ax)) >> 15); }
+                    { CF = (((dd)ax << (1)) >> 16) & 1; ax <<= 1; ZF = ((dw)(ax) == 0); SF = (((dw)(ax)) >> 15); }
+                    { CF = (((dd)ax << (1)) >> 16) & 1; ax <<= 1; ZF = ((dw)(ax) == 0); SF = (((dw)(ax)) >> 15); }
+                    draw_row = ax;
+                    CF = 0;
+                    return;
+                }
+            }
+        }
+    }
+    cell_to_col_e1b2e5_c();
+}
+void cell_to_col_e1b2e5_c(void) {
+    CF = 1;
+}
+void map_probe_pair2_c(void) {
+    map_prob_aa56 = bx;
+    map_prob_aa58 = si;
+    px_to_cell();
+    obj_cell_tile_e1b34f();
+}
+
+/* ---- rec5_cmp: 5-digit BCD add-with-carry, dseg fields ---- */
+static void rec5_digit(void) {
+    al = *(db*)raddr(ds,di);
+    { dd t_ = (dd)al + (dd)*(db*)raddr(ds,si); CF = t_ > 0xFF; al = t_; ZF = ((db)(al) == 0); SF = (((db)(al)) >> 7); }
+    { dd t_ = (dd)al + (dd)rec5_cmp_a506; CF = t_ > 0xFF; al = t_; ZF = ((db)(al) == 0); SF = (((db)(al)) >> 7); }
+    { dd t_ = (dd)al - (dd)0x30; CF = (dd)al < (dd)0x30; al = t_; ZF = ((db)(al) == 0); SF = (((db)(al)) >> 7); }
+    *(db*)raddr(ds,si) = al;
+    rec5_cmp_a506 = 0;
+    CF = (dd)al < (dd)0x3A; ZF = (al == 0x3A); SF = ((db)(al - 0x3A) >> 7);
+    if (al >= 0x3A) {
+        { dd t_ = (dd)al - (dd)0x0A; CF = (dd)al < (dd)0x0A; al = t_; ZF = ((db)(al) == 0); SF = (((db)(al)) >> 7); }
+        *(db*)raddr(ds,si) = al;
+        rec5_cmp_a506 = 1;
+    }
+}
+static void rec5_step(void) {
+    (si)--; ZF = ((dw)(si) == 0); SF = (((dw)(si)) >> 15);
+    (di)--; ZF = ((dw)(di) == 0); SF = (((dw)(di)) >> 15);
+}
+void rec5_cmp_e1831b_c(void);
+void rec5_cmp_c(void) {
+    di = rec_ptr_b;
+    si = rec_ptr_a;
+    cx = 5;
+    { dd t_ = (dd)di + (dd)cx; CF = t_ > 0xFFFF; di = t_; ZF = ((dw)(di) == 0); SF = (((dw)(di)) >> 15); }
+    { dd t_ = (dd)si + (dd)cx; CF = t_ > 0xFFFF; si = t_; ZF = ((dw)(si) == 0); SF = (((dw)(si)) >> 15); }
+    (cx)++; ZF = ((dw)(cx) == 0); SF = (((dw)(cx)) >> 15);
+    rec5_cmp_a506 = 0;
+    rec5_cmp_e1831b_c();
+}
+void rec5_cmp_e1831b_c(void) {
+    do {
+        rec5_digit();
+        rec5_step();
+    } while (--cx != 0);
+}
+void rec5_cmp_e18339_c(void) {
+    for (;;) {
+        rec5_step();
+        if (--cx == 0) return;
+        rec5_digit();
+    }
+}
