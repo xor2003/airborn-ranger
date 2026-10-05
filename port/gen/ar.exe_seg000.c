@@ -159158,7 +159158,8 @@ descent_steer_e1afe5:
     /* retn ;~ 01A2:B001 */
     return;
 }
-void draw_cell_strip_e1b044(void) {
+void draw_cell_strip_e1b044(void) { draw_cell_strip_e1b044_c(); }
+void draw_cell_strip_e1b044_lifted(void) {
     /* mov     cx, 20h ; ' ' ;~ 01A2:B044 */
     cx = 0x20;
 draw_cell_strip_e1b047:
@@ -159195,7 +159196,8 @@ draw_cell_strip_e1b06d:
     /* retn ;~ 01A2:B085 */
     return;
 }
-void draw_cell_strip_e1b047(void) {
+void draw_cell_strip_e1b047(void) { draw_cell_strip_e1b047_c(); }
+void draw_cell_strip_e1b047_lifted(void) {
 draw_cell_strip_e1b047:
     do {
         /* push    cx ;~ 01A2:B047 */
@@ -159230,7 +159232,8 @@ draw_cell_strip_e1b06d:
     /* retn ;~ 01A2:B085 */
     return;
 }
-void draw_cell_strip_e1b054(void) {
+void draw_cell_strip_e1b054(void) { draw_cell_strip_e1b054_c(); }
+void draw_cell_strip_e1b054_lifted(void) {
     /* mov     cl, 5 ;~ 01A2:B054 */
     cl = 5;
     /* shl     bx, cl ;~ 01A2:B056 */
@@ -159279,7 +159282,8 @@ draw_cell_strip_e1b06d:
     /* retn ;~ 01A2:B085 */
     return;
 }
-void draw_cell_strip_e1b05b(void) {
+void draw_cell_strip_e1b05b(void) { draw_cell_strip_e1b05b_c(); }
+void draw_cell_strip_e1b05b_lifted(void) {
 draw_cell_strip_e1b05b:
     do {
         /* push    cx ;~ 01A2:B05B */
@@ -159322,7 +159326,8 @@ draw_cell_strip_e1b06d:
     /* retn ;~ 01A2:B085 */
     return;
 }
-void draw_cell_strip_e1b06d(void) {
+void draw_cell_strip_e1b06d(void) { draw_cell_strip_e1b06d_c(); }
+void draw_cell_strip_e1b06d_lifted(void) {
     /* mov     ax, word_2A99D ;~ 01A2:B06D */
     ax = maprow_base;
     /* call    sub_1B090 ;~ 01A2:B070 */
@@ -159342,7 +159347,8 @@ void draw_cell_strip_e1b06d(void) {
     /* retn ;~ 01A2:B085 */
     return;
 }
-void draw_cell_strip(void) {
+void draw_cell_strip(void) { draw_cell_strip_c(); }
+void draw_cell_strip_lifted(void) {
     dd _sa = 0, _sb = 0;
     /* mov     ax, cs:seg_draw ;~ 01A2:B002 */
     ax = seg_draw;
@@ -159458,7 +159464,8 @@ draw_cell_strip_e1b06d:
     return;
 }
 
-void cell_glyph_fetch_e1b0b1(void) {
+void cell_glyph_fetch_e1b0b1(void) { cell_glyph_fetch_e1b0b1_c(); }
+void cell_glyph_fetch_e1b0b1_lifted(void) {
     /* mov     ax, [si] ;~ 01A2:B0B1 */
     ax = *(dw*)raddr(ds,si);
     /* lodsw ;~ 01A2:B0B3 */
@@ -159503,7 +159510,8 @@ void cell_glyph_fetch_e1b0b1(void) {
 
 
 
-void cellgfx_mcga(void) {
+void cellgfx_mcga(void) { cellgfx_mcga_c(); }
+void cellgfx_mcga_lifted(void) {
     /* mov     cl, 5           ; jumptable 0001B098 case 3 ;~ 01A2:B15E */
     cl = 5;
     /* shl     ax, cl ;~ 01A2:B160 */
@@ -159569,7 +159577,8 @@ cellgfx_mcga_e1b177:
     /* retn ;~ 01A2:B1BD */
     return;
 }
-void cellgfx_mcga_e1b172(void) {
+void cellgfx_mcga_e1b172(void) { cellgfx_mcga_e1b172_c(); }
+void cellgfx_mcga_e1b172_lifted(void) {
     /* mov     cx, 4 ;~ 01A2:B172 */
     cx = 4;
     /* xor     bh, bh ;~ 01A2:B175 */
@@ -159619,7 +159628,8 @@ cellgfx_mcga_e1b177:
     /* retn ;~ 01A2:B1BD */
     return;
 }
-void cellgfx_mcga_e1b177(void) {
+void cellgfx_mcga_e1b177(void) { cellgfx_mcga_e1b177_c(); }
+void cellgfx_mcga_e1b177_lifted(void) {
 cellgfx_mcga_e1b177:
     do {
         /* mov     bl, [si] ;~ 01A2:B177 */
@@ -159667,7 +159677,8 @@ cellgfx_mcga_e1b177:
 }
 
 
-void cell_glyph_fetch(void) {
+void cell_glyph_fetch(void) { cell_glyph_fetch_c(); }
+void cell_glyph_fetch_lifted(void) {
     /* mov     di, bp ;~ 01A2:B090 */
     di = bp;
     /* mov     si, word_1D934 ;~ 01A2:B092 */

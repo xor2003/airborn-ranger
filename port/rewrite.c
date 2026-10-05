@@ -2586,3 +2586,167 @@ void bar_draw_e17c87_c(void) {
 void bar_draw_e17c8f_c(void) {
     bar_draw_mark();
 }
+
+/* ---- cell-strip renderer: 8 cells via cellgfx_jt (tandy planar /
+ * mcga LUT), then a 32-cell strip (map bytes or flat fill) and the
+ * 4-cell tail — the scrolling edge column painter. ------------------ */
+static void strip_tail4(void) {          /* e1b06d: 4x glyph fetch     */
+    ax = maprow_base; cell_glyph_fetch();
+    ax = maprow_base; cell_glyph_fetch();
+    ax = maprow_base; cell_glyph_fetch();
+    ax = maprow_base; cell_glyph_fetch();
+}
+static void strip_fill32(void) {         /* e1b047: same cell x32      */
+    do {
+        push(cx);
+        ax = maprow_base;
+        cell_glyph_fetch();
+        cx = pop();
+    } while (--cx != 0);
+    strip_tail4();
+}
+static void strip_map32(void) {          /* e1b05b: map bytes |0x80    */
+    do {
+        push(cx);
+        push(bx);
+        al = *(db*)raddr(ds, bx - 0x68CA);
+        ah = 0; CF = 0; OF = 0; ZF = 1; SF = 0;
+        al |= 0x80; CF = 0; OF = 0; ZF = (al == 0); SF = (al >> 7);
+        cell_glyph_fetch();
+        bx = pop();
+        (bx)++; ZF = (bx == 0); SF = (bx >> 15);
+        cx = pop();
+    } while (--cx != 0);
+    strip_tail4();
+}
+void draw_cell_strip_c(void) {           /* sub_1B002: edge strip      */
+    ax = seg_draw;
+    es = ax;
+    bp = draw_cel_dbdd;
+    bx = scroll_cnt;
+    bx &= 7; CF = 0; OF = 0; ZF = (bx == 0); SF = (bx >> 15);
+    CF = (((dd)bx << 1) >> 16) & 1; bx <<= 1;
+    ZF = (bx == 0); SF = (bx >> 15);
+    ax = 0x7F;
+    { dd t_ = (dd)ax + (dd)*(dw*)raddr(ds, bx - 0x24F3); CF = t_ > 0xFFFF;
+      ax = t_; ZF = (ax == 0); SF = (ax >> 15); }
+    maprow_base = ax;
+    ax = maprow_base; cell_glyph_fetch();
+    ax = maprow_base; cell_glyph_fetch();
+    ax = maprow_base; cell_glyph_fetch();
+    ax = maprow_base; cell_glyph_fetch();
+    bx = scroll_cnt;
+    CF = bx & 1; bx = (short)bx >> 1;
+    ZF = (bx == 0); SF = (bx >> 15);
+    if ((short)(bx) >= 0) {
+        CF = (dd)bx < (dd)0x40; ZF = (bx == 0x40);
+        SF = ((dw)(bx - 0x40) >> 15);
+        if (bx < 0x40) { draw_cell_strip_e1b054_c(); return; }
+    }
+    draw_cell_strip_e1b044_c();
+}
+void draw_cell_strip_e1b044_c(void) {
+    cx = 0x20;
+    strip_fill32();
+}
+void draw_cell_strip_e1b047_c(void) {
+    strip_fill32();
+}
+void draw_cell_strip_e1b054_c(void) {
+    cl = 5;
+    if (cl) {
+        CF = (((dd)bx << cl) >> 16) & 1; bx <<= cl;
+        ZF = (bx == 0); SF = (bx >> 15);
+    }
+    cx = 0x20;
+    strip_map32();
+}
+void draw_cell_strip_e1b05b_c(void) {
+    strip_map32();
+}
+void draw_cell_strip_e1b06d_c(void) {
+    strip_tail4();
+}
+void cell_glyph_fetch_c(void) {          /* sub_1B090: cellgfx_jt disp */
+    di = bp;
+    si = adapter_id;
+    CF = (((dd)si << 1) >> 16) & 1; si <<= 1;
+    ZF = (si == 0); SF = (si >> 15);
+    { vfn f_ = func_at((dd)0x1a20 + (*(dw*)(((db*)&cellgfx_jt) + si)));
+      if (f_) f_();
+      else fprintf(stderr, "unresolved ind jmp %x\n",
+                   (dd)((dd)0x1a20 + (*(dw*)(((db*)&cellgfx_jt) + si))));
+      return; }
+}
+void cell_glyph_fetch_e1b0b1_c(void) {   /* tandy 4-plane glyph fetch  */
+    ax = *(dw*)raddr(ds, si);
+    ax = *(dw*)raddr_(ds, si); si += DF ? -2 : 2;
+    *(dw*)(raddr(es, di)) = ax;
+    ax = *(dw*)raddr_(ds, si); si += DF ? -2 : 2;
+    *(dw*)(raddr(es, di + 2)) = ax;
+    ax = *(dw*)raddr_(ds, si); si += DF ? -2 : 2;
+    *(dw*)(raddr(es, di + 0x2000)) = ax;
+    ax = *(dw*)raddr_(ds, si); si += DF ? -2 : 2;
+    *(dw*)(raddr(es, di + 0x2002)) = ax;
+    ax = *(dw*)raddr_(ds, si); si += DF ? -2 : 2;
+    *(dw*)(raddr(es, di + 0x4000)) = ax;
+    ax = *(dw*)raddr_(ds, si); si += DF ? -2 : 2;
+    *(dw*)(raddr(es, di + 0x4002)) = ax;
+    ax = *(dw*)raddr_(ds, si); si += DF ? -2 : 2;
+    *(dw*)(raddr(es, di + 0x6000)) = ax;
+    ax = *(dw*)raddr_(ds, si); si += DF ? -2 : 2;
+    *(dw*)(raddr(es, di + 0x6002)) = ax;
+    { dd t_ = (dd)bp + (dd)4; CF = t_ > 0xFFFF; bp = t_;
+      ZF = (bp == 0); SF = (bp >> 15); }
+}
+static void cellgfx_rows(void) {         /* e1b177: 4-row LUT blit     */
+    do {
+        bl = *(db*)raddr(ds, si);
+        al = *(db*)raddr(ds, bx + 0x3C70);
+        ah = *(db*)raddr(ds, bx + 0x3D70);
+        *(dw*)(raddr(es, di)) = ax;
+        bl = *(db*)raddr(ds, si + 1);
+        al = *(db*)raddr(ds, bx + 0x3C70);
+        ah = *(db*)raddr(ds, bx + 0x3D70);
+        *(dw*)(raddr(es, di + 2)) = ax;
+        bl = *(db*)raddr(ds, si + 2);
+        al = *(db*)raddr(ds, bx + 0x3C70);
+        ah = *(db*)raddr(ds, bx + 0x3D70);
+        *(dw*)(raddr(es, di + 4)) = ax;
+        bl = *(db*)raddr(ds, si + 3);
+        al = *(db*)raddr(ds, bx + 0x3C70);
+        ah = *(db*)raddr(ds, bx + 0x3D70);
+        *(dw*)(raddr(es, di + 6)) = ax;
+        { dd t_ = (dd)si + (dd)4; CF = t_ > 0xFFFF; si = t_;
+          ZF = (si == 0); SF = (si >> 15); }
+        { dd t_ = (dd)di + (dd)0x140; CF = t_ > 0xFFFF; di = t_;
+          ZF = (di == 0); SF = (di >> 15); }
+    } while (--cx != 0);
+    { dd t_ = (dd)bp + (dd)8; CF = t_ > 0xFFFF; bp = t_;
+      ZF = (bp == 0); SF = (bp >> 15); }
+}
+void cellgfx_mcga_c(void) {              /* jpt_1B098 case 3           */
+    cl = 5;
+    if (cl) {
+        CF = (((dd)ax << cl) >> 16) & 1; ax <<= cl;
+        ZF = (ax == 0); SF = (ax >> 15);
+    }
+    { dd t_ = (dd)ax + (dd)0x1B52; CF = t_ > 0xFFFF; ax = t_;
+      ZF = (ax == 0); SF = (ax >> 15); }
+    si = ax;
+    CF = 0; OF = 0; ZF = ((dw)(scroll_cnt & 1) == 0);
+    SF = ((dw)(scroll_cnt & 1) >> 15);
+    if (scroll_cnt & 1) {
+        dd t_ = (dd)si + (dd)0x10; CF = t_ > 0xFFFF; si = t_;
+        ZF = (si == 0); SF = (si >> 15);
+    }
+    cellgfx_mcga_e1b172_c();
+}
+void cellgfx_mcga_e1b172_c(void) {
+    cx = 4;
+    bh = 0; CF = 0; OF = 0; ZF = 1; SF = 0;
+    cellgfx_rows();
+}
+void cellgfx_mcga_e1b177_c(void) {
+    cellgfx_rows();
+}

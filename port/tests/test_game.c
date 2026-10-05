@@ -1242,6 +1242,61 @@ int main(void){
                 checks);
     }
 
+    /* ---- cell-strip renderer: draw_cell_strip edge column (cellgfx_jt
+     * dispatch -> cellgfx_mcga LUT blit), glyph fetch + mids. -------- */
+    {
+        dw s0 = seg_flip, s1 = seg_draw, s2 = seg_screen;
+        seg_flip = 0x9000; seg_draw = 0x9800; seg_screen = 0xA000;
+        ss = 0x8000; sp = 0xFFFE;
+        ds = seg_data; adapter_id = 3;
+        draw_cel_dbdd = 0x1000; scroll_cnt = 0;
+        ab_res("cellstrip", draw_cell_strip_lifted, draw_cell_strip, 0);
+        draw_cel_dbdd = 0x1000; scroll_cnt = 5;
+        ab_res("cellstrip sc5", draw_cell_strip_lifted,
+               draw_cell_strip, 0);
+        draw_cel_dbdd = 0x1000; scroll_cnt = 0x8000;
+        ab_res("cellstrip neg", draw_cell_strip_lifted,
+               draw_cell_strip, 0);
+        draw_cel_dbdd = 0x1000;
+        ab_res("cellstrip e044", draw_cell_strip_e1b044_lifted,
+               draw_cell_strip_e1b044, 0);
+        draw_cel_dbdd = 0x1000; cx = 0x10;
+        ab_res("cellstrip e047", draw_cell_strip_e1b047_lifted,
+               draw_cell_strip_e1b047, 0);
+        draw_cel_dbdd = 0x1000; bx = 3;
+        ab_res("cellstrip e054", draw_cell_strip_e1b054_lifted,
+               draw_cell_strip_e1b054, 0);
+        draw_cel_dbdd = 0x1000; bx = 0x100; cx = 6;
+        ab_res("cellstrip e05b", draw_cell_strip_e1b05b_lifted,
+               draw_cell_strip_e1b05b, 0);
+        draw_cel_dbdd = 0x1000;
+        ab_res("cellstrip e06d", draw_cell_strip_e1b06d_lifted,
+               draw_cell_strip_e1b06d, 0);
+        bp = 0x2000; adapter_id = 3; es = 0x9800;
+        ab_res("glyphfetch", cell_glyph_fetch_lifted, cell_glyph_fetch, 0);
+        bp = 0x2000; adapter_id = 1; es = 0x9800;
+        ab_res("glyphfetch t", cell_glyph_fetch_lifted,
+               cell_glyph_fetch, 0);
+        adapter_id = 3;
+        si = 0x1B52; di = 0x2000; bp = 0x2000; es = 0x9800;
+        ab_res("glyph mid", cell_glyph_fetch_e1b0b1_lifted,
+               cell_glyph_fetch_e1b0b1, 0);
+        ax = 7; scroll_cnt = 0; es = 0x9800; di = 0x2000; bp = 0x2000;
+        ab_res("cellgfx", cellgfx_mcga_lifted, cellgfx_mcga, 0);
+        ax = 7; scroll_cnt = 1; es = 0x9800; di = 0x2000; bp = 0x2000;
+        ab_res("cellgfx odd", cellgfx_mcga_lifted, cellgfx_mcga, 0);
+        si = 0x1B52; di = 0x2000; bp = 0x2000; es = 0x9800;
+        ab_res("cellgfx mid", cellgfx_mcga_e1b172_lifted,
+               cellgfx_mcga_e1b172, 0);
+        si = 0x1B52; di = 0x2000; bp = 0x2000; es = 0x9800;
+        cx = 3; bh = 0;
+        ab_res("cellgfx rows", cellgfx_mcga_e1b177_lifted,
+               cellgfx_mcga_e1b177, 0);
+        seg_flip = s0; seg_draw = s1; seg_screen = s2;
+        fprintf(stderr, "  (cellstrip: lifted vs C, %d checks)\n",
+                checks);
+    }
+
     /* ---- status-panel digit patcher: WOUNDS field ds:0xB93F <- byte_29712
      * template lives in the image with literal "XX" placeholders; sub_1BBB9
      * converts al to two ASCII digits and stores at ds:[si]/ds:[si+1]. ---- */
