@@ -14448,7 +14448,8 @@ clear_table_e1363f:
 
 
 
-void blitflag_go_mcga(void) {
+void blitflag_go_mcga(void) { blitflag_go_mcga_c(); }
+void blitflag_go_mcga_lifted(void) {
     /* mov     ax, cs:seg_flip ; jumptable 0001367D case 3 ;~ 01A2:382E */
     ax = seg_flip;
     /* mov     es, ax ;~ 01A2:3832 */
@@ -14533,7 +14534,8 @@ blitflag_go_mcga_e138a5:
     /* jmp     short loc_1384D ;~ 01A2:38AB */
     goto blitflag_go_mcga_e1384d;
 }
-void blitflag_go_mcga_e1384d(void) {
+void blitflag_go_mcga_e1384d(void) { blitflag_go_mcga_e1384d_c(); }
+void blitflag_go_mcga_e1384d_lifted(void) {
 blitflag_go_mcga_e1384d:
     do {
         /* mov     si, word_1DDB0 ;~ 01A2:384D */
@@ -14607,7 +14609,8 @@ locret_138ad:
     /* retn ;~ 01A2:38AD */
     return;
 }
-void blitflag_go_mcga_e1385c(void) {
+void blitflag_go_mcga_e1385c(void) { blitflag_go_mcga_e1385c_c(); }
+void blitflag_go_mcga_e1385c_lifted(void) {
 blitflag_go_mcga_e1385c:
     /* mov     byte ptr [si+0F67h], 0 ;~ 01A2:385C */
     *(db*)raddr(ds,si+0x0F67) = 0;
@@ -14677,7 +14680,8 @@ blitflag_go_mcga_e1384d:
         /* jmp     short loc_138A5 ;~ 01A2:3859 */
     } while (1);
 }
-void blitflag_go_mcga_e13884(void) {
+void blitflag_go_mcga_e13884(void) { blitflag_go_mcga_e13884_c(); }
+void blitflag_go_mcga_e13884_lifted(void) {
 blitflag_go_mcga_e13884:
     do {
         do {
@@ -14749,7 +14753,8 @@ blitflag_go_mcga_e1385c:
         bp = seg_draw;
     } while (1);
 }
-void blitflag_go_mcga_e138a5(void) {
+void blitflag_go_mcga_e138a5(void) { blitflag_go_mcga_e138a5_c(); }
+void blitflag_go_mcga_e138a5_lifted(void) {
 blitflag_go_mcga_e138a5:
     do {
         /* dec     word_1DDB0 ;~ 01A2:38A5 */
@@ -18347,7 +18352,8 @@ locret_13bc0:
     /* retn ;~ 01A2:3BC0 */
     return;
 }
-void scroll_go_a(void) {
+void scroll_go_a(void) { scroll_go_a_c(); }
+void scroll_go_a_lifted(void) {
     /* mov     ax, cs:seg_draw ; jumptable 00016AB9 case 2 ;~ 01A2:3BEA */
     ax = seg_draw;
     /* mov     es, ax ;~ 01A2:3BEE */
@@ -18428,7 +18434,8 @@ void scroll_a_mcga(void) {
     return;
 }
 
-void scroll_go_b(void) {
+void scroll_go_b(void) { scroll_go_b_c(); }
+void scroll_go_b_lifted(void) {
     /* mov     ax, cs:seg_draw ; jumptable 00016AB9 case 4 ;~ 01A2:3CBB */
     ax = seg_draw;
     /* mov     es, ax ;~ 01A2:3CBF */
@@ -18513,7 +18520,8 @@ void scroll_b_mcga(void) {
     return;
 }
 
-void scroll_go_c(void) {
+void scroll_go_c(void) { scroll_go_c_c(); }
+void scroll_go_c_lifted(void) {
     /* mov     ax, cs:seg_draw ; jumptable 00016AB9 case 8 ;~ 01A2:3D93 */
     ax = seg_draw;
     /* mov     es, ax ;~ 01A2:3D97 */
@@ -18594,7 +18602,8 @@ void scroll_c_mcga(void) {
     return;
 }
 
-void scroll_go_d(void) {
+void scroll_go_d(void) { scroll_go_d_c(); }
+void scroll_go_d_lifted(void) {
     /* mov     ax, cs:seg_draw ; jumptable 00016AB9 case 1 ;~ 01A2:3E64 */
     ax = seg_draw;
     /* mov     es, ax ;~ 01A2:3E68 */
@@ -18679,7 +18688,8 @@ void scroll_d_mcga(void) {
     return;
 }
 
-void scroll_go_e(void) {
+void scroll_go_e(void) { scroll_go_e_c(); }
+void scroll_go_e_lifted(void) {
     /* mov     ax, cs:seg_draw ; jumptable 00016AB9 case 5 ;~ 01A2:3F3A */
     ax = seg_draw;
     /* mov     es, ax ;~ 01A2:3F3E */
@@ -18766,7 +18776,8 @@ void scroll_e_mcga(void) {
     return;
 }
 
-void scroll_go_f(void) {
+void scroll_go_f(void) { scroll_go_f_c(); }
+void scroll_go_f_lifted(void) {
     /* mov     ax, cs:seg_draw ; jumptable 00016AB9 case 9 ;~ 01A2:4013 */
     ax = seg_draw;
     /* mov     es, ax ;~ 01A2:4017 */
@@ -18853,7 +18864,8 @@ void scroll_f_mcga(void) {
     return;
 }
 
-void scroll_go_g(void) {
+void scroll_go_g(void) { scroll_go_g_c(); }
+void scroll_go_g_lifted(void) {
     /* mov     ax, cs:seg_draw ; jumptable 00016AB9 case 6 ;~ 01A2:40EC */
     ax = seg_draw;
     /* mov     es, ax ;~ 01A2:40F0 */
@@ -18936,7 +18948,8 @@ void scroll_g_mcga(void) {
     return;
 }
 
-void scroll_go_h(void) {
+void scroll_go_h(void) { scroll_go_h_c(); }
+void scroll_go_h_lifted(void) {
     /* mov     ax, cs:seg_draw ; jumptable 00016AB9 case 10 ;~ 01A2:41C0 */
     ax = seg_draw;
     /* mov     es, ax ;~ 01A2:41C4 */

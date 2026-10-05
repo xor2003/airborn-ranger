@@ -1000,6 +1000,67 @@ int main(void){
         fprintf(stderr, "  (tile/glyph: lifted vs C, %d checks)\n", checks);
     }
 
+    /* ---- blitflag dirty-flag blit + scroll/pan handlers: blitflag_
+     * go_mcga sweeps 32 rect slots (flag at [si+0xF67], runs [si+0xFF3],
+     * row [si+0x1197], col pair [si+0x107F]/[si+0x110B]) copying
+     * seg_draw->seg_flip; scroll_go_* ind-call through scroll_tbl_x with
+     * the far-thunk sp restore, then run scroll_edge_x. -------------- */
+    {
+        dw s0 = seg_flip, s1 = seg_draw, s2 = seg_screen;
+        seg_flip = 0x9000; seg_draw = 0x9800; seg_screen = 0xA000;
+        ss = 0x8000; sp = 0xFFFE;
+        adapter_id = 3;
+        ds = seg_data; es = seg_flip;
+        memset(raddr_(ds, 0x0F67), 0, 0x20);  /* all flags clear        */
+        blit_sel = 0;
+        ab_res("blitflag", blitflag_go_mcga_lifted, blitflag_go_mcga, 0);
+        blit_sel = 1;
+        ab_res("blitflag sel1", blitflag_go_mcga_lifted, blitflag_go_mcga, 0);
+        blit_sel = 0;
+        /* rig slot 1: 2 runs of 4 words from row 0, col 2              */
+        *(db*)raddr_(ds, 1 + 0x0F67) = 4;     /* width                  */
+        *(db*)raddr_(ds, 1 + 0x0FF3) = 2;     /* run count              */
+        *(db*)raddr_(ds, 1 + 0x1197) = 0;     /* row idx                */
+        *(db*)raddr_(ds, 1 + 0x107F) = 2;     /* col lo                 */
+        *(db*)raddr_(ds, 1 + 0x110B) = 0;     /* col hi                 */
+        ab_res("blitflag hit", blitflag_go_mcga_lifted, blitflag_go_mcga, 0);
+        dirtyrect_ptr = 0x1F; rectreg_off = 0;
+        ab_res("blitflag mid4d", blitflag_go_mcga_e1384d_lifted,
+               blitflag_go_mcga_e1384d, 0);
+        *(db*)raddr_(ds, 2 + 0x0F67) = 3;
+        *(db*)raddr_(ds, 2 + 0x0FF3) = 1;
+        dirtyrect_ptr = 2; si = 2; al = 3;    /* live si = slot idx     */
+        ab_res("blitflag mid5c", blitflag_go_mcga_e1385c_lifted,
+               blitflag_go_mcga_e1385c, 0);
+        bx = 0; dx = 2; ax = seg_data; bp = seg_draw; blitgo_a = 4;
+        blitgo_c = 2;
+        ab_res("blitflag mid84", blitflag_go_mcga_e13884_lifted,
+               blitflag_go_mcga_e13884, 0);
+        dirtyrect_ptr = 0;
+        ab_res("blitflag mida5", blitflag_go_mcga_e138a5_lifted,
+               blitflag_go_mcga_e138a5, 0);
+
+        /* scroll_go_*: edge procs are still lifted (called identically
+         * from both impls); index byte at ds:0xAB4 picks the table slot */
+        adapter_id = 3;
+        *(dw*)raddr_(ds, 0x0AB4) = 3;
+        ds = seg_data; es = seg_draw;
+        ab_res("scroll a", scroll_go_a_lifted, scroll_go_a, 0);
+        ab_res("scroll b", scroll_go_b_lifted, scroll_go_b, 0);
+        ab_res("scroll c", scroll_go_c_lifted, scroll_go_c, 0);
+        ab_res("scroll d", scroll_go_d_lifted, scroll_go_d, 0);
+        ab_res("scroll e", scroll_go_e_lifted, scroll_go_e, 0);
+        ab_res("scroll f", scroll_go_f_lifted, scroll_go_f, 0);
+        ab_res("scroll g", scroll_go_g_lifted, scroll_go_g, 0);
+        ab_res("scroll h", scroll_go_h_lifted, scroll_go_h, 0);
+        *(dw*)raddr_(ds, 0x0AB4) = 0;
+        adapter_id = 0;
+        ab_res("scroll a0", scroll_go_a_lifted, scroll_go_a, 0);
+        seg_flip = s0; seg_draw = s1; seg_screen = s2;
+        fprintf(stderr, "  (blitflag/scroll: lifted vs C, %d checks)\n",
+                checks);
+    }
+
     /* ---- status-panel digit patcher: WOUNDS field ds:0xB93F <- byte_29712
      * template lives in the image with literal "XX" placeholders; sub_1BBB9
      * converts al to two ASCII digits and stores at ds:[si]/ds:[si+1]. ---- */

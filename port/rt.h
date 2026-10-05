@@ -224,6 +224,19 @@ void mapcols_draw_e1bcdc_c(void); void mapcols_draw_e1bcdc_lifted(void);
 void mapcols_draw_e1bcdf_c(void); void mapcols_draw_e1bcdf_lifted(void);
 void mapcols_draw_e1bced_c(void); void mapcols_draw_e1bced_lifted(void);
 void mapcols_draw_e1bcf4_c(void); void mapcols_draw_e1bcf4_lifted(void);
+void blitflag_go_mcga_c(void); void blitflag_go_mcga_lifted(void);
+void blitflag_go_mcga_e1384d_c(void); void blitflag_go_mcga_e1384d_lifted(void);
+void blitflag_go_mcga_e1385c_c(void); void blitflag_go_mcga_e1385c_lifted(void);
+void blitflag_go_mcga_e13884_c(void); void blitflag_go_mcga_e13884_lifted(void);
+void blitflag_go_mcga_e138a5_c(void); void blitflag_go_mcga_e138a5_lifted(void);
+void scroll_go_a_c(void); void scroll_go_a_lifted(void);
+void scroll_go_b_c(void); void scroll_go_b_lifted(void);
+void scroll_go_c_c(void); void scroll_go_c_lifted(void);
+void scroll_go_d_c(void); void scroll_go_d_lifted(void);
+void scroll_go_e_c(void); void scroll_go_e_lifted(void);
+void scroll_go_f_c(void); void scroll_go_f_lifted(void);
+void scroll_go_g_c(void); void scroll_go_g_lifted(void);
+void scroll_go_h_c(void); void scroll_go_h_lifted(void);
 
 /* env-gated trace (M2C_TRACE=1) */
 extern int rt_trace;

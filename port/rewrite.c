@@ -1701,3 +1701,158 @@ void mapcols_draw_c(void){
     }
     mapcols_draw_e1bcdc_c();
 }
+
+/* ---- blitflag + scroll/pan (seg000:382E..3D60) -------------------------
+ * blitflag_go_mcga sweeps the 32-slot rect-flag table: each nonzero flag
+ * [si+0xF67] holds a word width, [si+0xFF3] a run count, [si+0x1197]
+ * the row index, [si+0x107F]/[si+0x110B] the column pair; the inner loop
+ * copies that many words seg_draw -> seg_flip per run and clears the
+ * flag. scroll_go_a..h are the pan handlers: es=ds=seg_draw, an indirect
+ * call through scroll_tbl_x (far-thunk sp restore), then scroll_edge_x.
+ */
+static void blitflag_runs(void){            /* loc_13884: run copy       */
+    do {
+        bx &= 0x1FF; CF = 0; OF = 0; ZF = (bx == 0); SF = (bx >> 15);
+        si = *(dw*)raddr(ds, bx + 0x0BD5);
+        { dd t_ = (dd)si + (dd)dx; CF = t_ > 0xFFFF; si = t_;
+          ZF = (si == 0); SF = (si >> 15); }
+        di = si;
+        cl = *(db*)(&blitgo_a);
+        ch = 0; CF = 0; OF = 0; ZF = 1; SF = 0;
+        ds = bp;
+        while (cx--) { *(dw*)raddr_(es, di) = *(dw*)raddr_(ds, si);
+                       si += DF ? -2 : 2; di += DF ? -2 : 2; }
+        ds = ax;
+        { dd t_ = (dd)bx + (dd)2; CF = t_ > 0xFFFF; bx = t_;
+          ZF = (bx == 0); SF = (bx >> 15); }
+        (blitgo_c)--; ZF = (blitgo_c == 0); SF = (blitgo_c >> 7);
+    } while (blitgo_c != 0);
+}
+static void blitflag_load(void){            /* loc_1385C: slot load      */
+    *(db*)raddr(ds, si + 0x0F67) = 0;
+    *(db*)(&blitgo_a) = al;
+    al = *(db*)raddr(ds, si + 0x0FF3);
+    blitgo_c = al;
+    bl = *(db*)raddr(ds, si + 0x1197);
+    bh = 0; CF = 0; OF = 0; ZF = 1; SF = 0;
+    dl = *(db*)raddr(ds, si + 0x107F);
+    dh = *(db*)raddr(ds, si + 0x110B);
+    CF = ((dd)bx << 1) >> 16 & 1; bx <<= 1;
+    ZF = (bx == 0); SF = (bx >> 15);
+    ax = seg_data;
+    bp = seg_draw;
+}
+static void blitflag_fill(void){
+    blitflag_load();
+    blitflag_runs();
+}
+static int blitflag_probe(void){            /* loc_1384D: flag test      */
+    si = dirtyrect_ptr;
+    al = *(db*)raddr(ds, si + 0x0F67);
+    al |= al; CF = 0; OF = 0; ZF = (al == 0); SF = (al >> 7);
+    return al != 0;
+}
+static int blitflag_next(void){             /* loc_138A5: dec, 1 = done  */
+    (dirtyrect_ptr)--; ZF = (dirtyrect_ptr == 0);
+    SF = (dirtyrect_ptr >> 15);
+    return (short)dirtyrect_ptr < 0;
+}
+static void blitflag_scan(void){            /* loc_1384D: rect sweep     */
+    for (;;){
+        if (blitflag_probe()) blitflag_fill();
+        if (blitflag_next()) return;
+    }
+}
+void blitflag_go_mcga_e138a5_c(void){       /* mid: dec-first sweep      */
+    for (;;){
+        if (blitflag_next()) return;
+        if (blitflag_probe()) blitflag_fill();
+    }
+}
+void blitflag_go_mcga_e13884_c(void){       /* mid: runs-first sweep     */
+    for (;;){
+        blitflag_runs();
+        for (;;){
+            if (blitflag_next()) return;
+            if (blitflag_probe()) break;
+        }
+        blitflag_load();
+    }
+}
+void blitflag_go_mcga_e1385c_c(void){       /* mid: fill-first sweep     */
+    for (;;){
+        blitflag_fill();
+        for (;;){
+            if (blitflag_next()) return;
+            if (blitflag_probe()) break;
+        }
+    }
+}
+void blitflag_go_mcga_e1384d_c(void){ blitflag_scan(); }
+void blitflag_go_mcga_c(void){
+    ax = seg_flip;
+    es = ax;
+    dirtyrect_ptr = 0x1F;
+    rectreg_off = 0;
+    CF = (dd)blit_sel < (dd)0; ZF = (blit_sel == 0);
+    SF = ((dw)(blit_sel - 0) >> 15);
+    if (blit_sel != 0) rectreg_off = 0x20;
+    blitflag_scan();
+}
+
+static void scroll_go_common(db *tbl, vfn edge, vfn edge2){
+    /* ind call through the per-direction table, sp-restoring thunk */
+    { vfn f_ = func_at((dd)0x1a20 + (*(dw*)(tbl + di)));
+      dw sp_ = sp;
+      if (f_) f_();
+      else fprintf(stderr, "unresolved ind call %x\n",
+          (dd)((dd)0x1a20 + (*(dw*)(tbl + di))));
+      if ((short)(sp - sp_) > 0){ sp = sp_; return; } }
+    ax = seg_data;
+    ds = ax;
+    edge();
+    if (edge2) edge2();
+}
+void scroll_go_a_c(void){
+    ax = seg_draw;
+    es = ax;
+    di = adapter_id;
+    CF = ((dd)di << 1) >> 16 & 1; di <<= 1; ZF = (di == 0); SF = (di >> 15);
+    ds = ax;
+    scroll_go_common((db*)&scroll_tbl_a, scroll_edge_a, 0);
+}
+static void scroll_go_idx(void){            /* shared b..h head          */
+    ax = seg_draw;
+    es = ax;
+    di = *(dw*)raddr(ds, 0x0AB4);
+    CF = ((dd)di << 1) >> 16 & 1; di <<= 1; ZF = (di == 0); SF = (di >> 15);
+    ds = ax;
+}
+void scroll_go_b_c(void){
+    scroll_go_idx();
+    scroll_go_common((db*)&scroll_tbl_b, scroll_edge_b, 0);
+}
+void scroll_go_c_c(void){
+    scroll_go_idx();
+    scroll_go_common((db*)&scroll_tbl_c, scroll_edge_c, 0);
+}
+void scroll_go_d_c(void){
+    scroll_go_idx();
+    scroll_go_common((db*)&scroll_tbl_d, scroll_edge_d, 0);
+}
+void scroll_go_e_c(void){                   /* diagonal: edge b+d        */
+    scroll_go_idx();
+    scroll_go_common((db*)&scroll_tbl_e, scroll_edge_b, scroll_edge_d);
+}
+void scroll_go_f_c(void){                   /* diagonal: edge c+d        */
+    scroll_go_idx();
+    scroll_go_common((db*)&scroll_tbl_f, scroll_edge_c, scroll_edge_d);
+}
+void scroll_go_g_c(void){                   /* diagonal: edge b+a        */
+    scroll_go_idx();
+    scroll_go_common((db*)&scroll_tbl_g, scroll_edge_b, scroll_edge_a);
+}
+void scroll_go_h_c(void){                   /* diagonal: edge c+a        */
+    scroll_go_idx();
+    scroll_go_common((db*)&scroll_tbl_h, scroll_edge_c, scroll_edge_a);
+}

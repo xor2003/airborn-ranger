@@ -589,6 +589,19 @@ REWRITES = {
     'mapcols_draw_e1bcdf': 'mapcols_draw_e1bcdf_c',
     'mapcols_draw_e1bced': 'mapcols_draw_e1bced_c',
     'mapcols_draw_e1bcf4': 'mapcols_draw_e1bcf4_c',
+    'blitflag_go_mcga': 'blitflag_go_mcga_c',
+    'blitflag_go_mcga_e1384d': 'blitflag_go_mcga_e1384d_c',
+    'blitflag_go_mcga_e1385c': 'blitflag_go_mcga_e1385c_c',
+    'blitflag_go_mcga_e13884': 'blitflag_go_mcga_e13884_c',
+    'blitflag_go_mcga_e138a5': 'blitflag_go_mcga_e138a5_c',
+    'scroll_go_a': 'scroll_go_a_c',
+    'scroll_go_b': 'scroll_go_b_c',
+    'scroll_go_c': 'scroll_go_c_c',
+    'scroll_go_d': 'scroll_go_d_c',
+    'scroll_go_e': 'scroll_go_e_c',
+    'scroll_go_f': 'scroll_go_f_c',
+    'scroll_go_g': 'scroll_go_g_c',
+    'scroll_go_h': 'scroll_go_h_c',
 }
 # Commit 4366e7c removed the gfx driver-selection menu ('1'..'5' getch
 # loop → forced MCGA pick) by hand-editing the generated file, so every
