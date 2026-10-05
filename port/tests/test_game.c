@@ -13,6 +13,7 @@
 #include "../main.c"
 #undef main
 #include "../rt.h"
+#include "../data_syms.h"
 #include "../procs.h"
 #include <stdio.h>
 #include <string.h>
@@ -120,6 +121,36 @@ static long ab_lzw(const unsigned char *src, size_t n){
     CHECK(!memcmp(ab_a_r, ab_b_r, sizeof ab_a_r));
     CHECK(!memcmp(ab_a_g, ab_b_g, sizeof ab_a_g));
     return cn;
+}
+/* resource-chain A/B: like ab_lzw but flags are part of the contract
+ * (every caller gates on CF). feed low nibble = Enters to queue before
+ * each run for res_file_error's key wait (a path can wait more than
+ * once — mode_rec_load reports the write failure in write_res_file AND
+ * again in its own fail tail). feed bit4 closes res_handle between runs
+ * (open_res_file leaves the host handle occupied -> next open would get
+ * a different handle number). */
+static void ab_res(const char *nm, void(*lifted)(void), void(*now)(void), int feed){
+    for (int i = feed & 0xf; i > 0; i--) rt_test_kpush(0x1c0d);
+    memcpy(ab_pre, mem, sizeof mem); ab_grab(ab_pre_r, ab_pre_g);
+    int cf0 = CF, zf0 = ZF, sf0 = SF, of0 = OF;
+    lifted();
+    memcpy(ab_a, mem, sizeof mem); ab_grab(ab_a_r, ab_a_g);
+    int cfa = CF, zfa = ZF, sfa = SF, ofa = OF;
+    if (feed & 0x10){ bx = res_handle; ah = 0x3e; dos_close(); }
+    memcpy(mem, ab_pre, sizeof mem); ab_put(ab_pre_r, ab_pre_g);
+    CF = cf0; ZF = zf0; SF = sf0; OF = of0;
+    for (int i = feed & 0xf; i > 0; i--) rt_test_kpush(0x1c0d);
+    now();
+    ab_grab(ab_b_r, ab_b_g);
+    int ok = !memcmp(ab_a, mem, sizeof mem) &&
+             !memcmp(ab_a_r, ab_b_r, sizeof ab_a_r) &&
+             !memcmp(ab_a_g, ab_b_g, sizeof ab_a_g) &&
+             cfa == CF && zfa == ZF && sfa == SF && ofa == OF;
+    if (!ok)
+        fprintf(stderr, "  res-ab %s: cf %d/%d zf %d/%d sf %d/%d of %d/%d\n",
+                nm, cfa, CF, zfa, ZF, sfa, SF, ofa, OF);
+    CHECK(ok);
+    if (feed & 0x10){ bx = res_handle; ah = 0x3e; dos_close(); }
 }
 
 int main(void){
@@ -243,6 +274,146 @@ int main(void){
             /* tiny/truncated streams: the do-while still runs one decode */
             for (size_t n = 0; n < 6 && ci == 0; n++) ab_lzw(syn, n);
         }
+    }
+
+    /* ---- resource-file chain: lifted vs C rewrite ----------------------
+     * Same A/B shape as the decoder — identical pre-state -> identical
+     * post-state — but CF/ZF/SF/OF are part of the contract here (every
+     * caller gates on CF), so flags are compared too. File side effects
+     * are confined to test_res/test_big/test_out*.tmp the test creates
+     * itself, so the whole section is asset-free. */
+    {
+        /* synthetic resource files: [0]=LZW maxw 9 + zeros decodes
+         * deterministically; raw content is enough for the read paths */
+        {   FILE *f = fopen("test_res.tmp", "wb"); CHECK(f);
+            for (int i = 0; i < 20; i++) fputc(i ? 0 : 9, f);
+            fclose(f); }
+        {   FILE *f = fopen("test_big.tmp", "wb"); CHECK(f);
+            fseek(f, 70000, SEEK_SET); fputc(0, f); fclose(f); }  /* >64K */
+
+        ds = *(dw*)&mem[0x1a20];                      /* seg_data */
+        ss = 0x8000; sp = 0xFFFE;                     /* guest stack in mem */
+        *(dw*)raddr_(ds, 0xad7) = 0;                  /* no int9 divert */
+
+        /* rec table: ds:756[res_cache_d] -> rec ptr; rec = 13B name +
+         * mode byte + load seg:off + parm + staging seg:off */
+        res_cache_d = 0;
+        *(dw*)raddr_(ds, 0x756) = 0x400;
+        memset(raddr_(ds, 0x400), 0, 0x18);
+        strcpy((char*)raddr_(ds, 0x400), "test_res.tmp");  /* 12 ch + NUL */
+        *(db*)raddr_(ds, 0x400 + 0x0D) = 0;             /* mode -> tbl[0] */
+        *(dw*)raddr_(ds, 0x400 + 0x0E) = 0x6000;        /* load seg      */
+        *(dw*)raddr_(ds, 0x400 + 0x10) = 0;             /* load off      */
+        *(dw*)raddr_(ds, 0x400 + 0x12) = 0;             /* parm: raw     */
+        *(dw*)raddr_(ds, 0x400 + 0x14) = 0x7000;        /* staging seg   */
+        *(dw*)raddr_(ds, 0x400 + 0x16) = 0;             /* staging off   */
+        funcs_1083a = 0x091f;                           /* -> locret_1091f */
+
+        /* second rec slot for the write path */
+        *(dw*)raddr_(ds, 0x758) = 0x440;
+        memset(raddr_(ds, 0x440), 0, 0x18);
+        strcpy((char*)raddr_(ds, 0x440), "test_out.tmp");
+        *(dw*)raddr_(ds, 0x440 + 0x0E) = 0x6000;
+        *(dw*)raddr_(ds, 0x440 + 0x10) = 0;
+
+        /* --- leaf services --- */
+        res_name_ptr = 0x400; strcpy((char*)raddr_(ds, 0x400), "test_res.tmp");
+        ab_res("open_res_file", open_res_file_lifted, open_res_file, 0x10);
+
+        res_handle = 0x77;                               /* bogus handle */
+        ab_res("close_res_file", close_res_file_lifted, close_res_file, 0);
+
+        /* --- seek: success / >64K / missing --- */
+        ab_res("seek ok", seek_res_entry_lifted, seek_res_entry, 0);
+        CHECK(res_f1a == 20);
+        res_name_ptr = 0x400; strcpy((char*)raddr_(ds, 0x400), "test_big.tmp");
+        ab_res("seek >64K", seek_res_entry_lifted, seek_res_entry, 0);
+        res_name_ptr = 0x400; strcpy((char*)raddr_(ds, 0x400), "no_such.tmp");
+        ab_res("seek missing", seek_res_entry_lifted, seek_res_entry, 0);
+        res_handle = 0x77;
+        ab_res("seek tail", seek_res_entry_e108c1_lifted, seek_res_entry_e108c1, 0);
+
+        /* --- read: success / missing (fail path waits Enter) --- */
+        res_name_ptr = 0x400; strcpy((char*)raddr_(ds, 0x400), "test_res.tmp");
+        res_seg = 0x6000; res_ptr = 0;
+        ab_res("read ok", res_file_read_lifted, res_file_read, 0);
+        CHECK(!memcmp(&mem[0x60000], "\x09", 1));
+        res_name_ptr = 0x400; strcpy((char*)raddr_(ds, 0x400), "no_such.tmp");
+        ab_res("read missing", res_file_read_lifted, res_file_read, 1);
+        res_name_ptr = 0x400; strcpy((char*)raddr_(ds, 0x400), "test_res.tmp");
+        res_seg = 0x6000; res_ptr = 0; res_f1a = 20;
+        ab_res("read mid", res_file_read_e10849_lifted, res_file_read_e10849, 0);
+        res_handle = 0x77;
+        ab_res("read fail", res_file_read_e10846_lifted, res_file_read_e10846, 1);
+
+        /* --- error handler + mid-entries (all wait for Enter) --- */
+        res_name_ptr = 0x400; strcpy((char*)raddr_(ds, 0x400), "test_res.tmp");
+        res_handle = 0x77;
+        ab_res("load_fail", res_load_fail_lifted, res_load_fail, 1);
+        ab_res("res_error", res_file_error_lifted, res_file_error, 1);
+        si = res_name_ptr; di = 0x13E;
+        ab_res("err e109ab", res_file_error_e109ab_lifted, res_file_error_e109ab, 1);
+        si = res_name_ptr; di = 0x13E;
+        ab_res("err e109b7", res_file_error_e109b7_lifted, res_file_error_e109b7, 1);
+        ab_res("err e109d9", res_file_error_e109d9_lifted, res_file_error_e109d9, 1);
+
+        /* --- load_resource: raw + compressed recs --- */
+        res_name_ptr = 0x400; strcpy((char*)raddr_(ds, 0x400), "test_res.tmp");
+        res_cache_d = 0;
+        *(dw*)raddr_(ds, 0x400 + 0x12) = 0;             /* parm: raw     */
+        ab_res("load raw", load_resource_lifted, load_resource, 0);
+        *(dw*)raddr_(ds, 0x400 + 0x12) = 1;             /* parm: dcomp   */
+        ab_res("load cmp", load_resource_lifted, load_resource, 0);
+        *(dw*)raddr_(ds, 0x400 + 0x12) = 0;
+
+        /* --- write path: mode_rec_load + write_res_file + mid-entries ---
+         * dos_int21 is an unmodeled stub, so CREAT never produces a handle —
+         * the write path falls into res_load_fail and waits for Enter
+         * (feed=1). This mirrors the real port's behavior faithfully. */
+        res_cache_d = 1; res_f1a = 20;
+        memset(&mem[0x60000], 0x41, 20);                /* source payload */
+        ab_res("mode_rec", mode_rec_load_lifted, mode_rec_load, 2);
+        remove("test_out.tmp");
+
+        res_name_ptr = 0x400; strcpy((char*)raddr_(ds, 0x400), "test_out2.tmp");
+        res_f1a = 20; res_seg = 0x6000; res_ptr = 0;
+        ab_res("write_res", write_res_file_lifted, write_res_file, 1);
+        remove("test_out2.tmp");
+
+        res_handle = 0x77;
+        ab_res("wrf e1092d", write_res_file_e1092d_lifted, write_res_file_e1092d, 1);
+
+        /* e1092f with a live handle: dos_create_new() is callable directly
+         * (only the int21 stub is unmodeled) — each run needs a fresh handle;
+         * after close the slot recycles so the handle number matches */
+        {
+            res_name_ptr = 0x400; strcpy((char*)raddr_(ds, 0x400), "test_out3.tmp");
+            res_f1a = 20; res_seg = 0x6000; res_ptr = 0;
+            memcpy(ab_pre, mem, sizeof mem); ab_grab(ab_pre_r, ab_pre_g);
+            int cf0 = CF, zf0 = ZF, sf0 = SF, of0 = OF;
+            ah = 0x3C; dx = res_name_ptr; cx = 0; dos_create_new();
+            dw h0 = ax;
+            write_res_file_e1092f_lifted();
+            memcpy(ab_a, mem, sizeof mem); ab_grab(ab_a_r, ab_a_g);
+            int cfa = CF, zfa = ZF, sfa = SF, ofa = OF;
+            ah = 0x3C; dx = res_name_ptr; cx = 0; dos_create_new();
+            CHECK(ax == h0);
+            memcpy(mem, ab_pre, sizeof mem); ab_put(ab_pre_r, ab_pre_g);
+            CF = cf0; ZF = zf0; SF = sf0; OF = of0;
+            ax = h0;
+            write_res_file_e1092f();
+            ab_grab(ab_b_r, ab_b_g);
+            CHECK(!memcmp(ab_a, mem, sizeof mem));
+            CHECK(!memcmp(ab_a_r, ab_b_r, sizeof ab_a_r));
+            CHECK(!memcmp(ab_a_g, ab_b_g, sizeof ab_a_g));
+            CHECK(cfa == CF); CHECK(zfa == ZF); CHECK(sfa == SF); CHECK(ofa == OF);
+            remove("test_out3.tmp");
+        }
+
+        /* drain any leftover queued key, then clean up temp files */
+        for (;;){ bios_kbhit(); if (ZF) break; bios_getch(); }
+        remove("test_res.tmp"); remove("test_big.tmp");
+        fprintf(stderr, "  (res chain: lifted vs C, %d checks)\n", checks);
     }
 
     /* ---- status-panel digit patcher: WOUNDS field ds:0xB93F <- byte_29712

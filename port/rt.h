@@ -74,6 +74,7 @@ void rt_set_cpu_thread(void);   /* worker thread: register as IRQ0 park target *
 void rt_pump_events(void);
 void rt_script_feed(void);          /* scripted-key step — mem-only, timer-safe */
 dw rt_kbd_port60(void);
+void rt_test_kpush(dw v);           /* test hook: queue one BIOS-buffer key */
 /* key-mapping menu overlay (input.c); video.c draws it */
 void rt_kmap_frame(void);
 void rt_kmap_exclusive(void);
@@ -107,6 +108,23 @@ dw mem_w(dd a); db mem_b(dd a); void mem_ww(dd a, dw v); void mem_wb(dd a, db v)
 void decompress_res_c(void); void decompress_res_lifted(void);
 void sprtab_init_a_c(void); void sprtab_init_a_lifted(void);
 void sprtab_init_b_c(void); void sprtab_init_b_lifted(void);
+void load_resource_c(void); void load_resource_lifted(void);
+void res_file_read_c(void); void res_file_read_lifted(void);
+void res_file_read_e10846_c(void); void res_file_read_e10846_lifted(void);
+void res_file_read_e10849_c(void); void res_file_read_e10849_lifted(void);
+void seek_res_entry_c(void); void seek_res_entry_lifted(void);
+void seek_res_entry_e108c1_c(void); void seek_res_entry_e108c1_lifted(void);
+void open_res_file_c(void); void open_res_file_lifted(void);
+void close_res_file_c(void); void close_res_file_lifted(void);
+void res_load_fail_c(void); void res_load_fail_lifted(void);
+void res_file_error_c(void); void res_file_error_lifted(void);
+void res_file_error_e109ab_c(void); void res_file_error_e109ab_lifted(void);
+void res_file_error_e109b7_c(void); void res_file_error_e109b7_lifted(void);
+void res_file_error_e109d9_c(void); void res_file_error_e109d9_lifted(void);
+void mode_rec_load_c(void); void mode_rec_load_lifted(void);
+void write_res_file_c(void); void write_res_file_lifted(void);
+void write_res_file_e1092d_c(void); void write_res_file_e1092d_lifted(void);
+void write_res_file_e1092f_c(void); void write_res_file_e1092f_lifted(void);
 
 /* env-gated trace (M2C_TRACE=1) */
 extern int rt_trace;

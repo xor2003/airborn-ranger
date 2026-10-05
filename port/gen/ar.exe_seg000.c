@@ -1671,7 +1671,8 @@ void locret_10840(void) {
     /* retn ;~ 01A2:0840 */
     return;
 }
-void load_resource(void) { rt_tracef("load_resource");
+void load_resource(void) { rt_tracef("load_resource"); load_resource_c(); }
+void load_resource_lifted(void) {
     /* mov     ax, cs:seg_data ;~ 01A2:07C3 */
     ax = seg_data;
     /* mov     ds, ax ;~ 01A2:07C7 */
@@ -1762,7 +1763,8 @@ locret_10840:
     /* retn ;~ 01A2:0840 */
     return;
 }
-void res_file_read_e10846(void) {
+void res_file_read_e10846(void) { res_file_read_e10846_c(); }
+void res_file_read_e10846_lifted(void) {
 res_file_read_e10846:
     do {
         do {
@@ -1808,7 +1810,8 @@ res_file_read_e10849:
     /* retn ;~ 01A2:0883 */
     return;
 }
-void res_file_read_e10849(void) {
+void res_file_read_e10849(void) { res_file_read_e10849_c(); }
+void res_file_read_e10849_lifted(void) {
 res_file_read_e10849:
     do {
         /* mov     al, 0 ;~ 01A2:0849 */
@@ -1856,7 +1859,8 @@ res_file_read_e10846:
         res_load_fail(); return;
     } while (1);
 }
-void res_file_read(void) { rt_tracef("res_file_read");
+void res_file_read(void) { rt_tracef("res_file_read"); res_file_read_c(); }
+void res_file_read_lifted(void) {
     /* call    sub_10884 ;~ 01A2:0841 */
     seek_res_entry();
     /* jnb     short loc_10849 ;~ 01A2:0844 */
@@ -1905,7 +1909,8 @@ res_file_read_e10849:
     /* retn ;~ 01A2:0883 */
     return;
 }
-void seek_res_entry_e108c1(void) {
+void seek_res_entry_e108c1(void) { seek_res_entry_e108c1_c(); }
+void seek_res_entry_e108c1_lifted(void) {
     /* call    sub_108D4 ;~ 01A2:08C1 */
     close_res_file();
     /* stc ;~ 01A2:08C4 */
@@ -1913,7 +1918,8 @@ void seek_res_entry_e108c1(void) {
     /* retn ;~ 01A2:08C5 */
     return;
 }
-void seek_res_entry(void) {
+void seek_res_entry(void) { seek_res_entry_c(); }
+void seek_res_entry_lifted(void) {
     /* mov     al, 0 ;~ 01A2:0884 */
     al = 0;
     /* call    sub_108C6 ;~ 01A2:0886 */
@@ -1965,7 +1971,8 @@ seek_res_entry_e108c1:
     /* retn ;~ 01A2:08C5 */
     return;
 }
-void open_res_file(void) { rt_tracef("open_res_file");
+void open_res_file(void) { rt_tracef("open_res_file"); open_res_file_c(); }
+void open_res_file_lifted(void) {
     /* mov     ah, 3Dh ; '=' ;~ 01A2:08C6 */
     /* mov     al, 0 ;~ 01A2:08C8 */
     ax = 0x3D00;
@@ -1978,7 +1985,8 @@ void open_res_file(void) { rt_tracef("open_res_file");
     /* retn ;~ 01A2:08D3 */
     return;
 }
-void close_res_file(void) {
+void close_res_file(void) { close_res_file_c(); }
+void close_res_file_lifted(void) {
     /* mov     ah, 3Eh ; '>' ;~ 01A2:08D4 */
     ah = 0x3E;
     /* mov     bx, word_1D016 ;~ 01A2:08D6 */
@@ -1988,7 +1996,8 @@ void close_res_file(void) {
     /* retn ;~ 01A2:08DC */
     return;
 }
-void res_load_fail(void) { rt_tracef("res_load_fail");
+void res_load_fail(void) { rt_tracef("res_load_fail"); res_load_fail_c(); }
+void res_load_fail_lifted(void) {
     /* call    sub_108D4 ;~ 01A2:08DD */
     close_res_file();
     /* call    sub_10B99 ;~ 01A2:08E0 */
@@ -2004,7 +2013,8 @@ void res_load_fail(void) { rt_tracef("res_load_fail");
     /* retn ;~ 01A2:08ED */
     return;
 }
-void mode_rec_load(void) {
+void mode_rec_load(void) { mode_rec_load_c(); }
+void mode_rec_load_lifted(void) {
     /* mov     ax, cs:seg_data ;~ 01A2:08EE */
     ax = seg_data;
     /* mov     ds, ax ;~ 01A2:08F2 */
@@ -2051,7 +2061,8 @@ res_load_fail:
     /* retn ;~ 01A2:08ED */
     return;
 }
-void write_res_file_e1092d(void) {
+void write_res_file_e1092d(void) { write_res_file_e1092d_c(); }
+void write_res_file_e1092d_lifted(void) {
     /* jmp     short loc_108DD ;~ 01A2:092D */
     goto res_load_fail;
 res_load_fail:
@@ -2070,7 +2081,8 @@ res_load_fail:
     /* retn ;~ 01A2:08ED */
     return;
 }
-void write_res_file_e1092f(void) {
+void write_res_file_e1092f(void) { write_res_file_e1092f_c(); }
+void write_res_file_e1092f_lifted(void) {
     /* mov     word_1D016, ax ;~ 01A2:092F */
     res_handle = ax;
     /* mov     bx, word_1D016 ;~ 01A2:0932 */
@@ -2123,7 +2135,8 @@ void locret_1091f(void) {
     /* retn ;~ 01A2:091F */
     return;
 }
-void write_res_file(void) {
+void write_res_file(void) { write_res_file_c(); }
+void write_res_file_lifted(void) {
     /* mov     ah, 3Ch ; '<' ;~ 01A2:0920 */
     ah = 0x3C;
     /* mov     dx, word_1D018 ;~ 01A2:0922 */
@@ -2273,7 +2286,8 @@ select_resource_d_e10997:
     /* retn ;~ 01A2:09A3 */
     return;
 }
-void res_file_error_e109ab(void) {
+void res_file_error_e109ab(void) { res_file_error_e109ab_c(); }
+void res_file_error_e109ab_lifted(void) {
 res_file_error_e109ab:
     /* mov     al, [si] ;~ 01A2:09AB */
     al = *(db*)raddr(ds,si);
@@ -2330,7 +2344,8 @@ res_file_error_e109d9:
     /* retn ;~ 01A2:09E5 */
     return;
 }
-void res_file_error_e109b7(void) {
+void res_file_error_e109b7(void) { res_file_error_e109b7_c(); }
+void res_file_error_e109b7_lifted(void) {
     /* mov     byte ptr [di], 24h ; '$' ;~ 01A2:09B7 */
     *(db*)raddr(ds,di) = 0x24;
     /* mov     dx, 120h ;~ 01A2:09BA */
@@ -2370,7 +2385,8 @@ res_file_error_e109d9:
     /* retn ;~ 01A2:09E5 */
     return;
 }
-void res_file_error_e109d9(void) {
+void res_file_error_e109d9(void) { res_file_error_e109d9_c(); }
+void res_file_error_e109d9_lifted(void) {
 res_file_error_e109d9:
     do {
         /* call    sub_10A19 ;~ 01A2:09D9 */
@@ -2386,7 +2402,8 @@ res_file_error_e109d9:
     /* retn ;~ 01A2:09E5 */
     return;
 }
-void res_file_error(void) { rt_tracef("res_file_error");
+void res_file_error(void) { rt_tracef("res_file_error"); res_file_error_c(); }
+void res_file_error_lifted(void) {
     /* mov     si, word_1D018 ;~ 01A2:09A4 */
     si = res_name_ptr;
     /* mov     di, 13Eh ;~ 01A2:09A8 */

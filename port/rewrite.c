@@ -14,6 +14,7 @@
  */
 #include "rt.h"
 #include "data_syms.h"
+#include "procs.h"
 
 /* ---- decompress_res (seg000:3998) — LZW resource decoder --------------
  * In:  ds:si -> stream ([maxw][LSB-first packed codes]), cx = byte count
@@ -133,4 +134,262 @@ void decompress_res_c(void){
             sprtab_init_b_c();              /* width overflow: reset    */
         dcomp_4e79 = cx;                    /* prev = code emitted      */
     } while (si < dcomp_4e77);
+}
+
+/* ---- resource file I/O chain (seg000:07C3..09E5) -----------------------
+ * The resource directory is a word-indexed table of records: res_cache_d
+ * selects the record pointer through the table at ds:0x756. The record
+ * pointer doubles as the ASCIZ filename; name field is 13 bytes, then
+ * rec[0x0D] = modecall index, and words: load seg:off, parm (compressed
+ * flag), staging seg:off.
+ *
+ * DOS services report errors through CF; every failure tail funnels into
+ * res_load_fail (close, three beeps, error text + Enter wait) -> CF=1.
+ * res_pos is a progress breadcrumb the error path leaves in ds:186.
+ *
+ * The *_e<off> functions are the lifted secondary entries — reachable
+ * through func_at — each covering the tail of its parent routine. */
+
+/* res record field offsets (after the 13-byte name field) */
+#define RES_MODE   0x0D   /* modecall_tbl index                       */
+#define RES_LSEG   0x0E   /* load segment                             */
+#define RES_LOFF   0x10   /* load offset                              */
+#define RES_PARM   0x12   /* nonzero -> decompress into staging       */
+#define RES_SSEG   0x14   /* staging segment                          */
+#define RES_SOFF   0x16   /* staging offset                           */
+#define RES_RECS   0x756  /* ds base of the record-pointer table      */
+#define RES_ERRBUF 0x13E  /* error-line buffer for the filename       */
+#define RES_CSBASE 0x1a20 /* flat base of the seg000 (cs) image       */
+
+void open_res_file_c(void){
+    ax = 0x3D00;                            /* OPEN existing, read-only */
+    dx = res_name_ptr;
+    dos_open();
+    res_handle = ax;
+}
+
+void close_res_file_c(void){
+    ah = 0x3E;
+    bx = res_handle;
+    dos_close();
+}
+
+/* shared fail tail: close + CF — seek_res_entry's e108c1 entry point */
+static void res_fail_close(void){
+    close_res_file();
+    CF = 1;
+}
+void seek_res_entry_e108c1_c(void){ res_fail_close(); }
+
+/* open + size the resource via LSEEK-end; res_f1a <- byte count.
+ * CF=1 if the open/seek fails or the file exceeds 64K. */
+void seek_res_entry_c(void){
+    al = 0;
+    open_res_file();
+    res_pos = 1;
+    if (!CF){
+        ah = 0x42; al = 2; cx = 0; dx = 0;  /* LSEEK end+0 -> size      */
+        bx = res_handle;
+        dos_seek();
+        res_pos = 2;
+        if (!CF){
+            res_f1a = ax;
+            dx |= dx; CF = 0; OF = 0;       /* high word must be zero   */
+            ZF = (dx == 0); SF = (dx >> 15);
+            res_pos = 3;
+            if (dx == 0){
+                close_res_file();
+                res_pos = 0;
+                CF = 0;
+                return;
+            }
+        }
+    }
+    res_fail_close();
+}
+
+void res_load_fail_c(void){
+    close_res_file();
+    speaker_beep(); speaker_beep(); speaker_beep();
+    res_file_error();
+    CF = 1;
+}
+
+void res_file_read_c(void){
+    seek_res_entry();
+    if (CF){ res_load_fail(); return; }
+    res_file_read_e10849_c();
+}
+void res_file_read_e10846_c(void){ res_load_fail(); }
+
+/* mid-entry: reopen + read res_f1a bytes into res_seg:res_ptr */
+void res_file_read_e10849_c(void){
+    al = 0;
+    open_res_file();
+    *(dw*)raddr(ds, 0x186) = 4;             /* res_pos: reading         */
+    if (CF){ res_load_fail(); return; }
+    bx = *(dw*)raddr(ds, 0x196);            /* res_handle               */
+    cx = *(dw*)raddr(ds, 0x19A);            /* res_f1a                  */
+    dx = *(dw*)raddr(ds, 0x190);            /* res_ptr                  */
+    ax = *(dw*)raddr(ds, 0x192);            /* res_seg                  */
+    ds = ax;
+    ah = 0x3F;
+    dos_read();
+    ax = seg_data;
+    ds = ax;
+    res_pos = 5;
+    if (CF){ res_load_fail(); return; }
+    close_res_file();
+    res_pos = 0;
+    CF = 0;
+}
+
+/* res_file_error tails ---------------------------------------------- */
+
+/* e109d9 head: wait for Enter (read_key filters V/v mode toggles) */
+static void res_err_wait_enter(void){
+    do {
+        read_key();
+        CF = al < 0x0D; ZF = ((db)(al - 0x0D) == 0); SF = (((db)(al - 0x0D)) >> 7);
+    } while (al != 0x0D);
+    menu_state = pop();
+    CF = 1;
+}
+void res_file_error_e109d9_c(void){ res_err_wait_enter(); }
+
+/* e109b7 head: terminate the copied name, print, save menu state */
+static void res_err_report(void){
+    *(db*)raddr(ds, di) = 0x24;             /* '$' for DOS print        */
+    dx = 0x120; ah = 9; dos_print_string();
+    dx = 0x13C; ah = 9; dos_print_string();
+    dx = 0x152; ah = 9; dos_print_string();
+    push(menu_state);
+    menu_state = 0;
+    res_err_wait_enter();
+}
+void res_file_error_e109b7_c(void){ res_err_report(); }
+
+/* e109ab head: copy ASCIZ name ds:si -> ds:di */
+static void res_err_copy_name(void){
+    for (;;){
+        al = *(db*)raddr(ds, si);
+        al |= al; CF = 0; OF = 0; ZF = (al == 0); SF = (al >> 7);
+        if (al == 0) break;
+        *(db*)raddr(ds, di) = al;
+        si++; ZF = (si == 0); SF = (si >> 15);
+        di++; ZF = (di == 0); SF = (di >> 15);
+    }
+    res_err_report();
+}
+void res_file_error_e109ab_c(void){ res_err_copy_name(); }
+
+void res_file_error_c(void){
+    si = res_name_ptr;
+    di = RES_ERRBUF;
+    res_err_copy_name();
+}
+
+/* ------------------------------------------------------------------ */
+
+/* mode dispatch: modecall_tbl[bx] is a near offset into the seg000
+ * image; the callee may consume extra stack words (far-thunk shape) —
+ * restore sp and propagate the early return like the lifted macro. */
+static int res_mode_call(dw idx){
+    dw off = *(dw*)((db*)&funcs_1083a + idx);
+    dd fa = RES_CSBASE + off;
+    vfn f_ = func_at(fa);
+    dw sp_ = sp;
+    if (f_) f_();
+    else fprintf(stderr, "unresolved ind call %x\n", fa);
+    if ((short)(sp - sp_) > 0){ sp = sp_; return 1; }
+    return 0;
+}
+
+/* load_resource: fetch rec -> res_* state, read file, decompress into
+ * staging when res_parm, then dispatch the per-mode post-load hook. */
+void load_resource_c(void){
+    ax = seg_data;
+    ds = ax;
+    bx = res_cache_d;
+    CF = (((dd)bx << 1) >> 16) & 1; bx <<= 1;
+    ZF = (bx == 0); SF = (bx >> 15);
+    si = *(dw*)raddr(ds, bx + RES_RECS);    /* rec = dir[res_cache_d]   */
+    load_res_d004 = si;
+    res_name_ptr = si;
+    al = *(db*)raddr(ds, si + RES_MODE);
+    ah = 0; CF = 0; OF = 0; ZF = 1; SF = 0;
+    res_tmp = ax;                           /* mode index               */
+    ax = *(dw*)raddr(ds, si + RES_LSEG); res_seg = ax;
+    ax = *(dw*)raddr(ds, si + RES_LOFF); res_ptr = ax;
+    ax = *(dw*)raddr(ds, si + RES_PARM); res_parm = ax;
+    ax = *(dw*)raddr(ds, si + RES_SSEG); res_stg_seg = ax;
+    ax = *(dw*)raddr(ds, si + RES_SOFF); res_off = ax;
+    res_file_read();
+    if (CF) return;
+    if (res_parm != 0){
+        push(ds); push(es);
+        cx = res_f1a;
+        es = res_stg_seg;
+        di = res_off;
+        si = res_ptr;
+        ds = res_seg;
+        decompress_res();
+        es = pop(); ds = pop();
+        /* the live buffer is now the staging area */
+        ax = *(dw*)raddr(ds, 0x174);          /* res_stg_seg            */
+        *(dw*)raddr(ds, 0x192) = ax;          /* -> res_seg             */
+        ax = *(dw*)raddr(ds, 0x176);          /* res_off                */
+        *(dw*)raddr(ds, 0x190) = ax;          /* -> res_ptr             */
+    }
+    /* modecall: bx = res_tmp * 2 */
+    bx = *(dw*)raddr(ds, 0x194);            /* res_tmp                  */
+    CF = (((dd)bx << 1) >> 16) & 1; bx <<= 1;
+    ZF = (bx == 0); SF = (bx >> 15);
+    if (res_mode_call(bx)) return;
+    CF = 0;
+}
+
+/* mode_rec_load: same rec lookup but a WRITE (mode-record save path) */
+void mode_rec_load_c(void){
+    ax = seg_data;
+    ds = ax;
+    bx = res_cache_d;
+    CF = (((dd)bx << 1) >> 16) & 1; bx <<= 1;
+    ZF = (bx == 0); SF = (bx >> 15);
+    si = *(dw*)raddr(ds, bx + RES_RECS);
+    load_res_d004 = si;
+    res_name_ptr = si;
+    ax = *(dw*)raddr(ds, si + RES_LSEG); res_seg = ax;
+    ax = *(dw*)raddr(ds, si + RES_LOFF); res_ptr = ax;
+    write_res_file();
+    if (!CF) return;
+    res_pos = 6;
+    res_load_fail();
+}
+
+/* write_res_file: CREAT + write res_f1a bytes from res_seg:res_ptr.
+ * e1092f enters with ax = the CREAT handle. */
+void write_res_file_e1092d_c(void){ res_load_fail(); }
+void write_res_file_e1092f_c(void){
+    res_handle = ax;
+    bx = res_handle;
+    cx = res_f1a;
+    dx = res_ptr;
+    ax = res_seg;
+    ds = ax;
+    ah = 0x40;
+    dos_write();
+    ax = seg_data;
+    ds = ax;
+    if (CF){ res_load_fail(); return; }
+    close_res_file();
+    CF = 0;
+}
+void write_res_file_c(void){
+    ah = 0x3C;                              /* CREAT, attr 0            */
+    dx = res_name_ptr;
+    cx = 0;
+    dos_int21(ax);
+    if (CF){ res_load_fail(); return; }
+    write_res_file_e1092f_c();
 }

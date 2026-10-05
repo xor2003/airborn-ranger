@@ -9,6 +9,9 @@ static dw kq[QN]; static int khead, ktail;
 static db port60;
 
 static void kpush(dw v){ int n=(khead+1)%QN; if(n!=ktail){ kq[khead]=v; khead=n; } }
+/* test hook: push a cooked key (scan<<8|ascii) into the BIOS queue —
+ * lets unit tests feed the guest without the pump/script machinery */
+void rt_test_kpush(dw v){ kpush(v); }
 static int kpop(void){ if(khead==ktail) return -1; int v=kq[ktail]; ktail=(ktail+1)%QN; return v; }
 
 /* SDL scancode -> XT set-1 scancode (DOS-era keys used by AR) */

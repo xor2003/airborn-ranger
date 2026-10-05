@@ -471,6 +471,24 @@ REWRITES = {
     'decompress_res': 'decompress_res_c',
     'sprtab_init_a': 'sprtab_init_a_c',
     'sprtab_init_b': 'sprtab_init_b_c',
+    # resource file I/O chain (seg000:07C3..0953) + error handler
+    'load_resource': 'load_resource_c',
+    'res_file_read': 'res_file_read_c',
+    'res_file_read_e10846': 'res_file_read_e10846_c',
+    'res_file_read_e10849': 'res_file_read_e10849_c',
+    'seek_res_entry': 'seek_res_entry_c',
+    'seek_res_entry_e108c1': 'seek_res_entry_e108c1_c',
+    'open_res_file': 'open_res_file_c',
+    'close_res_file': 'close_res_file_c',
+    'res_load_fail': 'res_load_fail_c',
+    'res_file_error': 'res_file_error_c',
+    'res_file_error_e109ab': 'res_file_error_e109ab_c',
+    'res_file_error_e109b7': 'res_file_error_e109b7_c',
+    'res_file_error_e109d9': 'res_file_error_e109d9_c',
+    'mode_rec_load': 'mode_rec_load_c',
+    'write_res_file': 'write_res_file_c',
+    'write_res_file_e1092d': 'write_res_file_e1092d_c',
+    'write_res_file_e1092f': 'write_res_file_e1092f_c',
 }
 # Commit 4366e7c removed the gfx driver-selection menu ('1'..'5' getch
 # loop → forced MCGA pick) by hand-editing the generated file, so every
