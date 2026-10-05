@@ -251,6 +251,14 @@ void scroll_edge_c_c(void); void scroll_edge_c_lifted(void);
 void scroll_edge_c_e14345_c(void); void scroll_edge_c_e14345_lifted(void);
 void scroll_edge_c_e14359_c(void); void scroll_edge_c_e14359_lifted(void);
 void scroll_edge_c_e143a9_c(void); void scroll_edge_c_e143a9_lifted(void);
+void px_to_cell_c(void); void px_to_cell_lifted(void);
+void map_probe_xy_c(void); void map_probe_xy_lifted(void);
+void map_probe_xy_e1b29d_c(void); void map_probe_xy_e1b29d_lifted(void);
+void map_probe_xy_e1b2b2_c(void); void map_probe_xy_e1b2b2_lifted(void);
+void map_rowhdr_get_c(void); void map_rowhdr_get_lifted(void);
+void draw_tile_compose_c(void); void draw_tile_compose_lifted(void);
+void cell_tile_compose_c(void); void cell_tile_compose_lifted(void);
+void bar_tandy_c(void); void bar_tandy_lifted(void);
 
 /* env-gated trace (M2C_TRACE=1) */
 extern int rt_trace;

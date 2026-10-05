@@ -2033,3 +2033,185 @@ void scroll_edge_c_c(void){
     if ((*(db*)raddr(ds,0x0C7FD) & 4) != 0){ ax = 2; cx = 4; bx = 0x19; }
     scroll_edge_c_e14345_c();
 }
+
+/* ---- cell->tile compose chain + status bar (seg000:B26x..1D81, 7Cxx) ---
+ * cell_tile_compose: px_to_cell (probe_px/py >>3 -> cell_x/y),
+ * map_probe_xy (bounds + map byte at cell_base+cell_x, CF=1 on OOB),
+ * map_rowhdr_get (two-level row-header tables at ds:0x3F22/0x6322
+ * indexed by (probe_y&7)*16 + (probe_x&7)*2 -> row_meta), then
+ * draw_tile_compose (draw_row/col -> es:di into seg_draw, sprrow_tbl
+ * dispatch on (tilemap_page + adapter_id), shared col++/row+=8 tail).
+ */
+void px_to_cell_c(void){
+    ax = probe_px;
+    cl = 3;
+    if (cl){ CF = (ax >> (cl - 1)) & 1; ax = ax >> cl;
+             ZF = (ax == 0); SF = (ax >> 15); }
+    cell_x = al;
+    ax = probe_py;
+    cl = 3;
+    if (cl){ CF = (ax >> (cl - 1)) & 1; ax = ax >> cl;
+             ZF = (ax == 0); SF = (ax >> 15); }
+    cell_y = al;
+}
+static void map_probe_fin(void){            /* loc_1B29D: stage + ret    */
+    pushf();
+    spawn_a6d = al;
+    probe_a6e = cell_x;
+    probe_a6f = cell_y;
+    al = spawn_a6d;
+    popf();
+}
+void map_probe_xy_e1b29d_c(void){ map_probe_fin(); }
+void map_probe_xy_e1b2b2_c(void){           /* mid: OOB -> CF=1          */
+    CF = 1;
+    al = 0;
+    map_probe_fin();
+}
+void map_probe_xy_c(void){
+    al = cell_x;
+    CF = (dd)al < (dd)0x20; ZF = ((db)(al - 0x20) == 0);
+    SF = (((db)(al - 0x20)) >> 7);
+    if (al >= 0x20){ CF = 1; al = 0; map_probe_fin(); return; }
+    ah = cell_y;
+    CF = (dd)ah < (dd)0x40; ZF = ((db)(ah - 0x40) == 0);
+    SF = (((db)(ah - 0x40)) >> 7);
+    if (ah >= 0x40){ CF = 1; al = 0; map_probe_fin(); return; }
+    si = 0;
+    al = 0;
+    CF = (ax >> 0) & 1; ax = ax >> 1; ZF = (ax == 0); SF = (ax >> 15);
+    CF = (ax >> 0) & 1; ax = ax >> 1; ZF = (ax == 0); SF = (ax >> 15);
+    CF = (ax >> 0) & 1; ax = ax >> 1; ZF = (ax == 0); SF = (ax >> 15);
+    { dd t_ = (dd)ax + (dd)0x9736; CF = t_ > 0xFFFF; ax = t_;
+      ZF = (ax == 0); SF = (ax >> 15); }
+    cell_base = ax;
+    dl = cell_x;
+    dh = 0; CF = 0; OF = 0; ZF = 1; SF = 0;
+    si = dx;
+    dl |= dl; CF = 0; OF = 0; ZF = (dl == 0); SF = (dl >> 7);
+    bp = cell_base;
+    al = *(db*)raddr(ds, bp + si);
+    al |= al; CF = 0; OF = 0; ZF = (al == 0); SF = (al >> 7);
+    CF = 0;
+    map_probe_fin();
+}
+void map_rowhdr_get_c(void){
+    ah = 0; CF = 0; OF = 0; ZF = 1; SF = 0;
+    CF = ((dd)ax << 1) >> 16 & 1; ax <<= 1; ZF = (ax == 0); SF = (ax >> 15);
+    di = ax;
+    maprow_idx = di;
+    di = *(dw*)raddr(ds, di + 0x3F22);
+    { dd t_ = (dd)di + (dd)0x3F22; CF = t_ > 0xFFFF; di = t_;
+      ZF = (di == 0); SF = (di >> 15); }
+    al = *(db*)(&probe_py);
+    ax &= 7; CF = 0; OF = 0; ZF = (ax == 0); SF = (ax >> 15);
+    CF = ((dd)ax << 1) >> 16 & 1; ax <<= 1; ZF = (ax == 0); SF = (ax >> 15);
+    CF = ((dd)ax << 1) >> 16 & 1; ax <<= 1; ZF = (ax == 0); SF = (ax >> 15);
+    CF = ((dd)ax << 1) >> 16 & 1; ax <<= 1; ZF = (ax == 0); SF = (ax >> 15);
+    CF = ((dd)ax << 1) >> 16 & 1; ax <<= 1; ZF = (ax == 0); SF = (ax >> 15);
+    map_rowh_aa44 = ax;
+    { dd t_ = (dd)di + (dd)ax; CF = t_ > 0xFFFF; di = t_;
+      ZF = (di == 0); SF = (di >> 15); }
+    al = *(db*)(&probe_px);
+    ax &= 7; CF = 0; OF = 0; ZF = (ax == 0); SF = (ax >> 15);
+    CF = ((dd)ax << 1) >> 16 & 1; ax <<= 1; ZF = (ax == 0); SF = (ax >> 15);
+    { dd t_ = (dd)di + (dd)ax; CF = t_ > 0xFFFF; di = t_;
+      ZF = (di == 0); SF = (di >> 15); }
+    map_rowh_aa46 = ax;
+    ax = *(dw*)raddr(ds, di);
+    di = maprow_idx;
+    di = *(dw*)raddr(ds, di + 0x6322);
+    { dd t_ = (dd)di + (dd)0x6322; CF = t_ > 0xFFFF; di = t_;
+      ZF = (di == 0); SF = (di >> 15); }
+    { dd t_ = (dd)di + (dd)map_rowh_aa44; CF = t_ > 0xFFFF; di = t_;
+      ZF = (di == 0); SF = (di >> 15); }
+    { dd t_ = (dd)di + (dd)map_rowh_aa46; CF = t_ > 0xFFFF; di = t_;
+      ZF = (di == 0); SF = (di >> 15); }
+    di = *(dw*)raddr(ds, di);
+    row_meta = di;
+}
+void draw_tile_compose_c(void){
+    ds = seg_data;
+    di = seg_draw;
+    es = di;
+    bx = draw_row;
+    CF = ((dd)bx << 1) >> 16 & 1; bx <<= 1; ZF = (bx == 0); SF = (bx >> 15);
+    di = *(dw*)raddr(ds, bx + 0x0BD5);
+    bx = draw_col;
+    CF = ((dd)bx << 1) >> 16 & 1; bx <<= 1; ZF = (bx == 0); SF = (bx >> 15);
+    { dd t_ = (dd)di + (dd)*(dw*)raddr(ds, bx + 0x0AEF); CF = t_ > 0xFFFF;
+      di = t_; ZF = (di == 0); SF = (di >> 15); }
+    bx = tmap_9812;
+    CF = ((dd)bx << 1) >> 16 & 1; bx <<= 1; ZF = (bx == 0); SF = (bx >> 15);
+    bx = *(dw*)raddr(ds, bx + 0x948);
+    { dd t_ = (dd)bx + (dd)adapter_id; CF = t_ > 0xFFFF; bx = t_;
+      ZF = (bx == 0); SF = (bx >> 15); }
+    CF = ((dd)bx << 1) >> 16 & 1; bx <<= 1; ZF = (bx == 0); SF = (bx >> 15);
+    dx = row_meta;
+    cx = seg_resbuf;
+    ds = cx;
+    si = 0x42;
+    { vfn f_ = func_at((dd)0x1a20 + (*(dw*)(((db*)&sprrow_tbl) + bx)));
+      dw sp_ = sp;
+      if (f_) f_();
+      else fprintf(stderr, "unresolved ind call %x\n",
+          (dd)((dd)0x1a20 + (*(dw*)(((db*)&sprrow_tbl) + bx))));
+      if ((short)(sp - sp_) > 0){ sp = sp_; return; } }
+    ax = seg_data;
+    ds = ax;
+    (draw_col)++; ZF = (draw_col == 0); SF = (draw_col >> 15);
+    CF = (dd)draw_col < (dd)0x28; ZF = (draw_col == 0x28);
+    SF = ((dw)(draw_col - 0x28) >> 15);
+    if (draw_col < 0x28) return;
+    draw_col = 0;
+    { dd t_ = (dd)draw_row + (dd)8; CF = t_ > 0xFFFF; draw_row = t_;
+      ZF = (draw_row == 0); SF = (draw_row >> 15); }
+    CF = (dd)draw_row < (dd)0x0C8; ZF = (draw_row == 0x0C8);
+    SF = ((dw)(draw_row - 0x0C8) >> 15);
+    if (draw_row < 0x0C8) return;
+    draw_row = 0x0C7;
+}
+void cell_tile_compose_c(void){
+    px_to_cell();
+    map_probe_xy();
+    map_rowhdr_get();
+    draw_tile_compose();
+}
+
+void bar_tandy_c(void){                     /* sub_17C69-ish bar draw    */
+    al = *(db*)raddr(ds, si - 0x2FEE);
+    ah = al;
+    di = bp;
+    dx |= dx; CF = 0; OF = 0; ZF = (dx == 0); SF = (dx >> 15);
+    if (dx != 0){
+        if ((short)dx >= 0){
+            do {                              /* loc_17C77 fill words    */
+                *(dw*)(raddr(ss, bp + 0)) = 0x0DD88;
+                *(dw*)(raddr(ss, bp + 2)) = 0x0DDDD;
+                { dd t_ = (dd)bp + (dd)4; CF = t_ > 0xFFFF; bp = t_;
+                  ZF = (bp == 0); SF = (bp >> 15); }
+                (dx)--; ZF = (dx == 0); SF = (dx >> 15);
+            } while (dx != 0);
+        }
+    }
+    CF = (dd)bx < (dd)0x16; ZF = (bx == 0x16);
+    SF = ((dw)(bx - 0x16) >> 15);
+    if (bx > 0x16) bx = 0x16;
+    do {                                      /* loc_17C8F color pairs   */
+        *(db*)raddr(ss, bp + 0) = 0x88;
+        *(db*)raddr(ss, bp + 1) = al;
+        *(dw*)(raddr(ss, bp + 2)) = ax;
+        { dd t_ = (dd)bp + (dd)4; CF = t_ > 0xFFFF; bp = t_;
+          ZF = (bp == 0); SF = (bp >> 15); }
+        (bx)--; ZF = (bx == 0); SF = (bx >> 15);
+    } while (bx != 0);
+    bp = di;
+    al = *(db*)raddr(ss, bp + 0x19);
+    al &= 0x0F; CF = 0; OF = 0; ZF = (al == 0); SF = (al >> 7);
+    al |= 0x80; CF = 0; OF = 0; ZF = (al == 0); SF = (al >> 7);
+    *(db*)raddr(ss, bp + 0x19) = al;
+    al = *(db*)raddr(ss, bp + 0x1B);
+    al &= 0x0F0; CF = 0; OF = 0; ZF = (al == 0); SF = (al >> 7);
+    al |= 8; CF = 0; OF = 0; ZF = (al == 0); SF = (al >> 7);
+    *(db*)raddr(ss, bp + 0x1B) = al;
+}

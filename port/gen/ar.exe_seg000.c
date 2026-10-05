@@ -6588,7 +6588,8 @@ locret_11d81:
     /* retn ;~ 01A2:1D81 */
     return;
 }
-void draw_tile_compose(void) {
+void draw_tile_compose(void) { draw_tile_compose_c(); }
+void draw_tile_compose_lifted(void) {
     dd _sa = 0, _sb = 0;
     /* mov     di, cs:seg_data ;~ 01A2:1D12 */
     /* mov     ds, di ;~ 01A2:1D17 */
@@ -19779,7 +19780,8 @@ scroll_edge_b_e14430:
     /* retn ;~ 01A2:4432 */
     return;
 }
-void cell_tile_compose(void) {
+void cell_tile_compose(void) { cell_tile_compose_c(); }
+void cell_tile_compose_lifted(void) {
     /* call    sub_1B228 ;~ 01A2:4433 */
     px_to_cell();
     /* call    sub_1B268 ;~ 01A2:4436 */
@@ -84590,7 +84592,8 @@ bar_draw_e17c8f:
     /* retn ;~ 01A2:7CB5 */
     return;
 }
-void bar_tandy(void) {
+void bar_tandy(void) { bar_tandy_c(); }
+void bar_tandy_lifted(void) {
     dd _sa = 0, _sb = 0;
     /* mov     al, [si-2FEEh]  ; jumptable 00017C64 cases 1-3 ;~ 01A2:7C69 */
     al = *(db*)raddr(ds,si-0x2FEE);
@@ -159782,7 +159785,8 @@ map_probe_cell_e1b21e:
     /* retn ;~ 01A2:B227 */
     return;
 }
-void px_to_cell(void) {
+void px_to_cell(void) { px_to_cell_c(); }
+void px_to_cell_lifted(void) {
     dd _sa = 0, _sb = 0;
     /* mov     ax, word_2AA65 ;~ 01A2:B228 */
     ax = probe_px;
@@ -159844,7 +159848,8 @@ void xy_to_cell(void) {
     /* retn ;~ 01A2:B267 */
     return;
 }
-void map_probe_xy_e1b29d(void) {
+void map_probe_xy_e1b29d(void) { map_probe_xy_e1b29d_c(); }
+void map_probe_xy_e1b29d_lifted(void) {
     /* pushf ;~ 01A2:B29D */
     pushf();
     /* mov     byte_2AA6D, al ;~ 01A2:B29E */
@@ -159862,7 +159867,8 @@ void map_probe_xy_e1b29d(void) {
     /* retn ;~ 01A2:B2B1 */
     return;
 }
-void map_probe_xy_e1b2b2(void) {
+void map_probe_xy_e1b2b2(void) { map_probe_xy_e1b2b2_c(); }
+void map_probe_xy_e1b2b2_lifted(void) {
     /* stc ;~ 01A2:B2B2 */
     CF = 1;
     /* mov     al, 0 ;~ 01A2:B2B3 */
@@ -159887,7 +159893,8 @@ map_probe_xy_e1b29d:
     /* retn ;~ 01A2:B2B1 */
     return;
 }
-void map_probe_xy(void) {
+void map_probe_xy(void) { map_probe_xy_c(); }
+void map_probe_xy_lifted(void) {
     dd _sa = 0, _sb = 0;
     /* mov     al, byte_2A960 ;~ 01A2:B268 */
     al = cell_x;
@@ -160019,7 +160026,8 @@ cell_to_col_e1b2e5:
     /* retn ;~ 01A2:B2E6 */
     return;
 }
-void map_rowhdr_get(void) {
+void map_rowhdr_get(void) { map_rowhdr_get_c(); }
+void map_rowhdr_get_lifted(void) {
     dd _sa = 0, _sb = 0;
     /* xor     ah, ah ;~ 01A2:B2E7 */
     ah = 0; CF = 0; OF = 0; ZF = 1; SF = 0;

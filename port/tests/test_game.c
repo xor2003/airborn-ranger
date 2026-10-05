@@ -1118,6 +1118,44 @@ int main(void){
                 checks);
     }
 
+    /* ---- cell->tile compose chain: px_to_cell shifts, map_probe_xy
+     * bounds + map byte fetch, map_rowhdr_get two-level row tables,
+     * draw_tile_compose sprrow_tbl dispatch; bar_tandy fills the
+     * ss:bp status-bar frame. -----------------------------------------*/
+    {
+        dw s0 = seg_flip, s1 = seg_draw, s2 = seg_screen;
+        seg_flip = 0x9000; seg_draw = 0x9800; seg_screen = 0xA000;
+        ss = 0x8000; sp = 0xFFFE;
+        ds = seg_data; adapter_id = 3;
+        probe_px = 0x48; probe_py = 0x30;     /* -> cell 9,6            */
+        ab_res("px2cell", px_to_cell_lifted, px_to_cell, 0);
+        cell_x = 9; cell_y = 6;              /* in-bounds probe        */
+        ab_res("probe ok", map_probe_xy_lifted, map_probe_xy, 0);
+        cell_x = 0x20;                        /* x OOB -> CF=1          */
+        ab_res("probe xoob", map_probe_xy_lifted, map_probe_xy, 0);
+        cell_x = 9; cell_y = 0x40;           /* y OOB                  */
+        ab_res("probe yoob", map_probe_xy_lifted, map_probe_xy, 0);
+        al = 0x77;
+        ab_res("probe mid9d", map_probe_xy_e1b29d_lifted,
+               map_probe_xy_e1b29d, 0);
+        ab_res("probe midb2", map_probe_xy_e1b2b2_lifted,
+               map_probe_xy_e1b2b2, 0);
+        cell_x = 9; cell_y = 6;
+        ax = 2; probe_px = 0x25; probe_py = 0x31;
+        ab_res("rowhdr", map_rowhdr_get_lifted, map_rowhdr_get, 0);
+        draw_col = 4; draw_row = 0x20; tmap_9812 = 0;
+        ab_res("drawtile", draw_tile_compose_lifted, draw_tile_compose, 0);
+        ab_res("celltile", cell_tile_compose_lifted, cell_tile_compose, 0);
+        /* bar_tandy: ss:bp frame fill; dx>0 words then bx<=0x16 pairs  */
+        bp = 0x200; si = 0x400; dx = 3; bx = 5;
+        ab_res("bar", bar_tandy_lifted, bar_tandy, 0);
+        dx = 0; bx = 0x20;                    /* bx>0x16 clamps         */
+        ab_res("bar clamp", bar_tandy_lifted, bar_tandy, 0);
+        seg_flip = s0; seg_draw = s1; seg_screen = s2;
+        fprintf(stderr, "  (cellcompose: lifted vs C, %d checks)\n",
+                checks);
+    }
+
     /* ---- status-panel digit patcher: WOUNDS field ds:0xB93F <- byte_29712
      * template lives in the image with literal "XX" placeholders; sub_1BBB9
      * converts al to two ASCII digits and stores at ds:[si]/ds:[si+1]. ---- */

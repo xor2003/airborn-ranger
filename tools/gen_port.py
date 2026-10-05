@@ -616,6 +616,14 @@ REWRITES = {
     'scroll_edge_c_e14345': 'scroll_edge_c_e14345_c',
     'scroll_edge_c_e14359': 'scroll_edge_c_e14359_c',
     'scroll_edge_c_e143a9': 'scroll_edge_c_e143a9_c',
+    'px_to_cell': 'px_to_cell_c',
+    'map_probe_xy': 'map_probe_xy_c',
+    'map_probe_xy_e1b29d': 'map_probe_xy_e1b29d_c',
+    'map_probe_xy_e1b2b2': 'map_probe_xy_e1b2b2_c',
+    'map_rowhdr_get': 'map_rowhdr_get_c',
+    'draw_tile_compose': 'draw_tile_compose_c',
+    'cell_tile_compose': 'cell_tile_compose_c',
+    'bar_tandy': 'bar_tandy_c',
 }
 # Commit 4366e7c removed the gfx driver-selection menu ('1'..'5' getch
 # loop → forced MCGA pick) by hand-editing the generated file, so every
