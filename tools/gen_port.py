@@ -567,6 +567,15 @@ REWRITES = {
     'mcga_dirty_update_e1393c': 'mcga_dirty_update_e1393c_c',
     'mcga_dirty_update_e13943': 'mcga_dirty_update_e13943_c',
     'mcga_dirty_update_e13975': 'mcga_dirty_update_e13975_c',
+    'hud_weapon_update': 'hud_weapon_update_c',
+    'hud_weapon_update_e17b22': 'hud_weapon_update_e17b22_c',
+    'hud_weapon_update_e17b38': 'hud_weapon_update_e17b38_c',
+    'hud_weapon_update_e17b4a': 'hud_weapon_update_e17b4a_c',
+    'hud_weapon_update_e17bc5': 'hud_weapon_update_e17bc5_c',
+    'fx_overlay_fill': 'fx_overlay_fill_c',
+    'fx_overlay_fill_e17cfd': 'fx_overlay_fill_e17cfd_c',
+    'fx_overlay_fill_e17d0e': 'fx_overlay_fill_e17d0e_c',
+    'fx_overlay_fill_e17d32': 'fx_overlay_fill_e17d32_c',
 }
 # Commit 4366e7c removed the gfx driver-selection menu ('1'..'5' getch
 # loop → forced MCGA pick) by hand-editing the generated file, so every

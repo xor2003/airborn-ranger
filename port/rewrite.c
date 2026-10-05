@@ -1315,3 +1315,175 @@ void mcga_dirty_update_e13975_c(void){    /* mid: inner run then scan    */
     } while (blitgo_c != 0);
     mcga_dirty_scan();
 }
+
+/* ---- HUD weapon panel + fx overlay (seg000:7B10..7D70) ---------------
+ * hud_weapon_update derives the ammo/tens digits and the three evac
+ * meter words, then fills 11 clip-column records and re-runs
+ * video_bufs_setup. fx_overlay_fill clears the overlay columns and
+ * copies the meter_b-selected mask pair into clip_mask_a/hud_da1.
+ */
+static void hud_wpn_loop(void){           /* loc_17B4A: count 10s        */
+    do {
+        (si)++; ZF = (si == 0); SF = (si >> 15);
+        { dd t_ = (dd)al - (dd)0x0A; CF = (dd)al < (dd)0x0A; al = t_;
+          ZF = (al == 0); SF = (al >> 7); }
+    } while (!CF);
+    (si)--; ZF = (si == 0); SF = (si >> 15);
+    { dd t_ = (dd)al + (dd)0x0A; CF = t_ > 0xFF; al = t_;
+      ZF = (al == 0); SF = (al >> 7); }
+    CF = ((dd)si << 1) >> 16 & 1; si <<= 1; ZF = (si == 0); SF = (si >> 15);
+    cx = *(dw*)raddr(ds, si - 0x300A);
+    wpn_9e38 = cx;
+    ah = 0; CF = 0; OF = 0; ZF = 1; SF = 0;
+    si = ax;
+    CF = ((dd)si << 1) >> 16 & 1; si <<= 1; ZF = (si == 0); SF = (si >> 15);
+    ax = *(dw*)raddr(ds, si - 0x300A);
+    wpn_9e3a = ax;
+    bh = 0; CF = 0; OF = 0; ZF = 1; SF = 0;
+    bl = evac_h;
+    CF = (((dd)bl << 1) >> 8) & 1; bl <<= 1; ZF = (bl == 0); SF = (bl >> 7);
+    ax = *(dw*)raddr(ds, bx - 0x300A);
+    wpn_9e3c = ax;
+    bl = *(db*)(&evac_tu);
+    CF = (((dd)bl << 1) >> 8) & 1; bl <<= 1; ZF = (bl == 0); SF = (bl >> 7);
+    ax = *(dw*)raddr(ds, bx - 0x300A);
+    wpn_9e3e = ax;
+    bl = *(db*)(((db*)&evac_tu) + 1);
+    CF = (((dd)bl << 1) >> 8) & 1; bl <<= 1; ZF = (bl == 0); SF = (bl >> 7);
+    wpn_9e40 = *(dw*)raddr(ds, bx - 0x300A);
+    cx = 0x13A; ax = 0x13B;
+    si = 0x0C;
+    CF = (dd)wounds < (dd)0; ZF = ((db)(wounds - 0) == 0);
+    SF = (((db)(wounds - 0)) >> 7);
+    fld304a_store();
+    si = 0x0E;
+    CF = (dd)wounds < (dd)1; ZF = ((db)(wounds - 1) == 0);
+    SF = (((db)(wounds - 1)) >> 7);
+    fld304a_store();
+    si = 0x10;
+    CF = (dd)wounds < (dd)2; ZF = ((db)(wounds - 2) == 0);
+    SF = (((db)(wounds - 2)) >> 7);
+    fld304a_store();
+    tile_variant_sel();
+    bx = 0; si = 0; cx = 0x0B;
+}
+static void hud_col_fill(void){           /* loc_17BC5: 11 clip records  */
+    do {
+        ax = *(dw*)raddr(ds, bx - 0x304A);
+        *(db*)raddr(ds, si + 0x0E3F) = al;
+        *(db*)raddr(ds, si + 0x0E5F) = ah;
+        ax = *(dw*)raddr(ds, bx - 0x3060);
+        *(db*)raddr(ds, si + 0x0E7F) = al;
+        *(db*)raddr(ds, si + 0x0E9F) = ah;
+        ax = *(dw*)raddr(ds, bx - 0x3034);
+        *(db*)raddr(ds, si + 0x0EBF) = al;
+        *(db*)raddr(ds, si + 0x0EDF) = 5;
+        *(db*)raddr(ds, si + 0x0EFF) = 0x7F;
+        { dd t_ = (dd)bx + (dd)2; CF = t_ > 0xFFFF; bx = t_;
+          ZF = (bx == 0); SF = (bx >> 15); }
+        (si)++; ZF = (si == 0); SF = (si >> 15);
+    } while (--cx != 0);
+    clip_mask_a = 0x7FF;
+    hud_da1 = 0;
+    clip_mask_b = 0;
+    hud_da5 = 0;
+    video_bufs_setup();
+}
+void hud_weapon_update_e17bc5_c(void){ hud_col_fill(); }
+void hud_weapon_update_e17b4a_c(void){    /* mid: digit loop onward      */
+    hud_wpn_loop();
+    hud_col_fill();
+}
+void hud_weapon_update_e17b38_c(void){    /* mid: ammo byte fetch        */
+    al = *(db*)raddr(ds, bx - 0x376B);
+    CF = (dd)bx < (dd)0; ZF = (bx == 0); SF = (bx >> 15);
+    if (bx == 0){
+        CF = (dd)flash_period < (dd)0; ZF = (flash_period == 0);
+        SF = ((db)(flash_period - 0) >> 7);
+        if ((signed char)flash_period >= (signed char)0){
+            (al)++; ZF = (al == 0); SF = (al >> 7);
+        }
+    }
+    hud_wpn_loop();
+    hud_col_fill();
+}
+void hud_weapon_update_e17b22_c(void){    /* mid: table load             */
+    CF = ((dd)si << 1) >> 16 & 1; si <<= 1; ZF = (si == 0); SF = (si >> 15);
+    ax = *(dw*)raddr(ds, si - 0x301E);
+    wpn_9e36 = ax;
+    si = 0;
+    CF = (dd)bx < (dd)3; ZF = (bx == 3); SF = ((dw)(bx - 3) >> 15);
+    if (bx == 3){ al = bkey_970e; goto body; }
+    al = *(db*)raddr(ds, bx - 0x376B);
+    CF = (dd)bx < (dd)0; ZF = (bx == 0); SF = (bx >> 15);
+    if (bx == 0){
+        CF = (dd)flash_period < (dd)0; ZF = (flash_period == 0);
+        SF = ((db)(flash_period - 0) >> 7);
+        if ((signed char)flash_period >= (signed char)0){
+            (al)++; ZF = (al == 0); SF = (al >> 7);
+        }
+    }
+body:
+    hud_wpn_loop();
+    hud_col_fill();
+}
+void hud_weapon_update_c(void){           /* sub_17B10                   */
+    bl = weapon_sel;
+    bh = 0; CF = 0; OF = 0; ZF = 1; SF = 0;
+    si = bx;
+    CF = (dd)mst_a7af < (dd)0; ZF = (mst_a7af == 0); SF = (mst_a7af >> 7);
+    if (mst_a7af != 0){
+        dd t_ = (dd)si + (dd)5; CF = t_ > 0xFFFF; si = t_;
+        ZF = (si == 0); SF = (si >> 15);
+    }
+    hud_weapon_update_e17b22_c();
+}
+
+static void fx_col_fill(void){            /* loc_17D32: 32 col records   */
+    do {
+        ax = 0x113;
+        *(db*)raddr(ds, si + 0x0E3F) = al;
+        *(db*)raddr(ds, si + 0x0E5F) = ah;
+        ax = fx_overl_9f60;
+        *(db*)raddr(ds, si + 0x0E7F) = al;
+        *(db*)raddr(ds, si + 0x0E9F) = ah;
+        al = *(db*)raddr(ds, si - 0x2F42);
+        { dd t_ = (dd)al - (dd)fx_overl_9f5e;
+          CF = (dd)al < (dd)fx_overl_9f5e; al = t_;
+          ZF = (al == 0); SF = (al >> 7); }
+        *(db*)raddr(ds, si + 0x0EBF) = al;
+        *(db*)raddr(ds, si + 0x0EDF) = 5;
+        *(db*)raddr(ds, si + 0x0EFF) = 0x7F;
+        (si)++; ZF = (si == 0); SF = (si >> 15);
+    } while (--cx != 0);
+    clip_mask_b = 0;
+    hud_da5 = 0;
+    video_bufs_setup();
+}
+void fx_overlay_fill_e17d32_c(void){ fx_col_fill(); }
+void fx_overlay_fill_e17d0e_c(void){      /* mid: mask pair load         */
+    CF = (bx >> 0) & 1; bx >>= 1; ZF = (bx == 0); SF = (bx >> 15);
+    al = *(db*)raddr(ds, bx - 0x2FC2);
+    *(db*)(&clip_mask_a) = al;
+    al = *(db*)raddr(ds, bx - 0x2FA2);
+    *(db*)(((db*)&clip_mask_a) + 1) = al;
+    al = *(db*)raddr(ds, bx - 0x2F82);
+    *(db*)(&hud_da1) = al;
+    al = *(db*)raddr(ds, bx - 0x2F62);
+    *(db*)(((db*)&hud_da1) + 1) = al;
+    si = 0; cx = 0x20;
+    fx_col_fill();
+}
+void fx_overlay_fill_e17cfd_c(void){      /* mid: parity + masks         */
+    (bx)--; ZF = (bx == 0); SF = (bx >> 15);
+    fx_overl_9f5e = 0;
+    CF = 0; OF = 0; ZF = ((bx & 1) == 0); SF = (((bx & 1)) >> 15);
+    if ((bx & 1) == 0) fx_overl_9f5e = 4;
+    fx_overlay_fill_e17d0e_c();
+}
+void fx_overlay_fill_c(void){             /* sub_17CF4                   */
+    bx = meter_b;
+    bx |= bx; CF = 0; OF = 0; ZF = (bx == 0); SF = (bx >> 15);
+    if (bx == 0) return;
+    fx_overlay_fill_e17cfd_c();
+}

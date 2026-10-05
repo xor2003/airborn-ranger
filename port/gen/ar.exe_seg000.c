@@ -83766,7 +83766,8 @@ rec6_restore_e17afc:
         } while (dx != 0);
     }
 }
-void hud_weapon_update_e17b22(void) {
+void hud_weapon_update_e17b22(void) { hud_weapon_update_e17b22_c(); }
+void hud_weapon_update_e17b22_lifted(void) {
     dd _sa = 0, _sb = 0;
     /* shl     si, 1 ;~ 01A2:7B22 */
     { if (1) { CF = (((dd)si << (1)) >> 16) & 1; si <<= 1; ZF = ((dw)(si) == 0); SF = (((dw)(si)) >> 15); } }
@@ -83929,7 +83930,8 @@ hud_weapon_update_e17bc5:
     /* retn ;~ 01A2:7C10 */
     return;
 }
-void hud_weapon_update_e17b38(void) {
+void hud_weapon_update_e17b38(void) { hud_weapon_update_e17b38_c(); }
+void hud_weapon_update_e17b38_lifted(void) {
     dd _sa = 0, _sb = 0;
     /* mov     al, [bx-376Bh] ;~ 01A2:7B38 */
     al = *(db*)raddr(ds,bx-0x376B);
@@ -84072,7 +84074,8 @@ hud_weapon_update_e17bc5:
     /* retn ;~ 01A2:7C10 */
     return;
 }
-void hud_weapon_update_e17b4a(void) {
+void hud_weapon_update_e17b4a(void) { hud_weapon_update_e17b4a_c(); }
+void hud_weapon_update_e17b4a_lifted(void) {
     dd _sa = 0, _sb = 0;
 hud_weapon_update_e17b4a:
     do {
@@ -84202,7 +84205,8 @@ hud_weapon_update_e17bc5:
     /* retn ;~ 01A2:7C10 */
     return;
 }
-void hud_weapon_update_e17bc5(void) {
+void hud_weapon_update_e17bc5(void) { hud_weapon_update_e17bc5_c(); }
+void hud_weapon_update_e17bc5_lifted(void) {
 hud_weapon_update_e17bc5:
     do {
         /* mov     ax, [bx-304Ah] ;~ 01A2:7BC5 */
@@ -84244,7 +84248,8 @@ hud_weapon_update_e17bc5:
     /* retn ;~ 01A2:7C10 */
     return;
 }
-void hud_weapon_update(void) {
+void hud_weapon_update(void) { hud_weapon_update_c(); }
+void hud_weapon_update_lifted(void) {
     dd _sa = 0, _sb = 0;
     /* mov     bl, weapon_sel ;~ 01A2:7B10 */
     bl = weapon_sel;
@@ -84900,7 +84905,8 @@ bar_draw_e17c8f:
     /* retn ;~ 01A2:7CB5 */
     return;
 }
-void fx_overlay_fill_e17cfd(void) {
+void fx_overlay_fill_e17cfd(void) { fx_overlay_fill_e17cfd_c(); }
+void fx_overlay_fill_e17cfd_lifted(void) {
     /* dec     bx ;~ 01A2:7CFD */
     (bx)--; ZF = ((dw)(bx) == 0); SF = (((dw)(bx)) >> 15);
     /* mov     byte_29F5E, 0 ;~ 01A2:7CFE */
@@ -84972,7 +84978,8 @@ fx_overlay_fill_e17d32:
     /* retn ;~ 01A2:7D70 */
     return;
 }
-void fx_overlay_fill_e17d0e(void) {
+void fx_overlay_fill_e17d0e(void) { fx_overlay_fill_e17d0e_c(); }
+void fx_overlay_fill_e17d0e_lifted(void) {
     /* shr     bx, 1 ;~ 01A2:7D0E */
     { if (1) { CF = (bx >> ((1)-1)) & 1; bx = bx >> 1; ZF = ((dw)(bx) == 0); SF = (((dw)(bx)) >> 15); } }
     /* mov     al, [bx-2FC2h] ;~ 01A2:7D10 */
@@ -85032,7 +85039,8 @@ fx_overlay_fill_e17d32:
     /* retn ;~ 01A2:7D70 */
     return;
 }
-void fx_overlay_fill_e17d32(void) {
+void fx_overlay_fill_e17d32(void) { fx_overlay_fill_e17d32_c(); }
+void fx_overlay_fill_e17d32_lifted(void) {
 fx_overlay_fill_e17d32:
     do {
         /* mov     ax, 113h ;~ 01A2:7D32 */
@@ -85070,7 +85078,8 @@ fx_overlay_fill_e17d32:
     /* retn ;~ 01A2:7D70 */
     return;
 }
-void fx_overlay_fill(void) {
+void fx_overlay_fill(void) { fx_overlay_fill_c(); }
+void fx_overlay_fill_lifted(void) {
     /* mov     bx, word_29EBC ;~ 01A2:7CF4 */
     bx = meter_b;
     /* or      bx, bx ;~ 01A2:7CF8 */

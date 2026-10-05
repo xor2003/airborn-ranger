@@ -202,6 +202,15 @@ void mcga_dirty_update_c(void); void mcga_dirty_update_lifted(void);
 void mcga_dirty_update_e1393c_c(void); void mcga_dirty_update_e1393c_lifted(void);
 void mcga_dirty_update_e13943_c(void); void mcga_dirty_update_e13943_lifted(void);
 void mcga_dirty_update_e13975_c(void); void mcga_dirty_update_e13975_lifted(void);
+void hud_weapon_update_c(void); void hud_weapon_update_lifted(void);
+void hud_weapon_update_e17b22_c(void); void hud_weapon_update_e17b22_lifted(void);
+void hud_weapon_update_e17b38_c(void); void hud_weapon_update_e17b38_lifted(void);
+void hud_weapon_update_e17b4a_c(void); void hud_weapon_update_e17b4a_lifted(void);
+void hud_weapon_update_e17bc5_c(void); void hud_weapon_update_e17bc5_lifted(void);
+void fx_overlay_fill_c(void); void fx_overlay_fill_lifted(void);
+void fx_overlay_fill_e17cfd_c(void); void fx_overlay_fill_e17cfd_lifted(void);
+void fx_overlay_fill_e17d0e_c(void); void fx_overlay_fill_e17d0e_lifted(void);
+void fx_overlay_fill_e17d32_c(void); void fx_overlay_fill_e17d32_lifted(void);
 
 /* env-gated trace (M2C_TRACE=1) */
 extern int rt_trace;

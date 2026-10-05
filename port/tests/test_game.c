@@ -890,13 +890,61 @@ int main(void){
         fprintf(stderr, "  (clip/dirty: lifted vs C, %d checks)\n", checks);
     }
 
+    /* ---- HUD weapon panel + fx overlay: digit-count loop, evac meter
+     * word loads, 11/32-record clip-column fills; both tails re-run
+     * video_bufs_setup so the pinned segs/empty clip tables apply. --- */
+    {
+        dw s0 = seg_flip, s1 = seg_draw, s2 = seg_screen;
+        seg_flip = 0x9000; seg_draw = 0x9800; seg_screen = 0xA000;
+        adapter_id = 3;
+        memset(raddr_(ds, 0x0F1F), 0, 0x20);
+        memset(raddr_(ds, 0x0F23), 0, 0x20);
+        weapon_sel = 2; mst_a7af = 0;
+        ab_res("hud sel2", hud_weapon_update_lifted, hud_weapon_update, 0);
+        weapon_sel = 0; flash_period = 1;      /* bx==0 & >=0 -> al++   */
+        ab_res("hud sel0", hud_weapon_update_lifted, hud_weapon_update, 0);
+        weapon_sel = 3;                        /* bx==3 -> bkey fetch   */
+        ab_res("hud sel3", hud_weapon_update_lifted, hud_weapon_update, 0);
+        mst_a7af = 1; weapon_sel = 1;          /* si+=5 mission offset  */
+        ab_res("hud mst", hud_weapon_update_lifted, hud_weapon_update, 0);
+        mst_a7af = 0;
+        bx = 1; si = 4;                        /* e17b22: shl+table mid */
+        ab_res("hud mid22", hud_weapon_update_e17b22_lifted,
+               hud_weapon_update_e17b22, 0);
+        bx = 0; al = 25;                       /* e17b38: ammo fetch    */
+        ab_res("hud mid38", hud_weapon_update_e17b38_lifted,
+               hud_weapon_update_e17b38, 0);
+        al = 42; si = 0;                       /* e17b4a: count loop    */
+        ab_res("hud mid4a", hud_weapon_update_e17b4a_lifted,
+               hud_weapon_update_e17b4a, 0);
+        ab_res("hud midc5", hud_weapon_update_e17bc5_lifted,
+               hud_weapon_update_e17bc5, 0);
 
+        meter_b = 0;                           /* bx|bx==0 -> ret       */
+        ab_res("fx zero", fx_overlay_fill_lifted, fx_overlay_fill, 0);
+        meter_b = 3;                           /* odd -> offset stays 0 */
+        ab_res("fx odd", fx_overlay_fill_lifted, fx_overlay_fill, 0);
+        meter_b = 6;                           /* even -> fx_off = 4    */
+        ab_res("fx even", fx_overlay_fill_lifted, fx_overlay_fill, 0);
+        bx = 8;
+        ab_res("fx midfd", fx_overlay_fill_e17cfd_lifted,
+               fx_overlay_fill_e17cfd, 0);
+        bx = 4;
+        ab_res("fx mid0e", fx_overlay_fill_e17d0e_lifted,
+               fx_overlay_fill_e17d0e, 0);
+        si = 0; cx = 0x20;
+        ab_res("fx mid32", fx_overlay_fill_e17d32_lifted,
+               fx_overlay_fill_e17d32, 0);
+        seg_flip = s0; seg_draw = s1; seg_screen = s2;
+        fprintf(stderr, "  (hud/fx: lifted vs C, %d checks)\n", checks);
+    }
 
     /* ---- status-panel digit patcher: WOUNDS field ds:0xB93F <- byte_29712
      * template lives in the image with literal "XX" placeholders; sub_1BBB9
      * converts al to two ASCII digits and stores at ds:[si]/ds:[si+1]. ---- */
     ds = *(dw*)&mem[0x1a20];                     /* seg_10000: relocated data seg */
     int wslot = (ds << 4) + 0xB93F;
+    mem[wslot] = 'X'; mem[wslot+1] = 'X';        /* hud section rewrote it */
     CHECK(mem[wslot] == 'X' && mem[wslot+1] == 'X');   /* unpatched template */
     al = 7; si = 0xB93F; fmt_2digit();
     CHECK(mem[wslot] == '0' && mem[wslot+1] == '7');
