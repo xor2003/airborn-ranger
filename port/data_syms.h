@@ -1,29 +1,29 @@
 // data symbol -> struct field aliases (lst-linear addressing)
 #pragma once
 #include "dseg.h"
-#define seg_10000 (DSEG->seg.v_seg_10000)
+#define seg_data (DSEG->seg.v_seg_10000)
 #define seg_10002 (DSEG->seg.v_seg_10002)
-#define seg_10004 (DSEG->seg.v_seg_10004)
+#define seg_resbuf (DSEG->seg.v_seg_10004)
 #define seg_1000E (DSEG->seg_1a2e.v_seg_1000e)
-#define seg_10010 (DSEG->seg_1a2e.v_seg_10010)
-#define seg_10012 (DSEG->seg_1a2e.v_seg_10012)
-#define seg_10014 (DSEG->seg_1a2e.v_seg_10014)
+#define seg_flip (DSEG->seg_1a2e.v_seg_10010)
+#define seg_draw (DSEG->seg_1a2e.v_seg_10012)
+#define seg_aux (DSEG->seg_1a2e.v_seg_10014)
 #define seg_10016 (DSEG->seg_1a2e.v_seg_10016)
 #define seg_10018 (DSEG->seg_1a2e.v_seg_10018)
 #define word_100C3 (DSEG->v_word_100c3)
-#define jpt_1039D (DSEG->v_jpt_1039d)
+#define pal_jt (DSEG->v_jpt_1039d)
 #define jpt_107B6 (DSEG->v_jpt_107b6)
-#define funcs_1083A (DSEG->v_funcs_1083a)
-#define jpt_10AD3 (DSEG->v_jpt_10ad3)
-#define jpt_10B34 (DSEG->v_jpt_10b34)
-#define jpt_10B57 (DSEG->v_jpt_10b57)
+#define modecall_tbl (DSEG->v_funcs_1083a)
+#define clrflip_jt (DSEG->v_jpt_10ad3)
+#define clrdraw_jt (DSEG->v_jpt_10b34)
+#define clrback_jt (DSEG->v_jpt_10b57)
 #define jpt_10BEF (DSEG->v_jpt_10bef)
 #define jpt_10C4F (DSEG->v_jpt_10c4f)
-#define jpt_113E3 (DSEG->v_jpt_113e3)
+#define vidmode_jt (DSEG->v_jpt_113e3)
 #define funcs_115E7 (DSEG->v_funcs_115e7)
 #define jpt_1164F (DSEG->v_jpt_1164f)
 #define jpt_1171C (DSEG->v_jpt_1171c)
-#define jpt_11999 (DSEG->v_jpt_11999)
+#define present_jt (DSEG->v_jpt_11999)
 #define jpt_11A25 (DSEG->v_jpt_11a25)
 #define jpt_11BC9 (DSEG->v_jpt_11bc9)
 #define jpt_11C4E (DSEG->v_jpt_11c4e)
@@ -42,12 +42,12 @@
 #define funcs_13DA1 (DSEG->v_funcs_13da1)
 #define funcs_13E72 (DSEG->v_funcs_13e72)
 #define funcs_13F48 (DSEG->v_funcs_13f48)
-#define funcs_14021 (DSEG->v_funcs_14021)
+#define scroll_tbl_f (DSEG->v_funcs_14021)
 #define funcs_140FA (DSEG->v_funcs_140fa)
 #define funcs_141CE (DSEG->v_funcs_141ce)
-#define funcs_159E9 (DSEG->v_funcs_159e9)
+#define podhit_tbl (DSEG->v_funcs_159e9)
 #define jpt_16AB9 (DSEG->v_jpt_16ab9)
-#define jpt_17C64 (DSEG->v_jpt_17c64)
+#define bar_jt (DSEG->v_jpt_17c64)
 #define funcs_1892F (DSEG->v_funcs_1892f)
 #define funcs_1A9C8 (DSEG->v_funcs_1a9c8)
 #define jpt_1B098 (DSEG->v_jpt_1b098)
@@ -247,14 +247,14 @@
 #define word_24E77 (DCOMP->v_word_24e77)
 #define word_24E79 (DCOMP->v_word_24e79)
 #define byte_24E7B (DCOMP->v_byte_24e7b)
-#define word_26564 (DSEG->v_word_26564)
-#define word_26566 (DSEG->v_word_26566)
+#define intro_6564 (DSEG->v_word_26564)
+#define tmframe_6566 (DSEG->v_word_26566)
 #define word_2656A (DSEG->g_17f8a.v_word_2656a)
 #define word_2656C (DSEG->g_17f8a.v_word_2656c)
 #define word_2656E (DSEG->g_17f8a.v_word_2656e)
-#define word_26570 (DSEG->g_17f8a.v_word_26570)
-#define word_26574 (DSEG->v_word_26574)
-#define word_26582 (DSEG->v_word_26582)
+#define tmframe_6570 (DSEG->g_17f8a.v_word_26570)
+#define intro_6574 (DSEG->v_word_26574)
+#define speed_sel (DSEG->v_word_26582)
 #define word_265A8 (DSEG->g_17fc8.v_word_265a8)
 #define word_265AA (DSEG->g_17fc8.v_word_265aa)
 #define word_265AC (DSEG->g_17fc8.v_word_265ac)
@@ -293,34 +293,34 @@
 #define byte_26DFA (DSEG->g_187f3.v_byte_26dfa)
 #define byte_26DFB (DSEG->g_187f3.v_byte_26dfb)
 #define byte_26DFC (DSEG->g_187f3.v_byte_26dfc)
-#define byte_27149 (DSEG->v_byte_27149)
-#define word_27150 (DSEG->sum.v_word_27150)
-#define byte_27152 (DSEG->sum.v_byte_27152)
-#define byte_27153 (DSEG->sum.v_byte_27153)
-#define word_27154 (DSEG->sum.v_word_27154)
-#define byte_27156 (DSEG->sum.v_byte_27156)
-#define byte_27157 (DSEG->sum.v_byte_27157)
-#define byte_27158 (DSEG->sum.v_byte_27158)
-#define byte_27166 (DSEG->v_byte_27166)
-#define byte_27167 (DSEG->v_byte_27167)
-#define word_27169 (DSEG->v_word_27169)
+#define member_idx (DSEG->v_byte_27149)
+#define mission_idx (DSEG->sum.v_word_27150)
+#define color_idx (DSEG->sum.v_byte_27152)
+#define alarm_flag (DSEG->sum.v_byte_27153)
+#define sum_acc (DSEG->sum.v_word_27154)
+#define sum_ovf_b (DSEG->sum.v_byte_27156)
+#define mst_7157 (DSEG->sum.v_byte_27157)
+#define sum_ovf_a (DSEG->sum.v_byte_27158)
+#define color_a (DSEG->v_byte_27166)
+#define color_b (DSEG->v_byte_27167)
+#define mselprep_7169 (DSEG->v_word_27169)
 #define byte_271D5 (DSEG->v_byte_271d5)
 #define byte_2731E (DSEG->v_byte_2731e)
 #define word_2732F (DSEG->v_word_2732f)
-#define word_27403 (DSEG->v_word_27403)
+#define main_men_7403 (DSEG->v_word_27403)
 #define word_2762F (DSEG->v_word_2762f)
-#define word_27634 (DSEG->v_word_27634)
+#define brief_sc_7634 (DSEG->v_word_27634)
 #define byte_281ED (DSEG->v_byte_281ed)
 #define byte_281EE (DSEG->v_byte_281ee)
 #define word_2824B (DSEG->v_word_2824b)
-#define word_28341 (DSEG->mseloop.v_word_28341)
-#define word_28343 (DSEG->mseloop.v_word_28343)
-#define word_28345 (DSEG->mseloop.v_word_28345)
-#define word_28347 (DSEG->mseloop.v_word_28347)
-#define word_28349 (DSEG->mseloop.v_word_28349)
+#define mseloop_8341 (DSEG->mseloop.v_word_28341)
+#define menu_sel (DSEG->mseloop.v_word_28343)
+#define menu_nav_8345 (DSEG->mseloop.v_word_28345)
+#define mseloop_8347 (DSEG->mseloop.v_word_28347)
+#define mseloop_8349 (DSEG->mseloop.v_word_28349)
 #define word_2860A (DSEG->v_word_2860a)
-#define byte_28677 (DSEG->v_byte_28677)
-#define word_28730 (DSEG->v_word_28730)
+#define inmenu_8677 (DSEG->v_byte_28677)
+#define menu_scr_8730 (DSEG->v_word_28730)
 #define byte_289E2 (DSEG->v_byte_289e2)
 #define byte_289E3 (DSEG->v_byte_289e3)
 #define aCom1Com2BstrSs (DSEG->v_acom1com2bstrss)
@@ -376,75 +376,75 @@
 #define byte_2914D (DSEG->v_byte_2914d)
 #define byte_2914E (DSEG->v_byte_2914e)
 #define byte_2916F (DSEG->v_byte_2916f)
-#define byte_29170 (DSEG->v_byte_29170)
+#define csetup_9170 (DSEG->v_byte_29170)
 #define byte_291B3 (DSEG->v_byte_291b3)
 #define byte_291D5 (DSEG->v_byte_291d5)
-#define byte_29219 (DSEG->v_byte_29219)
+#define obj_9219 (DSEG->v_byte_29219)
 #define byte_2923B (DSEG->v_byte_2923b)
-#define byte_29307 (DSEG->v_byte_29307)
-#define byte_29537 (DSEG->aux7.v_byte_29537)
-#define byte_29538 (DSEG->aux7.v_byte_29538)
-#define byte_29539 (DSEG->aux7.v_byte_29539)
-#define byte_29567 (DSEG->v_byte_29567)
+#define ot23_tick_9307 (DSEG->v_byte_29307)
+#define aux7_9537 (DSEG->aux7.v_byte_29537)
+#define aux7_9538 (DSEG->aux7.v_byte_29538)
+#define aux7_9539 (DSEG->aux7.v_byte_29539)
+#define rstate_9567 (DSEG->v_byte_29567)
 #define byte_295EA (DSEG->v_byte_295ea)
 #define word_295EB (DSEG->v_word_295eb)
 #define byte_295EF (DSEG->v_byte_295ef)
-#define word_29668 (DSEG->g_1b088.v_word_29668)
+#define scan_id (DSEG->g_1b088.v_word_29668)
 #define word_2966A (DSEG->g_1b088.v_word_2966a)
 #define word_2966C (DSEG->g_1b088.v_word_2966c)
 #define word_2966E (DSEG->g_1b088.v_word_2966e)
-#define word_29670 (DSEG->g_1b088.v_word_29670)
-#define word_29676 (DSEG->cam.v_word_29676)
-#define word_29678 (DSEG->cam.v_word_29678)
+#define apply_sc_9670 (DSEG->g_1b088.v_word_29670)
+#define cam_9676 (DSEG->cam.v_word_29676)
+#define cam_9678 (DSEG->cam.v_word_29678)
 #define byte_2967A (DSEG->cam.v_byte_2967a)
 #define word_2967B (DSEG->cam.v_word_2967b)
 #define word_2967D (DSEG->cam.v_word_2967d)
-#define word_29681 (DSEG->v_word_29681)
-#define word_29683 (DSEG->v_word_29683)
+#define cam_9681 (DSEG->v_word_29681)
+#define cam_org_x (DSEG->v_word_29683)
 #define byte_2970D (DSEG->g_1b12d.v_byte_2970d)
 #define byte_2970E (DSEG->g_1b12d.v_byte_2970e)
 #define byte_2970F (DSEG->g_1b12d.v_byte_2970f)
-#define byte_29710 (DSEG->g_1b12d.v_byte_29710)
-#define byte_29711 (DSEG->g_1b12d.v_byte_29711)
-#define byte_29712 (DSEG->g_1b12d.v_byte_29712)
-#define byte_29714 (DSEG->mst.v_byte_29714)
-#define byte_29715 (DSEG->mst.v_byte_29715)
-#define byte_29716 (DSEG->mst.v_byte_29716)
-#define byte_29717 (DSEG->mst.v_byte_29717)
-#define byte_29718 (DSEG->mst.v_byte_29718)
+#define mst_9710 (DSEG->g_1b12d.v_byte_29710)
+#define weapon_sel (DSEG->g_1b12d.v_byte_29711)
+#define wounds (DSEG->g_1b12d.v_byte_29712)
+#define flash_period (DSEG->mst.v_byte_29714)
+#define hit_flash (DSEG->mst.v_byte_29715)
+#define mst_9716 (DSEG->mst.v_byte_29716)
+#define mst_9717 (DSEG->mst.v_byte_29717)
+#define fade_cnt (DSEG->mst.v_byte_29718)
 #define byte_2971A (DSEG->v_byte_2971a)
-#define byte_29721 (DSEG->ot13.v_byte_29721)
-#define byte_29722 (DSEG->ot13.v_byte_29722)
-#define byte_29723 (DSEG->ot13.v_byte_29723)
-#define byte_29724 (DSEG->ot13.v_byte_29724)
-#define byte_29733 (DSEG->roster.v_byte_29733)
-#define byte_29734 (DSEG->roster.v_byte_29734)
-#define byte_29735 (DSEG->roster.v_byte_29735)
-#define byte_29736 (DSEG->roster.v_byte_29736)
-#define byte_29738 (DSEG->v_byte_29738)
+#define ot13_tick_9721 (DSEG->ot13.v_byte_29721)
+#define mst_9722 (DSEG->ot13.v_byte_29722)
+#define ot13_tick_9723 (DSEG->ot13.v_byte_29723)
+#define ot14_tick_9724 (DSEG->ot13.v_byte_29724)
+#define roster_9733 (DSEG->roster.v_byte_29733)
+#define roster_9734 (DSEG->roster.v_byte_29734)
+#define roster_9735 (DSEG->roster.v_byte_29735)
+#define roster_9736 (DSEG->roster.v_byte_29736)
+#define roster_9738 (DSEG->v_byte_29738)
 #define byte_2974F (DSEG->v_byte_2974f)
-#define byte_29750 (DSEG->v_byte_29750)
-#define byte_29761 (DSEG->pri.v_byte_29761)
-#define byte_29762 (DSEG->pri.v_byte_29762)
-#define byte_29763 (DSEG->pri.v_byte_29763)
-#define byte_29764 (DSEG->pri.v_byte_29764)
-#define byte_29765 (DSEG->pri.v_byte_29765)
-#define byte_29766 (DSEG->pri.v_byte_29766)
-#define byte_29767 (DSEG->pri.v_byte_29767)
-#define byte_29768 (DSEG->pri.v_byte_29768)
-#define byte_29769 (DSEG->pri.v_byte_29769)
+#define scan_tgt (DSEG->v_byte_29750)
+#define ai_dir (DSEG->pri.v_byte_29761)
+#define ai_seek__9762 (DSEG->pri.v_byte_29762)
+#define pri_best (DSEG->pri.v_byte_29763)
+#define pri_a (DSEG->pri.v_byte_29764)
+#define pri_b (DSEG->pri.v_byte_29765)
+#define pri_c (DSEG->pri.v_byte_29766)
+#define pri_fiel_9767 (DSEG->pri.v_byte_29767)
+#define ai_drive_9768 (DSEG->pri.v_byte_29768)
+#define trk_flag_b (DSEG->pri.v_byte_29769)
 #define byte_2976A (DSEG->pri.v_byte_2976a)
 #define byte_2976B (DSEG->pri.v_byte_2976b)
 #define byte_2976C (DSEG->pri.v_byte_2976c)
 #define word_297E1 (DSEG->v_word_297e1)
 #define word_297F3 (DSEG->v_word_297f3)
-#define word_29812 (DSEG->cam_1b232.v_word_29812)
-#define word_29814 (DSEG->cam_1b232.v_word_29814)
-#define word_29816 (DSEG->cam_1b232.v_word_29816)
-#define word_29818 (DSEG->cam_1b232.v_word_29818)
-#define word_29845 (DSEG->udraw.v_word_29845)
-#define byte_29847 (DSEG->udraw.v_byte_29847)
-#define byte_29848 (DSEG->udraw.v_byte_29848)
+#define tmap_9812 (DSEG->cam_1b232.v_word_29812)
+#define cam_px_x (DSEG->cam_1b232.v_word_29814)
+#define cam_px_y (DSEG->cam_1b232.v_word_29816)
+#define burst_dir (DSEG->cam_1b232.v_word_29818)
+#define udraw_9845 (DSEG->udraw.v_word_29845)
+#define udraw_9847 (DSEG->udraw.v_byte_29847)
+#define udraw_9848 (DSEG->udraw.v_byte_29848)
 #define byte_2984B (DSEG->g_1b26b.v_byte_2984b)
 #define byte_2984C (DSEG->g_1b26b.v_byte_2984c)
 #define byte_2984D (DSEG->g_1b26b.v_byte_2984d)
@@ -459,9 +459,9 @@
 #define word_298C0 (DSEG->g_1b2e0.v_word_298c0)
 #define word_298C2 (DSEG->g_1b2e0.v_word_298c2)
 #define byte_298C4 (DSEG->g_1b2e0.v_byte_298c4)
-#define word_29955 (DSEG->v_word_29955)
+#define facing_c_9955 (DSEG->v_word_29955)
 #define byte_2998F (DSEG->v_byte_2998f)
-#define byte_29999 (DSEG->v_byte_29999)
+#define self_id (DSEG->v_byte_29999)
 #define byte_2999A (DSEG->v_byte_2999a)
 #define byte_299AF (DSEG->v_byte_299af)
 #define word_29B42 (DSEG->v_word_29b42)
@@ -698,19 +698,19 @@
 #define byte_2B510 (DSEG->v_byte_2b510)
 extern db default_seg;
 extern db seg000;
-#define seg_data (DSEG->seg.v_seg_10000) /* alias seg_10000 */
-#define seg_resbuf (DSEG->seg.v_seg_10004) /* alias seg_10004 */
+#define seg_data (DSEG->seg.v_seg_10000) /* alias seg_data */
+#define seg_resbuf (DSEG->seg.v_seg_10004) /* alias seg_resbuf */
 #define seg_screen (DSEG->seg_1a2e.v_seg_1000e) /* alias seg_1000E */
-#define seg_flip (DSEG->seg_1a2e.v_seg_10010) /* alias seg_10010 */
-#define seg_draw (DSEG->seg_1a2e.v_seg_10012) /* alias seg_10012 */
-#define seg_aux (DSEG->seg_1a2e.v_seg_10014) /* alias seg_10014 */
+#define seg_flip (DSEG->seg_1a2e.v_seg_10010) /* alias seg_flip */
+#define seg_draw (DSEG->seg_1a2e.v_seg_10012) /* alias seg_draw */
+#define seg_aux (DSEG->seg_1a2e.v_seg_10014) /* alias seg_aux */
 extern dw dummy50a3c745_seg000_1a3a_48;
 extern dw dummy50a3c745_seg000_1a3c_49;
 #define game_phase (DSEG->v_word_100c3) /* alias word_100C3 */
 extern db dummy50a3c745_seg000_1b1a_170;
 extern db dummy50a3c745_seg000_1d8e_565;
 extern db dummy50a3c745_seg000_1dac_589;
-#define jpt_1039d (DSEG->v_jpt_1039d) /* alias jpt_1039D */
+#define jpt_1039d (DSEG->v_jpt_1039d) /* alias pal_jt */
 extern dw dummy50a3c745_seg000_1daf_591;
 extern dw dummy50a3c745_seg000_1db1_592;
 extern dw dummy50a3c745_seg000_1db3_593;
@@ -720,22 +720,22 @@ extern dw dummy50a3c745_seg000_21af_1227;
 extern dw dummy50a3c745_seg000_21b1_1228;
 extern dw dummy50a3c745_seg000_21b3_1229;
 extern dw dummy50a3c745_seg000_21b5_1230;
-#define funcs_1083a (DSEG->v_funcs_1083a) /* alias funcs_1083A */
+#define funcs_1083a (DSEG->v_funcs_1083a) /* alias modecall_tbl */
 extern dw dummy50a3c745_seg000_21dd_1256;
 extern dw dummy50a3c745_seg000_21df_1257;
 extern dw dummy50a3c745_seg000_21e1_1258;
 extern db dummy50a3c745_seg000_24d4_1729;
-#define jpt_10ad3 (DSEG->v_jpt_10ad3) /* alias jpt_10AD3 */
+#define jpt_10ad3 (DSEG->v_jpt_10ad3) /* alias clrflip_jt */
 extern dw dummy50a3c745_seg000_24d7_1731;
 extern dw dummy50a3c745_seg000_24d9_1732;
 extern dw dummy50a3c745_seg000_24db_1733;
 extern dw dummy50a3c745_seg000_24dd_1734;
-#define jpt_10b34 (DSEG->v_jpt_10b34) /* alias jpt_10B34 */
+#define jpt_10b34 (DSEG->v_jpt_10b34) /* alias clrdraw_jt */
 extern dw dummy50a3c745_seg000_2538_1818;
 extern dw dummy50a3c745_seg000_253a_1819;
 extern dw dummy50a3c745_seg000_253c_1820;
 extern dw dummy50a3c745_seg000_253e_1821;
-#define jpt_10b57 (DSEG->v_jpt_10b57) /* alias jpt_10B57 */
+#define jpt_10b57 (DSEG->v_jpt_10b57) /* alias clrback_jt */
 extern dw dummy50a3c745_seg000_255b_1842;
 extern dw dummy50a3c745_seg000_255d_1843;
 extern dw dummy50a3c745_seg000_255f_1844;
@@ -751,7 +751,7 @@ extern dw dummy50a3c745_seg000_2650_2074;
 extern dw dummy50a3c745_seg000_2652_2075;
 extern dw dummy50a3c745_seg000_2654_2076;
 extern db dummy50a3c745_seg000_2cd6_2971;
-#define jpt_113e3 (DSEG->v_jpt_113e3) /* alias jpt_113E3 */
+#define jpt_113e3 (DSEG->v_jpt_113e3) /* alias vidmode_jt */
 extern dw dummy50a3c745_seg000_2de4_3158;
 extern dw dummy50a3c745_seg000_2de6_3159;
 extern dw dummy50a3c745_seg000_2de8_3160;
@@ -779,7 +779,7 @@ extern dw dummy50a3c745_seg000_3125_3673;
 extern dw dummy50a3c745_seg000_3127_3674;
 extern dw dummy50a3c745_seg000_3129_3675;
 extern db dummy50a3c745_seg000_3146_3695;
-#define present_jt (DSEG->v_jpt_11999) /* alias jpt_11999 */
+#define present_jt (DSEG->v_jpt_11999) /* alias present_jt */
 extern dw dummy50a3c745_seg000_3395_4001;
 extern dw dummy50a3c745_seg000_3397_4002;
 extern dw dummy50a3c745_seg000_3399_4003;
@@ -868,7 +868,7 @@ extern dw dummy50a3c745_seg000_5952_9064;
 extern dw dummy50a3c745_seg000_5954_9065;
 extern dw dummy50a3c745_seg000_5956_9066;
 extern dw dummy50a3c745_seg000_5958_9067;
-#define scroll_tbl_f (DSEG->v_funcs_14021) /* alias funcs_14021 */
+#define scroll_tbl_f (DSEG->v_funcs_14021) /* alias scroll_tbl_f */
 extern dw dummy50a3c745_seg000_5a2b_9207;
 extern dw dummy50a3c745_seg000_5a2d_9208;
 extern dw dummy50a3c745_seg000_5a2f_9209;
@@ -884,7 +884,7 @@ extern dw dummy50a3c745_seg000_5bda_9489;
 extern dw dummy50a3c745_seg000_5bdc_9490;
 extern dw dummy50a3c745_seg000_5bde_9491;
 extern db dummy50a3c745_seg000_624e_10224;
-#define funcs_159e9 (DSEG->v_funcs_159e9) /* alias funcs_159E9 */
+#define funcs_159e9 (DSEG->v_funcs_159e9) /* alias podhit_tbl */
 extern dw dummy50a3c745_seg000_73b2_12456;
 extern dw dummy50a3c745_seg000_73b4_12457;
 extern db dummy50a3c745_seg000_7694_12833;
@@ -910,7 +910,7 @@ extern db dummy50a3c745_seg000_8934_15480;
 extern db dummy50a3c745_seg000_8fae_16375;
 extern db dummy50a3c745_seg000_8ff0_16411;
 extern db dummy50a3c745_seg000_90f0_16529;
-#define jpt_17c64 (DSEG->v_jpt_17c64) /* alias jpt_17C64 */
+#define jpt_17c64 (DSEG->v_jpt_17c64) /* alias bar_jt */
 extern dw dummy50a3c745_seg000_963f_17221;
 extern dw dummy50a3c745_seg000_9641_17222;
 extern dw dummy50a3c745_seg000_9643_17223;
@@ -1342,15 +1342,15 @@ extern dw dummy50a3c745_seg002_1277e_29407;
 #define dcomp_4e77 (DCOMP->v_word_24e77) /* ds-rel alias word_24E77 */
 #define dcomp_4e79 (DCOMP->v_word_24e79) /* ds-rel alias word_24E79 */
 #define dcomp_4e7b (DCOMP->v_byte_24e7b) /* ds-rel alias byte_24E7B */
-#define intro_6564 (DSEG->v_word_26564) /* alias word_26564 */
-#define tmframe_6566 (DSEG->v_word_26566) /* alias word_26566 */
+#define intro_6564 (DSEG->v_word_26564) /* alias intro_6564 */
+#define tmframe_6566 (DSEG->v_word_26566) /* alias tmframe_6566 */
 #define intro_656a (DSEG->g_17f8a.v_word_2656a) /* alias word_2656A */
 #define frame_cnt (DSEG->g_17f8a.v_word_2656c) /* alias word_2656C */
 #define frame_cnt (DSEG->g_17fc8.v_word_265aa) /* alias word_265AA */
 #define frame_cnt2 (DSEG->g_17f8a.v_word_2656e) /* alias word_2656E */
-#define tmframe_6570 (DSEG->g_17f8a.v_word_26570) /* alias word_26570 */
-#define intro_6574 (DSEG->v_word_26574) /* alias word_26574 */
-#define speed_sel (DSEG->v_word_26582) /* alias word_26582 */
+#define tmframe_6570 (DSEG->g_17f8a.v_word_26570) /* alias tmframe_6570 */
+#define intro_6574 (DSEG->v_word_26574) /* alias intro_6574 */
+#define speed_sel (DSEG->v_word_26582) /* alias speed_sel */
 #define game_mai_65a8 (DSEG->g_17fc8.v_word_265a8) /* alias word_265A8 */
 #define ot0a_tick_65ac (DSEG->g_17fc8.v_word_265ac) /* alias word_265AC */
 #define render_cnt (DSEG->g_17fc8.v_word_265ae) /* alias word_265AE */
@@ -1388,38 +1388,38 @@ extern dw dummy50a3c745_seg002_1277e_29407;
 #define csnap_6dfa (DSEG->g_187f3.v_byte_26dfa) /* alias byte_26DFA */
 #define curs_b (DSEG->g_187f3.v_byte_26dfb) /* alias byte_26DFB */
 #define curs_idx (DSEG->g_187f3.v_byte_26dfc) /* alias byte_26DFC */
-#define member_idx (DSEG->v_byte_27149) /* alias byte_27149 */
-#define mission_idx (DSEG->sum.v_word_27150) /* alias word_27150 */
-#define color_idx (DSEG->sum.v_byte_27152) /* alias byte_27152 */
-#define alarm_flag (DSEG->sum.v_byte_27153) /* alias byte_27153 */
-#define sum_acc (DSEG->sum.v_word_27154) /* alias word_27154 */
-#define sum_ovf_b (DSEG->sum.v_byte_27156) /* alias byte_27156 */
-#define mst_7157 (DSEG->sum.v_byte_27157) /* alias byte_27157 */
-#define sum_ovf_a (DSEG->sum.v_byte_27158) /* alias byte_27158 */
-#define color_a (DSEG->v_byte_27166) /* alias byte_27166 */
-#define color_b (DSEG->v_byte_27167) /* alias byte_27167 */
+#define member_idx (DSEG->v_byte_27149) /* alias member_idx */
+#define mission_idx (DSEG->sum.v_word_27150) /* alias mission_idx */
+#define color_idx (DSEG->sum.v_byte_27152) /* alias color_idx */
+#define alarm_flag (DSEG->sum.v_byte_27153) /* alias alarm_flag */
+#define sum_acc (DSEG->sum.v_word_27154) /* alias sum_acc */
+#define sum_ovf_b (DSEG->sum.v_byte_27156) /* alias sum_ovf_b */
+#define mst_7157 (DSEG->sum.v_byte_27157) /* alias mst_7157 */
+#define sum_ovf_a (DSEG->sum.v_byte_27158) /* alias sum_ovf_a */
+#define color_a (DSEG->v_byte_27166) /* alias color_a */
+#define color_b (DSEG->v_byte_27167) /* alias color_b */
 extern db dummy50a3c745_seg002_18b88_29554;
-#define mselprep_7169 (DSEG->v_word_27169) /* alias word_27169 */
+#define mselprep_7169 (DSEG->v_word_27169) /* alias mselprep_7169 */
 extern db dummy50a3c745_seg002_18bf4_29564;
 #define mselprep_71d5 (DSEG->v_byte_271d5) /* alias byte_271D5 */
 #define msel_731e (DSEG->v_byte_2731e) /* alias byte_2731E */
 extern db dummy50a3c745_seg002_18d4e_29601;
 #define screen_c_732f (DSEG->v_word_2732f) /* alias word_2732F */
-#define main_men_7403 (DSEG->v_word_27403) /* alias word_27403 */
+#define main_men_7403 (DSEG->v_word_27403) /* alias main_men_7403 */
 #define brief_sc_762f (DSEG->v_word_2762f) /* alias word_2762F */
-#define brief_sc_7634 (DSEG->v_word_27634) /* alias word_27634 */
+#define brief_sc_7634 (DSEG->v_word_27634) /* alias brief_sc_7634 */
 #define mode4_81ed (DSEG->v_byte_281ed) /* alias byte_281ED */
 #define mode4_81ee (DSEG->v_byte_281ee) /* alias byte_281EE */
 #define mode4_824b (DSEG->v_word_2824b) /* alias word_2824B */
-#define mseloop_8341 (DSEG->mseloop.v_word_28341) /* alias word_28341 */
-#define menu_sel (DSEG->mseloop.v_word_28343) /* alias word_28343 */
-#define menu_nav_8345 (DSEG->mseloop.v_word_28345) /* alias word_28345 */
-#define mseloop_8347 (DSEG->mseloop.v_word_28347) /* alias word_28347 */
-#define mseloop_8349 (DSEG->mseloop.v_word_28349) /* alias word_28349 */
+#define mseloop_8341 (DSEG->mseloop.v_word_28341) /* alias mseloop_8341 */
+#define menu_sel (DSEG->mseloop.v_word_28343) /* alias menu_sel */
+#define menu_nav_8345 (DSEG->mseloop.v_word_28345) /* alias menu_nav_8345 */
+#define mseloop_8347 (DSEG->mseloop.v_word_28347) /* alias mseloop_8347 */
+#define mseloop_8349 (DSEG->mseloop.v_word_28349) /* alias mseloop_8349 */
 #define devmenu_860a (DSEG->v_word_2860a) /* alias word_2860A */
-#define inmenu_8677 (DSEG->v_byte_28677) /* alias byte_28677 */
+#define inmenu_8677 (DSEG->v_byte_28677) /* alias inmenu_8677 */
 extern db dummy50a3c745_seg002_1a14f_30088;
-#define menu_scr_8730 (DSEG->v_word_28730) /* alias word_28730 */
+#define menu_scr_8730 (DSEG->v_word_28730) /* alias menu_scr_8730 */
 #define file_fie_89e2 (DSEG->v_byte_289e2) /* alias byte_289E2 */
 #define file_fie_89e3 (DSEG->v_byte_289e3) /* alias byte_289E3 */
 #define roster_a50 (DSEG->v_byte_28a50) /* alias byte_28A50 */
@@ -1480,75 +1480,75 @@ extern db dummy50a3c745_seg002_1a72c_30286;
 #define csetup_914d (DSEG->v_byte_2914d) /* alias byte_2914D */
 #define csetup_914e (DSEG->v_byte_2914e) /* alias byte_2914E */
 #define csetup_916f (DSEG->v_byte_2916f) /* alias byte_2916F */
-#define csetup_9170 (DSEG->v_byte_29170) /* alias byte_29170 */
+#define csetup_9170 (DSEG->v_byte_29170) /* alias csetup_9170 */
 #define csetup_91b3 (DSEG->v_byte_291b3) /* alias byte_291B3 */
 #define csetup_91d5 (DSEG->v_byte_291d5) /* alias byte_291D5 */
-#define obj_9219 (DSEG->v_byte_29219) /* alias byte_29219 */
+#define obj_9219 (DSEG->v_byte_29219) /* alias obj_9219 */
 #define csetup_923b (DSEG->v_byte_2923b) /* alias byte_2923B */
-#define ot23_tick_9307 (DSEG->v_byte_29307) /* alias byte_29307 */
-#define aux7_9537 (DSEG->aux7.v_byte_29537) /* alias byte_29537 */
-#define aux7_9538 (DSEG->aux7.v_byte_29538) /* alias byte_29538 */
-#define aux7_9539 (DSEG->aux7.v_byte_29539) /* alias byte_29539 */
-#define rstate_9567 (DSEG->v_byte_29567) /* alias byte_29567 */
+#define ot23_tick_9307 (DSEG->v_byte_29307) /* alias ot23_tick_9307 */
+#define aux7_9537 (DSEG->aux7.v_byte_29537) /* alias aux7_9537 */
+#define aux7_9538 (DSEG->aux7.v_byte_29538) /* alias aux7_9538 */
+#define aux7_9539 (DSEG->aux7.v_byte_29539) /* alias aux7_9539 */
+#define rstate_9567 (DSEG->v_byte_29567) /* alias rstate_9567 */
 #define objblk_i_95ea (DSEG->v_byte_295ea) /* alias byte_295EA */
 #define evac_div (DSEG->v_word_295eb) /* alias word_295EB */
 #define csetup_95ef (DSEG->v_byte_295ef) /* alias byte_295EF */
-#define scan_id (DSEG->g_1b088.v_word_29668) /* alias word_29668 */
+#define scan_id (DSEG->g_1b088.v_word_29668) /* alias scan_id */
 #define tgt_a (DSEG->g_1b088.v_word_2966a) /* alias word_2966A */
 #define dmg_deal_966c (DSEG->g_1b088.v_word_2966c) /* alias word_2966C */
 #define oscr_66e (DSEG->g_1b088.v_word_2966e) /* alias word_2966E */
-#define apply_sc_9670 (DSEG->g_1b088.v_word_29670) /* alias word_29670 */
-#define cam_9676 (DSEG->cam.v_word_29676) /* alias word_29676 */
-#define cam_9678 (DSEG->cam.v_word_29678) /* alias word_29678 */
+#define apply_sc_9670 (DSEG->g_1b088.v_word_29670) /* alias apply_sc_9670 */
+#define cam_9676 (DSEG->cam.v_word_29676) /* alias cam_9676 */
+#define cam_9678 (DSEG->cam.v_word_29678) /* alias cam_9678 */
 #define pan_flags (DSEG->cam.v_byte_2967a) /* alias byte_2967A */
 #define cam_tgt_x (DSEG->cam.v_word_2967b) /* alias word_2967B */
 #define cam_tgt_y (DSEG->cam.v_word_2967d) /* alias word_2967D */
-#define cam_9681 (DSEG->v_word_29681) /* alias word_29681 */
-#define cam_org_x (DSEG->v_word_29683) /* alias word_29683 */
+#define cam_9681 (DSEG->v_word_29681) /* alias cam_9681 */
+#define cam_org_x (DSEG->v_word_29683) /* alias cam_org_x */
 #define ai_flag_out (DSEG->g_1b12d.v_byte_2970d) /* alias byte_2970D */
 #define bkey_970e (DSEG->g_1b12d.v_byte_2970e) /* alias byte_2970E */
 #define bkey_970f (DSEG->g_1b12d.v_byte_2970f) /* alias byte_2970F */
-#define mst_9710 (DSEG->g_1b12d.v_byte_29710) /* alias byte_29710 */
-#define weapon_sel (DSEG->g_1b12d.v_byte_29711) /* alias byte_29711 */
-#define wounds (DSEG->g_1b12d.v_byte_29712) /* alias byte_29712 */
-#define flash_period (DSEG->mst.v_byte_29714) /* alias byte_29714 */
-#define hit_flash (DSEG->mst.v_byte_29715) /* alias byte_29715 */
-#define mst_9716 (DSEG->mst.v_byte_29716) /* alias byte_29716 */
-#define mst_9717 (DSEG->mst.v_byte_29717) /* alias byte_29717 */
-#define fade_cnt (DSEG->mst.v_byte_29718) /* alias byte_29718 */
+#define mst_9710 (DSEG->g_1b12d.v_byte_29710) /* alias mst_9710 */
+#define weapon_sel (DSEG->g_1b12d.v_byte_29711) /* alias weapon_sel */
+#define wounds (DSEG->g_1b12d.v_byte_29712) /* alias wounds */
+#define flash_period (DSEG->mst.v_byte_29714) /* alias flash_period */
+#define hit_flash (DSEG->mst.v_byte_29715) /* alias hit_flash */
+#define mst_9716 (DSEG->mst.v_byte_29716) /* alias mst_9716 */
+#define mst_9717 (DSEG->mst.v_byte_29717) /* alias mst_9717 */
+#define fade_cnt (DSEG->mst.v_byte_29718) /* alias fade_cnt */
 #define mst_971a (DSEG->v_byte_2971a) /* alias byte_2971A */
-#define ot13_tick_9721 (DSEG->ot13.v_byte_29721) /* alias byte_29721 */
-#define mst_9722 (DSEG->ot13.v_byte_29722) /* alias byte_29722 */
-#define ot13_tick_9723 (DSEG->ot13.v_byte_29723) /* alias byte_29723 */
-#define ot14_tick_9724 (DSEG->ot13.v_byte_29724) /* alias byte_29724 */
-#define roster_9733 (DSEG->roster.v_byte_29733) /* alias byte_29733 */
-#define roster_9734 (DSEG->roster.v_byte_29734) /* alias byte_29734 */
-#define roster_9735 (DSEG->roster.v_byte_29735) /* alias byte_29735 */
-#define roster_9736 (DSEG->roster.v_byte_29736) /* alias byte_29736 */
-#define roster_9738 (DSEG->v_byte_29738) /* alias byte_29738 */
+#define ot13_tick_9721 (DSEG->ot13.v_byte_29721) /* alias ot13_tick_9721 */
+#define mst_9722 (DSEG->ot13.v_byte_29722) /* alias mst_9722 */
+#define ot13_tick_9723 (DSEG->ot13.v_byte_29723) /* alias ot13_tick_9723 */
+#define ot14_tick_9724 (DSEG->ot13.v_byte_29724) /* alias ot14_tick_9724 */
+#define roster_9733 (DSEG->roster.v_byte_29733) /* alias roster_9733 */
+#define roster_9734 (DSEG->roster.v_byte_29734) /* alias roster_9734 */
+#define roster_9735 (DSEG->roster.v_byte_29735) /* alias roster_9735 */
+#define roster_9736 (DSEG->roster.v_byte_29736) /* alias roster_9736 */
+#define roster_9738 (DSEG->v_byte_29738) /* alias roster_9738 */
 #define enemy_cnt (DSEG->v_byte_2974f) /* alias byte_2974F */
-#define scan_tgt (DSEG->v_byte_29750) /* alias byte_29750 */
-#define ai_dir (DSEG->pri.v_byte_29761) /* alias byte_29761 */
-#define ai_seek__9762 (DSEG->pri.v_byte_29762) /* alias byte_29762 */
-#define pri_best (DSEG->pri.v_byte_29763) /* alias byte_29763 */
-#define pri_a (DSEG->pri.v_byte_29764) /* alias byte_29764 */
-#define pri_b (DSEG->pri.v_byte_29765) /* alias byte_29765 */
-#define pri_c (DSEG->pri.v_byte_29766) /* alias byte_29766 */
-#define pri_fiel_9767 (DSEG->pri.v_byte_29767) /* alias byte_29767 */
-#define ai_drive_9768 (DSEG->pri.v_byte_29768) /* alias byte_29768 */
-#define trk_flag_b (DSEG->pri.v_byte_29769) /* alias byte_29769 */
+#define scan_tgt (DSEG->v_byte_29750) /* alias scan_tgt */
+#define ai_dir (DSEG->pri.v_byte_29761) /* alias ai_dir */
+#define ai_seek__9762 (DSEG->pri.v_byte_29762) /* alias ai_seek__9762 */
+#define pri_best (DSEG->pri.v_byte_29763) /* alias pri_best */
+#define pri_a (DSEG->pri.v_byte_29764) /* alias pri_a */
+#define pri_b (DSEG->pri.v_byte_29765) /* alias pri_b */
+#define pri_c (DSEG->pri.v_byte_29766) /* alias pri_c */
+#define pri_fiel_9767 (DSEG->pri.v_byte_29767) /* alias pri_fiel_9767 */
+#define ai_drive_9768 (DSEG->pri.v_byte_29768) /* alias ai_drive_9768 */
+#define trk_flag_b (DSEG->pri.v_byte_29769) /* alias trk_flag_b */
 #define hit_flag (DSEG->pri.v_byte_2976a) /* alias byte_2976A */
 #define trk_flag (DSEG->pri.v_byte_2976b) /* alias byte_2976B */
 #define aux_msg (DSEG->pri.v_byte_2976c) /* alias byte_2976C */
 #define state_b (DSEG->v_word_297e1) /* alias word_297E1 */
 #define spawn_budget (DSEG->v_word_297f3) /* alias word_297F3 */
-#define tmap_9812 (DSEG->cam_1b232.v_word_29812) /* alias word_29812 */
-#define cam_px_x (DSEG->cam_1b232.v_word_29814) /* alias word_29814 */
-#define cam_px_y (DSEG->cam_1b232.v_word_29816) /* alias word_29816 */
-#define burst_dir (DSEG->cam_1b232.v_word_29818) /* alias word_29818 */
-#define udraw_9845 (DSEG->udraw.v_word_29845) /* alias word_29845 */
-#define udraw_9847 (DSEG->udraw.v_byte_29847) /* alias byte_29847 */
-#define udraw_9848 (DSEG->udraw.v_byte_29848) /* alias byte_29848 */
+#define tmap_9812 (DSEG->cam_1b232.v_word_29812) /* alias tmap_9812 */
+#define cam_px_x (DSEG->cam_1b232.v_word_29814) /* alias cam_px_x */
+#define cam_px_y (DSEG->cam_1b232.v_word_29816) /* alias cam_px_y */
+#define burst_dir (DSEG->cam_1b232.v_word_29818) /* alias burst_dir */
+#define udraw_9845 (DSEG->udraw.v_word_29845) /* alias udraw_9845 */
+#define udraw_9847 (DSEG->udraw.v_byte_29847) /* alias udraw_9847 */
+#define udraw_9848 (DSEG->udraw.v_byte_29848) /* alias udraw_9848 */
 #define unit_dra_984b (DSEG->g_1b26b.v_byte_2984b) /* alias byte_2984B */
 #define oscr_0 (DSEG->g_1b26b.v_byte_2984c) /* alias byte_2984C */
 #define oscr_1 (DSEG->g_1b26b.v_byte_2984d) /* alias byte_2984D */
@@ -1563,9 +1563,9 @@ extern db dummy50a3c745_seg002_1a72c_30286;
 #define ai_cnt (DSEG->g_1b2e0.v_word_298c0) /* alias word_298C0 */
 #define weight_sum (DSEG->g_1b2e0.v_word_298c2) /* alias word_298C2 */
 #define follow_m_98c4 (DSEG->g_1b2e0.v_byte_298c4) /* alias byte_298C4 */
-#define facing_c_9955 (DSEG->v_word_29955) /* alias word_29955 */
+#define facing_c_9955 (DSEG->v_word_29955) /* alias facing_c_9955 */
 #define scan_a (DSEG->v_byte_2998f) /* alias byte_2998F */
-#define self_id (DSEG->v_byte_29999) /* alias byte_29999 */
+#define self_id (DSEG->v_byte_29999) /* alias self_id */
 #define scan_c (DSEG->v_byte_2999a) /* alias byte_2999A */
 #define ai_dir_p_99af (DSEG->v_byte_299af) /* alias byte_299AF */
 #define tgt_delt_9b42 (DSEG->v_word_29b42) /* alias word_29B42 */

@@ -1558,6 +1558,115 @@ int main(void){
         fprintf(stderr, "  (scrl+geo: lifted vs C, %d checks)\n", checks);
     }
 
+    /* ---- map access layer + record rect/row emit ---------------------- */
+    {   ds = *(dw*)&mem[0x1a20];
+        ss = 0x8000; sp = 0xFFFE;
+        dw dsc = ds, esc = es;
+        /* map_cell_read: ax=col si=row -> ds:0x9736+row*32+col */
+        ax = 3; si = 2;
+        ab_res("cellrd", map_cell_read_lifted, map_cell_read, 0);
+        ax = 0x20; si = 2;
+        ab_res("cellrd oob", map_cell_read_lifted, map_cell_read, 0);
+        ax = 0x10; si = 0x40;
+        ab_res("cellrd oob2", map_cell_read_lifted, map_cell_read, 0);
+        ab_res("cellrd b7", map_cell_read_e1b9b7_lifted, map_cell_read_e1b9b7, 0);
+        /* map_cell_write: cell_x/cell_y in bounds + oob */
+        cell_x = 4; cell_y = 6; al = 0x5A; bx = 0x11; si = 0x22;
+        ab_res("cellwr", map_cell_write_lifted, map_cell_write, 0);
+        cell_x = 0x40; cell_y = 0;
+        ab_res("cellwr oob", map_cell_write_lifted, map_cell_write, 0);
+        bx = 0x33; si = 0x44;
+        ab_res("cellwr e16b0a", map_cell_write_e16b0a_lifted, map_cell_write_e16b0a, 0);
+        /* map_mark_cell: exit-table entry at si&0x7F negative vs ok */
+        cell_x = 5; cell_y = 3;
+        for (int i = 0; i < 0x80; i++)
+            *(db*)raddr_(ds, map_exit_b253 + i) = 0x01;
+        ab_res("markcell", map_mark_cell_lifted, map_mark_cell, 0);
+        /* si = (0x9736 + 3*32 + 5) & 0x7F = 0x1B -> negative exit entry */
+        *(db*)raddr_(ds, map_exit_b253 + 0x1B) = 0x80;
+        ab_res("markcell neg", map_mark_cell_lifted, map_mark_cell, 0);
+        /* grid_cell_mark: mark_row*32+mark_col-0x68CA */
+        mark_row = 4; mark_col = 2;
+        ab_res("gridmark", grid_cell_mark_lifted, grid_cell_mark, 0);
+        mark_row = 0x80; mark_col = 0;
+        ab_res("gridmark hi", grid_cell_mark_lifted, grid_cell_mark, 0);
+        /* map_probe_cell chain: in-bounds and oob */
+        cell_x = 8; cell_y = 9;
+        ab_res("probecell", map_probe_cell_lifted, map_probe_cell, 0);
+        ab_res("probecell 209", map_probe_cell_e1b209_lifted, map_probe_cell_e1b209, 0);
+        cell_x = 0x30;
+        ab_res("probecell oob", map_probe_cell_lifted, map_probe_cell, 0);
+        ab_res("probecell 21e", map_probe_cell_e1b21e_lifted, map_probe_cell_e1b21e, 0);
+        /* map_init: neutralize the mission jt/pop_tbl dispatch to a locret */
+        mission_idx = 0;
+        mem[(ds << 4) + 0xE207] = 4;          /* mission_pop_tbl idx for idx 0 */
+        *(dw*)(((db*)&mission_jt) + 0) = 0x091F;
+        *(dw*)(((db*)&mission_pop_tbl) + 8) = 0x091F;
+        ab_res("mapinit", map_init_lifted, map_init, 0);
+        rec_ptr_a = 0x9736; bx = 2; si = 0x10;
+        ab_res("mapinit 430", map_init_e1b430_lifted, map_init_e1b430, 0);
+        rec_ptr_a = 0x9736; bx = 1; si = 5;
+        ab_res("mapinit 43f", map_init_e1b43f_lifted, map_init_e1b43f, 0);
+        rec_ptr_a = 0x9736; bx = 1; si = 0xF0;
+        ab_res("mapinit 448", map_init_e1b448_lifted, map_init_e1b448, 0);
+        /* map_rect_write: rec = [w][h][w*h tiles] at ds:0x9000; clear the
+         * scanned cells so the scan passes and the fill pass runs */
+        rec_ptr_a = 0x9000;
+        *(db*)raddr_(ds, 0x9000) = 3;
+        *(db*)raddr_(ds, 0x9001) = 2;
+        for (int i = 0; i < 6; i++) *(db*)raddr_(ds, 0x9002 + i) = 0x40 + i;
+        cell_bx = 2; cell_by = 1;
+        for (int r = 0; r < 2; r++)
+            for (int c = 0; c < 3; c++)
+                *(db*)raddr_(ds, 0x9736 + (cell_by + r) * 32 + cell_bx + c) = 0;
+        ab_res("mrect", map_rect_write_lifted, map_rect_write, 0);
+        ab_res("mrect 906", map_rect_write_e1b906_lifted, map_rect_write_e1b906, 0);
+        ab_res("mrect 914", map_rect_write_e1b914_lifted, map_rect_write_e1b914, 0);
+        rec_ptr_a = 0x9002; mrect_b23c = 3; mrect_b23d = 2; cell_base = 0x9736 + 32 + 2;
+        ab_res("mrect 95c", map_rect_write_e1b95c_lifted, map_rect_write_e1b95c, 0);
+        si = 2;
+        ab_res("mrect 967", map_rect_write_e1b967_lifted, map_rect_write_e1b967, 0);
+        ab_res("mrect 991", map_rect_write_e1b991_lifted, map_rect_write_e1b991, 0);
+        /* occupied cell -> scan bails stc */
+        *(db*)raddr_(ds, 0x9736 + 32 + 4) = 0x77;
+        rec_ptr_a = 0x9000;
+        ab_res("mrect busy", map_rect_write_lifted, map_rect_write, 0);
+        /* maprow_emit / maprow_4: glyph/tile emit, es pinned to scratch */
+        es = 0x9000; di = 0;
+        draw_row = 0x40; ax = 0x41;
+        ab_res("maprow", maprow_emit_lifted, maprow_emit, 0);
+        draw_col = 0x20;
+        ab_res("maprow e4", maprow_emit_e1bae4_lifted, maprow_emit_e1bae4, 0);
+        maprow_base = 0x55;
+        ab_res("maprow4", maprow_4_lifted, maprow_4, 0);
+        cx = 2;
+        ab_res("maprow4 c1", maprow_4_e1bcc1_lifted, maprow_4_e1bcc1, 0);
+        /* hdr_walk: link list {off@+0xFE, x@+0x100}, 0xFFFF-terminated */
+        *(dw*)raddr_(ds, 0x0FE) = 0x1234;
+        *(dw*)raddr_(ds, 0x100) = 0x5678;
+        *(dw*)raddr_(ds, 0x102) = 0xFFFF;
+        ab_res("hdrwalk", hdr_walk_lifted, hdr_walk, 0);
+        bx = 0;
+        ab_res("hdrwalk 262", hdr_walk_e10262_lifted, hdr_walk_e10262, 0);
+        *(dw*)raddr_(ds, 0x0FE) = 0xFFFF;
+        ab_res("hdrwalk term", hdr_walk_lifted, hdr_walk, 0);
+        /* rec_row_fetch: bx -> row/col tables + 0x48-stride tile table */
+        bx = 0;
+        ab_res("recrow", rec_row_fetch_lifted, rec_row_fetch, 0);
+        bx = 2;
+        ab_res("recrow 2", rec_row_fetch_lifted, rec_row_fetch, 0);
+        bx = 0; cx = 3; si = 0x8EF2; draw_row = 4; draw_col = 2;
+        ab_res("recrow 480", rec_row_fetch_e15480_lifted, rec_row_fetch_e15480, 0);
+        bx = 0; cx = 0x0C; si = 0x8EF2; draw_row = 4; draw_col = 2;
+        push(2); push(0x40); push(8);         /* cx=2 rows, draw_row/col */
+        ab_res("recrow 497", rec_row_fetch_e15497_lifted, rec_row_fetch_e15497, 0);
+        sp += 6;
+        cx = 4; bx = 0;
+        ab_res("recrow 4bc", rec_row_fetch_e154bc_lifted, rec_row_fetch_e154bc, 0);
+        ds = dsc; es = esc;
+        fprintf(stderr, "  (mapacc: lifted vs C, %d checks)\n", checks);
+    }
+
     /* ---- status-panel digit patcher: WOUNDS field ds:0xB93F <- byte_29712
      * template lives in the image with literal "XX" placeholders; sub_1BBB9
      * converts al to two ASCII digits and stores at ds:[si]/ds:[si+1]. ---- */
