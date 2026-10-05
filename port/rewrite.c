@@ -576,3 +576,142 @@ void load_overlay_c(void){
     }
     load_overlay_e13ab6_c();
 }
+
+/* ---------- palette upload + mode dispatch (loc_10397 family) ----------
+   load_palette / load_palette_b set ds=seg_data and the 16-entry color
+   table (0x1962 normal, 0x1972 alt), then tail into pal_upload which
+   dispatches through pal_jt[adapter_id].  Non-MCGA cases land in the
+   int-10h AL=0 per-register loop (load_palette_e103a5); the MCGA case
+   writes DAC registers directly (pal_upload_mcga), mirroring each of
+   the 16 colors into DAC regs i and i+0x18 via the RGB component
+   tables at ds:0xB8/0xC8/0xD8.  Only the MCGA case resolves to a real
+   proc in this build; other adapters hit the unresolved-jmp fallback,
+   which the readable form reproduces verbatim. */
+
+static void jt_tail(dd flat){           /* indirect jmp through a cs table */
+    vfn f_ = func_at(flat);
+    if (f_) f_();
+    else fprintf(stderr, "unresolved ind jmp %x\n", flat);
+}
+
+void pal_upload_c(void){                /* loc_10397 */
+    di = adapter_id;
+    CF = (((dd)di << 1) >> 16) & 1; di <<= 1;
+    ZF = (di == 0); SF = (di >> 15);
+    jt_tail((dd)RES_CSBASE + *(dw*)(((db*)&jpt_1039d) + di));
+}
+
+void load_palette_c(void){              /* sub_1037E */
+    ax = seg_data;
+    ds = ax;
+    palette_ptr = 0x1962;
+    pal_upload_c();
+}
+
+void load_palette_b_c(void){            /* sub_1036F — alt palette table */
+    ax = seg_data;
+    ds = ax;
+    palette_ptr = 0x1972;
+    pal_upload_c();
+}
+
+void load_palette_e103a5_c(void){       /* loc_103A5: EGA/Tandy reg loop */
+    do {
+        push(si);
+        bx = si;
+        { dd t_ = (dd)si + palette_ptr; CF = t_ > 0xFFFF; si = t_;
+          ZF = (si == 0); SF = (si >> 15); }
+        bh = *(db*)raddr(ds, si) & 0x0F; CF = 0; OF = 0;
+        ZF = (bh == 0); SF = (bh >> 7);
+        ax = 0x1000;                    /* SET PALETTE REGISTER bl=si bh=color */
+        bios_palette();
+        si = pop();
+        (si)++; ZF = (si == 0); SF = (si >> 15);
+        CF = si < 0x10; ZF = ((dw)(si - 0x10) == 0); SF = (((dw)(si - 0x10)) >> 15);
+    } while (si < 0x10);
+}
+
+static void pal_dac_pair(void){         /* write DAC regs bx=i and i+0x18 */
+    { dd t_ = (dd)si + palette_ptr; CF = t_ > 0xFFFF; si = t_;
+      ZF = (si == 0); SF = (si >> 15); }
+    al = *(db*)raddr(ds, si);
+    ax &= 0x0F; CF = 0; OF = 0;
+    ZF = (ax == 0); SF = (ax >> 15);
+    si = ax;                            /* color index -> component tables */
+    ch = *(db*)raddr(ds, si + 0x0D8);   /* G */
+    cl = *(db*)raddr(ds, si + 0x0C8);   /* B */
+    dh = *(db*)raddr(ds, si + 0x0B8);   /* R */
+    ax = 0x1010;                        /* SET INDIVIDUAL DAC REGISTER */
+    bios_palette();
+}
+
+void pal_upload_mcga_e10421_c(void){    /* loc_10421: MCGA DAC loop body */
+    do {
+        push(si);
+        bx = si;
+        pal_dac_pair();                 /* DAC[bx] = rgb(pal[bx]) */
+        si = pop();
+        push(si);
+        bx = si;
+        { dd t_ = (dd)bx + 0x18; CF = t_ > 0xFFFF; bx = t_;
+          ZF = (bx == 0); SF = (bx >> 15); }
+        pal_dac_pair();                 /* DAC[i+0x18] = same color */
+        si = pop();
+        (si)++; ZF = (si == 0); SF = (si >> 15);
+        CF = si < 0x10; ZF = ((dw)(si - 0x10) == 0); SF = (((dw)(si - 0x10)) >> 15);
+    } while (si < 0x10);
+}
+
+void pal_upload_mcga_c(void){           /* loc_1041E — jumptable case 3 */
+    si = 0;
+    pal_upload_mcga_e10421_c();
+}
+
+void rec_walk_e10491_c(void){           /* loc_10491: 6-byte rec walker  */
+    do {
+        si = *(dw*)raddr(ds, di);
+        CF = si < 0xFFFF; ZF = ((dw)(si - 0xFFFF) == 0); SF = (((dw)(si - 0xFFFF)) >> 15);
+        if (si == 0xFFFF) return;
+        bx = *(dw*)raddr(ds, di + 2);
+        dx = *(dw*)raddr(ds, di + 4);
+        es = seg_data;
+        ax = 0;
+        { dd t_ = (dd)di + 6; CF = t_ > 0xFFFF; di = t_;
+          ZF = (di == 0); SF = (di >> 15); }
+        push(di);
+        load_palette();                 /* per-record apply (jt case 0) */
+        di = pop();
+    } while (1);
+}
+
+/* ---------- mode-call dispatch (loc_10797 family) ---------- */
+
+void glyph_conv_dispatch_c(void){       /* sub_10797 — mode-1 post-load  */
+    es = res_seg;
+    ax = 0;
+    si = res_ptr;
+    dx = *(dw*)raddr(es, si);           /* glyph count at buf+0          */
+    bx = si;
+    { dd t_ = (dd)bx + 2; CF = t_ > 0xFFFF; bx = t_;
+      ZF = (bx == 0); SF = (bx >> 15); }/* bx = glyph data               */
+    { dd t_ = (dd)si + 0x42; CF = t_ > 0xFFFF; si = t_;
+      ZF = (si == 0); SF = (si >> 15); }
+    bp = si;                            /* bp = second table             */
+    di = adapter_id;
+    CF = (((dd)di << 1) >> 16) & 1; di <<= 1;
+    ZF = (di == 0); SF = (di >> 15);
+    jt_tail((dd)RES_CSBASE + *(dw*)(((db*)&glyphconv_jt) + di));
+}
+
+void mode_call_c(void){                 /* sub_10834 — ds:0194 indexed   */
+    bx = *(dw*)raddr(ds, 0x194);
+    CF = (((dd)bx << 1) >> 16) & 1; bx <<= 1;
+    ZF = (bx == 0); SF = (bx >> 15);
+    { vfn f_ = func_at((dd)RES_CSBASE + *(dw*)(((db*)&funcs_1083a) + bx));
+      dw sp_ = sp;
+      if (f_) f_();
+      else fprintf(stderr, "unresolved ind call %x\n",
+                   (dd)(RES_CSBASE + *(dw*)(((db*)&funcs_1083a) + bx)));
+      if ((short)(sp - sp_) > 0) { sp = sp_; return; } }
+    CF = 0;
+}

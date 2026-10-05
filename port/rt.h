@@ -140,6 +140,15 @@ void load_overlay_e13b46_c(void); void load_overlay_e13b46_lifted(void);
 void load_overlay_e13b85_c(void); void load_overlay_e13b85_lifted(void);
 void load_overlay_e13b9e_c(void); void load_overlay_e13b9e_lifted(void);
 void load_overlay_e13baa_c(void); void load_overlay_e13baa_lifted(void);
+void load_palette_c(void); void load_palette_lifted(void);
+void load_palette_b_c(void); void load_palette_b_lifted(void);
+void pal_upload_c(void); void pal_upload_lifted(void);
+void load_palette_e103a5_c(void); void load_palette_e103a5_lifted(void);
+void pal_upload_mcga_c(void); void pal_upload_mcga_lifted(void);
+void pal_upload_mcga_e10421_c(void); void pal_upload_mcga_e10421_lifted(void);
+void rec_walk_e10491_c(void); void rec_walk_e10491_lifted(void);
+void glyph_conv_dispatch_c(void); void glyph_conv_dispatch_lifted(void);
+void mode_call_c(void); void mode_call_lifted(void);
 
 /* env-gated trace (M2C_TRACE=1) */
 extern int rt_trace;

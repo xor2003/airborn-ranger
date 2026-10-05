@@ -614,7 +614,8 @@ palette_sel_e10369:
     /* jmp     short loc_10397 ;~ 01A2:036C */
     pal_upload(); return;
 }
-void load_palette_b(void) {
+void load_palette_b(void) { load_palette_b_c(); }
+void load_palette_b_lifted(void) {
     /* mov     ax, cs:seg_data ;~ 01A2:036F */
     ax = seg_data;
     /* mov     ds, ax ;~ 01A2:0373 */
@@ -624,7 +625,8 @@ void load_palette_b(void) {
     /* jmp     short loc_10397 ;~ 01A2:037B */
     pal_upload(); return;
 }
-void pal_upload(void) {
+void pal_upload(void) { pal_upload_c(); }
+void pal_upload_lifted(void) {
     /* mov     di, word_1D934 ;~ 01A2:0397 */
     di = adapter_id;
     /* shl     di, 1           ; switch 5 cases ;~ 01A2:039B */
@@ -663,7 +665,8 @@ load_palette_e103a5:
     return;
 }
 
-void load_palette_e103a5(void) {
+void load_palette_e103a5(void) { load_palette_e103a5_c(); }
+void load_palette_e103a5_lifted(void) {
 load_palette_e103a5:
     do {
         /* push    si ;~ 01A2:03A5 */
@@ -696,7 +699,8 @@ load_palette_e103a5:
 
 
 
-void pal_upload_mcga(void) {
+void pal_upload_mcga(void) { pal_upload_mcga_c(); }
+void pal_upload_mcga_lifted(void) {
     dd _sa = 0, _sb = 0;
     /* mov     si, 0           ; jumptable 0001039D case 3 ;~ 01A2:041E */
     si = 0;
@@ -767,7 +771,8 @@ pal_upload_mcga_e10421:
     /* retn ;~ 01A2:046C */
     return;
 }
-void pal_upload_mcga_e10421(void) {
+void pal_upload_mcga_e10421(void) { pal_upload_mcga_e10421_c(); }
+void pal_upload_mcga_e10421_lifted(void) {
     dd _sa = 0, _sb = 0;
 pal_upload_mcga_e10421:
     do {
@@ -836,7 +841,8 @@ pal_upload_mcga_e10421:
     /* retn ;~ 01A2:046C */
     return;
 }
-void rec_walk_e10491(void) {
+void rec_walk_e10491(void) { rec_walk_e10491_c(); }
+void rec_walk_e10491_lifted(void) {
 ret_1a2_488_e10491:
     do {
         /* mov     si, [di] ;~ 01A2:0491 */
@@ -887,7 +893,8 @@ void locret_10615(void) {
 }
 
 
-void load_palette(void) {
+void load_palette(void) { load_palette_c(); }
+void load_palette_lifted(void) {
     /* mov     ax, cs:seg_data ;~ 01A2:037E */
     ax = seg_data;
     /* mov     ds, ax ;~ 01A2:0382 */
@@ -1629,7 +1636,8 @@ void nullsub_3(void) {
     /* retn ;~ 01A2:078C */
     return;
 }
-void glyph_conv_dispatch(void) {
+void glyph_conv_dispatch(void) { glyph_conv_dispatch_c(); }
+void glyph_conv_dispatch_lifted(void) {
     /* mov     ax, word_1D012 ;~ 01A2:0797 */
     /* mov     es, ax ;~ 01A2:079A */
     es = (res_seg);
@@ -1654,7 +1662,8 @@ void glyph_conv_dispatch(void) {
     /* jmp     cs:jpt_107B6[di] ; switch jump ;~ 01A2:07B6 */
     { vfn f_ = func_at((dd)0x1a20 + (*(dw*)(((db*)&glyphconv_jt)+di))); if (f_) f_(); else fprintf(stderr, "unresolved ind jmp %x\n", (dd)((dd)0x1a20 + (*(dw*)(((db*)&glyphconv_jt)+di)))); return; }
 }
-void mode_call(void) {
+void mode_call(void) { mode_call_c(); }
+void mode_call_lifted(void) {
     /* mov     bx, ds:194h ;~ 01A2:0834 */
     bx = *(dw*)raddr(ds,0x194);
     /* shl     bx, 1 ;~ 01A2:0838 */

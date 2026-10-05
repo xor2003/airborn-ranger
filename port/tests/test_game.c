@@ -566,6 +566,71 @@ int main(void){
         fprintf(stderr, "  (res chain: lifted vs C, %d checks)\n", checks);
     }
 
+    /* ---- palette upload + mode dispatch: lifted vs C ----------------
+     * pal_upload dispatches on adapter_id via pal_jt; only the MCGA
+     * case (3) resolves to a live proc — other adapters hit the
+     * unresolved-jmp fallback (stderr noise is expected). The MCGA
+     * loop mirrors palette[i] into DAC regs i and i+0x18 via the RGB
+     * component tables at ds:0xB8/0xC8/0xD8. bios_palette() is a host
+     * svc — side effects identical for both runs.                    */
+    {
+        ds = seg_data;
+        for (int i = 0; i < 16; i++){                    /* palette tbl */
+            *(db*)raddr_(ds, 0x1962 + i) = i;
+            *(db*)raddr_(ds, 0x1972 + i) = 15 - i;
+            *(db*)raddr_(ds, 0x0B8 + i) = i * 4;         /* R */
+            *(db*)raddr_(ds, 0x0C8 + i) = i * 4 + 1;     /* B */
+            *(db*)raddr_(ds, 0x0D8 + i) = i * 4 + 2;     /* G */
+        }
+        for (dw a = 0; a < 8; a++){                      /* all cases   */
+            adapter_id = a;
+            ab_res("pal_upload", pal_upload_lifted, pal_upload, 0);
+        }
+        adapter_id = 3;                                  /* MCGA        */
+        ab_res("load_palette", load_palette_lifted, load_palette, 0);
+        ab_res("load_palette_b", load_palette_b_lifted, load_palette_b, 0);
+        ds = seg_data; palette_ptr = 0x1962;
+        si = 0;
+        ab_res("ega loop", load_palette_e103a5_lifted, load_palette_e103a5, 0);
+        si = 5;                                          /* mid-entry   */
+        ab_res("ega mid5", load_palette_e103a5_lifted, load_palette_e103a5, 0);
+        ab_res("mcga", pal_upload_mcga_lifted, pal_upload_mcga, 0);
+        si = 5;
+        ab_res("mcga mid5", pal_upload_mcga_e10421_lifted, pal_upload_mcga_e10421, 0);
+
+        /* rec_walk: 6-byte records {si,bx,dx} until si==0xFFFF, each
+         * iteration calls load_palette through the trampoline       */
+        di = 0x7000;
+        for (int i = 0; i < 3; i++){
+            *(dw*)raddr_(ds, 0x7000 + i*6) = 0x100 + i;
+            *(dw*)raddr_(ds, 0x7002 + i*6) = 0x200 + i;
+            *(dw*)raddr_(ds, 0x7004 + i*6) = 0x300 + i;
+        }
+        *(dw*)raddr_(ds, 0x7000 + 3*6) = 0xFFFF;
+        ab_res("rec_walk", rec_walk_e10491_lifted, rec_walk_e10491, 0);
+
+        /* glyph_conv_dispatch: setup + glyphconv_jt[adapter] — case 3
+         * is nullsub_8; unresolvable cases print + return           */
+        res_seg = seg_data; res_ptr = 0x7100;
+        *(dw*)raddr_(seg_data, 0x7100) = 7;               /* glyph cnt  */
+        for (dw a = 0; a < 8; a++){
+            adapter_id = a;
+            ab_res("glyphconv", glyph_conv_dispatch_lifted, glyph_conv_dispatch, 0);
+        }
+
+        /* mode_call: ds:0x194-indexed ind call through funcs_1083a.
+         * The res fixture redirected entries 0-1 (dd write) — restore
+         * the image values: 0 -> nullsub_1 (sp-balanced),
+         * 1 -> glyph_conv_dispatch, 4 -> mid-proc offset (unresolved) */
+        ((dw*)&funcs_1083a)[0] = 0x078A;
+        ((dw*)&funcs_1083a)[1] = 0x0797;
+        for (dw i = 0; i < 5; i++){
+            *(dw*)raddr_(ds, 0x194) = i;
+            ab_res("mode_call", mode_call_lifted, mode_call, 0);
+        }
+        fprintf(stderr, "  (palette/dispatch: lifted vs C, %d checks)\n", checks);
+    }
+
     /* ---- status-panel digit patcher: WOUNDS field ds:0xB93F <- byte_29712
      * template lives in the image with literal "XX" placeholders; sub_1BBB9
      * converts al to two ASCII digits and stores at ds:[si]/ds:[si+1]. ---- */

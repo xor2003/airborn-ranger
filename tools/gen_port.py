@@ -499,6 +499,17 @@ REWRITES = {
     'load_overlay_e13b85': 'load_overlay_e13b85_c',
     'load_overlay_e13b9e': 'load_overlay_e13b9e_c',
     'load_overlay_e13baa': 'load_overlay_e13baa_c',
+    # palette upload dispatch (seg000:036F..046C) + record walker
+    'load_palette': 'load_palette_c',
+    'load_palette_b': 'load_palette_b_c',
+    'pal_upload': 'pal_upload_c',
+    'load_palette_e103a5': 'load_palette_e103a5_c',
+    'pal_upload_mcga': 'pal_upload_mcga_c',
+    'pal_upload_mcga_e10421': 'pal_upload_mcga_e10421_c',
+    'rec_walk_e10491': 'rec_walk_e10491_c',
+    # mode-call dispatch (seg000:0797..083F)
+    'glyph_conv_dispatch': 'glyph_conv_dispatch_c',
+    'mode_call': 'mode_call_c',
 }
 # Commit 4366e7c removed the gfx driver-selection menu ('1'..'5' getch
 # loop → forced MCGA pick) by hand-editing the generated file, so every
