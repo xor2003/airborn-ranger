@@ -102,6 +102,11 @@ dw mem_w(dd a); db mem_b(dd a); void mem_ww(dd a, dw v); void mem_wb(dd a, db v)
 
 /* debug hook for intro diagnostics */
 
+/* readable rewrites (port/rewrite.c) — gen code trampolines <name>() ->
+ * <name>_c(); the original stays callable as <name>_lifted for A/B tests */
+void decompress_res_c(void); void decompress_res_lifted(void);
+void sprtab_init_a_c(void); void sprtab_init_a_lifted(void);
+void sprtab_init_b_c(void); void sprtab_init_b_lifted(void);
 
 /* env-gated trace (M2C_TRACE=1) */
 extern int rt_trace;

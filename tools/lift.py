@@ -1033,24 +1033,37 @@ void bios_palette(void);void bios_getch(void);void bios_kbhit(void);
 """)
     hdr.close()
     # lifted_data.h: data symbol decls extracted from ar.exe.h
-    dh = open(os.path.join(OUT, 'lifted_data.h'), 'w')
-    dh.write("// data symbol declarations lifted from ar.exe.h\n")
-    seen = set()
-    for ln in open(os.path.join(SRC, 'ar.exe.h')):
-        m = re.match(r'\s*extern\s+(db|dw|dd)&\s*(\w+)\s*;', ln)
-        if m and m.group(2) not in seen:
-            seen.add(m.group(2))
-            dh.write(f"extern {m.group(1)} {m.group(2)};\n")
-    dh.close()
+    # (build_ida/src was pruned in ade9b1c — when absent the committed
+    # lifted/*.c are the artifact and only the proc headers are rebuilt)
+    src_h = os.path.join(SRC, 'ar.exe.h')
+    if os.path.exists(src_h):
+        dh = open(os.path.join(OUT, 'lifted_data.h'), 'w')
+        dh.write("// data symbol declarations lifted from ar.exe.h\n")
+        seen = set()
+        for ln in open(src_h):
+            m = re.match(r'\s*extern\s+(db|dw|dd)&\s*(\w+)\s*;', ln)
+            if m and m.group(2) not in seen:
+                seen.add(m.group(2))
+                dh.write(f"extern {m.group(1)} {m.group(2)};\n")
+        dh.close()
+    else:
+        print(f"lift.py: {SRC} absent — preserving committed lifted/*.c bodies")
     all_defs = []
-    for f in sorted(glob.glob(os.path.join(SRC, 'ar.exe*.cpp'))):
-        out = ['#include "lifted.h"\n#include "lifted_data.h"\n#include "lifted_procs.h"\n']
-        lift_file(f, out)
-        on = os.path.join(OUT, os.path.basename(f).replace('.cpp', '.c'))
-        body = '\n'.join(out)
-        open(on, 'w').write(body)
-        all_defs += re.findall(r'^void (\w+)\(void\)', body, re.M)
-        print(f"{on}: {len(out)} lines")
+    lifted_cpp = sorted(glob.glob(os.path.join(SRC, 'ar.exe*.cpp')))
+    if lifted_cpp:
+        for f in lifted_cpp:
+            out = ['#include "lifted.h"\n#include "lifted_data.h"\n#include "lifted_procs.h"\n']
+            lift_file(f, out)
+            on = os.path.join(OUT, os.path.basename(f).replace('.cpp', '.c'))
+            body = '\n'.join(out)
+            open(on, 'w').write(body)
+            all_defs += re.findall(r'^void (\w+)\(void\)', body, re.M)
+            print(f"{on}: {len(out)} lines")
+    else:
+        # headers-only regen: proc decls from the committed lifted bodies
+        for f in sorted(glob.glob(os.path.join(OUT, 'ar.exe*.c'))):
+            all_defs += re.findall(r'^void (\w+)\(void\)',
+                                   open(f, encoding='utf8', errors='replace').read(), re.M)
 
     # TANDYSND.EXE overlay (Tandy sound driver). Its procs use overlay-linear
     # names (sub_10xxx) mapped at the port's overlay load base (0x30000); keep
@@ -1058,14 +1071,21 @@ void bios_palette(void);void bios_getch(void);void bios_kbhit(void);
     global OVL_BASE
     OVL_BASE = 0x30000
     tnd_defs = []
-    for f in sorted(glob.glob(os.path.join(os.path.dirname(os.path.dirname(SRC)), 'tandysnd.exe_seg001.cpp'))):
-        out = ['#include "lifted.h"\n#include "lifted_data.h"\n#include "lifted_procs.h"\n']
-        lift_file(f, out)
-        on = os.path.join(OUT, os.path.basename(f).replace('.cpp', '.c'))
-        body = '\n'.join(out)
-        open(on, 'w').write(body)
-        tnd_defs += re.findall(r'^void (\w+)\(void\)', body, re.M)
-        print(f"{on}: {len(out)} lines (overlay)")
+    tnd_cpp = sorted(glob.glob(os.path.join(os.path.dirname(os.path.dirname(SRC)), 'tandysnd.exe_seg001.cpp')))
+    if tnd_cpp:
+        for f in tnd_cpp:
+            out = ['#include "lifted.h"\n#include "lifted_data.h"\n#include "lifted_procs.h"\n']
+            lift_file(f, out)
+            on = os.path.join(OUT, os.path.basename(f).replace('.cpp', '.c'))
+            body = '\n'.join(out)
+            open(on, 'w').write(body)
+            tnd_defs += re.findall(r'^void (\w+)\(void\)', body, re.M)
+            print(f"{on}: {len(out)} lines (overlay)")
+    else:
+        tnd_c = os.path.join(OUT, 'tandysnd.exe_seg001.c')
+        if os.path.exists(tnd_c):
+            tnd_defs += re.findall(r'^void (\w+)\(void\)',
+                                   open(tnd_c, encoding='utf8', errors='replace').read(), re.M)
     OVL_BASE = 0
     with open(os.path.join(OUT, 'tnd_procs.h'), 'w') as tp:
         for d in sorted(set(tnd_defs)):

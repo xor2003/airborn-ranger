@@ -33,10 +33,10 @@ void tnd_edummylabel11(void) {
     out(0x0C0, al);
     cx = 0x38;
     bx = 0x2f;
-loc_104bb:
+memfill_dn:
     ax = 0; CF = 0; OF = 0; ZF = 1; SF = 0;
     { dd t_ = (dd)bx + (dd)cx; CF = t_ > 0xFFFF; bx = t_; ZF = ((dw)(bx) == 0); SF = (((dw)(bx)) >> 15); }
-loc_104bf:
+memfill_dn_loop:
     do {
         (bx)--; ZF = ((dw)(bx) == 0); SF = (((dw)(bx)) >> 15);
         _sa = (bx);
@@ -56,7 +56,7 @@ void tnd_edummylabel12(void) {
                 tnd_stream_start(); return;
             }
         }
-loc_104e1:
+music_tick_restart:
         CF = (dd)*(raddr(ds,0x65)) < (dd)0; ZF = ((dw)((*(raddr(ds,0x65))) - (0)) == 0); SF = (((dw)((*(raddr(ds,0x65))) - (0))) >> 15);
         if (*(raddr(ds,0x65)) != 0) {
             CF = (dd)*(raddr(ds,0x66)) < (dd)0; ZF = ((dw)((*(raddr(ds,0x66))) - (0)) == 0); SF = (((dw)((*(raddr(ds,0x66))) - (0))) >> 15);
@@ -69,11 +69,11 @@ loc_104e1:
                     tnd_stream_start(); return;
                 }
             }
-loc_10502:
+chans_tick_gate:
             (*(raddr(ds,0x66)))--; ZF = ((dw)(*(raddr(ds,0x66))) == 0); SF = (((dw)(*(raddr(ds,0x66)))) >> 15);
         }
     }
-loc_10506:
+chans_tick:
     di = 0x2F;
     tnd_chan_tick();
     di = 0x3C;
@@ -81,7 +81,7 @@ loc_10506:
     di = 0x49;
     tnd_chan_tick();
     di = 0x56;
-sub_1051f:
+chan_tick:
     CF = (dd)*(raddr(ds,di)) < (dd)0; ZF = ((dw)((*(raddr(ds,di))) - (0)) == 0); SF = (((dw)((*(raddr(ds,di))) - (0))) >> 15);
     if (*(raddr(ds,di)) == 0) { return; }
     (*(raddr(ds,di)))--; ZF = ((dw)(*(raddr(ds,di))) == 0); SF = (((dw)(*(raddr(ds,di)))) >> 15);
@@ -116,7 +116,7 @@ sub_1051f:
                     *(db*)raddr(ds,di+4) = al;
                 }
             }
-loc_10566:
+env_step:
             al = bl;
             al &= 0x0F; CF = 0; OF = 0; ZF = ((db)(al) == 0); SF = (((db)(al)) >> 7);
             if (al != 0) {
@@ -135,28 +135,28 @@ loc_10566:
                 }
             }
         }
-loc_1058c:
+note_out_tail:
         bx = *(dw*)raddr(ds,di+2);
         tnd_snd_reg_write(); return;
     }
-loc_10592:
+chan_init:
     bx = *(dw*)raddr(ds,di+0x0B);
     al = *(db*)raddr(ds,bx);
     al |= al; CF = 0; OF = 0; ZF = ((db)(al) == 0); SF = (((db)(al)) >> 7);
     if (al == 0) {
-sub_1059b:
+note_out:
         bx = *(dw*)raddr(ds,di+2);
         bx |= bx; CF = 0; OF = 0; ZF = ((dw)(bx) == 0); SF = (((dw)(bx)) >> 15);
         if (bx != 0) {
             bl |= 0x0F; CF = 0; OF = 0; ZF = ((db)(bl) == 0); SF = (((db)(bl)) >> 7);
             tnd_snd_reg_write();
         }
-loc_105a8:
+evt_seek:
         bx = di;
         cx = 0x0D;
-        goto loc_104bb;
+        goto memfill_dn;
     }
-loc_105d2:
+evt_read:
     al = *(db*)raddr(ds,bx);
     (bx)++; ZF = ((dw)(bx) == 0); SF = (((dw)(bx)) >> 15);
     ax &= 0x7F; CF = 0; OF = 0; ZF = ((dw)(ax) == 0); SF = (((dw)(ax)) >> 15);
@@ -176,21 +176,21 @@ loc_105d2:
         *(dw*)(raddr(ds,di+9)) = ax;
         ax = pop();
         bx = pop();
-        goto loc_10630;
-loc_105f6:
+        goto evt_maybe_rpt;
+evt_maybe_dur:
         CF = 0; OF = 0; ZF = ((db)((al & 0x84)) == 0); SF = (((db)((al & 0x84))) >> 7);
-        if ((al & 0x84) != 0) goto loc_10642;
-loc_105fa:
+        if ((al & 0x84) != 0) goto evt_loop_set;
+evt_commit:
         cx = bx;
         (cx)++; ZF = ((dw)(cx) == 0); SF = (((dw)(cx)) >> 15);
-loc_105fd:
+evt_commit_b:
         *(dw*)(raddr(ds,di+0x0B)) = cx;
         cl = *(db*)raddr(ds,bx);
         *(db*)raddr(ds,di) = cl;
 locret_10604:
         return;
     }
-loc_10605:
+evt_dur:
     cx = *(dw*)raddr(ds,bx);
     (bx)++; ZF = ((dw)(bx) == 0); SF = (((dw)(bx)) >> 15);
     (bx)++; ZF = ((dw)(bx) == 0); SF = (((dw)(bx)) >> 15);
@@ -198,52 +198,52 @@ loc_10605:
     CF = 0; OF = 0; ZF = ((db)((al & 0x0B0)) == 0); SF = (((db)((al & 0x0B0))) >> 7);
     if ((al & 0x0B0) == 0) {
         cx = 0; CF = 0; OF = 0; ZF = 1; SF = 0;
-        goto loc_1062d;
+        goto evt_loop_store;
     }
-loc_10615:
+evt_maybe_att:
     CF = 0; OF = 0; ZF = ((db)((al & 0x0A0)) == 0); SF = (((db)((al & 0x0A0))) >> 7);
     if ((al & 0x0A0) != 0) {
         cl = *(db*)raddr(ds,bx);
         (bx)++; ZF = ((dw)(bx) == 0); SF = (((dw)(bx)) >> 15);
         *(db*)raddr(ds,di+4) = cl;
     }
-loc_1061f:
+evt_maybe_rel:
     CF = 0; OF = 0; ZF = ((db)((al & 0x90)) == 0); SF = (((db)((al & 0x90))) >> 7);
     if ((al & 0x90) != 0) {
         cl = *(db*)raddr(ds,bx);
         (bx)++; ZF = ((dw)(bx) == 0); SF = (((dw)(bx)) >> 15);
         *(db*)raddr(ds,di+5) = cl;
     }
-loc_10629:
+evt_loop_word:
     cx = *(dw*)raddr(ds,bx);
     (bx)++; ZF = ((dw)(bx) == 0); SF = (((dw)(bx)) >> 15);
     (bx)++; ZF = ((dw)(bx) == 0); SF = (((dw)(bx)) >> 15);
-loc_1062d:
+evt_loop_store:
     *(dw*)(raddr(ds,di+6)) = cx;
-loc_10630:
+evt_maybe_rpt:
     CF = 0; OF = 0; ZF = ((db)((al & 0x0C0)) == 0); SF = (((db)((al & 0x0C0))) >> 7);
-    if ((al & 0x0C0) == 0) goto loc_105f6;
+    if ((al & 0x0C0) == 0) goto evt_maybe_dur;
     cl = *(db*)raddr(ds,bx);
     (bx)++; ZF = ((dw)(bx) == 0); SF = (((dw)(bx)) >> 15);
     CF = (dd)*(raddr(ds,di+8)) < (dd)0; ZF = ((dw)((*(raddr(ds,di+8))) - (0)) == 0); SF = (((dw)((*(raddr(ds,di+8))) - (0))) >> 15);
     if (*(raddr(ds,di+8)) != 0) {
         (*(raddr(ds,di+8)))--; ZF = ((dw)(*(raddr(ds,di+8))) == 0); SF = (((dw)(*(raddr(ds,di+8)))) >> 15);
-        if (*(raddr(ds,di+8)) != 0) goto loc_1064d;
-loc_10642:
+        if (*(raddr(ds,di+8)) != 0) goto evt_loop_back;
+evt_loop_set:
         cx = bx;
         (cx)++; ZF = ((dw)(cx) == 0); SF = (((dw)(cx)) >> 15);
         *(dw*)(raddr(ds,di+9)) = cx;
-        goto loc_105fa;
+        goto evt_commit;
     }
-loc_1064a:
+evt_rpt_set:
     *(db*)raddr(ds,di+8) = cl;
-loc_1064d:
+evt_loop_back:
     cx = *(dw*)raddr(ds,di+9);
-    goto loc_105fd;
-loc_104bb:
+    goto evt_commit_b;
+memfill_dn:
     ax = 0; CF = 0; OF = 0; ZF = 1; SF = 0;
     { dd t_ = (dd)bx + (dd)cx; CF = t_ > 0xFFFF; bx = t_; ZF = ((dw)(bx) == 0); SF = (((dw)(bx)) >> 15); }
-loc_104bf:
+memfill_dn_loop:
     do {
         (bx)--; ZF = ((dw)(bx) == 0); SF = (((dw)(bx)) >> 15);
         _sa = (bx);
@@ -263,7 +263,7 @@ void tnd_edummylabel13(void) {
     {dd r = (dd)ax * 0x0D; ax = r; dx = r >> 16;}
     cx = 0x2F;
     { dd t_ = (dd)ax + (dd)cx; CF = t_ > 0xFFFF; ax = t_; ZF = ((dw)(ax) == 0); SF = (((dw)(ax)) >> 15); }
-sub_105c4:
+voice_update:
     di = ax;
     push(bx);
     push(*(dw*)(raddr(ds,di)));
@@ -271,7 +271,7 @@ sub_105c4:
     *(dw*)(raddr(ds,di)) = pop();
     bx = pop();
     *(dw*)(raddr(ds,di+9)) = bx;
-loc_105d2:
+evt_read:
     al = *(db*)raddr(ds,bx);
     (bx)++; ZF = ((dw)(bx) == 0); SF = (((dw)(bx)) >> 15);
     ax &= 0x7F; CF = 0; OF = 0; ZF = ((dw)(ax) == 0); SF = (((dw)(ax)) >> 15);
@@ -291,21 +291,21 @@ loc_105d2:
         *(dw*)(raddr(ds,di+9)) = ax;
         ax = pop();
         bx = pop();
-        goto loc_10630;
-loc_105f6:
+        goto evt_maybe_rpt;
+evt_maybe_dur:
         CF = 0; OF = 0; ZF = ((db)((al & 0x84)) == 0); SF = (((db)((al & 0x84))) >> 7);
-        if ((al & 0x84) != 0) goto loc_10642;
-loc_105fa:
+        if ((al & 0x84) != 0) goto evt_loop_set;
+evt_commit:
         cx = bx;
         (cx)++; ZF = ((dw)(cx) == 0); SF = (((dw)(cx)) >> 15);
-loc_105fd:
+evt_commit_b:
         *(dw*)(raddr(ds,di+0x0B)) = cx;
         cl = *(db*)raddr(ds,bx);
         *(db*)raddr(ds,di) = cl;
 locret_10604:
         return;
     }
-loc_10605:
+evt_dur:
     cx = *(dw*)raddr(ds,bx);
     (bx)++; ZF = ((dw)(bx) == 0); SF = (((dw)(bx)) >> 15);
     (bx)++; ZF = ((dw)(bx) == 0); SF = (((dw)(bx)) >> 15);
@@ -313,48 +313,48 @@ loc_10605:
     CF = 0; OF = 0; ZF = ((db)((al & 0x0B0)) == 0); SF = (((db)((al & 0x0B0))) >> 7);
     if ((al & 0x0B0) == 0) {
         cx = 0; CF = 0; OF = 0; ZF = 1; SF = 0;
-        goto loc_1062d;
+        goto evt_loop_store;
     }
-loc_10615:
+evt_maybe_att:
     CF = 0; OF = 0; ZF = ((db)((al & 0x0A0)) == 0); SF = (((db)((al & 0x0A0))) >> 7);
     if ((al & 0x0A0) != 0) {
         cl = *(db*)raddr(ds,bx);
         (bx)++; ZF = ((dw)(bx) == 0); SF = (((dw)(bx)) >> 15);
         *(db*)raddr(ds,di+4) = cl;
     }
-loc_1061f:
+evt_maybe_rel:
     CF = 0; OF = 0; ZF = ((db)((al & 0x90)) == 0); SF = (((db)((al & 0x90))) >> 7);
     if ((al & 0x90) != 0) {
         cl = *(db*)raddr(ds,bx);
         (bx)++; ZF = ((dw)(bx) == 0); SF = (((dw)(bx)) >> 15);
         *(db*)raddr(ds,di+5) = cl;
     }
-loc_10629:
+evt_loop_word:
     cx = *(dw*)raddr(ds,bx);
     (bx)++; ZF = ((dw)(bx) == 0); SF = (((dw)(bx)) >> 15);
     (bx)++; ZF = ((dw)(bx) == 0); SF = (((dw)(bx)) >> 15);
-loc_1062d:
+evt_loop_store:
     *(dw*)(raddr(ds,di+6)) = cx;
-loc_10630:
+evt_maybe_rpt:
     CF = 0; OF = 0; ZF = ((db)((al & 0x0C0)) == 0); SF = (((db)((al & 0x0C0))) >> 7);
-    if ((al & 0x0C0) == 0) goto loc_105f6;
+    if ((al & 0x0C0) == 0) goto evt_maybe_dur;
     cl = *(db*)raddr(ds,bx);
     (bx)++; ZF = ((dw)(bx) == 0); SF = (((dw)(bx)) >> 15);
     CF = (dd)*(raddr(ds,di+8)) < (dd)0; ZF = ((dw)((*(raddr(ds,di+8))) - (0)) == 0); SF = (((dw)((*(raddr(ds,di+8))) - (0))) >> 15);
     if (*(raddr(ds,di+8)) != 0) {
         (*(raddr(ds,di+8)))--; ZF = ((dw)(*(raddr(ds,di+8))) == 0); SF = (((dw)(*(raddr(ds,di+8)))) >> 15);
-        if (*(raddr(ds,di+8)) != 0) goto loc_1064d;
-loc_10642:
+        if (*(raddr(ds,di+8)) != 0) goto evt_loop_back;
+evt_loop_set:
         cx = bx;
         (cx)++; ZF = ((dw)(cx) == 0); SF = (((dw)(cx)) >> 15);
         *(dw*)(raddr(ds,di+9)) = cx;
-        goto loc_105fa;
+        goto evt_commit;
     }
-loc_1064a:
+evt_rpt_set:
     *(db*)raddr(ds,di+8) = cl;
-loc_1064d:
+evt_loop_back:
     cx = *(dw*)raddr(ds,di+9);
-    goto loc_105fd;
+    goto evt_commit_b;
 }
 void tnd_edummylabel14(void) {
     al = 0x32;
@@ -389,7 +389,7 @@ void tnd_edummylabel17(void) {
         bx = 0x1A7;
         tnd_sfx_play(); return;
     }
-loc_10694:
+chan3_update:
     IF = 0;
     ax = 0x3C;
     tnd_voice_update();
@@ -399,14 +399,14 @@ locret_1069d:
 }
 void tnd_edummylabel18(void) {
     bx = 0x1BB;
-    goto loc_106a9;
-loc_106a9:
+    goto music_go;
+music_go:
     *(dw*)(raddr(ds,0x63)) = bx;
     tnd_sfx_play(); return;
 }
 void tnd_edummylabel19(void) {
     bx = 0x1C3;
-loc_106a9:
+music_go:
     *(dw*)(raddr(ds,0x63)) = bx;
     tnd_sfx_play(); return;
 }
@@ -447,7 +447,7 @@ void tnd_edummylabel25(void) {
     CF = (dd)al < (dd)*(db*)raddr(ds,0x30); ZF = ((db)((al) - (*(db*)raddr(ds,0x30))) == 0); SF = (((db)((al) - (*(db*)raddr(ds,0x30)))) >> 7);
     if (al < *(db*)raddr(ds,0x30)) { return; }
     bx = 0x153;
-loc_106f4:
+sfx_pair_143:
     tnd_sfx_play_pri();
     bx = 0x143;
     tnd_sfx_play(); return;
@@ -477,16 +477,16 @@ void tnd_edummylabel28(void) {
     CF = (dd)al < (dd)*(db*)raddr(ds,0x30); ZF = ((db)((al) - (*(db*)raddr(ds,0x30))) == 0); SF = (((db)((al) - (*(db*)raddr(ds,0x30)))) >> 7);
     if (al < *(db*)raddr(ds,0x30)) { return; }
     bx = 0x15B;
-    goto loc_106f4;
-loc_106f4:
+    goto sfx_pair_143;
+sfx_pair_143:
     tnd_sfx_play_pri();
     bx = 0x143;
     tnd_sfx_play(); return;
 }
 void tnd_edummylabel29(void) {
     bx = 0x16A;
-    goto loc_10735;
-loc_10735:
+    goto sfx_pair_163;
+sfx_pair_163:
     tnd_sfx_play();
     bx = 0x163;
     tnd_sfx_play(); return;
@@ -499,15 +499,15 @@ void tnd_edummylabel3(void) {
 }
 void tnd_edummylabel30(void) {
     bx = 0x174;
-loc_10735:
+sfx_pair_163:
     tnd_sfx_play();
     bx = 0x163;
     tnd_sfx_play(); return;
 }
 void tnd_edummylabel31(void) {
     bx = 0x16C;
-    goto loc_1074a;
-loc_1074a:
+    goto sfx_pair_165;
+sfx_pair_165:
     al = 0x28;
     CF = (dd)al < (dd)*(db*)raddr(ds,0x30); ZF = ((db)((al) - (*(db*)raddr(ds,0x30))) == 0); SF = (((db)((al) - (*(db*)raddr(ds,0x30)))) >> 7);
     if (al < *(db*)raddr(ds,0x30)) { return; }
@@ -519,7 +519,7 @@ locret_107ba:
 }
 void tnd_edummylabel32(void) {
     bx = 0x176;
-loc_1074a:
+sfx_pair_165:
     al = 0x28;
     CF = (dd)al < (dd)*(db*)raddr(ds,0x30); ZF = ((db)((al) - (*(db*)raddr(ds,0x30))) == 0); SF = (((db)((al) - (*(db*)raddr(ds,0x30)))) >> 7);
     if (al < *(db*)raddr(ds,0x30)) { return; }
@@ -554,8 +554,8 @@ void tnd_edummylabel35(void) {
     CF = (dd)al < (dd)*(db*)raddr(ds,0x30); ZF = ((db)((al) - (*(db*)raddr(ds,0x30))) == 0); SF = (((db)((al) - (*(db*)raddr(ds,0x30)))) >> 7);
     if (al < *(db*)raddr(ds,0x30)) { return; }
     bx = 0x0F8;
-    goto loc_1079c;
-loc_1079c:
+    goto sfx_pair_133;
+sfx_pair_133:
     tnd_sfx_play_pri();
     bx = 0x133;
     tnd_sfx_play(); return;
@@ -567,7 +567,7 @@ void tnd_edummylabel36(void) {
     CF = (dd)al < (dd)*(db*)raddr(ds,0x30); ZF = ((db)((al) - (*(db*)raddr(ds,0x30))) == 0); SF = (((db)((al) - (*(db*)raddr(ds,0x30)))) >> 7);
     if (al < *(db*)raddr(ds,0x30)) { return; }
     bx = 0x13B;
-loc_1079c:
+sfx_pair_133:
     tnd_sfx_play_pri();
     bx = 0x133;
     tnd_sfx_play(); return;
@@ -579,9 +579,9 @@ void tnd_edummylabel37(void) {
     CF = (dd)al < (dd)*(db*)raddr(ds,0x30); ZF = ((db)((al) - (*(db*)raddr(ds,0x30))) == 0); SF = (((db)((al) - (*(db*)raddr(ds,0x30)))) >> 7);
     if (al < *(db*)raddr(ds,0x30)) { return; }
     bx = 0x126;
-sub_107b2:
+sfx_play_pri:
     *(db*)raddr(ds,0x30) = al;
-sub_107b5:
+sfx_play:
     IF = 0;
     tnd_stream_start();
     IF = 1;
@@ -637,15 +637,15 @@ locret_107ba:
 }
 void tnd_edummylabel42(void) {
     bx = 0x0AE;
-    goto loc_10805;
-loc_10805:
+    goto sfx_pair_da;
+sfx_pair_da:
     tnd_sfx_play();
     bx = 0x0DA;
     tnd_sfx_play(); return;
 }
 void tnd_edummylabel43(void) {
     bx = 0x0C4;
-loc_10805:
+sfx_pair_da:
     tnd_sfx_play();
     bx = 0x0DA;
     tnd_sfx_play(); return;
@@ -680,7 +680,7 @@ void tnd_edummylabel49(void) {
     tnd_sfx_play();
     bx = 0x235;
     *(dw*)(raddr(ds,0x45)) = bx;
-sub_10851:
+sfx3_26b_2fd:
     bx = 0x28B;
     tnd_sfx_play();
     *(dw*)(raddr(ds,0x52)) = 0x26B;
@@ -732,7 +732,7 @@ void tnd_edummylabel51(void) {
 locret_108bc:
         return;
     }
-loc_108bd:
+snd_reg_out:
     al = bh;
     al |= 0x0E0; CF = 0; OF = 0; ZF = ((db)(al) == 0); SF = (((db)(al)) >> 7);
     out(0x0C0, al);
@@ -779,9 +779,9 @@ void tnd_timer_isr(void) {
         byte_103e2 = 0;
 locret_1040a:
         return;
-sub_1040b:
+install_timer:
         *(raddr(ds,0x67)) = 0;
-edummylabel9:
+install_timer_2:
         *(raddr(ds,0x65)) = 0;
         *(dw*)(raddr(ds,0x63)) = 0;
         byte_103e2 = 0;
@@ -817,13 +817,13 @@ edummylabel9:
 locret_1046a:
         return;
     }
-loc_1046b:
+timer_isr_chain:
     *(raddr(ds,0x69)) = 3;
     byte_103e2 = 0;
     ds = pop();
     ax = pop();
     { vfn f_ = func_at(rt_far(dword_103de)); if (f_) f_(); else fprintf(stderr, "unresolved ind jmp %x\n", (dd)(rt_far(dword_103de))); return; }
-edummylabel10:
+uninstall_timer:
     IF = 0;
     push(ds);
     bx = *(dw*)(&dword_103de);
@@ -886,7 +886,7 @@ void tnd_timer_isr_chain(void) {
     ds = pop();
     ax = pop();
     { vfn f_ = func_at(rt_far(dword_103de)); if (f_) f_(); else fprintf(stderr, "unresolved ind jmp %x\n", (dd)(rt_far(dword_103de))); return; }
-edummylabel10:
+uninstall_timer:
     IF = 0;
     push(ds);
     bx = *(dw*)(&dword_103de);
@@ -909,7 +909,7 @@ void tnd_memfill_dn(void) {
     dd _sa = 0, _sb = 0;
     ax = 0; CF = 0; OF = 0; ZF = 1; SF = 0;
     { dd t_ = (dd)bx + (dd)cx; CF = t_ > 0xFFFF; bx = t_; ZF = ((dw)(bx) == 0); SF = (((dw)(bx)) >> 15); }
-loc_104bf:
+memfill_dn_loop:
     do {
         (bx)--; ZF = ((dw)(bx) == 0); SF = (((dw)(bx)) >> 15);
         _sa = (bx);
@@ -920,7 +920,7 @@ locret_104c4:
 }
 void tnd_memfill_dn_loop(void) {
     dd _sa = 0, _sb = 0;
-loc_104bf:
+memfill_dn_loop:
     do {
         (bx)--; ZF = ((dw)(bx) == 0); SF = (((dw)(bx)) >> 15);
         _sa = (bx);
@@ -943,10 +943,10 @@ void tnd_music_tick_restart(void) {
                 tnd_stream_start(); return;
             }
         }
-loc_10502:
+chans_tick_gate:
         (*(raddr(ds,0x66)))--; ZF = ((dw)(*(raddr(ds,0x66))) == 0); SF = (((dw)(*(raddr(ds,0x66)))) >> 15);
     }
-loc_10506:
+chans_tick:
     di = 0x2F;
     tnd_chan_tick();
     di = 0x3C;
@@ -954,7 +954,7 @@ loc_10506:
     di = 0x49;
     tnd_chan_tick();
     di = 0x56;
-sub_1051f:
+chan_tick:
     CF = (dd)*(raddr(ds,di)) < (dd)0; ZF = ((dw)((*(raddr(ds,di))) - (0)) == 0); SF = (((dw)((*(raddr(ds,di))) - (0))) >> 15);
     if (*(raddr(ds,di)) == 0) { return; }
     (*(raddr(ds,di)))--; ZF = ((dw)(*(raddr(ds,di))) == 0); SF = (((dw)(*(raddr(ds,di)))) >> 15);
@@ -989,7 +989,7 @@ sub_1051f:
                     *(db*)raddr(ds,di+4) = al;
                 }
             }
-loc_10566:
+env_step:
             al = bl;
             al &= 0x0F; CF = 0; OF = 0; ZF = ((db)(al) == 0); SF = (((db)(al)) >> 7);
             if (al != 0) {
@@ -1008,28 +1008,28 @@ loc_10566:
                 }
             }
         }
-loc_1058c:
+note_out_tail:
         bx = *(dw*)raddr(ds,di+2);
         tnd_snd_reg_write(); return;
     }
-loc_10592:
+chan_init:
     bx = *(dw*)raddr(ds,di+0x0B);
     al = *(db*)raddr(ds,bx);
     al |= al; CF = 0; OF = 0; ZF = ((db)(al) == 0); SF = (((db)(al)) >> 7);
     if (al == 0) {
-sub_1059b:
+note_out:
         bx = *(dw*)raddr(ds,di+2);
         bx |= bx; CF = 0; OF = 0; ZF = ((dw)(bx) == 0); SF = (((dw)(bx)) >> 15);
         if (bx != 0) {
             bl |= 0x0F; CF = 0; OF = 0; ZF = ((db)(bl) == 0); SF = (((db)(bl)) >> 7);
             tnd_snd_reg_write();
         }
-loc_105a8:
+evt_seek:
         bx = di;
         cx = 0x0D;
-        goto loc_104bb;
+        goto memfill_dn;
     }
-loc_105d2:
+evt_read:
     al = *(db*)raddr(ds,bx);
     (bx)++; ZF = ((dw)(bx) == 0); SF = (((dw)(bx)) >> 15);
     ax &= 0x7F; CF = 0; OF = 0; ZF = ((dw)(ax) == 0); SF = (((dw)(ax)) >> 15);
@@ -1049,21 +1049,21 @@ loc_105d2:
         *(dw*)(raddr(ds,di+9)) = ax;
         ax = pop();
         bx = pop();
-        goto loc_10630;
-loc_105f6:
+        goto evt_maybe_rpt;
+evt_maybe_dur:
         CF = 0; OF = 0; ZF = ((db)((al & 0x84)) == 0); SF = (((db)((al & 0x84))) >> 7);
-        if ((al & 0x84) != 0) goto loc_10642;
-loc_105fa:
+        if ((al & 0x84) != 0) goto evt_loop_set;
+evt_commit:
         cx = bx;
         (cx)++; ZF = ((dw)(cx) == 0); SF = (((dw)(cx)) >> 15);
-loc_105fd:
+evt_commit_b:
         *(dw*)(raddr(ds,di+0x0B)) = cx;
         cl = *(db*)raddr(ds,bx);
         *(db*)raddr(ds,di) = cl;
 locret_10604:
         return;
     }
-loc_10605:
+evt_dur:
     cx = *(dw*)raddr(ds,bx);
     (bx)++; ZF = ((dw)(bx) == 0); SF = (((dw)(bx)) >> 15);
     (bx)++; ZF = ((dw)(bx) == 0); SF = (((dw)(bx)) >> 15);
@@ -1071,52 +1071,52 @@ loc_10605:
     CF = 0; OF = 0; ZF = ((db)((al & 0x0B0)) == 0); SF = (((db)((al & 0x0B0))) >> 7);
     if ((al & 0x0B0) == 0) {
         cx = 0; CF = 0; OF = 0; ZF = 1; SF = 0;
-        goto loc_1062d;
+        goto evt_loop_store;
     }
-loc_10615:
+evt_maybe_att:
     CF = 0; OF = 0; ZF = ((db)((al & 0x0A0)) == 0); SF = (((db)((al & 0x0A0))) >> 7);
     if ((al & 0x0A0) != 0) {
         cl = *(db*)raddr(ds,bx);
         (bx)++; ZF = ((dw)(bx) == 0); SF = (((dw)(bx)) >> 15);
         *(db*)raddr(ds,di+4) = cl;
     }
-loc_1061f:
+evt_maybe_rel:
     CF = 0; OF = 0; ZF = ((db)((al & 0x90)) == 0); SF = (((db)((al & 0x90))) >> 7);
     if ((al & 0x90) != 0) {
         cl = *(db*)raddr(ds,bx);
         (bx)++; ZF = ((dw)(bx) == 0); SF = (((dw)(bx)) >> 15);
         *(db*)raddr(ds,di+5) = cl;
     }
-loc_10629:
+evt_loop_word:
     cx = *(dw*)raddr(ds,bx);
     (bx)++; ZF = ((dw)(bx) == 0); SF = (((dw)(bx)) >> 15);
     (bx)++; ZF = ((dw)(bx) == 0); SF = (((dw)(bx)) >> 15);
-loc_1062d:
+evt_loop_store:
     *(dw*)(raddr(ds,di+6)) = cx;
-loc_10630:
+evt_maybe_rpt:
     CF = 0; OF = 0; ZF = ((db)((al & 0x0C0)) == 0); SF = (((db)((al & 0x0C0))) >> 7);
-    if ((al & 0x0C0) == 0) goto loc_105f6;
+    if ((al & 0x0C0) == 0) goto evt_maybe_dur;
     cl = *(db*)raddr(ds,bx);
     (bx)++; ZF = ((dw)(bx) == 0); SF = (((dw)(bx)) >> 15);
     CF = (dd)*(raddr(ds,di+8)) < (dd)0; ZF = ((dw)((*(raddr(ds,di+8))) - (0)) == 0); SF = (((dw)((*(raddr(ds,di+8))) - (0))) >> 15);
     if (*(raddr(ds,di+8)) != 0) {
         (*(raddr(ds,di+8)))--; ZF = ((dw)(*(raddr(ds,di+8))) == 0); SF = (((dw)(*(raddr(ds,di+8)))) >> 15);
-        if (*(raddr(ds,di+8)) != 0) goto loc_1064d;
-loc_10642:
+        if (*(raddr(ds,di+8)) != 0) goto evt_loop_back;
+evt_loop_set:
         cx = bx;
         (cx)++; ZF = ((dw)(cx) == 0); SF = (((dw)(cx)) >> 15);
         *(dw*)(raddr(ds,di+9)) = cx;
-        goto loc_105fa;
+        goto evt_commit;
     }
-loc_1064a:
+evt_rpt_set:
     *(db*)raddr(ds,di+8) = cl;
-loc_1064d:
+evt_loop_back:
     cx = *(dw*)raddr(ds,di+9);
-    goto loc_105fd;
-loc_104bb:
+    goto evt_commit_b;
+memfill_dn:
     ax = 0; CF = 0; OF = 0; ZF = 1; SF = 0;
     { dd t_ = (dd)bx + (dd)cx; CF = t_ > 0xFFFF; bx = t_; ZF = ((dw)(bx) == 0); SF = (((dw)(bx)) >> 15); }
-loc_104bf:
+memfill_dn_loop:
     do {
         (bx)--; ZF = ((dw)(bx) == 0); SF = (((dw)(bx)) >> 15);
         _sa = (bx);
@@ -1128,7 +1128,7 @@ locret_104c4:
 void tnd_chans_tick_gate(void) {
     dd _sa = 0, _sb = 0;
     (*(raddr(ds,0x66)))--; ZF = ((dw)(*(raddr(ds,0x66))) == 0); SF = (((dw)(*(raddr(ds,0x66)))) >> 15);
-loc_10506:
+chans_tick:
     di = 0x2F;
     tnd_chan_tick();
     di = 0x3C;
@@ -1136,7 +1136,7 @@ loc_10506:
     di = 0x49;
     tnd_chan_tick();
     di = 0x56;
-sub_1051f:
+chan_tick:
     CF = (dd)*(raddr(ds,di)) < (dd)0; ZF = ((dw)((*(raddr(ds,di))) - (0)) == 0); SF = (((dw)((*(raddr(ds,di))) - (0))) >> 15);
     if (*(raddr(ds,di)) == 0) { return; }
     (*(raddr(ds,di)))--; ZF = ((dw)(*(raddr(ds,di))) == 0); SF = (((dw)(*(raddr(ds,di)))) >> 15);
@@ -1171,7 +1171,7 @@ sub_1051f:
                     *(db*)raddr(ds,di+4) = al;
                 }
             }
-loc_10566:
+env_step:
             al = bl;
             al &= 0x0F; CF = 0; OF = 0; ZF = ((db)(al) == 0); SF = (((db)(al)) >> 7);
             if (al != 0) {
@@ -1190,28 +1190,28 @@ loc_10566:
                 }
             }
         }
-loc_1058c:
+note_out_tail:
         bx = *(dw*)raddr(ds,di+2);
         tnd_snd_reg_write(); return;
     }
-loc_10592:
+chan_init:
     bx = *(dw*)raddr(ds,di+0x0B);
     al = *(db*)raddr(ds,bx);
     al |= al; CF = 0; OF = 0; ZF = ((db)(al) == 0); SF = (((db)(al)) >> 7);
     if (al == 0) {
-sub_1059b:
+note_out:
         bx = *(dw*)raddr(ds,di+2);
         bx |= bx; CF = 0; OF = 0; ZF = ((dw)(bx) == 0); SF = (((dw)(bx)) >> 15);
         if (bx != 0) {
             bl |= 0x0F; CF = 0; OF = 0; ZF = ((db)(bl) == 0); SF = (((db)(bl)) >> 7);
             tnd_snd_reg_write();
         }
-loc_105a8:
+evt_seek:
         bx = di;
         cx = 0x0D;
-        goto loc_104bb;
+        goto memfill_dn;
     }
-loc_105d2:
+evt_read:
     al = *(db*)raddr(ds,bx);
     (bx)++; ZF = ((dw)(bx) == 0); SF = (((dw)(bx)) >> 15);
     ax &= 0x7F; CF = 0; OF = 0; ZF = ((dw)(ax) == 0); SF = (((dw)(ax)) >> 15);
@@ -1231,21 +1231,21 @@ loc_105d2:
         *(dw*)(raddr(ds,di+9)) = ax;
         ax = pop();
         bx = pop();
-        goto loc_10630;
-loc_105f6:
+        goto evt_maybe_rpt;
+evt_maybe_dur:
         CF = 0; OF = 0; ZF = ((db)((al & 0x84)) == 0); SF = (((db)((al & 0x84))) >> 7);
-        if ((al & 0x84) != 0) goto loc_10642;
-loc_105fa:
+        if ((al & 0x84) != 0) goto evt_loop_set;
+evt_commit:
         cx = bx;
         (cx)++; ZF = ((dw)(cx) == 0); SF = (((dw)(cx)) >> 15);
-loc_105fd:
+evt_commit_b:
         *(dw*)(raddr(ds,di+0x0B)) = cx;
         cl = *(db*)raddr(ds,bx);
         *(db*)raddr(ds,di) = cl;
 locret_10604:
         return;
     }
-loc_10605:
+evt_dur:
     cx = *(dw*)raddr(ds,bx);
     (bx)++; ZF = ((dw)(bx) == 0); SF = (((dw)(bx)) >> 15);
     (bx)++; ZF = ((dw)(bx) == 0); SF = (((dw)(bx)) >> 15);
@@ -1253,52 +1253,52 @@ loc_10605:
     CF = 0; OF = 0; ZF = ((db)((al & 0x0B0)) == 0); SF = (((db)((al & 0x0B0))) >> 7);
     if ((al & 0x0B0) == 0) {
         cx = 0; CF = 0; OF = 0; ZF = 1; SF = 0;
-        goto loc_1062d;
+        goto evt_loop_store;
     }
-loc_10615:
+evt_maybe_att:
     CF = 0; OF = 0; ZF = ((db)((al & 0x0A0)) == 0); SF = (((db)((al & 0x0A0))) >> 7);
     if ((al & 0x0A0) != 0) {
         cl = *(db*)raddr(ds,bx);
         (bx)++; ZF = ((dw)(bx) == 0); SF = (((dw)(bx)) >> 15);
         *(db*)raddr(ds,di+4) = cl;
     }
-loc_1061f:
+evt_maybe_rel:
     CF = 0; OF = 0; ZF = ((db)((al & 0x90)) == 0); SF = (((db)((al & 0x90))) >> 7);
     if ((al & 0x90) != 0) {
         cl = *(db*)raddr(ds,bx);
         (bx)++; ZF = ((dw)(bx) == 0); SF = (((dw)(bx)) >> 15);
         *(db*)raddr(ds,di+5) = cl;
     }
-loc_10629:
+evt_loop_word:
     cx = *(dw*)raddr(ds,bx);
     (bx)++; ZF = ((dw)(bx) == 0); SF = (((dw)(bx)) >> 15);
     (bx)++; ZF = ((dw)(bx) == 0); SF = (((dw)(bx)) >> 15);
-loc_1062d:
+evt_loop_store:
     *(dw*)(raddr(ds,di+6)) = cx;
-loc_10630:
+evt_maybe_rpt:
     CF = 0; OF = 0; ZF = ((db)((al & 0x0C0)) == 0); SF = (((db)((al & 0x0C0))) >> 7);
-    if ((al & 0x0C0) == 0) goto loc_105f6;
+    if ((al & 0x0C0) == 0) goto evt_maybe_dur;
     cl = *(db*)raddr(ds,bx);
     (bx)++; ZF = ((dw)(bx) == 0); SF = (((dw)(bx)) >> 15);
     CF = (dd)*(raddr(ds,di+8)) < (dd)0; ZF = ((dw)((*(raddr(ds,di+8))) - (0)) == 0); SF = (((dw)((*(raddr(ds,di+8))) - (0))) >> 15);
     if (*(raddr(ds,di+8)) != 0) {
         (*(raddr(ds,di+8)))--; ZF = ((dw)(*(raddr(ds,di+8))) == 0); SF = (((dw)(*(raddr(ds,di+8)))) >> 15);
-        if (*(raddr(ds,di+8)) != 0) goto loc_1064d;
-loc_10642:
+        if (*(raddr(ds,di+8)) != 0) goto evt_loop_back;
+evt_loop_set:
         cx = bx;
         (cx)++; ZF = ((dw)(cx) == 0); SF = (((dw)(cx)) >> 15);
         *(dw*)(raddr(ds,di+9)) = cx;
-        goto loc_105fa;
+        goto evt_commit;
     }
-loc_1064a:
+evt_rpt_set:
     *(db*)raddr(ds,di+8) = cl;
-loc_1064d:
+evt_loop_back:
     cx = *(dw*)raddr(ds,di+9);
-    goto loc_105fd;
-loc_104bb:
+    goto evt_commit_b;
+memfill_dn:
     ax = 0; CF = 0; OF = 0; ZF = 1; SF = 0;
     { dd t_ = (dd)bx + (dd)cx; CF = t_ > 0xFFFF; bx = t_; ZF = ((dw)(bx) == 0); SF = (((dw)(bx)) >> 15); }
-loc_104bf:
+memfill_dn_loop:
     do {
         (bx)--; ZF = ((dw)(bx) == 0); SF = (((dw)(bx)) >> 15);
         _sa = (bx);
@@ -1316,7 +1316,7 @@ void tnd_chans_tick(void) {
     di = 0x49;
     tnd_chan_tick();
     di = 0x56;
-sub_1051f:
+chan_tick:
     CF = (dd)*(raddr(ds,di)) < (dd)0; ZF = ((dw)((*(raddr(ds,di))) - (0)) == 0); SF = (((dw)((*(raddr(ds,di))) - (0))) >> 15);
     if (*(raddr(ds,di)) == 0) { return; }
     (*(raddr(ds,di)))--; ZF = ((dw)(*(raddr(ds,di))) == 0); SF = (((dw)(*(raddr(ds,di)))) >> 15);
@@ -1351,7 +1351,7 @@ sub_1051f:
                     *(db*)raddr(ds,di+4) = al;
                 }
             }
-loc_10566:
+env_step:
             al = bl;
             al &= 0x0F; CF = 0; OF = 0; ZF = ((db)(al) == 0); SF = (((db)(al)) >> 7);
             if (al != 0) {
@@ -1370,28 +1370,28 @@ loc_10566:
                 }
             }
         }
-loc_1058c:
+note_out_tail:
         bx = *(dw*)raddr(ds,di+2);
         tnd_snd_reg_write(); return;
     }
-loc_10592:
+chan_init:
     bx = *(dw*)raddr(ds,di+0x0B);
     al = *(db*)raddr(ds,bx);
     al |= al; CF = 0; OF = 0; ZF = ((db)(al) == 0); SF = (((db)(al)) >> 7);
     if (al == 0) {
-sub_1059b:
+note_out:
         bx = *(dw*)raddr(ds,di+2);
         bx |= bx; CF = 0; OF = 0; ZF = ((dw)(bx) == 0); SF = (((dw)(bx)) >> 15);
         if (bx != 0) {
             bl |= 0x0F; CF = 0; OF = 0; ZF = ((db)(bl) == 0); SF = (((db)(bl)) >> 7);
             tnd_snd_reg_write();
         }
-loc_105a8:
+evt_seek:
         bx = di;
         cx = 0x0D;
-        goto loc_104bb;
+        goto memfill_dn;
     }
-loc_105d2:
+evt_read:
     al = *(db*)raddr(ds,bx);
     (bx)++; ZF = ((dw)(bx) == 0); SF = (((dw)(bx)) >> 15);
     ax &= 0x7F; CF = 0; OF = 0; ZF = ((dw)(ax) == 0); SF = (((dw)(ax)) >> 15);
@@ -1411,21 +1411,21 @@ loc_105d2:
         *(dw*)(raddr(ds,di+9)) = ax;
         ax = pop();
         bx = pop();
-        goto loc_10630;
-loc_105f6:
+        goto evt_maybe_rpt;
+evt_maybe_dur:
         CF = 0; OF = 0; ZF = ((db)((al & 0x84)) == 0); SF = (((db)((al & 0x84))) >> 7);
-        if ((al & 0x84) != 0) goto loc_10642;
-loc_105fa:
+        if ((al & 0x84) != 0) goto evt_loop_set;
+evt_commit:
         cx = bx;
         (cx)++; ZF = ((dw)(cx) == 0); SF = (((dw)(cx)) >> 15);
-loc_105fd:
+evt_commit_b:
         *(dw*)(raddr(ds,di+0x0B)) = cx;
         cl = *(db*)raddr(ds,bx);
         *(db*)raddr(ds,di) = cl;
 locret_10604:
         return;
     }
-loc_10605:
+evt_dur:
     cx = *(dw*)raddr(ds,bx);
     (bx)++; ZF = ((dw)(bx) == 0); SF = (((dw)(bx)) >> 15);
     (bx)++; ZF = ((dw)(bx) == 0); SF = (((dw)(bx)) >> 15);
@@ -1433,52 +1433,52 @@ loc_10605:
     CF = 0; OF = 0; ZF = ((db)((al & 0x0B0)) == 0); SF = (((db)((al & 0x0B0))) >> 7);
     if ((al & 0x0B0) == 0) {
         cx = 0; CF = 0; OF = 0; ZF = 1; SF = 0;
-        goto loc_1062d;
+        goto evt_loop_store;
     }
-loc_10615:
+evt_maybe_att:
     CF = 0; OF = 0; ZF = ((db)((al & 0x0A0)) == 0); SF = (((db)((al & 0x0A0))) >> 7);
     if ((al & 0x0A0) != 0) {
         cl = *(db*)raddr(ds,bx);
         (bx)++; ZF = ((dw)(bx) == 0); SF = (((dw)(bx)) >> 15);
         *(db*)raddr(ds,di+4) = cl;
     }
-loc_1061f:
+evt_maybe_rel:
     CF = 0; OF = 0; ZF = ((db)((al & 0x90)) == 0); SF = (((db)((al & 0x90))) >> 7);
     if ((al & 0x90) != 0) {
         cl = *(db*)raddr(ds,bx);
         (bx)++; ZF = ((dw)(bx) == 0); SF = (((dw)(bx)) >> 15);
         *(db*)raddr(ds,di+5) = cl;
     }
-loc_10629:
+evt_loop_word:
     cx = *(dw*)raddr(ds,bx);
     (bx)++; ZF = ((dw)(bx) == 0); SF = (((dw)(bx)) >> 15);
     (bx)++; ZF = ((dw)(bx) == 0); SF = (((dw)(bx)) >> 15);
-loc_1062d:
+evt_loop_store:
     *(dw*)(raddr(ds,di+6)) = cx;
-loc_10630:
+evt_maybe_rpt:
     CF = 0; OF = 0; ZF = ((db)((al & 0x0C0)) == 0); SF = (((db)((al & 0x0C0))) >> 7);
-    if ((al & 0x0C0) == 0) goto loc_105f6;
+    if ((al & 0x0C0) == 0) goto evt_maybe_dur;
     cl = *(db*)raddr(ds,bx);
     (bx)++; ZF = ((dw)(bx) == 0); SF = (((dw)(bx)) >> 15);
     CF = (dd)*(raddr(ds,di+8)) < (dd)0; ZF = ((dw)((*(raddr(ds,di+8))) - (0)) == 0); SF = (((dw)((*(raddr(ds,di+8))) - (0))) >> 15);
     if (*(raddr(ds,di+8)) != 0) {
         (*(raddr(ds,di+8)))--; ZF = ((dw)(*(raddr(ds,di+8))) == 0); SF = (((dw)(*(raddr(ds,di+8)))) >> 15);
-        if (*(raddr(ds,di+8)) != 0) goto loc_1064d;
-loc_10642:
+        if (*(raddr(ds,di+8)) != 0) goto evt_loop_back;
+evt_loop_set:
         cx = bx;
         (cx)++; ZF = ((dw)(cx) == 0); SF = (((dw)(cx)) >> 15);
         *(dw*)(raddr(ds,di+9)) = cx;
-        goto loc_105fa;
+        goto evt_commit;
     }
-loc_1064a:
+evt_rpt_set:
     *(db*)raddr(ds,di+8) = cl;
-loc_1064d:
+evt_loop_back:
     cx = *(dw*)raddr(ds,di+9);
-    goto loc_105fd;
-loc_104bb:
+    goto evt_commit_b;
+memfill_dn:
     ax = 0; CF = 0; OF = 0; ZF = 1; SF = 0;
     { dd t_ = (dd)bx + (dd)cx; CF = t_ > 0xFFFF; bx = t_; ZF = ((dw)(bx) == 0); SF = (((dw)(bx)) >> 15); }
-loc_104bf:
+memfill_dn_loop:
     do {
         (bx)--; ZF = ((dw)(bx) == 0); SF = (((dw)(bx)) >> 15);
         _sa = (bx);
@@ -1505,7 +1505,7 @@ void tnd_env_step(void) {
             *(db*)raddr(ds,di+5) = bl;
         }
     }
-loc_1058c:
+note_out_tail:
     bx = *(dw*)raddr(ds,di+2);
     tnd_snd_reg_write(); return;
 }
@@ -1519,19 +1519,19 @@ void tnd_chan_init(void) {
     al = *(db*)raddr(ds,bx);
     al |= al; CF = 0; OF = 0; ZF = ((db)(al) == 0); SF = (((db)(al)) >> 7);
     if (al == 0) {
-sub_1059b:
+note_out:
         bx = *(dw*)raddr(ds,di+2);
         bx |= bx; CF = 0; OF = 0; ZF = ((dw)(bx) == 0); SF = (((dw)(bx)) >> 15);
         if (bx != 0) {
             bl |= 0x0F; CF = 0; OF = 0; ZF = ((db)(bl) == 0); SF = (((db)(bl)) >> 7);
             tnd_snd_reg_write();
         }
-loc_105a8:
+evt_seek:
         bx = di;
         cx = 0x0D;
-        goto loc_104bb;
+        goto memfill_dn;
     }
-loc_105d2:
+evt_read:
     al = *(db*)raddr(ds,bx);
     (bx)++; ZF = ((dw)(bx) == 0); SF = (((dw)(bx)) >> 15);
     ax &= 0x7F; CF = 0; OF = 0; ZF = ((dw)(ax) == 0); SF = (((dw)(ax)) >> 15);
@@ -1551,21 +1551,21 @@ loc_105d2:
         *(dw*)(raddr(ds,di+9)) = ax;
         ax = pop();
         bx = pop();
-        goto loc_10630;
-loc_105f6:
+        goto evt_maybe_rpt;
+evt_maybe_dur:
         CF = 0; OF = 0; ZF = ((db)((al & 0x84)) == 0); SF = (((db)((al & 0x84))) >> 7);
-        if ((al & 0x84) != 0) goto loc_10642;
-loc_105fa:
+        if ((al & 0x84) != 0) goto evt_loop_set;
+evt_commit:
         cx = bx;
         (cx)++; ZF = ((dw)(cx) == 0); SF = (((dw)(cx)) >> 15);
-loc_105fd:
+evt_commit_b:
         *(dw*)(raddr(ds,di+0x0B)) = cx;
         cl = *(db*)raddr(ds,bx);
         *(db*)raddr(ds,di) = cl;
 locret_10604:
         return;
     }
-loc_10605:
+evt_dur:
     cx = *(dw*)raddr(ds,bx);
     (bx)++; ZF = ((dw)(bx) == 0); SF = (((dw)(bx)) >> 15);
     (bx)++; ZF = ((dw)(bx) == 0); SF = (((dw)(bx)) >> 15);
@@ -1573,52 +1573,52 @@ loc_10605:
     CF = 0; OF = 0; ZF = ((db)((al & 0x0B0)) == 0); SF = (((db)((al & 0x0B0))) >> 7);
     if ((al & 0x0B0) == 0) {
         cx = 0; CF = 0; OF = 0; ZF = 1; SF = 0;
-        goto loc_1062d;
+        goto evt_loop_store;
     }
-loc_10615:
+evt_maybe_att:
     CF = 0; OF = 0; ZF = ((db)((al & 0x0A0)) == 0); SF = (((db)((al & 0x0A0))) >> 7);
     if ((al & 0x0A0) != 0) {
         cl = *(db*)raddr(ds,bx);
         (bx)++; ZF = ((dw)(bx) == 0); SF = (((dw)(bx)) >> 15);
         *(db*)raddr(ds,di+4) = cl;
     }
-loc_1061f:
+evt_maybe_rel:
     CF = 0; OF = 0; ZF = ((db)((al & 0x90)) == 0); SF = (((db)((al & 0x90))) >> 7);
     if ((al & 0x90) != 0) {
         cl = *(db*)raddr(ds,bx);
         (bx)++; ZF = ((dw)(bx) == 0); SF = (((dw)(bx)) >> 15);
         *(db*)raddr(ds,di+5) = cl;
     }
-loc_10629:
+evt_loop_word:
     cx = *(dw*)raddr(ds,bx);
     (bx)++; ZF = ((dw)(bx) == 0); SF = (((dw)(bx)) >> 15);
     (bx)++; ZF = ((dw)(bx) == 0); SF = (((dw)(bx)) >> 15);
-loc_1062d:
+evt_loop_store:
     *(dw*)(raddr(ds,di+6)) = cx;
-loc_10630:
+evt_maybe_rpt:
     CF = 0; OF = 0; ZF = ((db)((al & 0x0C0)) == 0); SF = (((db)((al & 0x0C0))) >> 7);
-    if ((al & 0x0C0) == 0) goto loc_105f6;
+    if ((al & 0x0C0) == 0) goto evt_maybe_dur;
     cl = *(db*)raddr(ds,bx);
     (bx)++; ZF = ((dw)(bx) == 0); SF = (((dw)(bx)) >> 15);
     CF = (dd)*(raddr(ds,di+8)) < (dd)0; ZF = ((dw)((*(raddr(ds,di+8))) - (0)) == 0); SF = (((dw)((*(raddr(ds,di+8))) - (0))) >> 15);
     if (*(raddr(ds,di+8)) != 0) {
         (*(raddr(ds,di+8)))--; ZF = ((dw)(*(raddr(ds,di+8))) == 0); SF = (((dw)(*(raddr(ds,di+8)))) >> 15);
-        if (*(raddr(ds,di+8)) != 0) goto loc_1064d;
-loc_10642:
+        if (*(raddr(ds,di+8)) != 0) goto evt_loop_back;
+evt_loop_set:
         cx = bx;
         (cx)++; ZF = ((dw)(cx) == 0); SF = (((dw)(cx)) >> 15);
         *(dw*)(raddr(ds,di+9)) = cx;
-        goto loc_105fa;
+        goto evt_commit;
     }
-loc_1064a:
+evt_rpt_set:
     *(db*)raddr(ds,di+8) = cl;
-loc_1064d:
+evt_loop_back:
     cx = *(dw*)raddr(ds,di+9);
-    goto loc_105fd;
-loc_104bb:
+    goto evt_commit_b;
+memfill_dn:
     ax = 0; CF = 0; OF = 0; ZF = 1; SF = 0;
     { dd t_ = (dd)bx + (dd)cx; CF = t_ > 0xFFFF; bx = t_; ZF = ((dw)(bx) == 0); SF = (((dw)(bx)) >> 15); }
-loc_104bf:
+memfill_dn_loop:
     do {
         (bx)--; ZF = ((dw)(bx) == 0); SF = (((dw)(bx)) >> 15);
         _sa = (bx);
@@ -1631,11 +1631,11 @@ void tnd_evt_seek(void) {
     dd _sa = 0, _sb = 0;
     bx = di;
     cx = 0x0D;
-    goto loc_104bb;
-loc_104bb:
+    goto memfill_dn;
+memfill_dn:
     ax = 0; CF = 0; OF = 0; ZF = 1; SF = 0;
     { dd t_ = (dd)bx + (dd)cx; CF = t_ > 0xFFFF; bx = t_; ZF = ((dw)(bx) == 0); SF = (((dw)(bx)) >> 15); }
-loc_104bf:
+memfill_dn_loop:
     do {
         (bx)--; ZF = ((dw)(bx) == 0); SF = (((dw)(bx)) >> 15);
         _sa = (bx);
@@ -1665,21 +1665,21 @@ void tnd_evt_read(void) {
         *(dw*)(raddr(ds,di+9)) = ax;
         ax = pop();
         bx = pop();
-        goto loc_10630;
-loc_105f6:
+        goto evt_maybe_rpt;
+evt_maybe_dur:
         CF = 0; OF = 0; ZF = ((db)((al & 0x84)) == 0); SF = (((db)((al & 0x84))) >> 7);
-        if ((al & 0x84) != 0) goto loc_10642;
-loc_105fa:
+        if ((al & 0x84) != 0) goto evt_loop_set;
+evt_commit:
         cx = bx;
         (cx)++; ZF = ((dw)(cx) == 0); SF = (((dw)(cx)) >> 15);
-loc_105fd:
+evt_commit_b:
         *(dw*)(raddr(ds,di+0x0B)) = cx;
         cl = *(db*)raddr(ds,bx);
         *(db*)raddr(ds,di) = cl;
 locret_10604:
         return;
     }
-loc_10605:
+evt_dur:
     cx = *(dw*)raddr(ds,bx);
     (bx)++; ZF = ((dw)(bx) == 0); SF = (((dw)(bx)) >> 15);
     (bx)++; ZF = ((dw)(bx) == 0); SF = (((dw)(bx)) >> 15);
@@ -1687,72 +1687,72 @@ loc_10605:
     CF = 0; OF = 0; ZF = ((db)((al & 0x0B0)) == 0); SF = (((db)((al & 0x0B0))) >> 7);
     if ((al & 0x0B0) == 0) {
         cx = 0; CF = 0; OF = 0; ZF = 1; SF = 0;
-        goto loc_1062d;
+        goto evt_loop_store;
     }
-loc_10615:
+evt_maybe_att:
     CF = 0; OF = 0; ZF = ((db)((al & 0x0A0)) == 0); SF = (((db)((al & 0x0A0))) >> 7);
     if ((al & 0x0A0) != 0) {
         cl = *(db*)raddr(ds,bx);
         (bx)++; ZF = ((dw)(bx) == 0); SF = (((dw)(bx)) >> 15);
         *(db*)raddr(ds,di+4) = cl;
     }
-loc_1061f:
+evt_maybe_rel:
     CF = 0; OF = 0; ZF = ((db)((al & 0x90)) == 0); SF = (((db)((al & 0x90))) >> 7);
     if ((al & 0x90) != 0) {
         cl = *(db*)raddr(ds,bx);
         (bx)++; ZF = ((dw)(bx) == 0); SF = (((dw)(bx)) >> 15);
         *(db*)raddr(ds,di+5) = cl;
     }
-loc_10629:
+evt_loop_word:
     cx = *(dw*)raddr(ds,bx);
     (bx)++; ZF = ((dw)(bx) == 0); SF = (((dw)(bx)) >> 15);
     (bx)++; ZF = ((dw)(bx) == 0); SF = (((dw)(bx)) >> 15);
-loc_1062d:
+evt_loop_store:
     *(dw*)(raddr(ds,di+6)) = cx;
-loc_10630:
+evt_maybe_rpt:
     CF = 0; OF = 0; ZF = ((db)((al & 0x0C0)) == 0); SF = (((db)((al & 0x0C0))) >> 7);
-    if ((al & 0x0C0) == 0) goto loc_105f6;
+    if ((al & 0x0C0) == 0) goto evt_maybe_dur;
     cl = *(db*)raddr(ds,bx);
     (bx)++; ZF = ((dw)(bx) == 0); SF = (((dw)(bx)) >> 15);
     CF = (dd)*(raddr(ds,di+8)) < (dd)0; ZF = ((dw)((*(raddr(ds,di+8))) - (0)) == 0); SF = (((dw)((*(raddr(ds,di+8))) - (0))) >> 15);
     if (*(raddr(ds,di+8)) != 0) {
         (*(raddr(ds,di+8)))--; ZF = ((dw)(*(raddr(ds,di+8))) == 0); SF = (((dw)(*(raddr(ds,di+8)))) >> 15);
-        if (*(raddr(ds,di+8)) != 0) goto loc_1064d;
-loc_10642:
+        if (*(raddr(ds,di+8)) != 0) goto evt_loop_back;
+evt_loop_set:
         cx = bx;
         (cx)++; ZF = ((dw)(cx) == 0); SF = (((dw)(cx)) >> 15);
         *(dw*)(raddr(ds,di+9)) = cx;
-        goto loc_105fa;
+        goto evt_commit;
     }
-loc_1064a:
+evt_rpt_set:
     *(db*)raddr(ds,di+8) = cl;
-loc_1064d:
+evt_loop_back:
     cx = *(dw*)raddr(ds,di+9);
-    goto loc_105fd;
+    goto evt_commit_b;
 }
 void tnd_evt_maybe_dur(void) {
     CF = 0; OF = 0; ZF = ((db)((al & 0x84)) == 0); SF = (((db)((al & 0x84))) >> 7);
     if ((al & 0x84) == 0) {
-loc_105fa:
+evt_commit:
         cx = bx;
         (cx)++; ZF = ((dw)(cx) == 0); SF = (((dw)(cx)) >> 15);
-loc_105fd:
+evt_commit_b:
         *(dw*)(raddr(ds,di+0x0B)) = cx;
         cl = *(db*)raddr(ds,bx);
         *(db*)raddr(ds,di) = cl;
 locret_10604:
         return;
     }
-loc_10642:
+evt_loop_set:
     cx = bx;
     (cx)++; ZF = ((dw)(cx) == 0); SF = (((dw)(cx)) >> 15);
     *(dw*)(raddr(ds,di+9)) = cx;
-    goto loc_105fa;
+    goto evt_commit;
 }
 void tnd_evt_commit(void) {
     cx = bx;
     (cx)++; ZF = ((dw)(cx) == 0); SF = (((dw)(cx)) >> 15);
-loc_105fd:
+evt_commit_b:
     *(dw*)(raddr(ds,di+0x0B)) = cx;
     cl = *(db*)raddr(ds,bx);
     *(db*)raddr(ds,di) = cl;
@@ -1774,29 +1774,29 @@ void tnd_evt_dur(void) {
     CF = 0; OF = 0; ZF = ((db)((al & 0x0B0)) == 0); SF = (((db)((al & 0x0B0))) >> 7);
     if ((al & 0x0B0) == 0) {
         cx = 0; CF = 0; OF = 0; ZF = 1; SF = 0;
-        goto loc_1062d;
+        goto evt_loop_store;
     }
-loc_10615:
+evt_maybe_att:
     CF = 0; OF = 0; ZF = ((db)((al & 0x0A0)) == 0); SF = (((db)((al & 0x0A0))) >> 7);
     if ((al & 0x0A0) != 0) {
         cl = *(db*)raddr(ds,bx);
         (bx)++; ZF = ((dw)(bx) == 0); SF = (((dw)(bx)) >> 15);
         *(db*)raddr(ds,di+4) = cl;
     }
-loc_1061f:
+evt_maybe_rel:
     CF = 0; OF = 0; ZF = ((db)((al & 0x90)) == 0); SF = (((db)((al & 0x90))) >> 7);
     if ((al & 0x90) != 0) {
         cl = *(db*)raddr(ds,bx);
         (bx)++; ZF = ((dw)(bx) == 0); SF = (((dw)(bx)) >> 15);
         *(db*)raddr(ds,di+5) = cl;
     }
-loc_10629:
+evt_loop_word:
     cx = *(dw*)raddr(ds,bx);
     (bx)++; ZF = ((dw)(bx) == 0); SF = (((dw)(bx)) >> 15);
     (bx)++; ZF = ((dw)(bx) == 0); SF = (((dw)(bx)) >> 15);
-loc_1062d:
+evt_loop_store:
     *(dw*)(raddr(ds,di+6)) = cx;
-loc_10630:
+evt_maybe_rpt:
     CF = 0; OF = 0; ZF = ((db)((al & 0x0C0)) == 0); SF = (((db)((al & 0x0C0))) >> 7);
     if ((al & 0x0C0) != 0) {
         cl = *(db*)raddr(ds,bx);
@@ -1804,26 +1804,26 @@ loc_10630:
         CF = (dd)*(raddr(ds,di+8)) < (dd)0; ZF = ((dw)((*(raddr(ds,di+8))) - (0)) == 0); SF = (((dw)((*(raddr(ds,di+8))) - (0))) >> 15);
         if (*(raddr(ds,di+8)) != 0) {
             (*(raddr(ds,di+8)))--; ZF = ((dw)(*(raddr(ds,di+8))) == 0); SF = (((dw)(*(raddr(ds,di+8)))) >> 15);
-            if (*(raddr(ds,di+8)) != 0) goto loc_1064d;
-loc_10642:
+            if (*(raddr(ds,di+8)) != 0) goto evt_loop_back;
+evt_loop_set:
             cx = bx;
             (cx)++; ZF = ((dw)(cx) == 0); SF = (((dw)(cx)) >> 15);
             *(dw*)(raddr(ds,di+9)) = cx;
-            goto loc_105fa;
+            goto evt_commit;
         }
-loc_1064a:
+evt_rpt_set:
         *(db*)raddr(ds,di+8) = cl;
-loc_1064d:
+evt_loop_back:
         cx = *(dw*)raddr(ds,di+9);
-        goto loc_105fd;
+        goto evt_commit_b;
     }
-loc_105f6:
+evt_maybe_dur:
     CF = 0; OF = 0; ZF = ((db)((al & 0x84)) == 0); SF = (((db)((al & 0x84))) >> 7);
-    if ((al & 0x84) != 0) goto loc_10642;
-loc_105fa:
+    if ((al & 0x84) != 0) goto evt_loop_set;
+evt_commit:
     cx = bx;
     (cx)++; ZF = ((dw)(cx) == 0); SF = (((dw)(cx)) >> 15);
-loc_105fd:
+evt_commit_b:
     *(dw*)(raddr(ds,di+0x0B)) = cx;
     cl = *(db*)raddr(ds,bx);
     *(db*)raddr(ds,di) = cl;
@@ -1837,20 +1837,20 @@ void tnd_evt_maybe_att(void) {
         (bx)++; ZF = ((dw)(bx) == 0); SF = (((dw)(bx)) >> 15);
         *(db*)raddr(ds,di+4) = cl;
     }
-loc_1061f:
+evt_maybe_rel:
     CF = 0; OF = 0; ZF = ((db)((al & 0x90)) == 0); SF = (((db)((al & 0x90))) >> 7);
     if ((al & 0x90) != 0) {
         cl = *(db*)raddr(ds,bx);
         (bx)++; ZF = ((dw)(bx) == 0); SF = (((dw)(bx)) >> 15);
         *(db*)raddr(ds,di+5) = cl;
     }
-loc_10629:
+evt_loop_word:
     cx = *(dw*)raddr(ds,bx);
     (bx)++; ZF = ((dw)(bx) == 0); SF = (((dw)(bx)) >> 15);
     (bx)++; ZF = ((dw)(bx) == 0); SF = (((dw)(bx)) >> 15);
-loc_1062d:
+evt_loop_store:
     *(dw*)(raddr(ds,di+6)) = cx;
-loc_10630:
+evt_maybe_rpt:
     CF = 0; OF = 0; ZF = ((db)((al & 0x0C0)) == 0); SF = (((db)((al & 0x0C0))) >> 7);
     if ((al & 0x0C0) != 0) {
         cl = *(db*)raddr(ds,bx);
@@ -1858,26 +1858,26 @@ loc_10630:
         CF = (dd)*(raddr(ds,di+8)) < (dd)0; ZF = ((dw)((*(raddr(ds,di+8))) - (0)) == 0); SF = (((dw)((*(raddr(ds,di+8))) - (0))) >> 15);
         if (*(raddr(ds,di+8)) != 0) {
             (*(raddr(ds,di+8)))--; ZF = ((dw)(*(raddr(ds,di+8))) == 0); SF = (((dw)(*(raddr(ds,di+8)))) >> 15);
-            if (*(raddr(ds,di+8)) != 0) goto loc_1064d;
-loc_10642:
+            if (*(raddr(ds,di+8)) != 0) goto evt_loop_back;
+evt_loop_set:
             cx = bx;
             (cx)++; ZF = ((dw)(cx) == 0); SF = (((dw)(cx)) >> 15);
             *(dw*)(raddr(ds,di+9)) = cx;
-            goto loc_105fa;
+            goto evt_commit;
         }
-loc_1064a:
+evt_rpt_set:
         *(db*)raddr(ds,di+8) = cl;
-loc_1064d:
+evt_loop_back:
         cx = *(dw*)raddr(ds,di+9);
-        goto loc_105fd;
+        goto evt_commit_b;
     }
-loc_105f6:
+evt_maybe_dur:
     CF = 0; OF = 0; ZF = ((db)((al & 0x84)) == 0); SF = (((db)((al & 0x84))) >> 7);
-    if ((al & 0x84) != 0) goto loc_10642;
-loc_105fa:
+    if ((al & 0x84) != 0) goto evt_loop_set;
+evt_commit:
     cx = bx;
     (cx)++; ZF = ((dw)(cx) == 0); SF = (((dw)(cx)) >> 15);
-loc_105fd:
+evt_commit_b:
     *(dw*)(raddr(ds,di+0x0B)) = cx;
     cl = *(db*)raddr(ds,bx);
     *(db*)raddr(ds,di) = cl;
@@ -1891,13 +1891,13 @@ void tnd_evt_maybe_rel(void) {
         (bx)++; ZF = ((dw)(bx) == 0); SF = (((dw)(bx)) >> 15);
         *(db*)raddr(ds,di+5) = cl;
     }
-loc_10629:
+evt_loop_word:
     cx = *(dw*)raddr(ds,bx);
     (bx)++; ZF = ((dw)(bx) == 0); SF = (((dw)(bx)) >> 15);
     (bx)++; ZF = ((dw)(bx) == 0); SF = (((dw)(bx)) >> 15);
-loc_1062d:
+evt_loop_store:
     *(dw*)(raddr(ds,di+6)) = cx;
-loc_10630:
+evt_maybe_rpt:
     CF = 0; OF = 0; ZF = ((db)((al & 0x0C0)) == 0); SF = (((db)((al & 0x0C0))) >> 7);
     if ((al & 0x0C0) != 0) {
         cl = *(db*)raddr(ds,bx);
@@ -1905,26 +1905,26 @@ loc_10630:
         CF = (dd)*(raddr(ds,di+8)) < (dd)0; ZF = ((dw)((*(raddr(ds,di+8))) - (0)) == 0); SF = (((dw)((*(raddr(ds,di+8))) - (0))) >> 15);
         if (*(raddr(ds,di+8)) != 0) {
             (*(raddr(ds,di+8)))--; ZF = ((dw)(*(raddr(ds,di+8))) == 0); SF = (((dw)(*(raddr(ds,di+8)))) >> 15);
-            if (*(raddr(ds,di+8)) != 0) goto loc_1064d;
-loc_10642:
+            if (*(raddr(ds,di+8)) != 0) goto evt_loop_back;
+evt_loop_set:
             cx = bx;
             (cx)++; ZF = ((dw)(cx) == 0); SF = (((dw)(cx)) >> 15);
             *(dw*)(raddr(ds,di+9)) = cx;
-            goto loc_105fa;
+            goto evt_commit;
         }
-loc_1064a:
+evt_rpt_set:
         *(db*)raddr(ds,di+8) = cl;
-loc_1064d:
+evt_loop_back:
         cx = *(dw*)raddr(ds,di+9);
-        goto loc_105fd;
+        goto evt_commit_b;
     }
-loc_105f6:
+evt_maybe_dur:
     CF = 0; OF = 0; ZF = ((db)((al & 0x84)) == 0); SF = (((db)((al & 0x84))) >> 7);
-    if ((al & 0x84) != 0) goto loc_10642;
-loc_105fa:
+    if ((al & 0x84) != 0) goto evt_loop_set;
+evt_commit:
     cx = bx;
     (cx)++; ZF = ((dw)(cx) == 0); SF = (((dw)(cx)) >> 15);
-loc_105fd:
+evt_commit_b:
     *(dw*)(raddr(ds,di+0x0B)) = cx;
     cl = *(db*)raddr(ds,bx);
     *(db*)raddr(ds,di) = cl;
@@ -1935,9 +1935,9 @@ void tnd_evt_loop_word(void) {
     cx = *(dw*)raddr(ds,bx);
     (bx)++; ZF = ((dw)(bx) == 0); SF = (((dw)(bx)) >> 15);
     (bx)++; ZF = ((dw)(bx) == 0); SF = (((dw)(bx)) >> 15);
-loc_1062d:
+evt_loop_store:
     *(dw*)(raddr(ds,di+6)) = cx;
-loc_10630:
+evt_maybe_rpt:
     CF = 0; OF = 0; ZF = ((db)((al & 0x0C0)) == 0); SF = (((db)((al & 0x0C0))) >> 7);
     if ((al & 0x0C0) != 0) {
         cl = *(db*)raddr(ds,bx);
@@ -1945,26 +1945,26 @@ loc_10630:
         CF = (dd)*(raddr(ds,di+8)) < (dd)0; ZF = ((dw)((*(raddr(ds,di+8))) - (0)) == 0); SF = (((dw)((*(raddr(ds,di+8))) - (0))) >> 15);
         if (*(raddr(ds,di+8)) != 0) {
             (*(raddr(ds,di+8)))--; ZF = ((dw)(*(raddr(ds,di+8))) == 0); SF = (((dw)(*(raddr(ds,di+8)))) >> 15);
-            if (*(raddr(ds,di+8)) != 0) goto loc_1064d;
-loc_10642:
+            if (*(raddr(ds,di+8)) != 0) goto evt_loop_back;
+evt_loop_set:
             cx = bx;
             (cx)++; ZF = ((dw)(cx) == 0); SF = (((dw)(cx)) >> 15);
             *(dw*)(raddr(ds,di+9)) = cx;
-            goto loc_105fa;
+            goto evt_commit;
         }
-loc_1064a:
+evt_rpt_set:
         *(db*)raddr(ds,di+8) = cl;
-loc_1064d:
+evt_loop_back:
         cx = *(dw*)raddr(ds,di+9);
-        goto loc_105fd;
+        goto evt_commit_b;
     }
-loc_105f6:
+evt_maybe_dur:
     CF = 0; OF = 0; ZF = ((db)((al & 0x84)) == 0); SF = (((db)((al & 0x84))) >> 7);
-    if ((al & 0x84) != 0) goto loc_10642;
-loc_105fa:
+    if ((al & 0x84) != 0) goto evt_loop_set;
+evt_commit:
     cx = bx;
     (cx)++; ZF = ((dw)(cx) == 0); SF = (((dw)(cx)) >> 15);
-loc_105fd:
+evt_commit_b:
     *(dw*)(raddr(ds,di+0x0B)) = cx;
     cl = *(db*)raddr(ds,bx);
     *(db*)raddr(ds,di) = cl;
@@ -1973,7 +1973,7 @@ locret_10604:
 }
 void tnd_evt_loop_store(void) {
     *(dw*)(raddr(ds,di+6)) = cx;
-loc_10630:
+evt_maybe_rpt:
     CF = 0; OF = 0; ZF = ((db)((al & 0x0C0)) == 0); SF = (((db)((al & 0x0C0))) >> 7);
     if ((al & 0x0C0) != 0) {
         cl = *(db*)raddr(ds,bx);
@@ -1981,26 +1981,26 @@ loc_10630:
         CF = (dd)*(raddr(ds,di+8)) < (dd)0; ZF = ((dw)((*(raddr(ds,di+8))) - (0)) == 0); SF = (((dw)((*(raddr(ds,di+8))) - (0))) >> 15);
         if (*(raddr(ds,di+8)) != 0) {
             (*(raddr(ds,di+8)))--; ZF = ((dw)(*(raddr(ds,di+8))) == 0); SF = (((dw)(*(raddr(ds,di+8)))) >> 15);
-            if (*(raddr(ds,di+8)) != 0) goto loc_1064d;
-loc_10642:
+            if (*(raddr(ds,di+8)) != 0) goto evt_loop_back;
+evt_loop_set:
             cx = bx;
             (cx)++; ZF = ((dw)(cx) == 0); SF = (((dw)(cx)) >> 15);
             *(dw*)(raddr(ds,di+9)) = cx;
-            goto loc_105fa;
+            goto evt_commit;
         }
-loc_1064a:
+evt_rpt_set:
         *(db*)raddr(ds,di+8) = cl;
-loc_1064d:
+evt_loop_back:
         cx = *(dw*)raddr(ds,di+9);
-        goto loc_105fd;
+        goto evt_commit_b;
     }
-loc_105f6:
+evt_maybe_dur:
     CF = 0; OF = 0; ZF = ((db)((al & 0x84)) == 0); SF = (((db)((al & 0x84))) >> 7);
-    if ((al & 0x84) != 0) goto loc_10642;
-loc_105fa:
+    if ((al & 0x84) != 0) goto evt_loop_set;
+evt_commit:
     cx = bx;
     (cx)++; ZF = ((dw)(cx) == 0); SF = (((dw)(cx)) >> 15);
-loc_105fd:
+evt_commit_b:
     *(dw*)(raddr(ds,di+0x0B)) = cx;
     cl = *(db*)raddr(ds,bx);
     *(db*)raddr(ds,di) = cl;
@@ -2015,26 +2015,26 @@ void tnd_evt_maybe_rpt(void) {
         CF = (dd)*(raddr(ds,di+8)) < (dd)0; ZF = ((dw)((*(raddr(ds,di+8))) - (0)) == 0); SF = (((dw)((*(raddr(ds,di+8))) - (0))) >> 15);
         if (*(raddr(ds,di+8)) != 0) {
             (*(raddr(ds,di+8)))--; ZF = ((dw)(*(raddr(ds,di+8))) == 0); SF = (((dw)(*(raddr(ds,di+8)))) >> 15);
-            if (*(raddr(ds,di+8)) != 0) goto loc_1064d;
-loc_10642:
+            if (*(raddr(ds,di+8)) != 0) goto evt_loop_back;
+evt_loop_set:
             cx = bx;
             (cx)++; ZF = ((dw)(cx) == 0); SF = (((dw)(cx)) >> 15);
             *(dw*)(raddr(ds,di+9)) = cx;
-            goto loc_105fa;
+            goto evt_commit;
         }
-loc_1064a:
+evt_rpt_set:
         *(db*)raddr(ds,di+8) = cl;
-loc_1064d:
+evt_loop_back:
         cx = *(dw*)raddr(ds,di+9);
-        goto loc_105fd;
+        goto evt_commit_b;
     }
-loc_105f6:
+evt_maybe_dur:
     CF = 0; OF = 0; ZF = ((db)((al & 0x84)) == 0); SF = (((db)((al & 0x84))) >> 7);
-    if ((al & 0x84) != 0) goto loc_10642;
-loc_105fa:
+    if ((al & 0x84) != 0) goto evt_loop_set;
+evt_commit:
     cx = bx;
     (cx)++; ZF = ((dw)(cx) == 0); SF = (((dw)(cx)) >> 15);
-loc_105fd:
+evt_commit_b:
     *(dw*)(raddr(ds,di+0x0B)) = cx;
     cl = *(db*)raddr(ds,bx);
     *(db*)raddr(ds,di) = cl;
@@ -2045,11 +2045,11 @@ void tnd_evt_loop_set(void) {
     cx = bx;
     (cx)++; ZF = ((dw)(cx) == 0); SF = (((dw)(cx)) >> 15);
     *(dw*)(raddr(ds,di+9)) = cx;
-    goto loc_105fa;
-loc_105fa:
+    goto evt_commit;
+evt_commit:
     cx = bx;
     (cx)++; ZF = ((dw)(cx) == 0); SF = (((dw)(cx)) >> 15);
-loc_105fd:
+evt_commit_b:
     *(dw*)(raddr(ds,di+0x0B)) = cx;
     cl = *(db*)raddr(ds,bx);
     *(db*)raddr(ds,di) = cl;
@@ -2058,10 +2058,10 @@ locret_10604:
 }
 void tnd_evt_rpt_set(void) {
     *(db*)raddr(ds,di+8) = cl;
-loc_1064d:
+evt_loop_back:
     cx = *(dw*)raddr(ds,di+9);
-    goto loc_105fd;
-loc_105fd:
+    goto evt_commit_b;
+evt_commit_b:
     *(dw*)(raddr(ds,di+0x0B)) = cx;
     cl = *(db*)raddr(ds,bx);
     *(db*)raddr(ds,di) = cl;
@@ -2070,8 +2070,8 @@ locret_10604:
 }
 void tnd_evt_loop_back(void) {
     cx = *(dw*)raddr(ds,di+9);
-    goto loc_105fd;
-loc_105fd:
+    goto evt_commit_b;
+evt_commit_b:
     *(dw*)(raddr(ds,di+0x0B)) = cx;
     cl = *(db*)raddr(ds,bx);
     *(db*)raddr(ds,di) = cl;
@@ -2140,9 +2140,9 @@ void tnd_locret_103dd(void) {
 void tnd_locret_1040a(void) {
     dd _sa = 0, _sb = 0;
     return;
-sub_1040b:
+install_timer:
     *(raddr(ds,0x67)) = 0;
-edummylabel9:
+install_timer_2:
     *(raddr(ds,0x65)) = 0;
     *(dw*)(raddr(ds,0x63)) = 0;
     byte_103e2 = 0;
@@ -2202,6 +2202,7 @@ void tnd_locret_107ba(void) {
 void tnd_locret_108bc(void) {
     return;
 }
+
 void tnd_module_init(void) {
     tnd_install_timer();
 edummylabel1:
@@ -2210,7 +2211,7 @@ edummylabel1:
 void tnd_install_timer(void) {
     dd _sa = 0, _sb = 0;
     *(raddr(ds,0x67)) = 0;
-edummylabel9:
+install_timer_2:
     *(raddr(ds,0x65)) = 0;
     *(dw*)(raddr(ds,0x63)) = 0;
     byte_103e2 = 0;
@@ -2257,10 +2258,10 @@ edummylabel11:
     out(0x0C0, al);
     cx = 0x38;
     bx = 0x2f;
-loc_104bb:
+memfill_dn:
     ax = 0; CF = 0; OF = 0; ZF = 1; SF = 0;
     { dd t_ = (dd)bx + (dd)cx; CF = t_ > 0xFFFF; bx = t_; ZF = ((dw)(bx) == 0); SF = (((dw)(bx)) >> 15); }
-loc_104bf:
+memfill_dn_loop:
     do {
         (bx)--; ZF = ((dw)(bx) == 0); SF = (((dw)(bx)) >> 15);
         _sa = (bx);
@@ -2282,7 +2283,7 @@ edummylabel12:
                 tnd_stream_start(); return;
             }
         }
-loc_104e1:
+music_tick_restart:
         CF = (dd)*(raddr(ds,0x65)) < (dd)0; ZF = ((dw)((*(raddr(ds,0x65))) - (0)) == 0); SF = (((dw)((*(raddr(ds,0x65))) - (0))) >> 15);
         if (*(raddr(ds,0x65)) != 0) {
             CF = (dd)*(raddr(ds,0x66)) < (dd)0; ZF = ((dw)((*(raddr(ds,0x66))) - (0)) == 0); SF = (((dw)((*(raddr(ds,0x66))) - (0))) >> 15);
@@ -2295,11 +2296,11 @@ loc_104e1:
                     tnd_stream_start(); return;
                 }
             }
-loc_10502:
+chans_tick_gate:
             (*(raddr(ds,0x66)))--; ZF = ((dw)(*(raddr(ds,0x66))) == 0); SF = (((dw)(*(raddr(ds,0x66)))) >> 15);
         }
     }
-loc_10506:
+chans_tick:
     di = 0x2F;
     tnd_chan_tick();
     di = 0x3C;
@@ -2307,7 +2308,7 @@ loc_10506:
     di = 0x49;
     tnd_chan_tick();
     di = 0x56;
-sub_1051f:
+chan_tick:
     CF = (dd)*(raddr(ds,di)) < (dd)0; ZF = ((dw)((*(raddr(ds,di))) - (0)) == 0); SF = (((dw)((*(raddr(ds,di))) - (0))) >> 15);
     if (*(raddr(ds,di)) == 0) { return; }
     (*(raddr(ds,di)))--; ZF = ((dw)(*(raddr(ds,di))) == 0); SF = (((dw)(*(raddr(ds,di)))) >> 15);
@@ -2342,7 +2343,7 @@ sub_1051f:
                     *(db*)raddr(ds,di+4) = al;
                 }
             }
-loc_10566:
+env_step:
             al = bl;
             al &= 0x0F; CF = 0; OF = 0; ZF = ((db)(al) == 0); SF = (((db)(al)) >> 7);
             if (al != 0) {
@@ -2361,28 +2362,28 @@ loc_10566:
                 }
             }
         }
-loc_1058c:
+note_out_tail:
         bx = *(dw*)raddr(ds,di+2);
         tnd_snd_reg_write(); return;
     }
-loc_10592:
+chan_init:
     bx = *(dw*)raddr(ds,di+0x0B);
     al = *(db*)raddr(ds,bx);
     al |= al; CF = 0; OF = 0; ZF = ((db)(al) == 0); SF = (((db)(al)) >> 7);
     if (al == 0) {
-sub_1059b:
+note_out:
         bx = *(dw*)raddr(ds,di+2);
         bx |= bx; CF = 0; OF = 0; ZF = ((dw)(bx) == 0); SF = (((dw)(bx)) >> 15);
         if (bx != 0) {
             bl |= 0x0F; CF = 0; OF = 0; ZF = ((db)(bl) == 0); SF = (((db)(bl)) >> 7);
             tnd_snd_reg_write();
         }
-loc_105a8:
+evt_seek:
         bx = di;
         cx = 0x0D;
-        goto loc_104bb;
+        goto memfill_dn;
     }
-loc_105d2:
+evt_read:
     al = *(db*)raddr(ds,bx);
     (bx)++; ZF = ((dw)(bx) == 0); SF = (((dw)(bx)) >> 15);
     ax &= 0x7F; CF = 0; OF = 0; ZF = ((dw)(ax) == 0); SF = (((dw)(ax)) >> 15);
@@ -2402,21 +2403,21 @@ loc_105d2:
         *(dw*)(raddr(ds,di+9)) = ax;
         ax = pop();
         bx = pop();
-        goto loc_10630;
-loc_105f6:
+        goto evt_maybe_rpt;
+evt_maybe_dur:
         CF = 0; OF = 0; ZF = ((db)((al & 0x84)) == 0); SF = (((db)((al & 0x84))) >> 7);
-        if ((al & 0x84) != 0) goto loc_10642;
-loc_105fa:
+        if ((al & 0x84) != 0) goto evt_loop_set;
+evt_commit:
         cx = bx;
         (cx)++; ZF = ((dw)(cx) == 0); SF = (((dw)(cx)) >> 15);
-loc_105fd:
+evt_commit_b:
         *(dw*)(raddr(ds,di+0x0B)) = cx;
         cl = *(db*)raddr(ds,bx);
         *(db*)raddr(ds,di) = cl;
 locret_10604:
         return;
     }
-loc_10605:
+evt_dur:
     cx = *(dw*)raddr(ds,bx);
     (bx)++; ZF = ((dw)(bx) == 0); SF = (((dw)(bx)) >> 15);
     (bx)++; ZF = ((dw)(bx) == 0); SF = (((dw)(bx)) >> 15);
@@ -2424,52 +2425,52 @@ loc_10605:
     CF = 0; OF = 0; ZF = ((db)((al & 0x0B0)) == 0); SF = (((db)((al & 0x0B0))) >> 7);
     if ((al & 0x0B0) == 0) {
         cx = 0; CF = 0; OF = 0; ZF = 1; SF = 0;
-        goto loc_1062d;
+        goto evt_loop_store;
     }
-loc_10615:
+evt_maybe_att:
     CF = 0; OF = 0; ZF = ((db)((al & 0x0A0)) == 0); SF = (((db)((al & 0x0A0))) >> 7);
     if ((al & 0x0A0) != 0) {
         cl = *(db*)raddr(ds,bx);
         (bx)++; ZF = ((dw)(bx) == 0); SF = (((dw)(bx)) >> 15);
         *(db*)raddr(ds,di+4) = cl;
     }
-loc_1061f:
+evt_maybe_rel:
     CF = 0; OF = 0; ZF = ((db)((al & 0x90)) == 0); SF = (((db)((al & 0x90))) >> 7);
     if ((al & 0x90) != 0) {
         cl = *(db*)raddr(ds,bx);
         (bx)++; ZF = ((dw)(bx) == 0); SF = (((dw)(bx)) >> 15);
         *(db*)raddr(ds,di+5) = cl;
     }
-loc_10629:
+evt_loop_word:
     cx = *(dw*)raddr(ds,bx);
     (bx)++; ZF = ((dw)(bx) == 0); SF = (((dw)(bx)) >> 15);
     (bx)++; ZF = ((dw)(bx) == 0); SF = (((dw)(bx)) >> 15);
-loc_1062d:
+evt_loop_store:
     *(dw*)(raddr(ds,di+6)) = cx;
-loc_10630:
+evt_maybe_rpt:
     CF = 0; OF = 0; ZF = ((db)((al & 0x0C0)) == 0); SF = (((db)((al & 0x0C0))) >> 7);
-    if ((al & 0x0C0) == 0) goto loc_105f6;
+    if ((al & 0x0C0) == 0) goto evt_maybe_dur;
     cl = *(db*)raddr(ds,bx);
     (bx)++; ZF = ((dw)(bx) == 0); SF = (((dw)(bx)) >> 15);
     CF = (dd)*(raddr(ds,di+8)) < (dd)0; ZF = ((dw)((*(raddr(ds,di+8))) - (0)) == 0); SF = (((dw)((*(raddr(ds,di+8))) - (0))) >> 15);
     if (*(raddr(ds,di+8)) != 0) {
         (*(raddr(ds,di+8)))--; ZF = ((dw)(*(raddr(ds,di+8))) == 0); SF = (((dw)(*(raddr(ds,di+8)))) >> 15);
-        if (*(raddr(ds,di+8)) != 0) goto loc_1064d;
-loc_10642:
+        if (*(raddr(ds,di+8)) != 0) goto evt_loop_back;
+evt_loop_set:
         cx = bx;
         (cx)++; ZF = ((dw)(cx) == 0); SF = (((dw)(cx)) >> 15);
         *(dw*)(raddr(ds,di+9)) = cx;
-        goto loc_105fa;
+        goto evt_commit;
     }
-loc_1064a:
+evt_rpt_set:
     *(db*)raddr(ds,di+8) = cl;
-loc_1064d:
+evt_loop_back:
     cx = *(dw*)raddr(ds,di+9);
-    goto loc_105fd;
-loc_104bb:
+    goto evt_commit_b;
+memfill_dn:
     ax = 0; CF = 0; OF = 0; ZF = 1; SF = 0;
     { dd t_ = (dd)bx + (dd)cx; CF = t_ > 0xFFFF; bx = t_; ZF = ((dw)(bx) == 0); SF = (((dw)(bx)) >> 15); }
-loc_104bf:
+memfill_dn_loop:
     do {
         (bx)--; ZF = ((dw)(bx) == 0); SF = (((dw)(bx)) >> 15);
         _sa = (bx);
@@ -2514,7 +2515,7 @@ void tnd_chan_tick(void) {
                     *(db*)raddr(ds,di+4) = al;
                 }
             }
-loc_10566:
+env_step:
             al = bl;
             al &= 0x0F; CF = 0; OF = 0; ZF = ((db)(al) == 0); SF = (((db)(al)) >> 7);
             if (al != 0) {
@@ -2533,28 +2534,28 @@ loc_10566:
                 }
             }
         }
-loc_1058c:
+note_out_tail:
         bx = *(dw*)raddr(ds,di+2);
         tnd_snd_reg_write(); return;
     }
-loc_10592:
+chan_init:
     bx = *(dw*)raddr(ds,di+0x0B);
     al = *(db*)raddr(ds,bx);
     al |= al; CF = 0; OF = 0; ZF = ((db)(al) == 0); SF = (((db)(al)) >> 7);
     if (al == 0) {
-sub_1059b:
+note_out:
         bx = *(dw*)raddr(ds,di+2);
         bx |= bx; CF = 0; OF = 0; ZF = ((dw)(bx) == 0); SF = (((dw)(bx)) >> 15);
         if (bx != 0) {
             bl |= 0x0F; CF = 0; OF = 0; ZF = ((db)(bl) == 0); SF = (((db)(bl)) >> 7);
             tnd_snd_reg_write();
         }
-loc_105a8:
+evt_seek:
         bx = di;
         cx = 0x0D;
-        goto loc_104bb;
+        goto memfill_dn;
     }
-loc_105d2:
+evt_read:
     al = *(db*)raddr(ds,bx);
     (bx)++; ZF = ((dw)(bx) == 0); SF = (((dw)(bx)) >> 15);
     ax &= 0x7F; CF = 0; OF = 0; ZF = ((dw)(ax) == 0); SF = (((dw)(ax)) >> 15);
@@ -2574,21 +2575,21 @@ loc_105d2:
         *(dw*)(raddr(ds,di+9)) = ax;
         ax = pop();
         bx = pop();
-        goto loc_10630;
-loc_105f6:
+        goto evt_maybe_rpt;
+evt_maybe_dur:
         CF = 0; OF = 0; ZF = ((db)((al & 0x84)) == 0); SF = (((db)((al & 0x84))) >> 7);
-        if ((al & 0x84) != 0) goto loc_10642;
-loc_105fa:
+        if ((al & 0x84) != 0) goto evt_loop_set;
+evt_commit:
         cx = bx;
         (cx)++; ZF = ((dw)(cx) == 0); SF = (((dw)(cx)) >> 15);
-loc_105fd:
+evt_commit_b:
         *(dw*)(raddr(ds,di+0x0B)) = cx;
         cl = *(db*)raddr(ds,bx);
         *(db*)raddr(ds,di) = cl;
 locret_10604:
         return;
     }
-loc_10605:
+evt_dur:
     cx = *(dw*)raddr(ds,bx);
     (bx)++; ZF = ((dw)(bx) == 0); SF = (((dw)(bx)) >> 15);
     (bx)++; ZF = ((dw)(bx) == 0); SF = (((dw)(bx)) >> 15);
@@ -2596,52 +2597,52 @@ loc_10605:
     CF = 0; OF = 0; ZF = ((db)((al & 0x0B0)) == 0); SF = (((db)((al & 0x0B0))) >> 7);
     if ((al & 0x0B0) == 0) {
         cx = 0; CF = 0; OF = 0; ZF = 1; SF = 0;
-        goto loc_1062d;
+        goto evt_loop_store;
     }
-loc_10615:
+evt_maybe_att:
     CF = 0; OF = 0; ZF = ((db)((al & 0x0A0)) == 0); SF = (((db)((al & 0x0A0))) >> 7);
     if ((al & 0x0A0) != 0) {
         cl = *(db*)raddr(ds,bx);
         (bx)++; ZF = ((dw)(bx) == 0); SF = (((dw)(bx)) >> 15);
         *(db*)raddr(ds,di+4) = cl;
     }
-loc_1061f:
+evt_maybe_rel:
     CF = 0; OF = 0; ZF = ((db)((al & 0x90)) == 0); SF = (((db)((al & 0x90))) >> 7);
     if ((al & 0x90) != 0) {
         cl = *(db*)raddr(ds,bx);
         (bx)++; ZF = ((dw)(bx) == 0); SF = (((dw)(bx)) >> 15);
         *(db*)raddr(ds,di+5) = cl;
     }
-loc_10629:
+evt_loop_word:
     cx = *(dw*)raddr(ds,bx);
     (bx)++; ZF = ((dw)(bx) == 0); SF = (((dw)(bx)) >> 15);
     (bx)++; ZF = ((dw)(bx) == 0); SF = (((dw)(bx)) >> 15);
-loc_1062d:
+evt_loop_store:
     *(dw*)(raddr(ds,di+6)) = cx;
-loc_10630:
+evt_maybe_rpt:
     CF = 0; OF = 0; ZF = ((db)((al & 0x0C0)) == 0); SF = (((db)((al & 0x0C0))) >> 7);
-    if ((al & 0x0C0) == 0) goto loc_105f6;
+    if ((al & 0x0C0) == 0) goto evt_maybe_dur;
     cl = *(db*)raddr(ds,bx);
     (bx)++; ZF = ((dw)(bx) == 0); SF = (((dw)(bx)) >> 15);
     CF = (dd)*(raddr(ds,di+8)) < (dd)0; ZF = ((dw)((*(raddr(ds,di+8))) - (0)) == 0); SF = (((dw)((*(raddr(ds,di+8))) - (0))) >> 15);
     if (*(raddr(ds,di+8)) != 0) {
         (*(raddr(ds,di+8)))--; ZF = ((dw)(*(raddr(ds,di+8))) == 0); SF = (((dw)(*(raddr(ds,di+8)))) >> 15);
-        if (*(raddr(ds,di+8)) != 0) goto loc_1064d;
-loc_10642:
+        if (*(raddr(ds,di+8)) != 0) goto evt_loop_back;
+evt_loop_set:
         cx = bx;
         (cx)++; ZF = ((dw)(cx) == 0); SF = (((dw)(cx)) >> 15);
         *(dw*)(raddr(ds,di+9)) = cx;
-        goto loc_105fa;
+        goto evt_commit;
     }
-loc_1064a:
+evt_rpt_set:
     *(db*)raddr(ds,di+8) = cl;
-loc_1064d:
+evt_loop_back:
     cx = *(dw*)raddr(ds,di+9);
-    goto loc_105fd;
-loc_104bb:
+    goto evt_commit_b;
+memfill_dn:
     ax = 0; CF = 0; OF = 0; ZF = 1; SF = 0;
     { dd t_ = (dd)bx + (dd)cx; CF = t_ > 0xFFFF; bx = t_; ZF = ((dw)(bx) == 0); SF = (((dw)(bx)) >> 15); }
-loc_104bf:
+memfill_dn_loop:
     do {
         (bx)--; ZF = ((dw)(bx) == 0); SF = (((dw)(bx)) >> 15);
         _sa = (bx);
@@ -2658,14 +2659,14 @@ void tnd_note_out(void) {
         bl |= 0x0F; CF = 0; OF = 0; ZF = ((db)(bl) == 0); SF = (((db)(bl)) >> 7);
         tnd_snd_reg_write();
     }
-loc_105a8:
+evt_seek:
     bx = di;
     cx = 0x0D;
-    goto loc_104bb;
-loc_104bb:
+    goto memfill_dn;
+memfill_dn:
     ax = 0; CF = 0; OF = 0; ZF = 1; SF = 0;
     { dd t_ = (dd)bx + (dd)cx; CF = t_ > 0xFFFF; bx = t_; ZF = ((dw)(bx) == 0); SF = (((dw)(bx)) >> 15); }
-loc_104bf:
+memfill_dn_loop:
     do {
         (bx)--; ZF = ((dw)(bx) == 0); SF = (((dw)(bx)) >> 15);
         _sa = (bx);
@@ -2686,7 +2687,7 @@ edummylabel13:
     {dd r = (dd)ax * 0x0D; ax = r; dx = r >> 16;}
     cx = 0x2F;
     { dd t_ = (dd)ax + (dd)cx; CF = t_ > 0xFFFF; ax = t_; ZF = ((dw)(ax) == 0); SF = (((dw)(ax)) >> 15); }
-sub_105c4:
+voice_update:
     di = ax;
     push(bx);
     push(*(dw*)(raddr(ds,di)));
@@ -2694,7 +2695,7 @@ sub_105c4:
     *(dw*)(raddr(ds,di)) = pop();
     bx = pop();
     *(dw*)(raddr(ds,di+9)) = bx;
-loc_105d2:
+evt_read:
     al = *(db*)raddr(ds,bx);
     (bx)++; ZF = ((dw)(bx) == 0); SF = (((dw)(bx)) >> 15);
     ax &= 0x7F; CF = 0; OF = 0; ZF = ((dw)(ax) == 0); SF = (((dw)(ax)) >> 15);
@@ -2714,21 +2715,21 @@ loc_105d2:
         *(dw*)(raddr(ds,di+9)) = ax;
         ax = pop();
         bx = pop();
-        goto loc_10630;
-loc_105f6:
+        goto evt_maybe_rpt;
+evt_maybe_dur:
         CF = 0; OF = 0; ZF = ((db)((al & 0x84)) == 0); SF = (((db)((al & 0x84))) >> 7);
-        if ((al & 0x84) != 0) goto loc_10642;
-loc_105fa:
+        if ((al & 0x84) != 0) goto evt_loop_set;
+evt_commit:
         cx = bx;
         (cx)++; ZF = ((dw)(cx) == 0); SF = (((dw)(cx)) >> 15);
-loc_105fd:
+evt_commit_b:
         *(dw*)(raddr(ds,di+0x0B)) = cx;
         cl = *(db*)raddr(ds,bx);
         *(db*)raddr(ds,di) = cl;
 locret_10604:
         return;
     }
-loc_10605:
+evt_dur:
     cx = *(dw*)raddr(ds,bx);
     (bx)++; ZF = ((dw)(bx) == 0); SF = (((dw)(bx)) >> 15);
     (bx)++; ZF = ((dw)(bx) == 0); SF = (((dw)(bx)) >> 15);
@@ -2736,48 +2737,48 @@ loc_10605:
     CF = 0; OF = 0; ZF = ((db)((al & 0x0B0)) == 0); SF = (((db)((al & 0x0B0))) >> 7);
     if ((al & 0x0B0) == 0) {
         cx = 0; CF = 0; OF = 0; ZF = 1; SF = 0;
-        goto loc_1062d;
+        goto evt_loop_store;
     }
-loc_10615:
+evt_maybe_att:
     CF = 0; OF = 0; ZF = ((db)((al & 0x0A0)) == 0); SF = (((db)((al & 0x0A0))) >> 7);
     if ((al & 0x0A0) != 0) {
         cl = *(db*)raddr(ds,bx);
         (bx)++; ZF = ((dw)(bx) == 0); SF = (((dw)(bx)) >> 15);
         *(db*)raddr(ds,di+4) = cl;
     }
-loc_1061f:
+evt_maybe_rel:
     CF = 0; OF = 0; ZF = ((db)((al & 0x90)) == 0); SF = (((db)((al & 0x90))) >> 7);
     if ((al & 0x90) != 0) {
         cl = *(db*)raddr(ds,bx);
         (bx)++; ZF = ((dw)(bx) == 0); SF = (((dw)(bx)) >> 15);
         *(db*)raddr(ds,di+5) = cl;
     }
-loc_10629:
+evt_loop_word:
     cx = *(dw*)raddr(ds,bx);
     (bx)++; ZF = ((dw)(bx) == 0); SF = (((dw)(bx)) >> 15);
     (bx)++; ZF = ((dw)(bx) == 0); SF = (((dw)(bx)) >> 15);
-loc_1062d:
+evt_loop_store:
     *(dw*)(raddr(ds,di+6)) = cx;
-loc_10630:
+evt_maybe_rpt:
     CF = 0; OF = 0; ZF = ((db)((al & 0x0C0)) == 0); SF = (((db)((al & 0x0C0))) >> 7);
-    if ((al & 0x0C0) == 0) goto loc_105f6;
+    if ((al & 0x0C0) == 0) goto evt_maybe_dur;
     cl = *(db*)raddr(ds,bx);
     (bx)++; ZF = ((dw)(bx) == 0); SF = (((dw)(bx)) >> 15);
     CF = (dd)*(raddr(ds,di+8)) < (dd)0; ZF = ((dw)((*(raddr(ds,di+8))) - (0)) == 0); SF = (((dw)((*(raddr(ds,di+8))) - (0))) >> 15);
     if (*(raddr(ds,di+8)) != 0) {
         (*(raddr(ds,di+8)))--; ZF = ((dw)(*(raddr(ds,di+8))) == 0); SF = (((dw)(*(raddr(ds,di+8)))) >> 15);
-        if (*(raddr(ds,di+8)) != 0) goto loc_1064d;
-loc_10642:
+        if (*(raddr(ds,di+8)) != 0) goto evt_loop_back;
+evt_loop_set:
         cx = bx;
         (cx)++; ZF = ((dw)(cx) == 0); SF = (((dw)(cx)) >> 15);
         *(dw*)(raddr(ds,di+9)) = cx;
-        goto loc_105fa;
+        goto evt_commit;
     }
-loc_1064a:
+evt_rpt_set:
     *(db*)raddr(ds,di+8) = cl;
-loc_1064d:
+evt_loop_back:
     cx = *(dw*)raddr(ds,di+9);
-    goto loc_105fd;
+    goto evt_commit_b;
 }
 void tnd_voice_update(void) {
     dd _sa = 0, _sb = 0;
@@ -2788,7 +2789,7 @@ void tnd_voice_update(void) {
     *(dw*)(raddr(ds,di)) = pop();
     bx = pop();
     *(dw*)(raddr(ds,di+9)) = bx;
-loc_105d2:
+evt_read:
     al = *(db*)raddr(ds,bx);
     (bx)++; ZF = ((dw)(bx) == 0); SF = (((dw)(bx)) >> 15);
     ax &= 0x7F; CF = 0; OF = 0; ZF = ((dw)(ax) == 0); SF = (((dw)(ax)) >> 15);
@@ -2808,21 +2809,21 @@ loc_105d2:
         *(dw*)(raddr(ds,di+9)) = ax;
         ax = pop();
         bx = pop();
-        goto loc_10630;
-loc_105f6:
+        goto evt_maybe_rpt;
+evt_maybe_dur:
         CF = 0; OF = 0; ZF = ((db)((al & 0x84)) == 0); SF = (((db)((al & 0x84))) >> 7);
-        if ((al & 0x84) != 0) goto loc_10642;
-loc_105fa:
+        if ((al & 0x84) != 0) goto evt_loop_set;
+evt_commit:
         cx = bx;
         (cx)++; ZF = ((dw)(cx) == 0); SF = (((dw)(cx)) >> 15);
-loc_105fd:
+evt_commit_b:
         *(dw*)(raddr(ds,di+0x0B)) = cx;
         cl = *(db*)raddr(ds,bx);
         *(db*)raddr(ds,di) = cl;
 locret_10604:
         return;
     }
-loc_10605:
+evt_dur:
     cx = *(dw*)raddr(ds,bx);
     (bx)++; ZF = ((dw)(bx) == 0); SF = (((dw)(bx)) >> 15);
     (bx)++; ZF = ((dw)(bx) == 0); SF = (((dw)(bx)) >> 15);
@@ -2830,48 +2831,48 @@ loc_10605:
     CF = 0; OF = 0; ZF = ((db)((al & 0x0B0)) == 0); SF = (((db)((al & 0x0B0))) >> 7);
     if ((al & 0x0B0) == 0) {
         cx = 0; CF = 0; OF = 0; ZF = 1; SF = 0;
-        goto loc_1062d;
+        goto evt_loop_store;
     }
-loc_10615:
+evt_maybe_att:
     CF = 0; OF = 0; ZF = ((db)((al & 0x0A0)) == 0); SF = (((db)((al & 0x0A0))) >> 7);
     if ((al & 0x0A0) != 0) {
         cl = *(db*)raddr(ds,bx);
         (bx)++; ZF = ((dw)(bx) == 0); SF = (((dw)(bx)) >> 15);
         *(db*)raddr(ds,di+4) = cl;
     }
-loc_1061f:
+evt_maybe_rel:
     CF = 0; OF = 0; ZF = ((db)((al & 0x90)) == 0); SF = (((db)((al & 0x90))) >> 7);
     if ((al & 0x90) != 0) {
         cl = *(db*)raddr(ds,bx);
         (bx)++; ZF = ((dw)(bx) == 0); SF = (((dw)(bx)) >> 15);
         *(db*)raddr(ds,di+5) = cl;
     }
-loc_10629:
+evt_loop_word:
     cx = *(dw*)raddr(ds,bx);
     (bx)++; ZF = ((dw)(bx) == 0); SF = (((dw)(bx)) >> 15);
     (bx)++; ZF = ((dw)(bx) == 0); SF = (((dw)(bx)) >> 15);
-loc_1062d:
+evt_loop_store:
     *(dw*)(raddr(ds,di+6)) = cx;
-loc_10630:
+evt_maybe_rpt:
     CF = 0; OF = 0; ZF = ((db)((al & 0x0C0)) == 0); SF = (((db)((al & 0x0C0))) >> 7);
-    if ((al & 0x0C0) == 0) goto loc_105f6;
+    if ((al & 0x0C0) == 0) goto evt_maybe_dur;
     cl = *(db*)raddr(ds,bx);
     (bx)++; ZF = ((dw)(bx) == 0); SF = (((dw)(bx)) >> 15);
     CF = (dd)*(raddr(ds,di+8)) < (dd)0; ZF = ((dw)((*(raddr(ds,di+8))) - (0)) == 0); SF = (((dw)((*(raddr(ds,di+8))) - (0))) >> 15);
     if (*(raddr(ds,di+8)) != 0) {
         (*(raddr(ds,di+8)))--; ZF = ((dw)(*(raddr(ds,di+8))) == 0); SF = (((dw)(*(raddr(ds,di+8)))) >> 15);
-        if (*(raddr(ds,di+8)) != 0) goto loc_1064d;
-loc_10642:
+        if (*(raddr(ds,di+8)) != 0) goto evt_loop_back;
+evt_loop_set:
         cx = bx;
         (cx)++; ZF = ((dw)(cx) == 0); SF = (((dw)(cx)) >> 15);
         *(dw*)(raddr(ds,di+9)) = cx;
-        goto loc_105fa;
+        goto evt_commit;
     }
-loc_1064a:
+evt_rpt_set:
     *(db*)raddr(ds,di+8) = cl;
-loc_1064d:
+evt_loop_back:
     cx = *(dw*)raddr(ds,di+9);
-    goto loc_105fd;
+    goto evt_commit_b;
 }
 void tnd_sfx_0f0(void) {
 edummylabel14:
@@ -2910,7 +2911,7 @@ edummylabel17:
         bx = 0x1A7;
         tnd_sfx_play(); return;
     }
-loc_10694:
+chan3_update:
     IF = 0;
     ax = 0x3C;
     tnd_voice_update();
@@ -2921,15 +2922,15 @@ locret_1069d:
 void tnd_music_play_a(void) {
 edummylabel18:
     bx = 0x1BB;
-    goto loc_106a9;
-loc_106a9:
+    goto music_go;
+music_go:
     *(dw*)(raddr(ds,0x63)) = bx;
     tnd_sfx_play(); return;
 }
 void tnd_music_play_b(void) {
 edummylabel19:
     bx = 0x1C3;
-loc_106a9:
+music_go:
     *(dw*)(raddr(ds,0x63)) = bx;
     tnd_sfx_play(); return;
 }
@@ -2973,7 +2974,7 @@ edummylabel25:
     CF = (dd)al < (dd)*(db*)raddr(ds,0x30); ZF = ((db)((al) - (*(db*)raddr(ds,0x30))) == 0); SF = (((db)((al) - (*(db*)raddr(ds,0x30)))) >> 7);
     if (al < *(db*)raddr(ds,0x30)) { return; }
     bx = 0x153;
-loc_106f4:
+sfx_pair_143:
     tnd_sfx_play_pri();
     bx = 0x143;
     tnd_sfx_play(); return;
@@ -3006,8 +3007,8 @@ edummylabel28:
     CF = (dd)al < (dd)*(db*)raddr(ds,0x30); ZF = ((db)((al) - (*(db*)raddr(ds,0x30))) == 0); SF = (((db)((al) - (*(db*)raddr(ds,0x30)))) >> 7);
     if (al < *(db*)raddr(ds,0x30)) { return; }
     bx = 0x15B;
-    goto loc_106f4;
-loc_106f4:
+    goto sfx_pair_143;
+sfx_pair_143:
     tnd_sfx_play_pri();
     bx = 0x143;
     tnd_sfx_play(); return;
@@ -3015,8 +3016,8 @@ loc_106f4:
 void tnd_sfx_16a_163(void) {
 edummylabel29:
     bx = 0x16A;
-    goto loc_10735;
-loc_10735:
+    goto sfx_pair_163;
+sfx_pair_163:
     tnd_sfx_play();
     bx = 0x163;
     tnd_sfx_play(); return;
@@ -3024,7 +3025,7 @@ loc_10735:
 void tnd_sfx_174_163(void) {
 edummylabel30:
     bx = 0x174;
-loc_10735:
+sfx_pair_163:
     tnd_sfx_play();
     bx = 0x163;
     tnd_sfx_play(); return;
@@ -3032,8 +3033,8 @@ loc_10735:
 void tnd_sfx_16c_165(void) {
 edummylabel31:
     bx = 0x16C;
-    goto loc_1074a;
-loc_1074a:
+    goto sfx_pair_165;
+sfx_pair_165:
     al = 0x28;
     CF = (dd)al < (dd)*(db*)raddr(ds,0x30); ZF = ((db)((al) - (*(db*)raddr(ds,0x30))) == 0); SF = (((db)((al) - (*(db*)raddr(ds,0x30)))) >> 7);
     if (al < *(db*)raddr(ds,0x30)) { return; }
@@ -3046,7 +3047,7 @@ locret_107ba:
 void tnd_sfx_176_165(void) {
 edummylabel32:
     bx = 0x176;
-loc_1074a:
+sfx_pair_165:
     al = 0x28;
     CF = (dd)al < (dd)*(db*)raddr(ds,0x30); ZF = ((db)((al) - (*(db*)raddr(ds,0x30))) == 0); SF = (((db)((al) - (*(db*)raddr(ds,0x30)))) >> 7);
     if (al < *(db*)raddr(ds,0x30)) { return; }
@@ -3084,8 +3085,8 @@ edummylabel35:
     CF = (dd)al < (dd)*(db*)raddr(ds,0x30); ZF = ((db)((al) - (*(db*)raddr(ds,0x30))) == 0); SF = (((db)((al) - (*(db*)raddr(ds,0x30)))) >> 7);
     if (al < *(db*)raddr(ds,0x30)) { return; }
     bx = 0x0F8;
-    goto loc_1079c;
-loc_1079c:
+    goto sfx_pair_133;
+sfx_pair_133:
     tnd_sfx_play_pri();
     bx = 0x133;
     tnd_sfx_play(); return;
@@ -3098,7 +3099,7 @@ edummylabel36:
     CF = (dd)al < (dd)*(db*)raddr(ds,0x30); ZF = ((db)((al) - (*(db*)raddr(ds,0x30))) == 0); SF = (((db)((al) - (*(db*)raddr(ds,0x30)))) >> 7);
     if (al < *(db*)raddr(ds,0x30)) { return; }
     bx = 0x13B;
-loc_1079c:
+sfx_pair_133:
     tnd_sfx_play_pri();
     bx = 0x133;
     tnd_sfx_play(); return;
@@ -3111,9 +3112,9 @@ edummylabel37:
     CF = (dd)al < (dd)*(db*)raddr(ds,0x30); ZF = ((db)((al) - (*(db*)raddr(ds,0x30))) == 0); SF = (((db)((al) - (*(db*)raddr(ds,0x30)))) >> 7);
     if (al < *(db*)raddr(ds,0x30)) { return; }
     bx = 0x126;
-sub_107b2:
+sfx_play_pri:
     *(db*)raddr(ds,0x30) = al;
-sub_107b5:
+sfx_play:
     IF = 0;
     tnd_stream_start();
     IF = 1;
@@ -3122,7 +3123,7 @@ locret_107ba:
 }
 void tnd_sfx_play_pri(void) {
     *(db*)raddr(ds,0x30) = al;
-sub_107b5:
+sfx_play:
     IF = 0;
     tnd_stream_start();
     IF = 1;
@@ -3181,8 +3182,8 @@ locret_107ba:
 void tnd_sfx_pair_ae_da(void) {
 edummylabel42:
     bx = 0x0AE;
-    goto loc_10805;
-loc_10805:
+    goto sfx_pair_da;
+sfx_pair_da:
     tnd_sfx_play();
     bx = 0x0DA;
     tnd_sfx_play(); return;
@@ -3190,7 +3191,7 @@ loc_10805:
 void tnd_sfx_pair_c4_da(void) {
 edummylabel43:
     bx = 0x0C4;
-loc_10805:
+sfx_pair_da:
     tnd_sfx_play();
     bx = 0x0DA;
     tnd_sfx_play(); return;
@@ -3231,7 +3232,7 @@ edummylabel49:
     tnd_sfx_play();
     bx = 0x235;
     *(dw*)(raddr(ds,0x45)) = bx;
-sub_10851:
+sfx3_26b_2fd:
     bx = 0x28B;
     tnd_sfx_play();
     *(dw*)(raddr(ds,0x52)) = 0x26B;
@@ -3286,7 +3287,7 @@ edummylabel51:
 locret_108bc:
         return;
     }
-loc_108bd:
+snd_reg_out:
     al = bh;
     al |= 0x0E0; CF = 0; OF = 0; ZF = ((db)(al) == 0); SF = (((db)(al)) >> 7);
     out(0x0C0, al);

@@ -38,6 +38,10 @@ void farjmp_ptr_1024f(void) {
     /* jmp     far ptr 0:0 ;~ 0E8A:19AE */
     { vfn f_ = func_at(rt_far(*(dd*)&mem[0x1024f])); if (f_) f_(); else fprintf(stderr, "unresolved ind jmp %x\n", (dd)(rt_far(*(dd*)&mem[0x1024f]))); return; }
 }
+
+
+
+
 void ind_jmp_ptr(void) {
     /* jmp     word ptr [bx+si] ;~ 0E8A:B8B2 */
     { vfn f_ = func_at((dd)0xe8a0 + (*(dw*)(raddr(ds,bx+si)))); if (f_) f_(); else fprintf(stderr, "unresolved ind jmp %x\n", (dd)((dd)0xe8a0 + (*(dw*)(raddr(ds,bx+si))))); return; }

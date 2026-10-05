@@ -2203,33 +2203,7 @@ void locret_107ba(void) {
 void locret_108bc(void) {
     return;
 }
-void irq8_chain(void) {
-    dd _sa = 0, _sb = 0;
-timer_isr_chain:
-    *(raddr(ds,0x69)) = 3;
-    byte_103e2 = 0;
-    ds = pop();
-    ax = pop();
-    { vfn f_ = func_at(rt_far(dword_103de)); if (f_) f_(); else fprintf(stderr, "unresolved ind jmp %x\n", (dd)(rt_far(dword_103de))); return; }
-uninstall_timer:
-    IF = 0;
-    push(ds);
-    bx = *(dw*)(&dword_103de);
-    cx = *(dw*)(((db*)&dword_103de)+2);
-    { dd t_ = (dd)ax - (dd)ax; CF = (dd)ax < (dd)ax; ax = t_; ZF = ((dw)(ax) == 0); SF = (((dw)(ax)) >> 15); }
-    m2c::set_segment_register(ds, ax);
-    *(dw*)(raddr(ds,0x20)) = bx;
-    *(dw*)(raddr(ds,0x22)) = cx;
-    ds = pop();
-    _sa = (ax);
-    out(0x43, 0x36);
-    ax = 0; CF = 0; OF = 0; ZF = 1; SF = 0;
-    out(0x40, al);
-    al = ah;
-    out(0x40, al);
-    IF = 1;
-    return;
-}
+
 void module_init(void) {
     install_timer();
 edummylabel1:

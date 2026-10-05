@@ -3,7 +3,7 @@ CFLAGS ?= -O2 -g -fcommon -fsigned-char -Wno-implicit-function-declaration -fno-
 SDL_CFLAGS := $(shell sdl2-config --cflags)
 SDL_LIBS := $(shell sdl2-config --libs) -lm
 
-OBJS = rt.o dos.o video.o input.o snd.o main.o memimg.o data_defs.o \
+OBJS = rt.o dos.o video.o input.o snd.o main.o memimg.o data_defs.o rewrite.o \
        gen/ar.exe.o gen/ar.exe_seg000.o gen/ar.exe_seg002.o \
        gen/ar.exe_seg001.o gen/ar.exe_seg003.o gen/ar.exe_default_seg.o \
        gen/tandysnd_seg001.o

@@ -82,15 +82,44 @@ static size_t ref_lzw(const unsigned char *src, size_t n, unsigned char *dst){
 #define DSTSEG 0x2000
 #define STKSEG 0x9000   /* decoder uses ss:sp as a scratch push-chain; give it
                          * a full segment of headroom like the real game has */
-static size_t port_lzw(const char *path){
-    FILE *f = fopen(path, "rb");
-    if (!f) return (size_t)-1;
-    size_t n = fread(&mem[((dd)SRCSEG << 4) + SRCOFF], 1, 0x8000, f);
-    fclose(f);
+static size_t port_lzw_src(const unsigned char *src, size_t n, vfn dec){
+    memset(&mem[((dd)SRCSEG << 4) + SRCOFF], 0xAA, 0x8100); /* fixed overshoot */
+    memcpy(&mem[((dd)SRCSEG << 4) + SRCOFF], src, n);
     ds = SRCSEG; si = SRCOFF; es = DSTSEG; di = 0; cx = (dw)n; dx = 0;
     ss = STKSEG; sp = 0xFFFE;
-    decompress_res();
+    *(dw*)raddr_(ds, 0x7ff9) = 0;   /* dcomp_4e79: BSS-cold prev=0 — garbage
+        streams may open with a KwKwK code; a stale prev can chain-walk
+        arbitrary memory forever (faithful, but the test must terminate) */
+    dec();
     return di;                                  /* dest offset = bytes out */
+}
+/* lifted-vs-rewrite differential: identical pre-state -> identical post-state
+ * (full 1MB image covers dict, ds-relative scratch, output and the ss:sp
+ * push-chain; regs cover every register the decoder leaves). */
+static db ab_pre[1<<20], ab_a[1<<20];
+static dd ab_pre_r[8], ab_a_r[8], ab_b_r[8];
+static dw ab_pre_g[8], ab_a_g[8], ab_b_g[8];
+static void ab_grab(dd *r, dw *g){
+    r[0]=eax;r[1]=ebx;r[2]=ecx;r[3]=edx;r[4]=esi;r[5]=edi;r[6]=esp;r[7]=ebp;
+    g[0]=cs;g[1]=ds;g[2]=es;g[3]=ss;
+}
+static void ab_put(const dd *r, const dw *g){
+    eax=r[0];ebx=r[1];ecx=r[2];edx=r[3];esi=r[4];edi=r[5];esp=r[6];ebp=r[7];
+    cs=g[0];ds=g[1];es=g[2];ss=g[3];
+}
+/* returns bytes-out from the C rewrite, or -1 on any divergence */
+static long ab_lzw(const unsigned char *src, size_t n){
+    memcpy(ab_pre, mem, sizeof mem); ab_grab(ab_pre_r, ab_pre_g);
+    size_t ln = port_lzw_src(src, n, decompress_res_lifted);
+    memcpy(ab_a, mem, sizeof mem); ab_grab(ab_a_r, ab_a_g);
+    memcpy(mem, ab_pre, sizeof mem); ab_put(ab_pre_r, ab_pre_g);
+    size_t cn = port_lzw_src(src, n, decompress_res);  /* -> rewrite */
+    ab_grab(ab_b_r, ab_b_g);
+    CHECK(ln == cn);
+    CHECK(!memcmp(ab_a, mem, sizeof mem));
+    CHECK(!memcmp(ab_a_r, ab_b_r, sizeof ab_a_r));
+    CHECK(!memcmp(ab_a_g, ab_b_g, sizeof ab_a_g));
+    return cn;
 }
 
 int main(void){
@@ -160,7 +189,7 @@ int main(void){
         size_t n = fread(src, 1, sizeof src, f); fclose(f);
         if (n < 3 || n > 0x8000) continue;         /* src must fit past the dict */
         size_t rn = ref_lzw(src, n, ref_out);
-        size_t pn = port_lzw(path);
+        size_t pn = ab_lzw(src, n);         /* lifted vs C: full state A/B */
         ndtx++;
         if (rn != pn || (rn && memcmp(ref_out, &mem[(dd)DSTSEG << 4], rn))){
             fails++;
@@ -192,6 +221,28 @@ int main(void){
     } else {
         fprintf(stderr, "  SKIP: no .DTX corpus (gdir=%s)\n",
                 gdir ? gdir : "(none found)");
+    }
+
+    /* ---- rewrite differential on synthetic streams (asset-free) ----
+     * random streams across max-widths 9..16 exercise width growth, dict
+     * resets, KwKwK and corrupt-code paths; all-zero / all-0xFF hit the
+     * literal-only and max-code extremes. A/B compares full mem + regs. */
+    {
+        static unsigned char syn[0x4000];
+        static const struct { int w; unsigned char fill; unsigned seed; } sc[] = {
+            { 9, 0, 0x1234 }, { 10, 0, 0x77 }, { 12, 0, 0xdead }, { 16, 0, 1 },
+            { 9, 0x00, 0 }, { 12, 0xFF, 0 },
+        };
+        for (size_t ci = 0; ci < sizeof sc / sizeof *sc; ci++){
+            syn[0] = (unsigned char)sc[ci].w;
+            unsigned rng = sc[ci].seed;
+            for (size_t i = 1; i < sizeof syn; i++)
+                syn[i] = sc[ci].seed ? (unsigned char)(rng = rng*1103515245 + 12345, rng >> 24)
+                                     : sc[ci].fill;
+            ab_lzw(syn, sizeof syn);
+            /* tiny/truncated streams: the do-while still runs one decode */
+            for (size_t n = 0; n < 6 && ci == 0; n++) ab_lzw(syn, n);
+        }
     }
 
     /* ---- status-panel digit patcher: WOUNDS field ds:0xB93F <- byte_29712

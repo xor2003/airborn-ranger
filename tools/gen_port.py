@@ -15,10 +15,15 @@ AR = '/home/xor/games/airborn'
 # semantic renames (tools/names.map): lifted sources may already carry the new
 # names — fmap addr lookup + tndoffs keys must resolve via the ORIGINAL name.
 NAMEMAP, TNDMAP = {}, {}
+NAME2OLDS = {}  # semantic -> every raw name mapped to it (multi-map is real:
+                # byte_2a7ad is BOTH alert_lvl and bar_val — a dict would
+                # silently drop one side of the mapping)
 for _ln in open(os.path.join(AR, 'tools', 'names.map')):
     _f = _ln.split('#')[0].split()
     if len(_f) >= 2:
         (TNDMAP if 'tnd' in _f[2:] else NAMEMAP)[_f[0]] = _f[1]
+        if 'tnd' not in _f[2:]:
+            NAME2OLDS.setdefault(_f[1], []).append(_f[0])
 NAME2OLD = {v: k for k, v in NAMEMAP.items()}
 TND2OLD = {v: k for k, v in TNDMAP.items()}
 OUT = os.path.join(AR, 'port')
@@ -65,18 +70,71 @@ for _n, _p, _o, _a in syms:
         DSREL[_n.lower()] = _o
 DSREL.update({n.lower(): o for n, o in DSREL.items()})  # already lower
 
+# dcomp_state member names for the ds-relative scratch block — semantic
+# names (matching port/rewrite.c's usage) unioned with the raw map name.
+DCOMP_MEMBER = {
+    'byte_24e70': 'lim',      'byte_24e71': 'maxw',
+    'word_24e72': 'mask',     'word_24e74': 'acc',
+    'byte_24e76': 'npending', 'word_24e77': 'end',
+    'word_24e79': 'prev',     'byte_24e7b': 'first',
+}
+
+# --- port/dseg.h: the data-segment layout as a real struct -------------
+# Symbols were historically `*(volatile T*)&mem[A]` aliases — a flat blob.
+# The struct overlays mem[] one-to-one (offsetof == flat addr) so every
+# define becomes a typed field access: `seg_data` -> `DSEG->v_seg_data`.
+# Field names keep the *map* name (v_-prefixed, lowercase): they stay
+# stable when names.map renames semantics, and can never collide with an
+# object-like macro (the token after -> must not be a macro name).
+# Generated _Static_asserts pin every field to its address.
+CODERE = re.compile(r'(sub_|loc_|locret_|nullsub_|start$|entry|.*_proc$)')
+flat_syms = sorted(
+    ((n, a, symtype.get(n, guess_type(n))) for n, p, o, a in syms
+     if not CODERE.match(n) and n.lower() not in DSREL),
+    key=lambda s: s[1])
+sem_of = {n: NAMEMAP[n] for n, _, _ in flat_syms if n in NAMEMAP}
+with open(os.path.join(OUT, 'dseg.h'), 'w') as d:
+    d.write('// data-segment layout overlaid on mem[] (generated)\n'
+            '#pragma once\n#include <stddef.h>\n\n'
+            '#pragma pack(push, 1)\nstruct ar_dseg {\n')
+    prev_end = 0
+    for n, a, t in flat_syms:
+        if a > prev_end:
+            d.write(f'    db _pad_{prev_end:x}[0x{a - prev_end:x}];\n')
+        sem = f'  {sem_of[n]}' if n in sem_of else ''
+        d.write(f'    {t} v_{n.lower()}; /* 0x{a:x}{sem} */\n')
+        prev_end = a + {'db': 1, 'dw': 2, 'dd': 4}[t]
+    d.write('};\n\n'
+            '/* decompress_res scratch at ds:7FF0 — ds-relative (see\n'
+            ' * gen_port.py DSREL note), so it gets its own overlay. */\n'
+            'struct dcomp_state {\n')
+    for raw, semn in DCOMP_MEMBER.items():
+        t = symtype.get(raw, guess_type(raw))
+        d.write(f'    union {{ {t} {semn}; {t} v_{raw}; }}; '
+                f'/* ds:0x{DSREL[raw]:x} */\n')
+    d.write('};\n#pragma pack(pop)\n\n'
+            '#define DSEG  ((volatile struct ar_dseg *)mem)\n'
+            '#define DCOMP ((volatile struct dcomp_state*)raddr_(ds,0x7ff0))\n\n')
+    for n, a, t in flat_syms:
+        d.write(f'_Static_assert(offsetof(struct ar_dseg, v_{n.lower()}) '
+                f'== 0x{a:x}, "{n}");\n')
+    for raw, semn in sorted(DCOMP_MEMBER.items(), key=lambda kv: DSREL[kv[0]]):
+        d.write(f'_Static_assert(offsetof(struct dcomp_state, {semn}) '
+                f'== 0x{DSREL[raw] - 0x7ff0:x}, "{raw}");\n')
+print(f'dseg.h: {len(flat_syms)} fields')
+
 # --- port/data_syms.h ---
 w = open(os.path.join(OUT, 'data_syms.h'), 'w')
-w.write('// data symbol -> mem[] aliases (lst-linear addressing)\n#pragma once\n')
+w.write('// data symbol -> struct field aliases (lst-linear addressing)\n'
+        '#pragma once\n#include "dseg.h"\n')
 emitted = set()
 for name, para, off, addr in syms:
-    if re.match(r'(sub_|loc_|locret_|nullsub_|start$|entry|.*_proc$)', name):
+    if CODERE.match(name):
         continue  # code addresses are real functions, not data
-    t = symtype.get(name, guess_type(name))
     if name.lower() in DSREL:
-        w.write(f'#define {name} (*(volatile {t}*)raddr_(ds,0x{off:x}))\n')
+        w.write(f'#define {name} (DCOMP->v_{name.lower()})\n')
     else:
-        w.write(f'#define {name} (*(volatile {t}*)&mem[0x{addr:x}])\n')
+        w.write(f'#define {name} (DSEG->v_{name.lower()})\n')
     emitted.add(name)
 # externs without a map entry (dummy arrays etc) -> keep as real vars.
 # Case-insensitive alias first: fake-C lowercases symbol names (word_1D934 ->
@@ -84,17 +142,28 @@ for name, para, off, addr in syms:
 bylower = {}
 for name, para, off, addr in syms:
     bylower.setdefault(name.lower(), (name, addr))
+# extern names are already semantic (rename.py rewrote lifted_data.h), so a
+# name like alert_lvl maps to several map symbols; emitting a define per
+# hit reproduces the historical duplicate-#define stream — addr order keeps
+# last-wins identical to the committed file (winners were the later/higher
+# entry every time).
 extra = []
 for ln in open(os.path.join(AR, 'lifted', 'lifted_data.h')):
     m = re.match(r'extern (db|dw|dd) (\w+);', ln)
     if m and m.group(2) not in emitted:
         t, n = m.groups()
-        hit = bylower.get(n.lower())
-        if hit and not re.match(r'(sub_|loc_|locret_|nullsub_|start$|entry|.*_proc$)', hit[0]):
-            if n.lower() in DSREL:
-                w.write(f'#define {n} (*(volatile {t}*)raddr_(ds,0x{DSREL[n.lower()]:x})) /* ds-rel alias {hit[0]} */\n')
-            else:
-                w.write(f'#define {n} (*(volatile {t}*)&mem[0x{hit[1]:x}]) /* alias {hit[0]} */\n')
+        hits = []
+        for cn in [n] + NAME2OLDS.get(n, []):
+            hit = bylower.get(cn.lower())
+            if hit and not re.match(r'(sub_|loc_|locret_|nullsub_|start$|entry|.*_proc$)', hit[0]):
+                hits.append(hit)
+        emitted.add(n)
+        if hits:
+            for hn, ha in sorted(set(hits), key=lambda h: h[1]):
+                if hn.lower() in DSREL:
+                    w.write(f'#define {n} (DCOMP->v_{hn.lower()}) /* ds-rel alias {hn} */\n')
+                else:
+                    w.write(f'#define {n} (DSEG->v_{hn.lower()}) /* alias {hn} */\n')
         else:
             extra.append(m.groups())
             w.write(f'extern {t} {n};\n')
@@ -114,10 +183,20 @@ img = open(os.path.join(AR, 'AR_rebuilt.exe'), 'rb').read()[0x280:]  # 640B hdr
 def segval(segname):  # para value for a segment name
     return segpara[segname]
 
+# previous generated memimg.c, read BEFORE this run truncates it — the
+# .cpp sources were pruned in ade9b1c, so the committed file carries the
+# frozen fixup values and the tndoffs (overlay proc -> addr) table
+_old_memimg = ''
+_pm = os.path.join(OUT, 'memimg.c')
+if os.path.exists(_pm):
+    _old_memimg = open(_pm, encoding='utf8', errors='replace').read()
+
 # parse MYCOPY fixups from fake-C source
 fixups = []
 mcre = re.compile(r'\{(\w+)\s+tmp\d*\s*=\s*(.*?);\s*MYCOPY\((\w+)\)\}')
+found_cpp = False
 for fn in glob.glob(os.path.join(AR, '*.cpp')) + glob.glob(os.path.join(AR, 'build_ida/src/*.cpp')):
+    found_cpp = True
     for ln in open(fn, errors='replace'):
         mm = mcre.search(ln)
         if not mm: continue
@@ -143,6 +222,15 @@ for fn in glob.glob(os.path.join(AR, '*.cpp')) + glob.glob(os.path.join(AR, 'bui
             try: v = int(e, 0)
             except ValueError: continue
         fixups.append((symaddr[sym], ty, v, sym))
+if not found_cpp:
+    # the fake-C sources were pruned in ade9b1c; their fixup values are
+    # frozen inputs, so harvest them back out of the generated file
+    _infx = False
+    for ln in _old_memimg.splitlines():
+        if 'mem_apply_fixups' in ln: _infx = True; continue
+        mm = re.match(r'\s+\*\((db|dw|dd)\*\)&mem\[0x([0-9a-f]+)\] = 0x([0-9a-f]+); /\* (\w+) \*/', ln)
+        if _infx and mm and 'exe reloc' not in ln and 'dw seg' not in ln:
+            fixups.append((int(mm.group(2), 16), mm.group(1), int(mm.group(3), 16), mm.group(4)))
 print(f"fixups: {len(fixups)}")
 
 w = open(os.path.join(OUT, 'memimg.c'), 'w')
@@ -197,13 +285,23 @@ w.write('}\n')
 # all code lives in overlay seg001 = image offset 0x70. Canonical fmap keys
 # assume tnd_base=0x30000; func_at renormalizes when the load seg differs.
 tndoffs = {}   # lifted proc name -> canonical mem addr (0x30070 + seg001 off)
-curlbl = None
-for ln in open(os.path.join(AR, 'tandysnd.exe_seg001.cpp'), errors='replace'):
-    lm = re.match(r'\s*(\w+):\s*$', ln)
-    if lm: curlbl = lm.group(1); continue
-    mm = re.search(r';~ None:([0-9A-Fa-f]+)', ln)
-    if mm and curlbl and curlbl not in tndoffs:
-        tndoffs[curlbl] = 0x30070 + int(mm.group(1), 16)
+_tndcpp = os.path.join(AR, 'tandysnd.exe_seg001.cpp')
+if os.path.exists(_tndcpp):
+    curlbl = None
+    for ln in open(_tndcpp, errors='replace'):
+        lm = re.match(r'\s*(\w+):\s*$', ln)
+        if lm: curlbl = lm.group(1); continue
+        mm = re.search(r';~ None:([0-9A-Fa-f]+)', ln)
+        if mm and curlbl and curlbl not in tndoffs:
+            tndoffs[curlbl] = 0x30070 + int(mm.group(1), 16)
+else:
+    # .cpp pruned in ade9b1c: recover name->addr from the generated fmap
+    # (keys normalized to the pre-rename space so the TNDMAP join below
+    # re-emits both forms exactly as before)
+    for ln in _old_memimg.splitlines():
+        mm = re.search(r'\{0x([0-9a-f]+), tw_tnd_(\w+)\}', ln)
+        if mm:
+            tndoffs[TND2OLD.get(mm.group(2), mm.group(2))] = int(mm.group(1), 16)
 
 tsrc = open(os.path.join(AR, 'lifted', 'tandysnd.exe_seg001.c'),
             encoding='utf8', errors='replace').read()
@@ -264,7 +362,12 @@ w.write('static void tnd_e0002(void){ dw _ocs = cs; cs = tnd_cseg; push(cs); ds 
 w.write('static void rt_nullfn(void){}\n')
 w.write('static const fent fmap[] = {\n')
 for n in fns:
-    o = NAME2OLD.get(n, n)      # renamed procs: addr comes from the old name
+    # renamed procs: addr comes from the old name. names.map chains are
+    # multi-hop (hdr_walk_e10262 -> hdr_walk_e10262 -> hdr_walk_e10262) and
+    # procs.h already holds the final name, so walk the chain to fixpoint.
+    o, _seen = n, set()
+    while o in NAME2OLD and o not in _seen:
+        _seen.add(o); o = NAME2OLD[o]
     hit = bylower.get(o.lower())
     if hit and re.match(r'(sub_|loc_|locret_|nullsub_|start$|entry|.*_proc$)', hit[0]):
         w.write('  {0x%x, %s},\n' % (hit[1], n))
@@ -283,6 +386,13 @@ for n in fns:
         sbase = {0: 0x1a20, 1: 0xe45f, 2: 0xe8a0, 3: 0x1cf30}.get(int(m.group(1)))
         if sbase:
             w.write('  {0x%x, %s},\n' % (sbase + int(m.group(2), 16), n))
+        continue
+    m = re.match(r'\w+_e([0-9a-fA-F]{5,})$', o)
+    if m:
+        # IDA chunk-entry suffix: e<lst-linear> is the entry's own address
+        lin = int(m.group(1), 16)
+        if lin >= 0x10000:
+            w.write('  {0x%x, %s},\n' % (0x1a20 + (lin - 0x10000), n))
 for n in sorted(set(tnames)):
     if n in tndoffs:
         w.write('  {0x%x, tw_%s},\n' % (tndoffs[n], n))
@@ -306,10 +416,51 @@ print("memimg.c + funmap written")
 TRACE_PROCS = tuple(NAMEMAP.get(t, t) for t in
     ('load_resource', 'res_file_read', 'decompress_res', 'res_load_fail', 'open_res_file',
      'load_overlay', 'res_file_error', 'delay_3_ticks'))
+# hand-written readable replacements in port/rewrite.c: the lifted body is
+# renamed <name>_lifted (kept for A/B equivalence tests) while <name>()
+# becomes a trampoline to the C version, so all callers — including the
+# mid-function chunk entries — pick up the rewrite automatically.
+REWRITES = {
+    'decompress_res': 'decompress_res_c',
+    'sprtab_init_a': 'sprtab_init_a_c',
+    'sprtab_init_b': 'sprtab_init_b_c',
+}
+# Commit 4366e7c removed the gfx driver-selection menu ('1'..'5' getch
+# loop → forced MCGA pick) by hand-editing the generated file, so every
+# regen lost it and the interactive menu came back — which stalls the
+# e2e key script on the wrong screen. Reproduce the excision here: cut
+# the emitted statements belonging to asm range [01A2:065A, 01A2:0673)
+# in whichever proc contains them, preserving the committed text.
+def excise_driver_menu(src):
+    fn = re.compile(r'^void \w+\(void\) \{.*?^\}', re.M | re.S)
+    off = re.compile(r';~ 01A2:([0-9A-F]{4})')
+    def cut(m):
+        lines = m.group(0).split('\n')
+        offs = {i: int(mm.group(1), 16)
+                for i, ln in enumerate(lines) for mm in [off.search(ln)] if mm}
+        inr = [i for i, o in offs.items() if 0x065A <= o < 0x0673]
+        if not inr:
+            return m.group(0)
+        lo = min(inr)
+        while lines[lo - 1].strip() in ('do {', '{'):
+            lo -= 1                       # absorb orphaned loop openers
+        hi = min(i for i, o in offs.items() if i > lo and o >= 0x0673)
+        kept = [ln for ln in lines[lo:hi] if re.match(r'^\w+:$', ln)]
+        note = ('    /* driver menu removed — no text-table draw / cursor set */\n'
+                if offs[min(inr)] == 0x065A else '')
+        lines[lo:hi] = [note + ''.join(l + '\n' for l in kept) +
+                        "    /* driver menu removed — MCGA only, al = '4' pick */\n"
+                        '    al = 0x34;']
+        return '\n'.join(lines)
+    return fn.sub(cut, src)
 os.makedirs(os.path.join(OUT, 'gen'), exist_ok=True)
 for f in glob.glob(os.path.join(AR, 'lifted', 'ar.exe*.c')):
     src = open(f, encoding='utf8', errors='replace').read()
     src = re.sub(r'#include "lifted[^"]*"\s*\n?', '', src)
+    for old, new in REWRITES.items():
+        src = src.replace(f'void {old}(void) {{',
+                          f'void {old}(void) {{ {new}(); }}\nvoid {old}_lifted(void) {{', 1)
+    src = excise_driver_menu(src)
     for tp in TRACE_PROCS:
         src = src.replace(f'void {tp}(void) {{', f'void {tp}(void) {{ rt_tracef("{tp}");')
     base = os.path.basename(f)
