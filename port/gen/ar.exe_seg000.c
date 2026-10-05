@@ -162409,7 +162409,8 @@ locret_1b7c2:
     /* retn ;~ 01A2:B7C2 */
     return;
 }
-void mapgen_fill_6_e1b7cd(void) {
+void mapgen_fill_6_e1b7cd(void) { mapgen_fill_6_e1b7cd_c(); }
+void mapgen_fill_6_e1b7cd_lifted(void) {
     dd _sa = 0, _sb = 0;
 mapgen_fill_6_e1b7cd:
     do {
@@ -162514,7 +162515,8 @@ locret_1b845:
     /* retn ;~ 01A2:B845 */
     return;
 }
-void mapgen_fill_6_e1b837(void) {
+void mapgen_fill_6_e1b837(void) { mapgen_fill_6_e1b837_c(); }
+void mapgen_fill_6_e1b837_lifted(void) {
     dd _sa = 0, _sb = 0;
 mapgen_fill_6_e1b837:
     do {
@@ -162621,7 +162623,8 @@ void locret_1b845(void) {
     /* retn ;~ 01A2:B845 */
     return;
 }
-void mapgen_fill_6(void) {
+void mapgen_fill_6(void) { mapgen_fill_6_c(); }
+void mapgen_fill_6_lifted(void) {
     dd _sa = 0, _sb = 0;
     /* mov     byte_2B130, 0 ;~ 01A2:B7C3 */
     mgen6_b130 = 0;
@@ -162752,7 +162755,8 @@ void obj_spawn(void) {
     /* retn ;~ 01A2:B85E */
     return;
 }
-void mapgen_fill_8_e1b869(void) {
+void mapgen_fill_8_e1b869(void) { mapgen_fill_8_e1b869_c(); }
+void mapgen_fill_8_e1b869_lifted(void) {
     dd _sa = 0, _sb = 0;
 mapgen_fill_8_e1b869:
     do {
@@ -162818,7 +162822,8 @@ locret_1b8ab:
     /* retn ;~ 01A2:B8AB */
     return;
 }
-void mapgen_fill_8_e1b87d(void) {
+void mapgen_fill_8_e1b87d(void) { mapgen_fill_8_e1b87d_c(); }
+void mapgen_fill_8_e1b87d_lifted(void) {
     dd _sa = 0, _sb = 0;
 mapgen_fill_8_e1b87d:
     do {
@@ -162886,7 +162891,8 @@ mapgen_fill_8_e1b869:
         al = 0;
     } while (1);
 }
-void mapgen_fill_8_e1b89f(void) {
+void mapgen_fill_8_e1b89f(void) { mapgen_fill_8_e1b89f_c(); }
+void mapgen_fill_8_e1b89f_lifted(void) {
     dd _sa = 0, _sb = 0;
 mapgen_fill_8_e1b89f:
     do {
@@ -162958,7 +162964,8 @@ void locret_1b8ab(void) {
     /* retn ;~ 01A2:B8AB */
     return;
 }
-void mapgen_fill_8(void) {
+void mapgen_fill_8(void) { mapgen_fill_8_c(); }
+void mapgen_fill_8_lifted(void) {
     dd _sa = 0, _sb = 0;
     /* mov     byte_2B132, 0 ;~ 01A2:B85F */
     fill_8_b132 = 0;

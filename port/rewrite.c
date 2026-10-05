@@ -5017,3 +5017,146 @@ void mapgen_pick_e_e1b6e3_c(void) {
         al = 0;
     }
 }
+
+/* ---- mapgen_fill_6 / mapgen_fill_8: fixed-shape scatter spawns ---- */
+/* fill_6: rows b12f = 6,9,...<0x30; write rec 0xE2B3 at (rand&0x1F,row);
+   on success spawn obj 6 and drop two retry-table extras (0xE35D,0xE37B)
+   at (x+2,row+1) and (x,row+1). Stops after 6 spawns. */
+static void mgen_fill6_iter(void) {
+    al = mgen6_b12f;
+    cell_by = al;
+    mgen6_b12e = al;
+    rand_next();
+    al &= 0x1F; CF = 0; OF = 0; ZF = al == 0; SF = al >> 7;
+    cell_bx = al;
+    mgen6_b12d = al;
+    ax = 0x0E2B3;
+    rec_ptr_a = ax;
+    map_rect_write();
+}
+static int mgen_fill6_spawn(void) {    /* returns 1 = proc returns */
+    al = 6;
+    obj_spawn();
+    al = mgen6_b130;
+    (al)++; ZF = al == 0; SF = al >> 7;
+    mgen6_b130 = al;
+    CF = (dd)al < (dd)6; ZF = (db)(al - 6) == 0; SF = (db)(al - 6) >> 7;
+    if (al >= 6) return 1;
+    al = mgen6_b12d;
+    { dd t_ = (dd)al + (dd)2; CF = t_ > 0xFF; al = t_;
+      ZF = al == 0; SF = al >> 7; }
+    mgen_12a = al;
+    al = mgen6_b12e;
+    { dd t_ = (dd)al + (dd)1; CF = t_ > 0xFF; al = t_;
+      ZF = al == 0; SF = al >> 7; }
+    mgen_12b = al;
+    ax = 0x0E35D;
+    rec_ptr_b = ax;
+    mgen_127 = 0x0C0;
+    mgen_128 = 0x0C0;
+    mapgen_retry();
+    al = mgen6_b12d;
+    mgen_12a = al;
+    al = mgen6_b12e;
+    (al)++; ZF = al == 0; SF = al >> 7;
+    mgen_12b = al;
+    ax = 0x0E37B;
+    rec_ptr_b = ax;
+    mapgen_retry();
+    return 0;
+}
+static int mgen_fill6_tail(void) {     /* e1b837 */
+    al = mgen6_b12f;
+    { dd t_ = (dd)al + (dd)3; CF = t_ > 0xFF; al = t_;
+      ZF = al == 0; SF = al >> 7; }
+    mgen6_b12f = al;
+    CF = (dd)al < (dd)0x30; ZF = (db)(al - 0x30) == 0;
+    SF = (db)(al - 0x30) >> 7;
+    return al >= 0x30;
+}
+void mapgen_fill_6_c(void) {
+    mgen6_b130 = 0;
+    mgen6_b12f = 6;
+    mapgen_fill_6_e1b7cd_c();
+}
+void mapgen_fill_6_e1b7cd_c(void) {
+    for (;;) {
+        mgen_fill6_iter();
+        if (!CF) { if (mgen_fill6_spawn()) return; }
+        if (mgen_fill6_tail()) return;
+    }
+}
+void mapgen_fill_6_e1b837_c(void) {
+    for (;;) {
+        for (;;) {
+            if (mgen_fill6_tail()) return;
+            mgen_fill6_iter();
+            if (!CF) break;
+        }
+        if (mgen_fill6_spawn()) return;
+    }
+}
+
+/* fill_8: rows b131 = 8,12,...<0x3C; rec 0xE2B9 at (max(0,rand&0x1F-4),
+   row); spawn obj 7 on success; stops after 9 spawns. */
+static void mgen_fill8_head(void) {    /* e1b869 */
+    al = fill_8_b131;
+    cell_by = al;
+    mgen6_b12e = al;
+    rand_next();
+    al &= 0x1F; CF = 0; OF = 0; ZF = al == 0; SF = al >> 7;
+    { dd t_ = (dd)al - (dd)4; CF = (dd)al < (dd)4; al = t_;
+      ZF = al == 0; SF = al >> 7; }
+    if (CF) al = 0;
+}
+static int mgen_fill8_place(void) {    /* e1b87d: returns 1 = proc returns */
+    cell_bx = al;
+    mgen6_b12d = al;
+    ax = 0x0E2B9;
+    rec_ptr_a = ax;
+    map_rect_write();
+    if (!CF) {
+        al = 7;
+        obj_spawn();
+        al = fill_8_b132;
+        (al)++; ZF = al == 0; SF = al >> 7;
+        fill_8_b132 = al;
+        CF = (dd)al < (dd)9; ZF = (db)(al - 9) == 0; SF = (db)(al - 9) >> 7;
+        if (al >= 9) return 1;
+    }
+    return 0;
+}
+static int mgen_fill8_tail(void) {     /* e1b89f */
+    al = fill_8_b131;
+    { dd t_ = (dd)al + (dd)4; CF = t_ > 0xFF; al = t_;
+      ZF = al == 0; SF = al >> 7; }
+    fill_8_b131 = al;
+    CF = (dd)al < (dd)0x3C; ZF = (db)(al - 0x3C) == 0;
+    SF = (db)(al - 0x3C) >> 7;
+    return al >= 0x3C;
+}
+void mapgen_fill_8_c(void) {
+    fill_8_b132 = 0;
+    fill_8_b131 = 8;
+    mapgen_fill_8_e1b869_c();
+}
+void mapgen_fill_8_e1b869_c(void) {
+    do {
+        mgen_fill8_head();
+        if (mgen_fill8_place()) return;
+    } while (!mgen_fill8_tail());
+}
+void mapgen_fill_8_e1b87d_c(void) {
+    for (;;) {
+        if (mgen_fill8_place()) return;
+        if (mgen_fill8_tail()) return;
+        mgen_fill8_head();
+    }
+}
+void mapgen_fill_8_e1b89f_c(void) {
+    for (;;) {
+        if (mgen_fill8_tail()) return;
+        mgen_fill8_head();
+        if (mgen_fill8_place()) return;
+    }
+}

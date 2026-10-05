@@ -1872,6 +1872,31 @@ int main(void){
         rand_s0 = 0x1357; rand_s1 = 0x2468;
         rec_ptr_b = 0xE313; pick_e_b123 = 0x23; al = 5;
         ab_res("pick_e 6e3", mapgen_pick_e_e1b6e3_lifted, mapgen_pick_e_e1b6e3, 0);
+        /* fill_6/fill_8: spawn-capped scatter passes — records 0xE2B3 /
+         * 0xE2B9 planted like the others; obj_spawn just needs free slots */
+        db *f6_rec = (db*)raddr_(ds, 0xE2B3);
+        f6_rec[0] = 2; f6_rec[1] = 2;
+        f6_rec[2] = 0x2d; f6_rec[3] = 0xff; f6_rec[4] = 0xff; f6_rec[5] = 0xff;
+        db *f8_rec = (db*)raddr_(ds, 0xE2B9);
+        f8_rec[0] = 2; f8_rec[1] = 2;
+        f8_rec[2] = 0x2d; f8_rec[3] = 0xff; f8_rec[4] = 0xff; f8_rec[5] = 0xff;
+        rand_s0 = 0x1357; rand_s1 = 0x2468;
+        ab_res("fill_6", mapgen_fill_6_lifted, mapgen_fill_6, 0);
+        rand_s0 = 0x1357; rand_s1 = 0x2468;
+        mgen6_b130 = 5; mgen6_b12f = 0x2D;
+        ab_res("fill_6 7cd", mapgen_fill_6_e1b7cd_lifted, mapgen_fill_6_e1b7cd, 0);
+        rand_s0 = 0x1357; rand_s1 = 0x2468;
+        mgen6_b130 = 4; mgen6_b12f = 0x2D;
+        ab_res("fill_6 837", mapgen_fill_6_e1b837_lifted, mapgen_fill_6_e1b837, 0);
+        rand_s0 = 0x1357; rand_s1 = 0x2468;
+        ab_res("fill_8", mapgen_fill_8_lifted, mapgen_fill_8, 0);
+        rand_s0 = 0x1357; rand_s1 = 0x2468; fill_8_b132 = 8; fill_8_b131 = 0x38;
+        ab_res("fill_8 869", mapgen_fill_8_e1b869_lifted, mapgen_fill_8_e1b869, 0);
+        rand_s0 = 0x1357; rand_s1 = 0x2468;
+        fill_8_b132 = 8; fill_8_b131 = 0x38; al = 4;
+        ab_res("fill_8 87d", mapgen_fill_8_e1b87d_lifted, mapgen_fill_8_e1b87d, 0);
+        rand_s0 = 0x1357; rand_s1 = 0x2468; fill_8_b132 = 7; fill_8_b131 = 0x38;
+        ab_res("fill_8 89f", mapgen_fill_8_e1b89f_lifted, mapgen_fill_8_e1b89f, 0);
         ds = dsc;
         fprintf(stderr, "  (mission leaf: lifted vs C, %d checks)\n", checks);
     }
