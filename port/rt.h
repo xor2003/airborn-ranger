@@ -259,6 +259,9 @@ void map_rowhdr_get_c(void); void map_rowhdr_get_lifted(void);
 void draw_tile_compose_c(void); void draw_tile_compose_lifted(void);
 void cell_tile_compose_c(void); void cell_tile_compose_lifted(void);
 void bar_tandy_c(void); void bar_tandy_lifted(void);
+void blit_tile_mcga_c(void); void blit_tile_mcga_lifted(void);
+void blit_tile_mcga_e11ec5_c(void); void blit_tile_mcga_e11ec5_lifted(void);
+void text_cursor_next_c(void); void text_cursor_next_lifted(void);
 
 /* env-gated trace (M2C_TRACE=1) */
 extern int rt_trace;
@@ -266,3 +269,26 @@ extern int rt_trace;
 void rt_tracef(const char *tag);
 
 #define swap(a,b) do{__typeof__(a)_t=(a);(a)=(b);(b)=_t;}while(0)
+void tile_lookup_c(void); void tile_lookup_lifted(void);
+void obj_cell_tile_c(void); void obj_cell_tile_lifted(void);
+void obj_cell_tile_e1b34f_c(void); void obj_cell_tile_e1b34f_lifted(void);
+void tilemap_init_c(void); void tilemap_init_lifted(void);
+void build_mcga_lut_c(void); void build_mcga_lut_lifted(void);
+void build_mcga_lut_e14b1a_c(void); void build_mcga_lut_e14b1a_lifted(void);
+void blit_dst_patch_c(void); void blit_dst_patch_lifted(void);
+void tile_draw_3f22_c(void); void tile_draw_3f22_lifted(void);
+void tile_blit_c(void); void tile_blit_lifted(void);
+void rdr_copy_mcga_c(void); void rdr_copy_mcga_lifted(void);
+void sprrow_mcga_b_c(void); void sprrow_mcga_b_lifted(void);
+void sprrow_mcga_b_e1204d_c(void); void sprrow_mcga_b_e1204d_lifted(void);
+void sprrow_mcga_c_c(void); void sprrow_mcga_c_lifted(void);
+void sprrow_mcga_c_e121b4_c(void); void sprrow_mcga_c_e121b4_lifted(void);
+void render_bit_row_c(void); void render_bit_row_lifted(void);
+void render_bit_row_e182df_c(void); void render_bit_row_e182df_lifted(void);
+void render_bit_row_e182ec_c(void); void render_bit_row_e182ec_lifted(void);
+void render_bit_row_e18302_c(void); void render_bit_row_e18302_lifted(void);
+void tile_variant_sel_c(void); void tile_variant_sel_lifted(void);
+void bar_draw_c(void); void bar_draw_lifted(void);
+void bar_draw_e17c77_c(void); void bar_draw_e17c77_lifted(void);
+void bar_draw_e17c87_c(void); void bar_draw_e17c87_lifted(void);
+void bar_draw_e17c8f_c(void); void bar_draw_e17c8f_lifted(void);

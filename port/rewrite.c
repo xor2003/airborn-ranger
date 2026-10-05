@@ -2215,3 +2215,374 @@ void bar_tandy_c(void){                     /* sub_17C69-ish bar draw    */
     al |= 8; CF = 0; OF = 0; ZF = (al == 0); SF = (al >> 7);
     *(db*)raddr(ss, bp + 0x1B) = al;
 }
+
+/* ---- MCGA tile pixel writer + text cursor (seg000:1EB3, 0FD0) ----------
+ * blit_tile_mcga: es=seg_flip, si += ax*32 (glyph/tile index into the
+ * seg_resbuf pattern data), then 8 rows of 4 pixel pairs: pattern byte
+ * bl indexes the resbuf translate tables at bx-0x1000/bx-0x0F00 -> word
+ * store at es:di, pitch 0x140. This is the actual background-tile
+ * pixel path reached via sprrow_tbl from draw_tile_compose.
+ * text_cursor_next: shared draw_col++/draw_row+=8 advance (the
+ * 0xC0/0x27 bottom-of-screen clamp).
+ */
+static void blit_tile_mcga_loop(void){      /* loc_11EC5: 8-row xlate    */
+    do {
+        bl = *(db*)raddr(ds, si);
+        al = *(db*)raddr(ds, bx - 0x1000);
+        ah = *(db*)raddr(ds, bx - 0x0F00);
+        *(dw*)(raddr(es, di)) = ax;
+        bl = *(db*)raddr(ds, si + 1);
+        al = *(db*)raddr(ds, bx - 0x1000);
+        ah = *(db*)raddr(ds, bx - 0x0F00);
+        *(dw*)(raddr(es, di + 2)) = ax;
+        bl = *(db*)raddr(ds, si + 2);
+        al = *(db*)raddr(ds, bx - 0x1000);
+        ah = *(db*)raddr(ds, bx - 0x0F00);
+        *(dw*)(raddr(es, di + 4)) = ax;
+        bl = *(db*)raddr(ds, si + 3);
+        al = *(db*)raddr(ds, bx - 0x1000);
+        ah = *(db*)raddr(ds, bx - 0x0F00);
+        *(dw*)(raddr(es, di + 6)) = ax;
+        { dd t_ = (dd)si + (dd)4; CF = t_ > 0xFFFF; si = t_;
+          ZF = (si == 0); SF = (si >> 15); }
+        { dd t_ = (dd)di + (dd)0x140; CF = t_ > 0xFFFF; di = t_;
+          ZF = (di == 0); SF = (di >> 15); }
+    } while (--cx != 0);
+}
+void blit_tile_mcga_e11ec5_c(void){ blit_tile_mcga_loop(); }
+void blit_tile_mcga_c(void){
+    cx = seg_flip;
+    es = cx;
+    cl = 5;
+    if (cl){ CF = ((dd)ax << cl) >> 16 & 1; ax <<= cl;
+             ZF = (ax == 0); SF = (ax >> 15); }
+    { dd t_ = (dd)si + (dd)ax; CF = t_ > 0xFFFF; si = t_;
+      ZF = (si == 0); SF = (si >> 15); }
+    cx = 8;
+    bh = 0; CF = 0; OF = 0; ZF = 1; SF = 0;
+    blit_tile_mcga_loop();
+}
+void text_cursor_next_c(void){              /* sub_10FD0: col wrap       */
+    (draw_col)++; ZF = (draw_col == 0); SF = (draw_col >> 15);
+    CF = (dd)draw_col < (dd)0x28; ZF = (draw_col == 0x28);
+    SF = ((dw)(draw_col - 0x28) >> 15);
+    if (draw_col < 0x28) return;
+    draw_col = 0;
+    { dd t_ = (dd)draw_row + (dd)8; CF = t_ > 0xFFFF; draw_row = t_;
+      ZF = (draw_row == 0); SF = (draw_row >> 15); }
+    CF = (dd)draw_row < (dd)0x0C8; ZF = (draw_row == 0x0C8);
+    SF = ((dw)(draw_row - 0x0C8) >> 15);
+    if (draw_row < 0x0C8) return;
+    draw_row = 0x0C0;
+    draw_col = 0x27;
+}
+
+/* ---- map-cell attribute lookup + tilemap leaf helpers ---- */
+void tile_lookup_c(void) {               /* sub_1B35E: cell attrs       */
+    ax &= 0x7F; CF = 0; OF = 0; ZF = (ax == 0); SF = (ax >> 15);
+    si = ax;
+    bp = tile_loo_b24f;
+    al = *(db*)raddr(ds, bp + si);
+    al |= al; CF = 0; OF = 0; ZF = (al == 0); SF = (al >> 7);
+    ot0d_aa61 = al;
+    CF = (si >> 12) & 1; si <<= 4;      /* four shl si,1 */
+    ZF = (si == 0); SF = (si >> 15);
+    { dd t_ = (dd)si + (dd)tile_loo_b251; CF = t_ > 0xFFFF; si = t_;
+      ZF = (si == 0); SF = (si >> 15); }
+    al = *(db*)(&probe_py);
+    al &= 6; CF = 0; OF = 0; ZF = (al == 0); SF = (al >> 7);
+    CF = (al >> 6) & 1; al = (db)(al << 1);
+    ZF = (al == 0); SF = (al >> 7);
+    ah = *(db*)(&probe_px);
+    CF = ah & 1; ah >>= 1;
+    ZF = (ah == 0); SF = (ah >> 7);
+    ah &= 3; CF = 0; OF = 0; ZF = (ah == 0); SF = (ah >> 7);
+    { dd t_ = (dd)al + (dd)ah; CF = t_ > 0xFF; al = t_;
+      ZF = (al == 0); SF = (al >> 7); }
+    ah = 0; CF = 0; OF = 0; ZF = 1; SF = 0;
+    { dd t_ = (dd)si + (dd)ax; CF = t_ > 0xFFFF; si = t_;
+      ZF = (si == 0); SF = (si >> 15); }
+    al = *(db*)raddr(ds, si);
+    map_kind = al;
+    ah = 0; CF = 0; OF = 0; ZF = 1; SF = 0;
+    si = ax;
+    al = *(db*)raddr(ds, si - 0x2410); odelta_a5c   = al;
+    al = *(db*)raddr(ds, si - 0x2403); rplan_aa5d   = al;
+    al = *(db*)raddr(ds, si - 0x23F6); omove_a5e    = al;
+    al = *(db*)raddr(ds, si - 0x23E9); omove_a5f    = al;
+    al = *(db*)raddr(ds, si - 0x23DC); spawn_a64    = al;
+    al = *(db*)raddr(ds, si - 0x23CF); motion_t_aa60 = al;
+    al = *(db*)raddr(ds, si - 0x23C2); omot_a62     = al;
+}
+void obj_cell_tile_c(void) {             /* sub_1B344: probe+lookup     */
+    map_prob_aa56 = bx;
+    map_prob_aa58 = si;
+    xy_to_cell();
+    obj_cell_tile_e1b34f_c();
+}
+void obj_cell_tile_e1b34f_c(void) {
+    map_probe_xy();
+    tile_lookup();
+    bx = map_prob_aa56;
+    si = map_prob_aa58;
+}
+void tilemap_init_c(void) {              /* sub_11CD9: field init       */
+    glyph_rows = 0x3F22;
+    tile_src = 0x8722;
+    seg000_1_d969 = 0;
+    seg000_1_d965 = 0x28;
+    tilemap_compose_e11c82();
+}
+void build_mcga_lut_c(void) {            /* sub_14B0C: LUT copy gate    */
+    ax = seg_data;
+    ds = ax;
+    CF = (dd)adapter_id < 3; ZF = (adapter_id == 3);
+    SF = ((dw)(adapter_id - 3) >> 15);
+    if (adapter_id != 3) return;
+    build_mcga_lut_e14b1a_c();
+}
+void build_mcga_lut_e14b1a_c(void) {
+    ax = seg_resbuf;
+    es = ax;
+    si = 0x3C70;
+    di = 0x0F000;
+    cx = 0x100;
+    while (cx--) {
+        *(dw*)raddr_(es, di) = *(dw*)raddr_(ds, si);
+        si += DF ? -2 : 2; di += DF ? -2 : 2;
+    }
+}
+void blit_dst_patch_c(void) {            /* sub_126A0: dst seg patch    */
+    ax = seg_draw;
+    blitdst_a = ax;
+    blitdst_b = ax;
+    video_bufs_setup_e126c9();
+}
+void tile_draw_3f22_c(void) {            /* sub_154CE: tile @3F22       */
+    push(si);
+    si = 0x3F22;
+    tile_blit();
+    si = pop();
+}
+void tile_blit_c(void) {                 /* sub_116E0: blit entry       */
+    di = seg_draw;
+    bx = 0;
+    farcall_seg0e_e1170b();
+}
+void rdr_copy_mcga_c(void) {             /* sub_1AA39: 0x7A80w copy     */
+    si = 0x500;
+    di = 0;
+    cx = 0x7A80;
+    while (cx--) {
+        *(dw*)raddr_(es, di) = *(dw*)raddr_(ds, si);
+        si += DF ? -2 : 2; di += DF ? -2 : 2;
+    }
+}
+
+/* ---- half-tile MCGA row writers (sprrow_tbl cases) ---- */
+static void sprrow_half_rows(void) {     /* 4 rows x 4 px via LUTs      */
+    do {
+        bl = *(db*)raddr(ds, si);
+        al = *(db*)raddr(ds, bx - 0x1000);
+        ah = *(db*)raddr(ds, bx - 0x0F00);
+        *(dw*)(raddr(es, di)) = ax;
+        bl = *(db*)raddr(ds, si + 1);
+        al = *(db*)raddr(ds, bx - 0x1000);
+        ah = *(db*)raddr(ds, bx - 0x0F00);
+        *(dw*)(raddr(es, di + 2)) = ax;
+        bl = *(db*)raddr(ds, si + 2);
+        al = *(db*)raddr(ds, bx - 0x1000);
+        ah = *(db*)raddr(ds, bx - 0x0F00);
+        *(dw*)(raddr(es, di + 4)) = ax;
+        bl = *(db*)raddr(ds, si + 3);
+        al = *(db*)raddr(ds, bx - 0x1000);
+        ah = *(db*)raddr(ds, bx - 0x0F00);
+        *(dw*)(raddr(es, di + 6)) = ax;
+        { dd t_ = (dd)si + (dd)4; CF = t_ > 0xFFFF; si = t_;
+          ZF = (si == 0); SF = (si >> 15); }
+        { dd t_ = (dd)di + (dd)0x140; CF = t_ > 0xFFFF; di = t_;
+          ZF = (di == 0); SF = (di >> 15); }
+    } while (--cx != 0);
+}
+void sprrow_mcga_b_c(void) {             /* sub_1203B: left half tile   */
+    cx = seg_flip;
+    es = cx;
+    cl = 5;
+    if (cl) {
+        CF = (((dd)ax << cl) >> 16) & 1; ax <<= cl;
+        ZF = (ax == 0); SF = (ax >> 15);
+    }
+    { dd t_ = (dd)si + (dd)ax; CF = t_ > 0xFFFF; si = t_;
+      ZF = (si == 0); SF = (si >> 15); }
+    cx = 4;
+    bh = 0; CF = 0; OF = 0; ZF = 1; SF = 0;
+    sprrow_half_rows();
+}
+void sprrow_mcga_b_e1204d_c(void) {
+    sprrow_half_rows();
+}
+void sprrow_mcga_c_c(void) {             /* sub_1219F: right half tile  */
+    cx = seg_flip;
+    es = cx;
+    cl = 5;
+    if (cl) {
+        CF = (((dd)ax << cl) >> 16) & 1; ax <<= cl;
+        ZF = (ax == 0); SF = (ax >> 15);
+    }
+    { dd t_ = (dd)si + (dd)ax; CF = t_ > 0xFFFF; si = t_;
+      ZF = (si == 0); SF = (si >> 15); }
+    { dd t_ = (dd)si + (dd)0x10; CF = t_ > 0xFFFF; si = t_;
+      ZF = (si == 0); SF = (si >> 15); }
+    cx = 4;
+    bh = 0; CF = 0; OF = 0; ZF = 1; SF = 0;
+    sprrow_half_rows();
+}
+void sprrow_mcga_c_e121b4_c(void) {
+    sprrow_half_rows();
+}
+
+/* ---- sel-mask bit scan → record compares ---- */
+static void bitrow_fill(void) {          /* rec_ptr_a[5..0] = '0'       */
+    do {
+        bp = rec_ptr_a;
+        *(db*)raddr(ds, bp + si) = al;
+        (si)--; ZF = (si == 0); SF = (si >> 15);
+    } while ((short)(si) >= 0);
+}
+static void bitrow_scan(void) {          /* sel_mask bit loop           */
+    do {
+        CF = sel_mask & 1; sel_mask >>= 1;
+        ZF = (sel_mask == 0); SF = (sel_mask >> 15);
+        if (CF) {
+            ax = bx;
+            CF = (((dd)ax << 1) >> 16) & 1; ax <<= 1;
+            ZF = (ax == 0); SF = (ax >> 15);
+            si = ax;
+            ax = *(dw*)raddr(ds, si - 0x295D);
+            rec_ptr_b = ax;
+            rec5_cmp();
+        }
+        (bx)--; ZF = (bx == 0); SF = (bx >> 15);
+    } while ((short)(bx) >= 0);
+}
+void render_bit_row_c(void) {            /* sub_182DA: '0' row + scan   */
+    si = 5;
+    al = 0x30;
+    bitrow_fill();
+    bx = 0x0F;
+    bitrow_scan();
+}
+void render_bit_row_e182df_c(void) {
+    bitrow_fill();
+    bx = 0x0F;
+    bitrow_scan();
+}
+void render_bit_row_e182ec_c(void) {
+    bitrow_scan();
+}
+void render_bit_row_e18302_c(void) {
+    for (;;) {
+        do {
+            (bx)--; ZF = (bx == 0); SF = (bx >> 15);
+            if ((short)(bx) < 0) return;
+            CF = sel_mask & 1; sel_mask >>= 1;
+            ZF = (sel_mask == 0); SF = (sel_mask >> 15);
+        } while (!CF);
+        ax = bx;
+        CF = (((dd)ax << 1) >> 16) & 1; ax <<= 1;
+        ZF = (ax == 0); SF = (ax >> 15);
+        si = ax;
+        ax = *(dw*)raddr(ds, si - 0x295D);
+        rec_ptr_b = ax;
+        rec5_cmp();
+    }
+}
+
+/* ---- alert-level tile variant + status bar (bar_jt dispatch) ---- */
+void bar_draw_c(void);                   /* fwd: shared tail            */
+void tile_variant_sel_c(void) {          /* sub_17C27: alert→si select  */
+    si = 0;
+    CF = (dd)alert_aux < 0; ZF = (alert_aux == 0);
+    SF = ((db)(alert_aux - 0) >> 7);
+    if (alert_aux == 0) {
+        si = 2;
+        CF = (dd)alert_lvl < (dd)0x0A0; ZF = (alert_lvl == 0x0A0);
+        SF = ((db)(alert_lvl - 0x0A0) >> 7);
+        if (alert_lvl >= 0x0A0) si = 1;
+    }
+    bar_draw_c();
+}
+static void bar_draw_fill(void) {        /* e17c77: DD88/DDDD cells     */
+    do {
+        *(dw*)(raddr(ss, bp + 0)) = 0x0DD88;
+        *(dw*)(raddr(ss, bp + 2)) = 0x0DDDD;
+        { dd t_ = (dd)bp + (dd)4; CF = t_ > 0xFFFF; bp = t_;
+          ZF = (bp == 0); SF = (bp >> 15); }
+        (dx)--; ZF = (dx == 0); SF = (dx >> 15);
+    } while (dx != 0);
+}
+static void bar_draw_mark(void) {        /* e17c8f: 88/al/ax cells+tail */
+    do {
+        *(db*)raddr(ss, bp + 0) = 0x88;
+        *(db*)raddr(ss, bp + 1) = al;
+        *(dw*)raddr(ss, bp + 2) = ax;
+        { dd t_ = (dd)bp + (dd)4; CF = t_ > 0xFFFF; bp = t_;
+          ZF = (bp == 0); SF = (bp >> 15); }
+        (bx)--; ZF = (bx == 0); SF = (bx >> 15);
+    } while (bx != 0);
+    bp = di;
+    al = *(db*)raddr(ss, bp + 0x19);
+    al &= 0x0F; CF = 0; OF = 0; ZF = (al == 0); SF = (al >> 7);
+    al |= 0x80; CF = 0; OF = 0; ZF = (al == 0); SF = (al >> 7);
+    *(db*)raddr(ss, bp + 0x19) = al;
+    al = *(db*)raddr(ss, bp + 0x1B);
+    al &= 0x0F0; CF = 0; OF = 0; ZF = (al == 0); SF = (al >> 7);
+    al |= 8; CF = 0; OF = 0; ZF = (al == 0); SF = (al >> 7);
+    *(db*)raddr(ss, bp + 0x1B) = al;
+}
+void bar_draw_c(void) {                  /* sub_17C3E: bar compute+disp */
+    bl = alert_lvl;
+    bh = 0; CF = 0; OF = 0; ZF = 1; SF = 0;
+    cl = 4;
+    if (cl) {
+        CF = (bx >> (cl - 1)) & 1; bx >>= cl;
+        ZF = (bx == 0); SF = (bx >> 15);
+    }
+    (bx)++; ZF = (bx == 0); SF = (bx >> 15);
+    { dd t_ = (dd)bx + (dd)6; CF = t_ > 0xFFFF; bx = t_;
+      ZF = (bx == 0); SF = (bx >> 15); }
+    ax = 0x16;
+    { dd t_ = (dd)ax - (dd)bx; CF = (dd)ax < (dd)bx; ax = t_;
+      ZF = (ax == 0); SF = (ax >> 15); }
+    dx = ax;
+    bp = 0x139;
+    CF = (((dd)bp << 1) >> 16) & 1; bp <<= 1;
+    ZF = (bp == 0); SF = (bp >> 15);
+    bp = *(dw*)raddr(ss, bp + 0);
+    { dd t_ = (dd)bp + (dd)4; CF = t_ > 0xFFFF; bp = t_;
+      ZF = (bp == 0); SF = (bp >> 15); }
+    di = adapter_id;
+    CF = (((dd)di << 1) >> 16) & 1; di <<= 1;
+    ZF = (di == 0); SF = (di >> 15);
+    { vfn f_ = func_at((dd)0x1a20 + (*(dw*)(((db*)&jpt_17c64) + di)));
+      if (f_) f_();
+      else fprintf(stderr, "unresolved ind jmp %x\n",
+                   (dd)((dd)0x1a20 + (*(dw*)(((db*)&jpt_17c64) + di))));
+      return; }
+}
+void bar_draw_e17c77_c(void) {
+    bar_draw_fill();
+    CF = (dd)bx < (dd)0x16; ZF = (bx == 0x16);
+    SF = ((dw)(bx - 0x16) >> 15);
+    if (bx > 0x16) bx = 0x16;
+    bar_draw_mark();
+}
+void bar_draw_e17c87_c(void) {
+    CF = (dd)bx < (dd)0x16; ZF = (bx == 0x16);
+    SF = ((dw)(bx - 0x16) >> 15);
+    if (bx > 0x16) bx = 0x16;
+    bar_draw_mark();
+}
+void bar_draw_e17c8f_c(void) {
+    bar_draw_mark();
+}

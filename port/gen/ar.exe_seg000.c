@@ -3428,7 +3428,8 @@ void locret_1101d(void) {
     /* retn ;~ 01A2:101D */
     return;
 }
-void text_cursor_next(void) {
+void text_cursor_next(void) { text_cursor_next_c(); }
+void text_cursor_next_lifted(void) {
     dd _sa = 0, _sb = 0;
     /* inc     word_1D900 ;~ 01A2:0FF3 */
     (draw_col)++; ZF = ((dw)(draw_col) == 0); SF = (((dw)(draw_col)) >> 15);
@@ -5442,7 +5443,8 @@ bufsel_mcga:
     /* retn ;~ 01A2:1670 */
     return;
 }
-void tile_blit(void) {
+void tile_blit(void) { tile_blit_c(); }
+void tile_blit_lifted(void) {
     /* mov     di, cs:seg_draw ;~ 01A2:16E0 */
     di = seg_draw;
     /* mov     bx, 0 ;~ 01A2:16E5 */
@@ -6504,7 +6506,8 @@ void locret_11d81(void) {
     /* retn ;~ 01A2:1D81 */
     return;
 }
-void tilemap_init(void) {
+void tilemap_init(void) { tilemap_init_c(); }
+void tilemap_init_lifted(void) {
     dd _sa = 0, _sb = 0;
     /* mov     word_1D916, 3F22h ;~ 01A2:1CD9 */
     glyph_rows = 0x3F22;
@@ -6670,7 +6673,8 @@ void locret_11df7(void) {
 
 
 
-void blit_tile_mcga_e11ec5(void) {
+void blit_tile_mcga_e11ec5(void) { blit_tile_mcga_e11ec5_c(); }
+void blit_tile_mcga_e11ec5_lifted(void) {
 blit_tile_mcga_e11ec5:
     do {
         /* mov     bl, [si] ;~ 01A2:1EC5 */
@@ -6714,7 +6718,8 @@ blit_tile_mcga_e11ec5:
     /* retn ;~ 01A2:1F08 */
     return;
 }
-void blit_tile_mcga(void) {
+void blit_tile_mcga(void) { blit_tile_mcga_c(); }
+void blit_tile_mcga_lifted(void) {
     /* mov     cx, cs:seg_flip ;~ 01A2:1EB3 */
     cx = seg_flip;
     /* mov     es, cx ;~ 01A2:1EB8 */
@@ -6785,7 +6790,8 @@ void locret_11fc4(void) {
 
 
 
-void sprrow_mcga_b_e1204d(void) {
+void sprrow_mcga_b_e1204d(void) { sprrow_mcga_b_e1204d_c(); }
+void sprrow_mcga_b_e1204d_lifted(void) {
 sprrow_mcga_b_e1204d:
     do {
         /* mov     bl, [si] ;~ 01A2:204D */
@@ -6829,7 +6835,8 @@ sprrow_mcga_b_e1204d:
     /* retn ;~ 01A2:2090 */
     return;
 }
-void sprrow_mcga_b(void) {
+void sprrow_mcga_b(void) { sprrow_mcga_b_c(); }
+void sprrow_mcga_b_lifted(void) {
     /* mov     cx, cs:seg_flip ;~ 01A2:203B */
     cx = seg_flip;
     /* mov     es, cx ;~ 01A2:2040 */
@@ -6900,7 +6907,8 @@ void locret_12122(void) {
 
 
 
-void sprrow_mcga_c_e121b4(void) {
+void sprrow_mcga_c_e121b4(void) { sprrow_mcga_c_e121b4_c(); }
+void sprrow_mcga_c_e121b4_lifted(void) {
 sprrow_mcga_c_e121b4:
     do {
         /* mov     bl, [si] ;~ 01A2:21B4 */
@@ -6944,7 +6952,8 @@ sprrow_mcga_c_e121b4:
     /* retn ;~ 01A2:21F7 */
     return;
 }
-void sprrow_mcga_c(void) {
+void sprrow_mcga_c(void) { sprrow_mcga_c_c(); }
+void sprrow_mcga_c_lifted(void) {
     /* mov     cx, cs:seg_flip ;~ 01A2:219F */
     cx = seg_flip;
     /* mov     es, cx ;~ 01A2:21A4 */
@@ -9350,7 +9359,8 @@ border_sel_e12680:
     /* retn ;~ 01A2:2694 */
     return;
 }
-void blit_dst_patch(void) {
+void blit_dst_patch(void) { blit_dst_patch_c(); }
+void blit_dst_patch_lifted(void) {
     /* mov     ax, cs:seg_draw ;~ 01A2:26A0 */
     ax = seg_draw;
     /* mov     cs:word_126DA, ax ;~ 01A2:26A4 */
@@ -25335,7 +25345,8 @@ locret_14b0b:
     /* retn ;~ 01A2:4B0B */
     return;
 }
-void build_mcga_lut_e14b1a(void) {
+void build_mcga_lut_e14b1a(void) { build_mcga_lut_e14b1a_c(); }
+void build_mcga_lut_e14b1a_lifted(void) {
     /* mov     ax, cs:seg_resbuf ;~ 01A2:4B1A */
     ax = seg_resbuf;
     /* mov     es, ax ;~ 01A2:4B1E */
@@ -25351,7 +25362,8 @@ void build_mcga_lut_e14b1a(void) {
     /* retn ;~ 01A2:4B2B */
     return;
 }
-void build_mcga_lut(void) {
+void build_mcga_lut(void) { build_mcga_lut_c(); }
+void build_mcga_lut_lifted(void) {
     /* mov     ax, cs:seg_data ;~ 01A2:4B0C */
     ax = seg_data;
     /* mov     ds, ax ;~ 01A2:4B10 */
@@ -39200,7 +39212,8 @@ rec_row_fetch_e154bc:
     /* retn ;~ 01A2:54CD */
     return;
 }
-void tile_draw_3f22(void) {
+void tile_draw_3f22(void) { tile_draw_3f22_c(); }
+void tile_draw_3f22_lifted(void) {
     /* push    si ;~ 01A2:54CE */
     push(si);
     /* mov     si, 3F22h ;~ 01A2:54CF */
@@ -84483,7 +84496,8 @@ fld304a_store_e17c18:
     /* retn ;~ 01A2:7C1C */
     return;
 }
-void bar_draw(void) {
+void bar_draw(void) { bar_draw_c(); }
+void bar_draw_lifted(void) {
     dd _sa = 0, _sb = 0;
     /* mov     bl, byte_2A7AD ;~ 01A2:7C3E */
     bl = alert_lvl;
@@ -84667,7 +84681,8 @@ bar_draw_e17c8f:
     /* retn ;~ 01A2:7CB5 */
     return;
 }
-void bar_draw_e17c77(void) {
+void bar_draw_e17c77(void) { bar_draw_e17c77_c(); }
+void bar_draw_e17c77_lifted(void) {
     dd _sa = 0, _sb = 0;
 bar_draw_e17c77:
     do {
@@ -84727,7 +84742,8 @@ bar_draw_e17c8f:
     /* retn ;~ 01A2:7CB5 */
     return;
 }
-void bar_draw_e17c87(void) {
+void bar_draw_e17c87(void) { bar_draw_e17c87_c(); }
+void bar_draw_e17c87_lifted(void) {
     dd _sa = 0, _sb = 0;
     /* cmp     bx, 16h ;~ 01A2:7C87 */
     CF = (dd)bx < (dd)0x16; ZF = ((dw)((bx) - (0x16)) == 0); SF = (((dw)((bx) - (0x16))) >> 15);
@@ -84774,7 +84790,8 @@ bar_draw_e17c8f:
     /* retn ;~ 01A2:7CB5 */
     return;
 }
-void bar_draw_e17c8f(void) {
+void bar_draw_e17c8f(void) { bar_draw_e17c8f_c(); }
+void bar_draw_e17c8f_lifted(void) {
     dd _sa = 0, _sb = 0;
 bar_draw_e17c8f:
     do {
@@ -84817,7 +84834,8 @@ bar_draw_e17c8f:
 
 
 
-void tile_variant_sel(void) {
+void tile_variant_sel(void) { tile_variant_sel_c(); }
+void tile_variant_sel_lifted(void) {
     dd _sa = 0, _sb = 0;
     /* mov     si, 0 ;~ 01A2:7C27 */
     si = 0;
@@ -100194,7 +100212,8 @@ void accum_add_half(void) {
     /* retn ;~ 01A2:82D9 */
     return;
 }
-void render_bit_row_e182df(void) {
+void render_bit_row_e182df(void) { render_bit_row_e182df_c(); }
+void render_bit_row_e182df_lifted(void) {
     dd _sa = 0, _sb = 0;
 render_bit_row_e182df:
     do {
@@ -100237,7 +100256,8 @@ render_bit_row_e18302:
     /* retn ;~ 01A2:8305 */
     return;
 }
-void render_bit_row_e182ec(void) {
+void render_bit_row_e182ec(void) { render_bit_row_e182ec_c(); }
+void render_bit_row_e182ec_lifted(void) {
     dd _sa = 0, _sb = 0;
 render_bit_row_e182ec:
     do {
@@ -100268,7 +100288,8 @@ render_bit_row_e18302:
     /* retn ;~ 01A2:8305 */
     return;
 }
-void render_bit_row_e18302(void) {
+void render_bit_row_e18302(void) { render_bit_row_e18302_c(); }
+void render_bit_row_e18302_lifted(void) {
     dd _sa = 0, _sb = 0;
 render_bit_row_e18302:
     do {
@@ -100301,7 +100322,8 @@ render_bit_row_e182ec:
         rec5_cmp();
     } while (1);
 }
-void render_bit_row(void) {
+void render_bit_row(void) { render_bit_row_c(); }
+void render_bit_row_lifted(void) {
     dd _sa = 0, _sb = 0;
     /* mov     si, 5 ;~ 01A2:82DA */
     si = 5;
@@ -154231,7 +154253,8 @@ void render_dispatch(void) {
 
 
 
-void rdr_copy_mcga(void) {
+void rdr_copy_mcga(void) { rdr_copy_mcga_c(); }
+void rdr_copy_mcga_lifted(void) {
     /* mov     si, 500h ;~ 01A2:AA39 */
     si = 0x500;
     /* mov     di, 0 ;~ 01A2:AA3C */
@@ -160090,7 +160113,8 @@ void map_rowhdr_get_lifted(void) {
     /* retn ;~ 01A2:B335 */
     return;
 }
-void obj_cell_tile_e1b34f(void) {
+void obj_cell_tile_e1b34f(void) { obj_cell_tile_e1b34f_c(); }
+void obj_cell_tile_e1b34f_lifted(void) {
     /* call    sub_1B268 ;~ 01A2:B34F */
     map_probe_xy();
     /* call    sub_1B35E ;~ 01A2:B352 */
@@ -160123,7 +160147,8 @@ obj_cell_tile_e1b34f:
     /* retn ;~ 01A2:B35D */
     return;
 }
-void obj_cell_tile(void) {
+void obj_cell_tile(void) { obj_cell_tile_c(); }
+void obj_cell_tile_lifted(void) {
     /* mov     word_2AA56, bx ;~ 01A2:B344 */
     map_prob_aa56 = bx;
     /* mov     word_2AA58, si ;~ 01A2:B348 */
@@ -160142,7 +160167,8 @@ obj_cell_tile_e1b34f:
     /* retn ;~ 01A2:B35D */
     return;
 }
-void tile_lookup(void) {
+void tile_lookup(void) { tile_lookup_c(); }
+void tile_lookup_lifted(void) {
     dd _sa = 0, _sb = 0;
     /* and     ax, 7Fh ;~ 01A2:B35E */
     ax &= 0x7F; CF = 0; OF = 0; ZF = ((dw)(ax) == 0); SF = (((dw)(ax)) >> 15);

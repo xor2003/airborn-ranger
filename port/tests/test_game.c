@@ -1156,6 +1156,92 @@ int main(void){
                 checks);
     }
 
+    /* ---- tilemap leaf helpers: tile_lookup cell attrs, obj_cell_tile
+     * chain, mcga LUT build/copy procs, half-tile sprrow writers,
+     * render_bit_row mask scan, tile_variant_sel + bar_draw frame. --- */
+    {
+        dw s0 = seg_flip, s1 = seg_draw, s2 = seg_screen, s3 = seg_resbuf;
+        seg_flip = 0x9000; seg_draw = 0x9800; seg_screen = 0xA000;
+        seg_resbuf = 0xB000;
+        ss = 0x8000; sp = 0xFFFE;
+        ds = seg_data; adapter_id = 3;
+        ax = 0x25; probe_px = 0x48; probe_py = 0x30;
+        ab_res("tile_lookup", tile_lookup_lifted, tile_lookup, 0);
+        ax = 0x7F; probe_px = 0xFF; probe_py = 0xFF;
+        ab_res("tile_lookup hi", tile_lookup_lifted, tile_lookup, 0);
+        obj_sx = 0x48; obj_sy = 0x30; bx = 0x11; si = 0x22;
+        cell_x = 9; cell_y = 6;
+        ab_res("obj_cell_tile", obj_cell_tile_lifted, obj_cell_tile, 0);
+        cell_x = 9; cell_y = 6;
+        ab_res("obj_cell mid", obj_cell_tile_e1b34f_lifted,
+               obj_cell_tile_e1b34f, 0);
+        adapter_id = 3; ds = seg_data;
+        ab_res("mcga lut", build_mcga_lut_lifted, build_mcga_lut, 0);
+        adapter_id = 0;
+        ab_res("mcga lut a0", build_mcga_lut_lifted, build_mcga_lut, 0);
+        adapter_id = 3;
+        ab_res("mcga lut mid", build_mcga_lut_e14b1a_lifted,
+               build_mcga_lut_e14b1a, 0);
+        ab_res("blitdst", blit_dst_patch_lifted, blit_dst_patch, 0);
+        ds = seg_data;
+        ab_res("tilemap_init", tilemap_init_lifted, tilemap_init, 0);
+        ds = seg_data; es = 0xA800;
+        ab_res("rdr copy", rdr_copy_mcga_lifted, rdr_copy_mcga, 0);
+        draw_col = 4; draw_row = 0x20; si = 0x3F22;
+        ab_res("tile_blit", tile_blit_lifted, tile_blit, 0);
+        si = 0x3F22;
+        ab_res("tile 3f22", tile_draw_3f22_lifted, tile_draw_3f22, 0);
+        /* half-tile writers: ds=resbuf so [bx-1000]/[bx-F00] hit the
+         * LUTs at resbuf:F000/F100; src tile at resbuf:2000          */
+        ds = seg_resbuf;
+        for (int i = 0; i < 0x200; i++)
+            mem[(seg_resbuf << 4) + 0xF000 + i] = i;
+        for (int i = 0; i < 16; i++)
+            mem[(seg_resbuf << 4) + 0x2000 + i] = 0x10 + i;
+        si = 0x2000; ax = 2; di = 0x100;
+        ab_res("sprrow b", sprrow_mcga_b_lifted, sprrow_mcga_b, 0);
+        si = 0x2000; di = 0x100; es = 0x9000; cx = 4; bh = 0;
+        ab_res("sprrow b mid", sprrow_mcga_b_e1204d_lifted,
+               sprrow_mcga_b_e1204d, 0);
+        si = 0x2000; ax = 2; di = 0x100;
+        ab_res("sprrow c", sprrow_mcga_c_lifted, sprrow_mcga_c, 0);
+        si = 0x2000; di = 0x100; es = 0x9000; cx = 4; bh = 0;
+        ab_res("sprrow c mid", sprrow_mcga_c_e121b4_lifted,
+               sprrow_mcga_c_e121b4, 0);
+        /* bit scan: '0' fill + sel_mask bits -> rec5_cmp decimal adds */
+        ds = seg_data;
+        rec_ptr_a = 0x6000; sel_mask = 0xA005;
+        ab_res("bitrow", render_bit_row_lifted, render_bit_row, 0);
+        si = 5; al = 0x30;
+        ab_res("bitrow fill", render_bit_row_e182df_lifted,
+               render_bit_row_e182df, 0);
+        bx = 0x0F; sel_mask = 0x00FF;
+        ab_res("bitrow scan", render_bit_row_e182ec_lifted,
+               render_bit_row_e182ec, 0);
+        bx = 0x0F; sel_mask = 0x00FF;
+        ab_res("bitrow next", render_bit_row_e18302_lifted,
+               render_bit_row_e18302, 0);
+        /* alert->tile variant + status-bar frame fill (bar_jt -> tandy) */
+        alert_aux = 0; alert_lvl = 0xA0;
+        *(dw*)raddr_(ss, 0x272) = 0x4000;      /* bar frame base */
+        ab_res("tilevar", tile_variant_sel_lifted, tile_variant_sel, 0);
+        alert_aux = 1; alert_lvl = 0x40;
+        ab_res("tilevar aux", tile_variant_sel_lifted, tile_variant_sel, 0);
+        alert_aux = 0; alert_lvl = 0x20;
+        ab_res("tilevar lo", tile_variant_sel_lifted, tile_variant_sel, 0);
+        *(dw*)raddr_(ss, 0x272) = 0x4000;
+        ab_res("bar_draw", bar_draw_lifted, bar_draw, 0);
+        bp = 0x4004; di = 6; bx = 3; dx = 2; ax = 0x2211;
+        ab_res("bar fill", bar_draw_e17c77_lifted, bar_draw_e17c77, 0);
+        bp = 0x4004; di = 6; bx = 0x30;
+        ab_res("bar clamp", bar_draw_e17c87_lifted, bar_draw_e17c87, 0);
+        bp = 0x4004; di = 6; bx = 4; ax = 0x5566;
+        ab_res("bar mark", bar_draw_e17c8f_lifted, bar_draw_e17c8f, 0);
+        seg_flip = s0; seg_draw = s1; seg_screen = s2; seg_resbuf = s3;
+        fprintf(stderr, "  (tilemap-leaf: lifted vs C, %d checks)\n",
+                checks);
+    }
+
     /* ---- status-panel digit patcher: WOUNDS field ds:0xB93F <- byte_29712
      * template lives in the image with literal "XX" placeholders; sub_1BBB9
      * converts al to two ASCII digits and stores at ds:[si]/ds:[si+1]. ---- */
