@@ -1723,6 +1723,62 @@ int main(void){
         fprintf(stderr, "  (rand+fill: lifted vs C, %d checks)\n", checks);
     }
 
+    /* ---- mission leaf layer: ds wraps, cursor res sel, mission
+     * setup/populate call chains, cells scatter, obj spawn ---- */
+    {
+        dw dsc = ds;
+        ss = 0x8000; sp = 0xFFFE;
+        ab_res("dswrap_a", ds_wrap_a_lifted, ds_wrap_a, 0);
+        push(ds);
+        ab_res("dswrap_a mid", ds_wrap_a_e1bd56_lifted, ds_wrap_a_e1bd56, 0);
+        ab_res("dswrap_b", ds_wrap_b_lifted, ds_wrap_b, 0);
+        push(ds);
+        ab_res("dswrap_b mid", ds_wrap_b_e1c671_lifted, ds_wrap_b_e1c671, 0);
+        ab_res("dswrap_c", ds_wrap_c_lifted, ds_wrap_c, 0);
+        push(ds);
+        ab_res("dswrap_c mid", ds_wrap_c_e1c9ff_lifted, ds_wrap_c_e1c9ff, 0);
+        ab_res("locret4c", locret_1bd4c_lifted, locret_1bd4c, 0);
+        /* cursor_res_sel: mission_idx indexes 4 res tables (di-1DED..-1DC9) */
+        mission_idx = 4;
+        adapter_id = 3;                  /* skips the second pair */
+        ab_res("curres adp3", cursor_res_sel_lifted, cursor_res_sel, 0);
+        adapter_id = 0;                  /* adapter 0 -> second pair too */
+        ab_res("curres adp0", cursor_res_sel_lifted, cursor_res_sel, 0);
+        adapter_id = 4;
+        ab_res("curres adp4", cursor_res_sel_lifted, cursor_res_sel, 0);
+        adapter_id = 1;
+        ab_res("curres mid", cursor_res_sel_e1bd32_lifted, cursor_res_sel_e1bd32, 0);
+        /* mission setup: select_resource + load_resource chain — feed
+         * Enters for any res-file error path (bad handle here) */
+        ab_res("m6 setup", mission6_setup_lifted, mission6_setup, 0xF);
+        ab_res("m7 setup", mission7_setup_lifted, mission7_setup, 0xF);
+        ab_res("m8 setup", mission8_setup_lifted, mission8_setup, 0xF);
+        /* populate: full mapgen pipeline — fixed rand seed so retries
+         * terminate identically on both sides */
+        for (int i = 0; i < 0x800; i++)
+            *(db*)raddr_(ds, 0x9736 + i) = 0;
+        rand_s0 = 0x1357; rand_s1 = 0x2468;
+        ab_res("m6 populate", mission6_populate_lifted, mission6_populate, 0);
+        rand_s0 = 0x1357; rand_s1 = 0x2468;
+        ab_res("m7 populate", mission7_populate_lifted, mission7_populate, 0);
+        rand_s0 = 0x1357; rand_s1 = 0x2468;
+        ab_res("m8 populate", mission8_populate_lifted, mission8_populate, 0);
+        /* cells scatter: bounded stride sweep, rec tbl ds:si-1BA2/19F9 */
+        rand_s0 = 0x1357; rand_s1 = 0x2468;
+        ab_res("cells_a", mapgen_cells_a_lifted, mapgen_cells_a, 0);
+        rand_s0 = 0x1357; rand_s1 = 0x2468;
+        ab_res("cells_a mid", mapgen_cells_a_e1c167_lifted, mapgen_cells_a_e1c167, 0);
+        rand_s0 = 0x1357; rand_s1 = 0x2468;
+        ab_res("cells_b", mapgen_cells_b_lifted, mapgen_cells_b, 0);
+        rand_s0 = 0x1357; rand_s1 = 0x2468;
+        ab_res("cells_b mid", mapgen_cells_b_e1ca06_lifted, mapgen_cells_b_e1ca06, 0);
+        rand_s0 = 0x1357; rand_s1 = 0x2468;
+        *(db*)raddr_(ds, 0x0E574) = 3;
+        ab_res("mgen_obj", mapgen_obj_lifted, mapgen_obj, 0);
+        ds = dsc;
+        fprintf(stderr, "  (mission leaf: lifted vs C, %d checks)\n", checks);
+    }
+
     /* ---- status-panel digit patcher: WOUNDS field ds:0xB93F <- byte_29712
      * template lives in the image with literal "XX" placeholders; sub_1BBB9
      * converts al to two ASCII digits and stores at ds:[si]/ds:[si+1]. ---- */

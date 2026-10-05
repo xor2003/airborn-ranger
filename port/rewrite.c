@@ -4249,3 +4249,192 @@ void mapgen_fill_b_e1b48b_c(void) {
         (fill_b_b0c7)--; ZF = fill_b_b0c7 == 0; SF = fill_b_b0c7 >> 7;
     } while ((signed char)fill_b_b0c7 >= 0);
 }
+
+/* ---- mission leaf layer: ds save/restore wraps, resource setup, ----
+ * cell scatter + object spawn helpers */
+
+void ds_wrap_a_c(void) { push(ds); ds_wrap_a_e1bd56_c(); }
+void ds_wrap_a_e1bd56_c(void) { ds = pop(); }
+void ds_wrap_b_c(void) { push(ds); ds_wrap_b_e1c671_c(); }
+void ds_wrap_b_e1c671_c(void) { ds = pop(); }
+void ds_wrap_c_c(void) { push(ds); ds_wrap_c_e1c9ff_c(); }
+void ds_wrap_c_e1c9ff_c(void) { ds = pop(); }
+void locret_1bd4c_c(void) { }
+
+void cursor_res_sel_e1bd32_c(void);
+void cursor_res_sel_c(void) {
+    di = mission_idx;
+    al = *(db*)raddr(ds, di - 0x1DED);
+    ah = 0; CF = 0; OF = 0; ZF = 1; SF = 0;
+    select_resource_c();
+    di = mission_idx;
+    al = *(db*)raddr(ds, di - 0x1DD5);
+    ah = 0; CF = 0; OF = 0; ZF = 1; SF = 0;
+    select_resource();
+    CF = adapter_id < 0; ZF = adapter_id == 0; SF = ((dw)(adapter_id - 0)) >> 15;
+    if (adapter_id != 0) {
+        CF = adapter_id < 4; ZF = adapter_id == 4; SF = ((dw)(adapter_id - 4)) >> 15;
+        if (adapter_id != 4) { return; }
+    }
+    cursor_res_sel_e1bd32_c();
+}
+void cursor_res_sel_e1bd32_c(void) {
+    di = mission_idx;
+    al = *(db*)raddr(ds, di - 0x1DE1);
+    ah = 0; CF = 0; OF = 0; ZF = 1; SF = 0;
+    select_resource_c();
+    di = mission_idx;
+    al = *(db*)raddr(ds, di - 0x1DC9);
+    ah = 0; CF = 0; OF = 0; ZF = 1; SF = 0;
+    select_resource();
+}
+
+/* mission*_setup: pick res idx pair, tag ds:18Eh, load, set ptr table */
+void mission6_setup_c(void) {
+    ax = *(dw*)raddr(ds, 0x3EDA);
+    *(dw*)raddr(ds, 0x3ED8) = ax;
+    ax = 0x13; select_resource_c();
+    ax = 0x27; select_resource_d();
+    *(dw*)raddr(ds, 0x18E) = 0x36;
+    load_resource();
+    *(dw*)raddr(ds, 0x0E3CF) = 0x0DCA0;
+    *(dw*)raddr(ds, 0x0E3D1) = 0x0DCF0;
+    *(dw*)raddr(ds, 0x0E3D3) = 0x0DC50;
+    *(dw*)raddr(ds, 0x0E3C5) = 0x0E4D0;
+    *(dw*)raddr(ds, 0x0E3C7) = 0x0E4EA;
+}
+void mission7_setup_c(void) {
+    ax = *(dw*)raddr(ds, 0x3EDE);
+    *(dw*)raddr(ds, 0x3ED8) = ax;
+    ax = 0x14; select_resource_c();
+    ax = 0x28; select_resource_d();
+    *(dw*)raddr(ds, 0x18E) = 0x37;
+    load_resource();
+    *(dw*)raddr(ds, 0x0E3CF) = 0x0DCA0;
+    *(dw*)raddr(ds, 0x0E3D1) = 0x0DCF0;
+    *(dw*)raddr(ds, 0x0E3D3) = 0x0DC50;
+    *(dw*)raddr(ds, 0x0E3C5) = 0x0E4A8;
+    *(dw*)raddr(ds, 0x0E3C7) = 0x0E4B6;
+}
+void mission8_setup_c(void) {
+    ax = *(dw*)raddr(ds, 0x3EDC);
+    *(dw*)raddr(ds, 0x3ED8) = ax;
+    ax = 6;    select_resource_c();
+    ax = 0x29; select_resource_d();
+    *(dw*)raddr(ds, 0x18E) = 0x38;
+    load_resource();
+    *(dw*)raddr(ds, 0x0E3CF) = 0x0DCA0;
+    *(dw*)raddr(ds, 0x0E3D1) = 0x0DCF0;
+    *(dw*)raddr(ds, 0x0E3D3) = 0x0DC50;
+    *(dw*)raddr(ds, 0x0E3C5) = 0x0E5E6;
+    *(dw*)raddr(ds, 0x0E3C7) = 0x0E5F4;
+}
+
+/* mission*_populate: shared mapgen pipeline + per-mission placements */
+void mission6_populate_c(void) {
+    mapgen_place_a();
+    mapgen_fill_6();
+    mapgen_fill_a();
+    mapgen_pick_e();
+    mapgen_fill_8();
+    mapgen_pick_b();
+    al = 1; bl = 6;    si = 0x0E554; mapgen_place_d();
+    al = 1; bl = 6;    si = 0x0E550; mapgen_place_c();
+}
+void mission7_populate_c(void) {
+    mapgen_place_a();
+    mapgen_cells_a();
+    mapgen_fill_6();
+    mapgen_fill_a();
+    mapgen_pick_e();
+    mapgen_fill_8();
+    mapgen_pick_b();
+    al = 1; bl = 2;    si = 0x0E4A0; mapgen_place_d();
+    al = 1; bl = 3;    si = 0x0E49C; mapgen_place_c();
+}
+void mission8_populate_c(void) {
+    mapgen_place_a();
+    mapgen_cells_b();
+    mapgen_fill_6();
+    mapgen_fill_a();
+    mapgen_fill_8();
+    mapgen_pick_b();
+    al = 0; bl = 7;    si = 0x0E67B; mapgen_place_d();
+    al = 0; bl = 0x10; si = 0x0E677; mapgen_place_c();
+}
+
+/* mapgen_cells_a/b: scatter rect records on a stride-3/stride-2 row sweep;
+ * ds:0x9730 aliases rec_ptr_a — the record map_rect_write consumes. */
+void mapgen_cells_a_e1c167_c(void);
+void mapgen_cells_a_c(void) {
+    al = 6;
+    *(db*)raddr(ds, 0x0E45D) = al;
+    mapgen_cells_a_e1c167_c();
+}
+void mapgen_cells_a_e1c167_c(void) {
+    do {
+        rand_next();
+        al &= 0x1F; CF = 0; OF = 0; ZF = al == 0; SF = al >> 7;
+        *(db*)raddr(ds, 0x0E3C3) = al;
+        al = *(db*)raddr(ds, 0x0E45D);
+        *(db*)raddr(ds, 0x0E3C4) = al;
+        rand_next();
+        ax &= 6; CF = 0; OF = 0; ZF = ax == 0; SF = ax >> 15;
+        si = ax;
+        ax = *(dw*)raddr(ds, si - 0x1BA2);
+        *(dw*)raddr(ds, 0x9730) = ax;
+        map_rect_write();
+        al = *(db*)raddr(ds, 0x0E45D);
+        { dd t_ = (dd)al + (dd)3; CF = t_ > 0xFF; al = t_; ZF = al == 0; SF = al >> 7; }
+        *(db*)raddr(ds, 0x0E45D) = al;
+        CF = al < 0x3C; ZF = al == 0x3C; SF = ((db)(al - 0x3C)) >> 7;
+    } while (al < 0x3C);
+}
+void mapgen_cells_b_e1ca06_c(void);
+void mapgen_cells_b_c(void) {
+    *(db*)raddr(ds, 0x0E606) = 6;
+    mapgen_cells_b_e1ca06_c();
+}
+void mapgen_cells_b_e1ca06_c(void) {
+    do {
+        rand_next();
+        al &= 0x0F; CF = 0; OF = 0; ZF = al == 0; SF = al >> 7;
+        *(db*)raddr(ds, 0x0E3C3) = al;
+        rand_next();
+        al &= 7; CF = 0; OF = 0; ZF = al == 0; SF = al >> 7;
+        { dd t_ = (dd)al + (dd)*(db*)raddr(ds, 0x0E3C3); CF = t_ > 0xFF; al = t_; ZF = al == 0; SF = al >> 7; }
+        *(db*)raddr(ds, 0x0E3C3) = al;
+        al = *(db*)raddr(ds, 0x0E606);
+        *(db*)raddr(ds, 0x0E3C4) = al;
+        rand_next();
+        ax &= 6; CF = 0; OF = 0; ZF = ax == 0; SF = ax >> 15;
+        si = ax;
+        ax = *(dw*)raddr(ds, si - 0x19F9);
+        *(dw*)raddr(ds, 0x9730) = ax;
+        map_rect_write();
+        al = *(db*)raddr(ds, 0x0E606);
+        { dd t_ = (dd)al + (dd)2; CF = t_ > 0xFF; al = t_; ZF = al == 0; SF = al >> 7; }
+        *(db*)raddr(ds, 0x0E606) = al;
+        CF = al < 0x3E; ZF = al == 0x3E; SF = ((db)(al - 0x3E)) >> 7;
+    } while (al < 0x3E);
+}
+
+void mapgen_obj_c(void) {
+    al = 0x0C;
+    cell_to_px();
+    al = 0x16;
+    obj_alloc();
+    al = *(db*)raddr(ds, 0x0E574);
+    *(db*)raddr(ds, si - 0x3CEF) = al;
+    ax = si;
+    dl = *(db*)raddr(ds, 0x0E574);
+    dh = 0; CF = 0; OF = 0; ZF = 1; SF = 0;
+    si = dx;
+    dl |= dl; CF = 0; OF = 0; ZF = dl == 0; SF = dl >> 7;
+    *(db*)raddr(ds, si - 0x3CEF) = al;
+    al = *(db*)raddr(ds, 0x0E3C3);
+    *(db*)raddr(ds, 0x0E576) = al;
+    al = *(db*)raddr(ds, 0x0E3C4);
+    { dd t_ = (dd)al + (dd)2; CF = t_ > 0xFF; al = t_; ZF = al == 0; SF = al >> 7; }
+    *(db*)raddr(ds, 0x0E577) = al;
+}

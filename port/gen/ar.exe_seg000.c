@@ -164845,7 +164845,8 @@ mapcols_draw_e1bcf4:
     /* retn ;~ 01A2:BD09 */
     return;
 }
-void cursor_res_sel_e1bd32(void) {
+void cursor_res_sel_e1bd32(void) { cursor_res_sel_e1bd32_c(); }
+void cursor_res_sel_e1bd32_lifted(void) {
     /* mov     di, mission_idx ;~ 01A2:BD32 */
     di = mission_idx;
     /* mov     al, [di-1DE1h] ;~ 01A2:BD36 */
@@ -164866,11 +164867,13 @@ locret_1bd4c:
     /* retn ;~ 01A2:BD4C */
     return;
 }
-void locret_1bd4c(void) {
+void locret_1bd4c(void) { locret_1bd4c_c(); }
+void locret_1bd4c_lifted(void) {
     /* retn ;~ 01A2:BD4C */
     return;
 }
-void cursor_res_sel(void) {
+void cursor_res_sel(void) { cursor_res_sel_c(); }
+void cursor_res_sel_lifted(void) {
     /* mov     di, mission_idx ;~ 01A2:BD0A */
     di = mission_idx;
     /* mov     al, [di-1DEDh] ;~ 01A2:BD0E */
@@ -164917,13 +164920,15 @@ locret_1bd4c:
     /* retn ;~ 01A2:BD4C */
     return;
 }
-void ds_wrap_a_e1bd56(void) {
+void ds_wrap_a_e1bd56(void) { ds_wrap_a_e1bd56_c(); }
+void ds_wrap_a_e1bd56_lifted(void) {
     /* pop     ds ;~ 01A2:BD56 */
     ds = pop();
     /* retn ;~ 01A2:BD57 */
     return;
 }
-void ds_wrap_a(void) {
+void ds_wrap_a(void) { ds_wrap_a_c(); }
+void ds_wrap_a_lifted(void) {
     /* push    ds ;~ 01A2:BD50 */
     push(ds);
     /* jmp     short loc_1BD56 ;~ 01A2:BD51 */
@@ -164934,7 +164939,8 @@ ds_wrap_a_e1bd56:
     /* retn ;~ 01A2:BD57 */
     return;
 }
-void mission7_setup(void) {
+void mission7_setup(void) { mission7_setup_c(); }
+void mission7_setup_lifted(void) {
     /* mov     ax, ds:3EDEh ;~ 01A2:BD58 */
     ax = *(dw*)raddr(ds,0x3EDE);
     /* mov     ds:3ED8h, ax ;~ 01A2:BD5B */
@@ -164964,7 +164970,8 @@ void mission7_setup(void) {
     /* retn ;~ 01A2:BD91 */
     return;
 }
-void mission7_populate(void) {
+void mission7_populate(void) { mission7_populate_c(); }
+void mission7_populate_lifted(void) {
     /* call    sub_1B4F0 ;~ 01A2:BD92 */
     mapgen_place_a();
     /* call    sub_1C162 ;~ 01A2:BD95 */
@@ -169838,7 +169845,8 @@ void mission_case7_e1c15b(void) {
     /* retn ;~ 01A2:C161 */
     return;
 }
-void mapgen_cells_a_e1c167(void) {
+void mapgen_cells_a_e1c167(void) { mapgen_cells_a_e1c167_c(); }
+void mapgen_cells_a_e1c167_lifted(void) {
     dd _sa = 0, _sb = 0;
 mapgen_cells_a_e1c167:
     do {
@@ -169881,7 +169889,8 @@ mapgen_cells_a_e1c167:
     /* retn ;~ 01A2:C193 */
     return;
 }
-void mapgen_cells_a(void) {
+void mapgen_cells_a(void) { mapgen_cells_a_c(); }
+void mapgen_cells_a_lifted(void) {
     dd _sa = 0, _sb = 0;
     /* mov     al, 6 ;~ 01A2:C162 */
     al = 6;
@@ -169928,7 +169937,8 @@ mapgen_cells_a_e1c167:
     /* retn ;~ 01A2:C193 */
     return;
 }
-void mission6_setup(void) {
+void mission6_setup(void) { mission6_setup_c(); }
+void mission6_setup_lifted(void) {
     /* mov     ax, ds:3EDAh ;~ 01A2:C1A0 */
     ax = *(dw*)raddr(ds,0x3EDA);
     /* mov     ds:3ED8h, ax ;~ 01A2:C1A3 */
@@ -169958,7 +169968,8 @@ void mission6_setup(void) {
     /* retn ;~ 01A2:C1D9 */
     return;
 }
-void mission6_populate(void) {
+void mission6_populate(void) { mission6_populate_c(); }
+void mission6_populate_lifted(void) {
     /* call    sub_1B4F0 ;~ 01A2:C1DA */
     mapgen_place_a();
     /* call    sub_1B7C3 ;~ 01A2:C1DD */
@@ -174675,7 +174686,8 @@ mission_case3_e1c60c:
         *(db*)raddr(ds,0x0E570) = al;
     } while (1);
 }
-void mapgen_obj(void) {
+void mapgen_obj(void) { mapgen_obj_c(); }
+void mapgen_obj_lifted(void) {
     /* mov     al, 0Ch ;~ 01A2:C63B */
     al = 0x0C;
     /* call    sub_1B4B7 ;~ 01A2:C63D */
@@ -174713,13 +174725,15 @@ void mapgen_obj(void) {
     /* retn ;~ 01A2:C66A */
     return;
 }
-void ds_wrap_b_e1c671(void) {
+void ds_wrap_b_e1c671(void) { ds_wrap_b_e1c671_c(); }
+void ds_wrap_b_e1c671_lifted(void) {
     /* pop     ds ;~ 01A2:C671 */
     ds = pop();
     /* retn ;~ 01A2:C672 */
     return;
 }
-void ds_wrap_b(void) {
+void ds_wrap_b(void) { ds_wrap_b_c(); }
+void ds_wrap_b_lifted(void) {
     /* push    ds ;~ 01A2:C66B */
     push(ds);
     /* jmp     short loc_1C671 ;~ 01A2:C66C */
@@ -174730,7 +174744,8 @@ ds_wrap_b_e1c671:
     /* retn ;~ 01A2:C672 */
     return;
 }
-void mission8_setup(void) {
+void mission8_setup(void) { mission8_setup_c(); }
+void mission8_setup_lifted(void) {
     /* mov     ax, ds:3EDCh ;~ 01A2:C680 */
     ax = *(dw*)raddr(ds,0x3EDC);
     /* mov     ds:3ED8h, ax ;~ 01A2:C683 */
@@ -174760,7 +174775,8 @@ void mission8_setup(void) {
     /* retn ;~ 01A2:C6B9 */
     return;
 }
-void mission8_populate(void) {
+void mission8_populate(void) { mission8_populate_c(); }
+void mission8_populate_lifted(void) {
     /* call    sub_1B4F0 ;~ 01A2:C6BA */
     mapgen_place_a();
     /* call    sub_1CA01 ;~ 01A2:C6BD */
@@ -177696,13 +177712,15 @@ mission_case8_e1c9de:
     /* retn ;~ 01A2:C9F8 */
     return;
 }
-void ds_wrap_c_e1c9ff(void) {
+void ds_wrap_c_e1c9ff(void) { ds_wrap_c_e1c9ff_c(); }
+void ds_wrap_c_e1c9ff_lifted(void) {
     /* pop     ds ;~ 01A2:C9FF */
     ds = pop();
     /* retn ;~ 01A2:CA00 */
     return;
 }
-void ds_wrap_c(void) {
+void ds_wrap_c(void) { ds_wrap_c_c(); }
+void ds_wrap_c_lifted(void) {
     /* push    ds ;~ 01A2:C9F9 */
     push(ds);
     /* jmp     short loc_1C9FF ;~ 01A2:C9FA */
@@ -177713,7 +177731,8 @@ ds_wrap_c_e1c9ff:
     /* retn ;~ 01A2:CA00 */
     return;
 }
-void mapgen_cells_b_e1ca06(void) {
+void mapgen_cells_b_e1ca06(void) { mapgen_cells_b_e1ca06_c(); }
+void mapgen_cells_b_e1ca06_lifted(void) {
     dd _sa = 0, _sb = 0;
 mapgen_cells_b_e1ca06:
     do {
@@ -177764,7 +177783,8 @@ mapgen_cells_b_e1ca06:
     /* retn ;~ 01A2:CA3E */
     return;
 }
-void mapgen_cells_b(void) {
+void mapgen_cells_b(void) { mapgen_cells_b_c(); }
+void mapgen_cells_b_lifted(void) {
     dd _sa = 0, _sb = 0;
     /* mov     byte ptr ds:0E606h, 6 ;~ 01A2:CA01 */
     *(db*)raddr(ds,0x0E606) = 6;
