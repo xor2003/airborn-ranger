@@ -211,6 +211,19 @@ void fx_overlay_fill_c(void); void fx_overlay_fill_lifted(void);
 void fx_overlay_fill_e17cfd_c(void); void fx_overlay_fill_e17cfd_lifted(void);
 void fx_overlay_fill_e17d0e_c(void); void fx_overlay_fill_e17d0e_lifted(void);
 void fx_overlay_fill_e17d32_c(void); void fx_overlay_fill_e17d32_lifted(void);
+void tile_blit_flipbuf_c(void); void tile_blit_flipbuf_lifted(void);
+void tile_blit_mcga_c(void); void tile_blit_mcga_lifted(void);
+void tile_row_mcga_c(void); void tile_row_mcga_lifted(void);
+void tile_row_mcga_e118c6_c(void); void tile_row_mcga_e118c6_lifted(void);
+void glyph_blit_mcga_c(void); void glyph_blit_mcga_lifted(void);
+void glyph_blit_mcga_e10d9e_c(void); void glyph_blit_mcga_e10d9e_lifted(void);
+void glyph_put_mcga_10c1c_c(void); void glyph_put_mcga_10c1c_lifted(void);
+void glyph_put2_mcga_c(void); void glyph_put2_mcga_lifted(void);
+void mapcols_draw_c(void); void mapcols_draw_lifted(void);
+void mapcols_draw_e1bcdc_c(void); void mapcols_draw_e1bcdc_lifted(void);
+void mapcols_draw_e1bcdf_c(void); void mapcols_draw_e1bcdf_lifted(void);
+void mapcols_draw_e1bced_c(void); void mapcols_draw_e1bced_lifted(void);
+void mapcols_draw_e1bcf4_c(void); void mapcols_draw_e1bcf4_lifted(void);
 
 /* env-gated trace (M2C_TRACE=1) */
 extern int rt_trace;

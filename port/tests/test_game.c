@@ -939,6 +939,67 @@ int main(void){
         fprintf(stderr, "  (hud/fx: lifted vs C, %d checks)\n", checks);
     }
 
+    /* ---- tile/glyph blitters: flipbuf dispatches tileblit_jt (case 3 =
+     * tile_blit_mcga -> 8-row color-translate store into es=seg_flip);
+     * glyph_blit adds the wparm masks; mapcols_draw drives 32 columns.
+     * Pattern/xlate tables at ds:0x3B70..0x3D70+0x100, row-offset table
+     * at ds:0xBD5. es pinned to seg_flip scratch for the stores. ------ */
+    {
+        dw s0 = seg_flip, s1 = seg_draw, s2 = seg_screen;
+        seg_flip = 0x9000; seg_draw = 0x9800; seg_screen = 0xA000;
+        ss = 0x8000; sp = 0xFFFE;             /* guest stack in scratch   */
+        draw_col = 4; draw_row = 0x20;
+        ax = 2;                               /* glyph/tile idx          */
+        si = 0x1B52;
+        for (int i = 0; i < 5; i++){
+            adapter_id = i;
+            ab_res("tileblit", tile_blit_flipbuf_lifted, tile_blit_flipbuf, 0);
+        }
+        adapter_id = 3;
+        es = seg_flip;
+        ab_res("tile mcga", tile_blit_mcga_lifted, tile_blit_mcga, 0);
+        ds = seg_data;
+        *(dw*)raddr_(ds, 0x0A82) = 1;         /* draw_row table idx      */
+        *(dw*)raddr_(ds, 0x0A80) = 2;         /* draw_col                */
+        ax = 3;
+        ab_res("tilerow", tile_row_mcga_lifted, tile_row_mcga, 0);
+        si = 0x2000; di = 0; cx = 8; bx = 0;  /* e118c6: loop mid-entry  */
+        ab_res("tilerow mid", tile_row_mcga_e118c6_lifted,
+               tile_row_mcga_e118c6, 0);
+        draw_col = 39; draw_row = 0xC0;       /* col wrap + row clamp    */
+        ab_res("tile wrap", tile_blit_mcga_lifted, tile_blit_mcga, 0);
+        draw_col = 4; draw_row = 0x20;
+        ax = 5;
+        ab_res("glyphblit", glyph_blit_mcga_lifted, glyph_blit_mcga, 0);
+        si = 0x2100; di = 0x80; cx = 0x408; bx = 0;  /* ch=8 loop mid    */
+        ab_res("glyph mid", glyph_blit_mcga_e10d9e_lifted,
+               glyph_blit_mcga_e10d9e, 0);
+        ax = 1;
+        ab_res("glyphput", glyph_put_mcga_10c1c_lifted, glyph_put_mcga_10c1c, 0);
+        ax = 2;
+        ab_res("glyphput2", glyph_put2_mcga_lifted, glyph_put2_mcga, 0);
+
+        map_base = 0x40;                      /* raw 32-col path         */
+        ab_res("mapcols raw", mapcols_draw_lifted, mapcols_draw, 0);
+        map_base = 3;                         /* cell-table path         */
+        ab_res("mapcols map", mapcols_draw_lifted, mapcols_draw, 0);
+        map_base = 0x8000;                    /* sign bit -> raw path    */
+        ab_res("mapcols sgn", mapcols_draw_lifted, mapcols_draw, 0);
+        ab_res("mapcols mid-dc", mapcols_draw_e1bcdc_lifted,
+               mapcols_draw_e1bcdc, 0);
+        cx = 3;
+        ab_res("mapcols mid-df", mapcols_draw_e1bcdf_lifted,
+               mapcols_draw_e1bcdf, 0);
+        bx = 2;
+        ab_res("mapcols mid-ed", mapcols_draw_e1bced_lifted,
+               mapcols_draw_e1bced, 0);
+        bx = 1; cx = 2;
+        ab_res("mapcols mid-f4", mapcols_draw_e1bcf4_lifted,
+               mapcols_draw_e1bcf4, 0);
+        seg_flip = s0; seg_draw = s1; seg_screen = s2;
+        fprintf(stderr, "  (tile/glyph: lifted vs C, %d checks)\n", checks);
+    }
+
     /* ---- status-panel digit patcher: WOUNDS field ds:0xB93F <- byte_29712
      * template lives in the image with literal "XX" placeholders; sub_1BBB9
      * converts al to two ASCII digits and stores at ds:[si]/ds:[si+1]. ---- */

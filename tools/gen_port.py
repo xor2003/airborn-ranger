@@ -576,6 +576,19 @@ REWRITES = {
     'fx_overlay_fill_e17cfd': 'fx_overlay_fill_e17cfd_c',
     'fx_overlay_fill_e17d0e': 'fx_overlay_fill_e17d0e_c',
     'fx_overlay_fill_e17d32': 'fx_overlay_fill_e17d32_c',
+    'tile_blit_flipbuf': 'tile_blit_flipbuf_c',
+    'tile_blit_mcga': 'tile_blit_mcga_c',
+    'tile_row_mcga': 'tile_row_mcga_c',
+    'tile_row_mcga_e118c6': 'tile_row_mcga_e118c6_c',
+    'glyph_blit_mcga': 'glyph_blit_mcga_c',
+    'glyph_blit_mcga_e10d9e': 'glyph_blit_mcga_e10d9e_c',
+    'glyph_put_mcga_10c1c': 'glyph_put_mcga_10c1c_c',
+    'glyph_put2_mcga': 'glyph_put2_mcga_c',
+    'mapcols_draw': 'mapcols_draw_c',
+    'mapcols_draw_e1bcdc': 'mapcols_draw_e1bcdc_c',
+    'mapcols_draw_e1bcdf': 'mapcols_draw_e1bcdf_c',
+    'mapcols_draw_e1bced': 'mapcols_draw_e1bced_c',
+    'mapcols_draw_e1bcf4': 'mapcols_draw_e1bcf4_c',
 }
 # Commit 4366e7c removed the gfx driver-selection menu ('1'..'5' getch
 # loop → forced MCGA pick) by hand-editing the generated file, so every

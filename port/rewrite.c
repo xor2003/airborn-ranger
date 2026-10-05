@@ -1487,3 +1487,217 @@ void fx_overlay_fill_c(void){             /* sub_17CF4                   */
     if (bx == 0) return;
     fx_overlay_fill_e17cfd_c();
 }
+
+/* ---- MCGA tile/glyph blitters (seg000:0C14..1C4F) ---------------------
+ * tile_blit_flipbuf pushes ds/es, aims es at seg_flip (passed via di),
+ * then ind-jmps through tileblit_jt[adapter]; the MCGA case
+ * tile_blit_mcga runs tile_row_mcga and falls into the shared
+ * col++/row+=8 advance tail that pops the saved segs. tile_row_mcga is
+ * the 8bpp translate loop: pattern byte bl indexes color tables at
+ * ds:0x3C70/0x3D70 -> word store to es:di (pitch 0x140). glyph_blit_
+ * mcga is the same shape with the wparm_a/b glyph-bit masks folded in.
+ * mapcols_draw walks a 32-col row either raw (map_base>=0x40) or from
+ * the map cell table at ds:bx-0x68CA with the 0x80 bit set.
+ */
+static void tileblit_advance(void){         /* ret_1a2_16f6_e1175b tail  */
+    (draw_col)++; ZF = (draw_col == 0); SF = (draw_col >> 15);
+    CF = (dd)draw_col < (dd)0x28; ZF = (draw_col == 0x28);
+    SF = ((dw)(draw_col - 0x28) >> 15);
+    if (draw_col >= 0x28){
+        draw_col = 0;
+        { dd t_ = (dd)draw_row + (dd)8; CF = t_ > 0xFFFF; draw_row = t_;
+          ZF = (draw_row == 0); SF = (draw_row >> 15); }
+        CF = (dd)draw_row < (dd)0x0C8; ZF = (draw_row == 0x0C8);
+        SF = ((dw)(draw_row - 0x0C8) >> 15);
+        if (draw_row >= 0x0C8) draw_row = 0x0C7;
+    }
+    es = pop();
+    ds = pop();
+}
+void tile_blit_flipbuf_c(void){
+    di = seg_flip;
+    bx = 0;
+    push(ds);
+    push(es);
+    es = di;
+    ds = seg_data;
+    di = adapter_id;
+    CF = ((dd)di << 1) >> 16 & 1; di <<= 1; ZF = (di == 0); SF = (di >> 15);
+    { vfn f_ = func_at((dd)0x1a20 + (*(dw*)(((db*)&tileblit_jt) + di)));
+      if (f_) f_(); else fprintf(stderr, "unresolved ind jmp %x\n",
+          (dd)((dd)0x1a20 + (*(dw*)(((db*)&tileblit_jt) + di))));
+      return; }
+}
+static void tile_row_mcga_loop(void){       /* loc_118C6: 8-row xlate    */
+    do {
+        bl = *(db*)raddr(ds, si);
+        al = *(db*)raddr(ds, bx + 0x3C70);
+        ah = *(db*)raddr(ds, bx + 0x3D70);
+        *(dw*)(raddr(es, di)) = ax;
+        bl = *(db*)raddr(ds, si + 1);
+        al = *(db*)raddr(ds, bx + 0x3C70);
+        ah = *(db*)raddr(ds, bx + 0x3D70);
+        *(dw*)(raddr(es, di + 2)) = ax;
+        bl = *(db*)raddr(ds, si + 2);
+        al = *(db*)raddr(ds, bx + 0x3C70);
+        ah = *(db*)raddr(ds, bx + 0x3D70);
+        *(dw*)(raddr(es, di + 4)) = ax;
+        bl = *(db*)raddr(ds, si + 3);
+        al = *(db*)raddr(ds, bx + 0x3C70);
+        ah = *(db*)raddr(ds, bx + 0x3D70);
+        *(dw*)(raddr(es, di + 6)) = ax;
+        { dd t_ = (dd)si + (dd)4; CF = t_ > 0xFFFF; si = t_;
+          ZF = (si == 0); SF = (si >> 15); }
+        { dd t_ = (dd)di + (dd)0x140; CF = t_ > 0xFFFF; di = t_;
+          ZF = (di == 0); SF = (di >> 15); }
+    } while (--cx != 0);
+}
+void tile_row_mcga_e118c6_c(void){ tile_row_mcga_loop(); }
+void tile_row_mcga_c(void){
+    di = 0; CF = 0; OF = 0; ZF = 1; SF = 0;
+    bx = *(dw*)raddr(ds, 0x0A82);
+    CF = ((dd)bx << 1) >> 16 & 1; bx <<= 1; ZF = (bx == 0); SF = (bx >> 15);
+    { dd t_ = (dd)di + (dd)*(dw*)raddr(ds, bx + 0x0BD5); CF = t_ > 0xFFFF;
+      di = t_; ZF = (di == 0); SF = (di >> 15); }
+    bx = *(dw*)raddr(ds, 0x0A80);
+    CF = ((dd)bx << 1) >> 16 & 1; bx <<= 1; ZF = (bx == 0); SF = (bx >> 15);
+    CF = ((dd)bx << 1) >> 16 & 1; bx <<= 1; ZF = (bx == 0); SF = (bx >> 15);
+    CF = ((dd)bx << 1) >> 16 & 1; bx <<= 1; ZF = (bx == 0); SF = (bx >> 15);
+    { dd t_ = (dd)di + (dd)bx; CF = t_ > 0xFFFF; di = t_;
+      ZF = (di == 0); SF = (di >> 15); }
+    cl = 5;
+    if (cl){ CF = ((dd)ax << cl) >> 16 & 1; ax <<= cl;
+             ZF = (ax == 0); SF = (ax >> 15); }
+    { dd t_ = (dd)si + (dd)ax; CF = t_ > 0xFFFF; si = t_;
+      ZF = (si == 0); SF = (si >> 15); }
+    cx = 8;
+    bh = 0; CF = 0; OF = 0; ZF = 1; SF = 0;
+    tile_row_mcga_loop();
+}
+void tile_blit_mcga_c(void){
+    tile_row_mcga();
+    tileblit_advance();
+}
+static void glyph_blit_mcga_loop(void){     /* loc_10D9E: masked xlate   */
+    do {
+        bl = *(db*)raddr(ds, si);
+        cl = *(db*)raddr(ds, bx + 0x3B70);
+        bl &= eblit_d6dc; CF = 0; OF = 0; ZF = (bl == 0); SF = (bl >> 7);
+        cl &= eblit_d6dd; CF = 0; OF = 0; ZF = (cl == 0); SF = (cl >> 7);
+        bl |= cl; CF = 0; OF = 0; ZF = (bl == 0); SF = (bl >> 7);
+        al = *(db*)raddr(ds, bx + 0x3C70);
+        ah = *(db*)raddr(ds, bx + 0x3D70);
+        *(dw*)(raddr(es, di)) = ax;
+        bl = *(db*)raddr(ds, si + 1);
+        cl = *(db*)raddr(ds, bx + 0x3B70);
+        bl &= eblit_d6dc; CF = 0; OF = 0; ZF = (bl == 0); SF = (bl >> 7);
+        cl &= eblit_d6dd; CF = 0; OF = 0; ZF = (cl == 0); SF = (cl >> 7);
+        bl |= cl; CF = 0; OF = 0; ZF = (bl == 0); SF = (bl >> 7);
+        al = *(db*)raddr(ds, bx + 0x3C70);
+        ah = *(db*)raddr(ds, bx + 0x3D70);
+        *(dw*)(raddr(es, di + 2)) = ax;
+        bl = *(db*)raddr(ds, si + 2);
+        cl = *(db*)raddr(ds, bx + 0x3B70);
+        bl &= eblit_d6dc; CF = 0; OF = 0; ZF = (bl == 0); SF = (bl >> 7);
+        cl &= eblit_d6dd; CF = 0; OF = 0; ZF = (cl == 0); SF = (cl >> 7);
+        bl |= cl; CF = 0; OF = 0; ZF = (bl == 0); SF = (bl >> 7);
+        al = *(db*)raddr(ds, bx + 0x3C70);
+        ah = *(db*)raddr(ds, bx + 0x3D70);
+        *(dw*)(raddr(es, di + 4)) = ax;
+        bl = *(db*)raddr(ds, si + 3);
+        cl = *(db*)raddr(ds, bx + 0x3B70);
+        bl &= eblit_d6dc; CF = 0; OF = 0; ZF = (bl == 0); SF = (bl >> 7);
+        cl &= eblit_d6dd; CF = 0; OF = 0; ZF = (cl == 0); SF = (cl >> 7);
+        bl |= cl; CF = 0; OF = 0; ZF = (bl == 0); SF = (bl >> 7);
+        al = *(db*)raddr(ds, bx + 0x3C70);
+        ah = *(db*)raddr(ds, bx + 0x3D70);
+        *(dw*)(raddr(es, di + 6)) = ax;
+        { dd t_ = (dd)si + (dd)4; CF = t_ > 0xFFFF; si = t_;
+          ZF = (si == 0); SF = (si >> 15); }
+        { dd t_ = (dd)di + (dd)0x140; CF = t_ > 0xFFFF; di = t_;
+          ZF = (di == 0); SF = (di >> 15); }
+        (ch)--; ZF = (ch == 0); SF = (ch >> 7);
+    } while (ch != 0);
+}
+void glyph_blit_mcga_e10d9e_c(void){ glyph_blit_mcga_loop(); }
+void glyph_blit_mcga_c(void){
+    bx = draw_row;
+    CF = ((dd)bx << 1) >> 16 & 1; bx <<= 1; ZF = (bx == 0); SF = (bx >> 15);
+    di = *(dw*)raddr(ds, bx + 0x0BD5);
+    bx = draw_col;
+    CF = ((dd)bx << 1) >> 16 & 1; bx <<= 1; ZF = (bx == 0); SF = (bx >> 15);
+    CF = ((dd)bx << 1) >> 16 & 1; bx <<= 1; ZF = (bx == 0); SF = (bx >> 15);
+    CF = ((dd)bx << 1) >> 16 & 1; bx <<= 1; ZF = (bx == 0); SF = (bx >> 15);
+    { dd t_ = (dd)di + (dd)bx; CF = t_ > 0xFFFF; di = t_;
+      ZF = (di == 0); SF = (di >> 15); }
+    cl = 5;
+    if (cl){ CF = ((dd)ax << cl) >> 16 & 1; ax <<= cl;
+             ZF = (ax == 0); SF = (ax >> 15); }
+    { dd t_ = (dd)ax + (dd)glyph_rows; CF = t_ > 0xFFFF; ax = t_;
+      ZF = (ax == 0); SF = (ax >> 15); }
+    si = ax;
+    ax = wparm_a;
+    eblit_d6dc = al;
+    ax = wparm_b;
+    eblit_d6dd = al;
+    ch = 8;
+    bh = 0; CF = 0; OF = 0; ZF = 1; SF = 0;
+    glyph_blit_mcga_loop();
+}
+void glyph_put_mcga_10c1c_c(void){
+    glyph_blit_mcga();
+    text_cursor_next();
+    es = pop();
+}
+void glyph_put2_mcga_c(void){
+    glyph_blit_mcga();
+    text_cursor_next();
+    es = pop();
+}
+
+static void mapcols_loop_a(void){           /* loc_1BCDF: raw 32 cols    */
+    do {
+        push(cx);
+        ax = maprow_base;
+        si = 0x1B52;
+        tile_blit_flipbuf();
+        cx = pop();
+    } while (--cx != 0);
+}
+void mapcols_draw_e1bcdf_c(void){ mapcols_loop_a(); }
+void mapcols_draw_e1bcdc_c(void){
+    cx = 0x20;
+    mapcols_loop_a();
+}
+static void mapcols_loop_b(void){           /* loc_1BCF4: cell-mapped    */
+    do {
+        push(cx);
+        push(bx);
+        al = *(db*)raddr(ds, bx - 0x68CA);
+        ah = 0; CF = 0; OF = 0; ZF = 1; SF = 0;
+        al |= 0x80; CF = 0; OF = 0; ZF = (al == 0); SF = (al >> 7);
+        si = 0x1B52;
+        tile_blit_flipbuf();
+        bx = pop();
+        (bx)++; ZF = (bx == 0); SF = (bx >> 15);
+        cx = pop();
+    } while (--cx != 0);
+}
+void mapcols_draw_e1bcf4_c(void){ mapcols_loop_b(); }
+void mapcols_draw_e1bced_c(void){
+    cl = 5;
+    if (cl){ CF = ((dd)bx << cl) >> 16 & 1; bx <<= cl;
+             ZF = (bx == 0); SF = (bx >> 15); }
+    cx = 0x20;
+    mapcols_loop_b();
+}
+void mapcols_draw_c(void){
+    bx = map_base;
+    bx |= bx; CF = 0; OF = 0; ZF = (bx == 0); SF = (bx >> 15);
+    if ((short)bx >= 0){
+        CF = (dd)bx < (dd)0x40; ZF = (bx == 0x40);
+        SF = ((dw)(bx - 0x40) >> 15);
+        if (bx < 0x40){ mapcols_draw_e1bced_c(); return; }
+    }
+    mapcols_draw_e1bcdc_c();
+}
