@@ -169564,7 +169564,8 @@ mission_case4_e1c0ab:
     /* retn ;~ 01A2:C0C7 */
     return;
 }
-void mission_case7(void) {
+void mission_case7(void) { mission_case7_c(); }
+void mission_case7_lifted(void) {
     dd _sa = 0, _sb = 0;
     /* mov     al, 1           ; jumptable 0001B475 case 7 ;~ 01A2:C0C8 */
     al = 1;
@@ -169688,7 +169689,8 @@ mission_case7_e1c15b:
     /* retn ;~ 01A2:C161 */
     return;
 }
-void mission_case7_e1c0cd(void) {
+void mission_case7_e1c0cd(void) { mission_case7_e1c0cd_c(); }
+void mission_case7_e1c0cd_lifted(void) {
     dd _sa = 0, _sb = 0;
 mission_case7_e1c0cd:
     do {
@@ -169808,7 +169810,8 @@ mission_case7_e1c15b:
     /* retn ;~ 01A2:C161 */
     return;
 }
-void mission_case7_e1c10f(void) {
+void mission_case7_e1c10f(void) { mission_case7_e1c10f_c(); }
+void mission_case7_e1c10f_lifted(void) {
     dd _sa = 0, _sb = 0;
 mission_case7_e1c10f:
     do {
@@ -169874,7 +169877,8 @@ mission_case7_e1c15b:
     /* retn ;~ 01A2:C161 */
     return;
 }
-void mission_case7_e1c15b(void) {
+void mission_case7_e1c15b(void) { mission_case7_e1c15b_c(); }
+void mission_case7_e1c15b_lifted(void) {
     /* mov     word ptr ds:0E2A4h, 1 ;~ 01A2:C15B */
     *(dw*)(raddr(ds,0x0E2A4)) = 1;
     /* retn ;~ 01A2:C161 */
@@ -177327,7 +177331,8 @@ mission_case5_e1c91f:
         *(dw*)(raddr(ds,0x0E2A4)) = 1;
     } while (1);
 }
-void mission_case8(void) {
+void mission_case8(void) { mission_case8_c(); }
+void mission_case8_lifted(void) {
     dd _sa = 0, _sb = 0;
 mission_case8:
     do {
@@ -177440,7 +177445,8 @@ mission_case8_e1c9de:
     /* retn ;~ 01A2:C9F8 */
     return;
 }
-void mission_case8_1c980(void) {
+void mission_case8_1c980(void) { mission_case8_1c980_c(); }
+void mission_case8_1c980_lifted(void) {
     dd _sa = 0, _sb = 0;
 mission_case8_1c980:
     do {
@@ -177554,7 +177560,8 @@ mission_case8:
         /* jmp     short loc_1C980 ;~ 01A2:C97B */
     } while (1);
 }
-void mission_case8_1c98a(void) {
+void mission_case8_1c98a(void) { mission_case8_1c98a_c(); }
+void mission_case8_1c98a_lifted(void) {
     dd _sa = 0, _sb = 0;
 mission_case8_1c98a:
     do {
@@ -177669,7 +177676,8 @@ mission_case8_1c980:
         *(dw*)(raddr(ds,0x0E2A4)) = 1;
     } while (1);
 }
-void mission_case8_e1c9af(void) {
+void mission_case8_e1c9af(void) { mission_case8_e1c9af_c(); }
+void mission_case8_e1c9af_lifted(void) {
     dd _sa = 0, _sb = 0;
 mission_case8_e1c9af:
     do {
@@ -177727,7 +177735,8 @@ mission_case8_e1c9de:
     /* retn ;~ 01A2:C9F8 */
     return;
 }
-void mission_case8_e1c9de(void) {
+void mission_case8_e1c9de(void) { mission_case8_e1c9de_c(); }
+void mission_case8_e1c9de_lifted(void) {
 mission_case8_e1c9de:
     do {
         /* mov     word ptr ds:9730h, 0E683h ;~ 01A2:C9DE */

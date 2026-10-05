@@ -5160,3 +5160,216 @@ void mapgen_fill_8_e1b89f_c(void) {
         if (mgen_fill8_place()) return;
     }
 }
+
+/* ---- mission_case7 / mission_case8 ---- */
+/* case7: place the 0xE432 hq record at a random column, spawn obj 0x1D,
+   then ds:0xBE41 copies of the 0xE443 record each spawning obj 0x1E,
+   then the shared fill_b + ds_wrap_a tail. */
+static void mission7_place_hq(void) {
+    rand_next();
+    al &= 0x1F; CF = 0; OF = 0; ZF = al == 0; SF = al >> 7;
+    *(db*)raddr(ds, 0x0E3C3) = al;
+    { dd t_ = (dd)al + (dd)3; CF = t_ > 0xFF; al = t_;
+      ZF = al == 0; SF = al >> 7; }
+    *(db*)raddr(ds, 0x0BE33) = al;
+    al = 0;
+    *(db*)raddr(ds, 0x0E3C4) = al;
+    al = 1;
+    *(db*)raddr(ds, 0x0BE34) = al;
+    ax = 0x0E432;
+    *(dw*)(raddr(ds, 0x9730)) = ax;
+    map_rect_write();
+}
+static void mission7_spawns(void) {
+    al = 0x18;
+    *(db*)raddr(ds, 0x0D834) = al;
+    *(db*)raddr(ds, 0x0D835) = al;
+    al = 6;
+    cell_to_px();
+    al = 0x1D;
+    obj_alloc();
+    al = *(db*)raddr(ds, 0x0E3C3);
+    { dd t_ = (dd)al - (dd)7; CF = (dd)al < (dd)7; al = t_;
+      ZF = al == 0; SF = al >> 7; }
+    *(db*)raddr(ds, 0x0E45A) = al;
+    al = *(db*)raddr(ds, 0x0BE41);
+    *(db*)raddr(ds, 0x0E459) = al;
+}
+static void mission7_rep_loop(void) {
+    do {
+        do {
+            rand_next();
+            al &= 0x0F; CF = 0; OF = 0; ZF = al == 0; SF = al >> 7;
+            { dd t_ = (dd)al + (dd)*(db*)raddr(ds, 0x0E45A); CF = t_ > 0xFF;
+              al = t_; ZF = al == 0; SF = al >> 7; }
+            *(db*)raddr(ds, 0x0E3C3) = al;
+            rand_next();
+            al &= 7; CF = 0; OF = 0; ZF = al == 0; SF = al >> 7;
+            *(db*)raddr(ds, 0x0E3C4) = al;
+            ax = 0x0E443;
+            *(dw*)(raddr(ds, 0x9730)) = ax;
+            map_rect_write();
+        } while (CF);
+        al = 0x38;
+        *(db*)raddr(ds, 0x0D834) = al;
+        *(db*)raddr(ds, 0x0D835) = al;
+        al = 2;
+        cell_to_px();
+        al = 0x1E;
+        obj_alloc();
+        (*(db*)raddr(ds, 0x0E459))--;
+        ZF = *(db*)raddr(ds, 0x0E459) == 0;
+        SF = *(db*)raddr(ds, 0x0E459) >> 7;
+    } while ((signed char)*(db*)raddr(ds, 0x0E459) >= 0);
+}
+static void mission7_tail(void) {
+    mapgen_fill_b();
+    CF = (dd)*(dw*)raddr(ds, 0x0E2A4) < (dd)0;
+    ZF = (dw)(*(dw*)raddr(ds, 0x0E2A4) - 0) == 0;
+    SF = (dw)(*(dw*)raddr(ds, 0x0E2A4) - 0) >> 15;
+    if (*(dw*)raddr(ds, 0x0E2A4) == 0) {
+        es = seg_draw;
+        ds_wrap_a();
+        *(dw*)(raddr(ds, 0x0E244)) = ax;
+    }
+    *(dw*)(raddr(ds, 0x0E2A4)) = 1;
+}
+void mission_case7_c(void) {
+    al = 1;
+    *(db*)raddr(ds, 0x0BE59) = al;
+    mission_case7_e1c0cd_c();
+}
+void mission_case7_e1c0cd_c(void) {
+    do {
+        mission7_place_hq();
+    } while (CF);
+    mission7_spawns();
+    mission7_rep_loop();
+    mission7_tail();
+}
+void mission_case7_e1c10f_c(void) {
+    mission7_rep_loop();
+    mission7_tail();
+}
+void mission_case7_e1c15b_c(void) {
+    *(dw*)(raddr(ds, 0x0E2A4)) = 1;
+}
+
+/* case8: place the 0xE5D8 record (with the e2a4/es-wrap one-shot), spawn
+   0x23 + 3-be41 copies of 0x24 via 0xE5C4, then a 0xE683 column fill. */
+static void mission8_head_rand(void) {   /* canonical head (loc_1C95B) */
+    rand_next();
+    al &= 0x1F; CF = 0; OF = 0; ZF = al == 0; SF = al >> 7;
+    *(db*)raddr(ds, 0x0E3C3) = al;
+    *(db*)raddr(ds, 0x0E3C4) = 2;
+    *(dw*)(raddr(ds, 0x9730)) = 0x0E5D8;
+    CF = (dd)*(dw*)raddr(ds, 0x0E2A4) < (dd)0;
+    ZF = (dw)(*(dw*)raddr(ds, 0x0E2A4) - 0) == 0;
+    SF = (dw)(*(dw*)raddr(ds, 0x0E2A4) - 0) >> 15;
+}
+static void mission8_rep(void) {         /* e1c9af */
+    do {
+        do {
+            rand_next();
+            al &= 0x0F; CF = 0; OF = 0; ZF = al == 0; SF = al >> 7;
+            { dd t_ = (dd)al + (dd)5; CF = t_ > 0xFF; al = t_;
+              ZF = al == 0; SF = al >> 7; }
+            *(db*)raddr(ds, 0x0E3C3) = al;
+            *(db*)raddr(ds, 0x0E3C4) = 3;
+            *(dw*)(raddr(ds, 0x9730)) = 0x0E5C4;
+            map_rect_write();
+        } while (CF);
+        al = 3;
+        cell_to_px();
+        al = 0x24;
+        obj_alloc();
+        (*(db*)raddr(ds, 0x0E605))--;
+        ZF = *(db*)raddr(ds, 0x0E605) == 0;
+        SF = *(db*)raddr(ds, 0x0E605) >> 7;
+    } while ((signed char)*(db*)raddr(ds, 0x0E605) >= 0);
+}
+static void mission8_line(void) {        /* e1c9de */
+    do {
+        *(dw*)(raddr(ds, 0x9730)) = 0x0E683;
+        al = *(db*)raddr(ds, 0x0E605);
+        *(db*)raddr(ds, 0x0E3C3) = al;
+        *(db*)raddr(ds, 0x0E3C4) = 3;
+        map_rect_write();
+        (*(db*)raddr(ds, 0x0E605))--;
+        ZF = *(db*)raddr(ds, 0x0E605) == 0;
+        SF = *(db*)raddr(ds, 0x0E605) >> 7;
+    } while ((signed char)*(db*)raddr(ds, 0x0E605) >= 0);
+}
+static void mission8_tail(void) {        /* after the 0xE5D8 write lands */
+    *(db*)raddr(ds, 0x0D835) = 0x30;
+    *(db*)raddr(ds, 0x0D834) = 0x24;
+    al = 6;
+    cell_to_px();
+    al = 0x23;
+    obj_alloc();
+    rand_map_pos();
+    al = 3;
+    { dd t_ = (dd)al - (dd)*(db*)raddr(ds, 0x0BE41);
+      CF = (dd)al < (dd)*(db*)raddr(ds, 0x0BE41); al = t_;
+      ZF = al == 0; SF = al >> 7; }
+    *(db*)raddr(ds, 0x0E605) = al;
+    mission8_rep();
+    al = 0x1F;
+    *(db*)raddr(ds, 0x0E605) = al;
+    mission8_line();
+}
+void mission_case8_c(void) {
+    for (;;) {
+        mission8_head_rand();
+        if (*(dw*)raddr(ds, 0x0E2A4) == 0) {
+            es = seg_draw;
+            push(ds);
+            ds = pop();
+            *(dw*)(raddr(ds, 0x0E244)) = ax;
+            *(dw*)(raddr(ds, 0x0E2A4)) = 1;
+        }
+        map_rect_write();
+        if (!CF) break;
+    }
+    mission8_tail();
+}
+void mission_case8_1c980_c(void) {
+    for (;;) {
+        ds = pop();
+        *(dw*)(raddr(ds, 0x0E244)) = ax;
+        *(dw*)(raddr(ds, 0x0E2A4)) = 1;
+        for (;;) {
+            map_rect_write();
+            if (!CF) { mission8_tail(); return; }
+            mission8_head_rand();
+            if (*(dw*)raddr(ds, 0x0E2A4) == 0) break;
+        }
+        es = seg_draw;
+        push(ds);
+    }
+}
+void mission_case8_1c98a_c(void) {
+    for (;;) {
+        for (;;) {
+            map_rect_write();
+            if (!CF) { mission8_tail(); return; }
+            mission8_head_rand();
+            if (*(dw*)raddr(ds, 0x0E2A4) != 0) continue;
+            break;
+        }
+        es = seg_draw;
+        push(ds);
+        ds = pop();
+        *(dw*)(raddr(ds, 0x0E244)) = ax;
+        *(dw*)(raddr(ds, 0x0E2A4)) = 1;
+    }
+}
+void mission_case8_e1c9af_c(void) {
+    mission8_rep();
+    al = 0x1F;
+    *(db*)raddr(ds, 0x0E605) = al;
+    mission8_line();
+}
+void mission_case8_e1c9de_c(void) {
+    mission8_line();
+}

@@ -1897,6 +1897,57 @@ int main(void){
         ab_res("fill_8 87d", mapgen_fill_8_e1b87d_lifted, mapgen_fill_8_e1b87d, 0);
         rand_s0 = 0x1357; rand_s1 = 0x2468; fill_8_b132 = 7; fill_8_b131 = 0x38;
         ab_res("fill_8 89f", mapgen_fill_8_e1b89f_lifted, mapgen_fill_8_e1b89f, 0);
+        /* mission_case7/case8: jumptable cases — record ptrs at
+         * ds:0xE432/0xE443/0xE5D8/0xE5C4/0xE683 all get the 2x2 record;
+         * ds:0xBE41 is the repeat count, ds:0xE2A4 the es-wrap flag.
+         * Successful map_rect_write fills map cells with record bytes
+         * (ab_res restores only within one call), so the 32x64 cell map
+         * (row*32+col at ds:0x9736) must be re-cleared before every
+         * retry-driven case or the placement loops starve. */
+        for (int i = 0; i < 6; i++) {
+            dw rofs[] = { 0xE432, 0xE443, 0xE5D8, 0xE5C4, 0xE683, 0xE3B6 };
+            db *r7 = (db*)raddr_(ds, rofs[i]);
+            r7[0] = 2; r7[1] = 2;
+            r7[2] = 0x2d; r7[3] = 0xff; r7[4] = 0xff; r7[5] = 0xff;
+        }
+#define clrmap() do { for (int i = 0; i < 0x800; i++) *(db*)raddr_(ds, 0x9736 + i) = 0; } while (0)
+        clrmap();
+        *(db*)raddr_(ds, 0x0BE41) = 1;
+        *(dw*)raddr_(ds, 0x0E2A4) = 0;
+        rand_s0 = 0x1357; rand_s1 = 0x2468;
+        ab_res("case7", mission_case7_lifted, mission_case7, 0);
+        clrmap();
+        *(dw*)raddr_(ds, 0x0E2A4) = 0; *(db*)raddr_(ds, 0x0BE41) = 1;
+        rand_s0 = 0x1357; rand_s1 = 0x2468;
+        ab_res("case7 0cd", mission_case7_e1c0cd_lifted, mission_case7_e1c0cd, 0);
+        clrmap();
+        *(dw*)raddr_(ds, 0x0E2A4) = 0;
+        *(db*)raddr_(ds, 0x0E45A) = 4; *(db*)raddr_(ds, 0x0E459) = 1;
+        rand_s0 = 0x1357; rand_s1 = 0x2468;
+        ab_res("case7 10f", mission_case7_e1c10f_lifted, mission_case7_e1c10f, 0);
+        ab_res("case7 15b", mission_case7_e1c15b_lifted, mission_case7_e1c15b, 0);
+        clrmap();
+        *(dw*)raddr_(ds, 0x0E2A4) = 0; *(db*)raddr_(ds, 0x0BE41) = 1;
+        rand_s0 = 0x1357; rand_s1 = 0x2468;
+        ab_res("case8", mission_case8_lifted, mission_case8, 0);
+        /* 1c980 pops ds from the stack — plant it */
+        clrmap();
+        sp = 0xFFFE; push(ds);
+        *(dw*)raddr_(ds, 0x0E2A4) = 0; *(db*)raddr_(ds, 0x0BE41) = 1;
+        rand_s0 = 0x1357; rand_s1 = 0x2468;
+        ab_res("case8 980", mission_case8_1c980_lifted, mission_case8_1c980, 0);
+        clrmap();
+        *(dw*)raddr_(ds, 0x0E2A4) = 0; *(db*)raddr_(ds, 0x0BE41) = 1;
+        rand_s0 = 0x1357; rand_s1 = 0x2468;
+        ab_res("case8 98a", mission_case8_1c98a_lifted, mission_case8_1c98a, 0);
+        clrmap();
+        *(db*)raddr_(ds, 0x0E605) = 1;
+        rand_s0 = 0x1357; rand_s1 = 0x2468;
+        ab_res("case8 9af", mission_case8_e1c9af_lifted, mission_case8_e1c9af, 0);
+        clrmap();
+        *(db*)raddr_(ds, 0x0E605) = 2;
+        ab_res("case8 9de", mission_case8_e1c9de_lifted, mission_case8_e1c9de, 0);
+#undef clrmap
         ds = dsc;
         fprintf(stderr, "  (mission leaf: lifted vs C, %d checks)\n", checks);
     }
