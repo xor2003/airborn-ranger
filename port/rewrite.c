@@ -3076,3 +3076,216 @@ void view_pan_step_e1ad09_c(void) {
 void view_pan_step_e1ad0d_c(void) {
     pan_finish();
 }
+
+/* ---- tilemap redraw: sprite_param_set — 40x24-cell grid -> cell_tile_compose ---- */
+static void spr_cell_loop(void) {
+    do {
+        ax = *(dw*)raddr(ds,0x96F6);
+        *(dw*)raddr(ds,0x0A82) = ax;
+        ax = *(dw*)raddr(ds,0x96F4);
+        *(dw*)raddr(ds,0x0A80) = ax;
+        { dd t_ = (dd)ax + (dd)*(dw*)raddr(ds,0x0C803); CF = t_ > 0xFFFF; ax = t_; ZF = ((dw)(ax) == 0); SF = (((dw)(ax)) >> 15); }
+        *(dw*)raddr(ds,0x0DBE5) = ax;
+        ax = *(dw*)raddr(ds,0x96F0);
+        { dd t_ = (dd)ax + (dd)*(dw*)raddr(ds,0x0C801); CF = t_ > 0xFFFF; ax = t_; ZF = ((dw)(ax) == 0); SF = (((dw)(ax)) >> 15); }
+        *(dw*)raddr(ds,0x0DBE7) = ax;
+        cell_tile_compose();
+        (*(dw*)raddr(ds,0x96F4))++; ZF = (*(dw*)raddr(ds,0x96F4) == 0); SF = (*(dw*)raddr(ds,0x96F4) >> 15);
+        CF = (dd)*(dw*)raddr(ds,0x96F4) < (dd)0x28; ZF = (*(dw*)raddr(ds,0x96F4) == 0x28); SF = ((dw)(*(dw*)raddr(ds,0x96F4) - 0x28) >> 15);
+    } while (*(dw*)raddr(ds,0x96F4) < 0x28);
+}
+static void spr_row_tail(void) {
+    ax = *(dw*)raddr(ds,0x96F8);
+    { dd t_ = (dd)*(dw*)raddr(ds,0x96F6) + (dd)ax; CF = t_ > 0xFFFF; *(dw*)raddr(ds,0x96F6) = t_; ZF = ((dw)t_ == 0); SF = ((dw)t_ >> 15); }
+    *(dw*)raddr(ds,0x96F8) = 8;
+    *(dw*)raddr(ds,0x0C992) = 0;
+    (*(dw*)raddr(ds,0x96F0))++; ZF = (*(dw*)raddr(ds,0x96F0) == 0); SF = (*(dw*)raddr(ds,0x96F0) >> 15);
+    ax = *(dw*)raddr(ds,0x96F0);
+    CF = (dd)ax < (dd)*(dw*)raddr(ds,0x96F2); ZF = (ax == *(dw*)raddr(ds,0x96F2)); SF = ((dw)(ax - *(dw*)raddr(ds,0x96F2)) >> 15);
+}
+static void spr_rows(void) {
+    for (;;) {
+        do {
+            *(dw*)raddr(ds,0x96F4) = 0;
+            spr_cell_loop();
+            spr_row_tail();
+        } while (ax < *(dw*)raddr(ds,0x96F2));
+        if (ax > *(dw*)raddr(ds,0x96F2)) return;
+        CF = (dd)*(dw*)raddr(ds,0x96FA) < 0; ZF = (*(dw*)raddr(ds,0x96FA) == 0); SF = (*(dw*)raddr(ds,0x96FA) >> 15);
+        if (*(dw*)raddr(ds,0x96FA) != 0)
+            *(dw*)raddr(ds,0x0C992) = 1;
+    }
+}
+void sprite_param_set_e14458_c(void);
+void sprite_param_set_c(void) {
+    ax = 0; cx = 8; bx = 0x18;
+    CF = 0; OF = 0; ZF = ((*(db*)raddr(ds,0x0C7FD) & 4) == 0); SF = ((db)(*(db*)raddr(ds,0x0C7FD) & 4) >> 7);
+    if ((*(db*)raddr(ds,0x0C7FD) & 4) != 0) { ax = 2; cx = 4; bx = 0x19; }
+    sprite_param_set_e14458_c();
+}
+void sprite_param_set_e14458_c(void) {
+    *(dw*)raddr(ds,0x0C992) = ax;
+    *(dw*)raddr(ds,0x96FA) = ax;
+    *(dw*)raddr(ds,0x96F8) = cx;
+    *(dw*)raddr(ds,0x96F2) = bx;
+    *(dw*)raddr(ds,0x96F0) = 0;
+    *(dw*)raddr(ds,0x96F6) = 0;
+    spr_rows();
+}
+void sprite_param_set_e14472_c(void) {
+    spr_rows();
+}
+void sprite_param_set_e14478_c(void) {
+    spr_cell_loop();
+    spr_row_tail();
+    while (ax < *(dw*)raddr(ds,0x96F2)) {
+        *(dw*)raddr(ds,0x96F4) = 0;
+        spr_cell_loop();
+        spr_row_tail();
+    }
+    if (ax > *(dw*)raddr(ds,0x96F2)) return;
+    CF = (dd)*(dw*)raddr(ds,0x96FA) < 0; ZF = (*(dw*)raddr(ds,0x96FA) == 0); SF = (*(dw*)raddr(ds,0x96FA) >> 15);
+    if (*(dw*)raddr(ds,0x96FA) != 0)
+        *(dw*)raddr(ds,0x0C992) = 1;
+    spr_rows();
+}
+
+/* ---- sprite_blit_flagged: blitflag_jt dispatch (tandy case dead inline) ---- */
+void sprite_blit_flagged_c(void) {
+    ax = seg_data;
+    ds = ax;
+    di = adapter_id;
+    { CF = (((dd)di << (1)) >> 16) & 1; di <<= 1; ZF = ((dw)(di) == 0); SF = (((dw)(di)) >> 15); }
+    { vfn f_ = func_at((dd)0x1a20 + (*(dw*)(((db*)&blitflag_jt)+di))); if (f_) f_(); else fprintf(stderr, "unresolved ind jmp %x\n", (dd)((dd)0x1a20 + (*(dw*)(((db*)&blitflag_jt)+di)))); return; }
+}
+
+/* ---- draw_list_walk: slot-flag scan -> blit_dst_patch -> compose_flip ---- */
+static void dlw_slot(void) {
+    ah = 0; CF = 0; OF = 0; ZF = 1; SF = 0;
+    *(db*)(&dpar_0) = al;
+    *(db*)(&dpar_1) = ah;
+    al = *(db*)raddr(ds,si - 0x4395);
+    *(db*)(&dpar_4) = al;
+    al = *(db*)raddr(ds,si - 0x437D);
+    *(db*)(&dpar_2) = al;
+    *(db*)(&dpar_3) = ah;
+    push(si);
+    blit_dst_patch();
+    si = pop();
+}
+static void dlw_done(void) {
+    dpar_5 = pop(); dpar_4 = pop(); dpar_3 = pop();
+    dpar_2 = pop(); dpar_1 = pop(); dpar_0 = pop();
+    compose_flip();
+}
+void draw_list_walk_e15bf0_c(void);
+void draw_list_walk_c(void) {
+    push(dpar_0); push(dpar_1); push(dpar_2);
+    push(dpar_3); push(dpar_4); push(dpar_5);
+    si = 0;
+    draw_list_walk_e15bf0_c();
+}
+void draw_list_walk_e15bf0_c(void) {
+    for (;;) {
+        al = *(db*)raddr(ds,si - 0x43AD);
+        al |= al; CF = 0; OF = 0; ZF = (al == 0); SF = (al >> 7);
+        if (al != 0 && (signed char)al >= 0)
+            dlw_slot();
+        (si)++; ZF = (si == 0); SF = (si >> 15);
+        CF = (dd)si < (dd)0x18; ZF = (si == 0x18); SF = ((dw)(si - 0x18) >> 15);
+        if (si >= 0x18) break;
+    }
+    dlw_done();
+}
+void draw_list_walk_e15c1a_c(void) {
+    for (;;) {
+        for (;;) {
+            do {
+                (si)++; ZF = (si == 0); SF = (si >> 15);
+                CF = (dd)si < (dd)0x18; ZF = (si == 0x18); SF = ((dw)(si - 0x18) >> 15);
+                if (si >= 0x18) { dlw_done(); return; }
+                al = *(db*)raddr(ds,si - 0x43AD);
+                al |= al; CF = 0; OF = 0; ZF = (al == 0); SF = (al >> 7);
+            } while (al == 0);
+            if ((signed char)al >= 0) break;
+        }
+        dlw_slot();
+    }
+}
+
+/* ---- copy_draw_params: 5x 3-byte records -> blit_dst_patch, then roster ---- */
+void copy_draw_params_e15d39_c(void);
+void copy_draw_params_c(void) {
+    si = 0x0BBD6;
+    cx = 5;
+    copy_draw_params_e15d39_c();
+}
+void copy_draw_params_e15d39_c(void) {
+    do {
+        al = *(db*)raddr(ds,si);
+        *(db*)(&dpar_4) = al;
+        al = *(db*)raddr(ds,si + 1);
+        *(db*)(&dpar_2) = al;
+        *(db*)(&dpar_3) = 0;
+        al = *(db*)raddr(ds,si + 2);
+        *(db*)(&dpar_0) = al;
+        *(db*)(&dpar_1) = 0;
+        clip_mask_a = 1;
+        hud_da1 = 0;
+        push(si);
+        push(cx);
+        blit_dst_patch();
+        cx = pop();
+        si = pop();
+        { dd t_ = (dd)si + (dd)3; CF = t_ > 0xFFFF; si = t_; ZF = ((dw)(si) == 0); SF = (((dw)(si)) >> 15); }
+    } while (--cx != 0);
+    unitlist_init();
+    *(db*)(&roster_ace) = 3;
+    *(db*)(((db*)&roster_ace) + 1) = 1;
+    *(db*)(&roster_ad0) = 1;
+    *(db*)(((db*)&roster_ad0) + 1) = 3;
+    roster_ad2 = 1;
+    roster_a50 = 0;
+    roster_apply();
+}
+
+/* ---- scroll_d_direct: scroll_tbl_d call then 40-col draw_tile_compose ---- */
+void scroll_d_direct_e14501_c(void);
+void scroll_d_direct_e1450e_c(void);
+void scroll_d_direct_c(void) {
+    ax = seg_draw;
+    es = ax;
+    di = *(dw*)raddr(ds,0x0AB4);
+    { CF = (((dd)di << (1)) >> 16) & 1; di <<= 1; ZF = ((dw)(di) == 0); SF = (((dw)(di)) >> 15); }
+    ds = ax;
+    { vfn f_ = func_at((dd)0x1a20 + (*(dw*)(((db*)&scroll_tbl_d)+di))); dw sp_ = sp; if (f_) f_(); else fprintf(stderr, "unresolved ind call %x\n", (dd)((dd)0x1a20 + (*(dw*)(((db*)&scroll_tbl_d)+di)))); if ((short)(sp - sp_) > 0) { sp = sp_; return; } }
+    ds = (seg_data);
+    row_meta = 0x0FFFF;
+    cx = 1;
+    ax = intro_656a;
+    { CF = (ax >> 0) & 1; ax = ax >> 1; ZF = ((dw)(ax) == 0); SF = (((dw)(ax)) >> 15); }
+    if (CF) cx = 2;
+    scroll_d_direct_e14501_c();
+}
+void scroll_d_direct_e14501_c(void) {
+    tmap_9812 = cx;
+    frame_cnt2 = ax;
+    frame_cnt = 0;
+    scroll_d_direct_e1450e_c();
+}
+void scroll_d_direct_e1450e_c(void) {
+    do {
+        draw_row = 0;
+        ax = frame_cnt;
+        draw_col = ax;
+        bx = frame_cnt2;
+        { CF = (((dd)bx << (1)) >> 16) & 1; bx <<= 1; ZF = ((dw)(bx) == 0); SF = (((dw)(bx)) >> 15); }
+        di = *(dw*)raddr(ds,bx + 0x0B71);
+        { dd t_ = (dd)di + (dd)frame_cnt; CF = t_ > 0xFFFF; di = t_; ZF = ((dw)(di) == 0); SF = (((dw)(di)) >> 15); }
+        { CF = (((dd)di << (1)) >> 16) & 1; di <<= 1; ZF = ((dw)(di) == 0); SF = (((dw)(di)) >> 15); }
+        ax = *(dw*)raddr(ds,di + 0x3F22);
+        draw_tile_compose();
+        (frame_cnt)++; ZF = ((dw)(frame_cnt) == 0); SF = (((dw)(frame_cnt)) >> 15);
+        CF = (dd)frame_cnt < (dd)0x28; ZF = (frame_cnt == 0x28); SF = ((dw)(frame_cnt - 0x28) >> 15);
+    } while (frame_cnt < 0x28);
+}

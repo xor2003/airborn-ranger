@@ -14862,7 +14862,8 @@ void locret_1392f(void) {
     /* retn ;~ 01A2:392F */
     return;
 }
-void sprite_blit_flagged(void) {
+void sprite_blit_flagged(void) { sprite_blit_flagged_c(); }
+void sprite_blit_flagged_lifted(void) {
     dd _sa = 0, _sb = 0;
     /* mov     ax, cs:seg_data ;~ 01A2:3671 */
     ax = seg_data;
@@ -19801,7 +19802,8 @@ void cell_tile_compose_lifted(void) {
     /* jmp     sub_11D12 ;~ 01A2:443C */
     draw_tile_compose(); return;
 }
-void sprite_param_set_e14458(void) {
+void sprite_param_set_e14458(void) { sprite_param_set_e14458_c(); }
+void sprite_param_set_e14458_lifted(void) {
     dd _sa = 0, _sb = 0;
     /* mov     ds:0C992h, ax ;~ 01A2:4458 */
     *(dw*)(raddr(ds,0x0C992)) = ax;
@@ -19885,7 +19887,8 @@ locret_144d4:
     /* retn ;~ 01A2:44D4 */
     return;
 }
-void sprite_param_set_e14472(void) {
+void sprite_param_set_e14472(void) { sprite_param_set_e14472_c(); }
+void sprite_param_set_e14472_lifted(void) {
     dd _sa = 0, _sb = 0;
 sprite_param_set_e14472:
     do {
@@ -19957,7 +19960,8 @@ locret_144d4:
     /* retn ;~ 01A2:44D4 */
     return;
 }
-void sprite_param_set_e14478(void) {
+void sprite_param_set_e14478(void) { sprite_param_set_e14478_c(); }
+void sprite_param_set_e14478_lifted(void) {
     dd _sa = 0, _sb = 0;
 sprite_param_set_e14478:
     do {
@@ -20031,7 +20035,8 @@ void locret_144d4(void) {
     /* retn ;~ 01A2:44D4 */
     return;
 }
-void sprite_param_set(void) {
+void sprite_param_set(void) { sprite_param_set_c(); }
+void sprite_param_set_lifted(void) {
     dd _sa = 0, _sb = 0;
     /* mov     ax, 0 ;~ 01A2:443F */
     ax = 0;
@@ -20133,7 +20138,8 @@ locret_144d4:
     /* retn ;~ 01A2:44D4 */
     return;
 }
-void scroll_d_direct_e14501(void) {
+void scroll_d_direct_e14501(void) { scroll_d_direct_e14501_c(); }
+void scroll_d_direct_e14501_lifted(void) {
     /* mov     tmap_9812, cx ;~ 01A2:4501 */
     tmap_9812 = cx;
     /* mov     word_2656E, ax ;~ 01A2:4505 */
@@ -20171,7 +20177,8 @@ scroll_d_direct_e1450e:
     /* retn ;~ 01A2:453C */
     return;
 }
-void scroll_d_direct_e1450e(void) {
+void scroll_d_direct_e1450e(void) { scroll_d_direct_e1450e_c(); }
+void scroll_d_direct_e1450e_lifted(void) {
 scroll_d_direct_e1450e:
     do {
         /* mov     word_1D902, 0 ;~ 01A2:450E */
@@ -20203,7 +20210,8 @@ scroll_d_direct_e1450e:
     /* retn ;~ 01A2:453C */
     return;
 }
-void scroll_d_direct(void) {
+void scroll_d_direct(void) { scroll_d_direct_c(); }
+void scroll_d_direct_lifted(void) {
     /* mov     ax, cs:seg_draw ;~ 01A2:44D5 */
     ax = seg_draw;
     /* mov     es, ax ;~ 01A2:44D9 */
@@ -45159,7 +45167,8 @@ roster_apply_e15bd1:
     /* retn ;~ 01A2:5BD4 */
     return;
 }
-void draw_list_walk_e15bf0(void) {
+void draw_list_walk_e15bf0(void) { draw_list_walk_e15bf0_c(); }
+void draw_list_walk_e15bf0_lifted(void) {
 draw_list_walk_e15bf0:
     do {
         /* mov     al, [si-43ADh] ;~ 01A2:5BF0 */
@@ -45218,7 +45227,8 @@ draw_list_walk_e15c1a:
     /* retn ;~ 01A2:5C3B */
     return;
 }
-void draw_list_walk_e15c1a(void) {
+void draw_list_walk_e15c1a(void) { draw_list_walk_e15c1a_c(); }
+void draw_list_walk_e15c1a_lifted(void) {
 draw_list_walk_e15c1a:
     do {
         do {
@@ -45279,7 +45289,8 @@ draw_list_walk_e15bf0:
         si = pop();
     } while (1);
 }
-void draw_list_walk(void) {
+void draw_list_walk(void) { draw_list_walk_c(); }
+void draw_list_walk_lifted(void) {
     /* push    word_1DCBF ;~ 01A2:5BD5 */
     push(dpar_0);
     /* push    word_1DCDF ;~ 01A2:5BD9 */
@@ -46167,7 +46178,8 @@ member_rec_load_e15d21:
     /* jmp     short loc_15CF2 ;~ 01A2:5D31 */
     goto member_rec_load_e15cf2;
 }
-void copy_draw_params_e15d39(void) {
+void copy_draw_params_e15d39(void) { copy_draw_params_e15d39_c(); }
+void copy_draw_params_e15d39_lifted(void) {
 copy_draw_params_e15d39:
     do {
         /* mov     al, [si] ;~ 01A2:5D39 */
@@ -46221,7 +46233,8 @@ copy_draw_params_e15d39:
     /* jmp     sub_15B24 ;~ 01A2:5D8D */
     roster_apply(); return;
 }
-void copy_draw_params(void) {
+void copy_draw_params(void) { copy_draw_params_c(); }
+void copy_draw_params_lifted(void) {
     /* mov     si, 0BBD6h ;~ 01A2:5D33 */
     si = 0x0BBD6;
     /* mov     cx, 5 ;~ 01A2:5D36 */

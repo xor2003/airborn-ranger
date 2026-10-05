@@ -1404,6 +1404,60 @@ int main(void){
         fprintf(stderr, "  (campan: lifted vs C, %d checks)\n", checks);
     }
 
+    /* ---- tilemap redraw + draw-list walkers: sprite_param_set 40x24
+     * cell grid -> cell_tile_compose, sprite_blit_flagged dispatch,
+     * draw_list_walk slot flags, copy_draw_params record loop,
+     * scroll_d_direct 40-col draw_tile_compose sweep. ----------------- */
+    {
+        dw s0 = seg_flip, s1 = seg_draw, s2 = seg_screen;
+        seg_flip = 0x9000; seg_draw = 0x9800; seg_screen = 0xA000;
+        ss = 0x8000; sp = 0xFFFE;
+        ds = seg_data; adapter_id = 3;
+        *(db*)raddr_(ds,0xC7FD) = 0;          /* 24-row redraw mode   */
+        ab_res("redraw", sprite_param_set_lifted, sprite_param_set, 0);
+        *(db*)raddr_(ds,0xC7FD) = 4;          /* 25-row redraw mode   */
+        ab_res("redraw +r", sprite_param_set_lifted, sprite_param_set, 0);
+        ax = 0; cx = 8; bx = 0x18;
+        ab_res("redraw 458", sprite_param_set_e14458_lifted,
+               sprite_param_set_e14458, 0);
+        *(dw*)raddr_(ds,0x96F2) = 2; *(dw*)raddr_(ds,0x96FA) = 0;
+        *(dw*)raddr_(ds,0x96F8) = 8; *(dw*)raddr_(ds,0x96F0) = 0;
+        *(dw*)raddr_(ds,0x96F6) = 0; *(dw*)raddr_(ds,0x0C992) = 0;
+        ab_res("redraw 472", sprite_param_set_e14472_lifted,
+               sprite_param_set_e14472, 0);
+        *(dw*)raddr_(ds,0x96F2) = 2; *(dw*)raddr_(ds,0x96FA) = 1;
+        *(dw*)raddr_(ds,0x96F8) = 8; *(dw*)raddr_(ds,0x96F0) = 1;
+        *(dw*)raddr_(ds,0x96F6) = 8; *(dw*)raddr_(ds,0x0C992) = 0;
+        *(dw*)raddr_(ds,0x96F4) = 0x20;
+        ab_res("redraw 478", sprite_param_set_e14478_lifted,
+               sprite_param_set_e14478, 0);
+        for (int i = 0; i < 5; i++) {
+            adapter_id = i;
+            ab_res("blitflag dsp", sprite_blit_flagged_lifted,
+                   sprite_blit_flagged, 0);
+        }
+        adapter_id = 3;
+        si = 0;
+        ab_res("dlw mid", draw_list_walk_e15bf0_lifted,
+               draw_list_walk_e15bf0, 0);
+        ab_res("dlw tail", draw_list_walk_e15c1a_lifted,
+               draw_list_walk_e15c1a, 0);
+        ab_res("dlw", draw_list_walk_lifted, draw_list_walk, 0);
+        ab_res("cdp", copy_draw_params_lifted, copy_draw_params, 0);
+        si = 0xBBD6 + 6; cx = 3;
+        ab_res("cdp mid", copy_draw_params_e15d39_lifted,
+               copy_draw_params_e15d39, 0);
+        ab_res("scrolld", scroll_d_direct_lifted, scroll_d_direct, 0);
+        cx = 2; ax = 0x11;
+        ab_res("scrolld 501", scroll_d_direct_e14501_lifted,
+               scroll_d_direct_e14501, 0);
+        frame_cnt2 = 3; frame_cnt = 0;
+        ab_res("scrolld 50e", scroll_d_direct_e1450e_lifted,
+               scroll_d_direct_e1450e, 0);
+        seg_flip = s0; seg_draw = s1; seg_screen = s2;
+        fprintf(stderr, "  (redraw: lifted vs C, %d checks)\n", checks);
+    }
+
     /* ---- status-panel digit patcher: WOUNDS field ds:0xB93F <- byte_29712
      * template lives in the image with literal "XX" placeholders; sub_1BBB9
      * converts al to two ASCII digits and stores at ds:[si]/ds:[si+1]. ---- */
