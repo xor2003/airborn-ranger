@@ -754,6 +754,71 @@ int main(void){
         fprintf(stderr, "  (render/objsys/ai: lifted vs C, %d checks)\n", checks);
     }
 
+    /* ---- frame dispatch: compose/flip/vblank adapter tables --------
+     * All 5 adapter indices exercised through every table; only the MCGA
+     * bodies resolve in this build — other cases hit the identical
+     * unresolved-jump path in both impls. farcall_ptr_a9e needs ds:0xA9E. */
+    {
+        /* the 64K frame copies run ds:0 -> es:0 through seg_flip/draw/
+         * screen — pin them to scratch high mem so the fixture doesn't
+         * stomp the image the digit-patcher test reads afterwards      */
+        dw s0 = seg_flip, s1 = seg_draw, s2 = seg_screen;
+        seg_flip = 0x9000; seg_draw = 0x9800; seg_screen = 0xA000;
+        adapter_id = 3;
+        *(dw*)raddr_(ds, 0x0A9E) = 0xFFFF;
+        ab_res("farcall none", farcall_ptr_a9e_lifted, farcall_ptr_a9e, 0);
+        *(dw*)raddr_(ds, 0x0A9E) = 7;
+        ab_res("farcall live", farcall_ptr_a9e_lifted, farcall_ptr_a9e, 0);
+        *(dw*)raddr_(ds, 0x0A9E) = 0xFFFF;
+
+        adapter_id = 3;
+        ab_res("compose cond3", compose_frame_cond_lifted, compose_frame_cond, 0);
+        adapter_id = 1;
+        ab_res("compose cond1", compose_frame_cond_lifted, compose_frame_cond, 0);
+        ab_res("compose clr", compose_frame_cond_e11962_lifted,
+               compose_frame_cond_e11962, 0);
+        for (int i = 0; i < 5; i++){
+            adapter_id = i;
+            ab_res("compose disp", compose_frame_e11983_lifted,
+                   compose_frame_e11983, 0);
+            ab_res("compose", compose_frame_lifted, compose_frame, 0);
+            ab_res("flip", flip_frame_lifted, flip_frame, 0);
+            ab_res("border", set_border_color_lifted, set_border_color, 0);
+            ab_res("clrbk", clear_backbuf_lifted, clear_backbuf, 0);
+            ab_res("adpflip", adapter_compose_flip_lifted,
+                   adapter_compose_flip, 0);
+            ab_res("compflip", compose_flip_lifted, compose_flip, 0);
+        }
+        adapter_id = 3;
+        es = seg_flip; ds = seg_draw;
+        ab_res("present mcga", present_mcga_lifted, present_mcga, 0);
+        es = seg_screen; ds = seg_flip;
+        ab_res("flip mcga", flip_mcga_lifted, flip_mcga, 0);
+        ds = 0x0E8A;
+        blit_sel = 1;
+        ab_res("flip e11a5c", flip_frame_e11a5c_lifted, flip_frame_e11a5c, 0);
+        ab_res("flip tail", flip_frame_e11b7a_lifted, flip_frame_e11b7a, 0);
+        dx = 0x3DA;                       /* head sets the status port   */
+        ab_res("vblank mid", vblank_wait_e11b84_lifted, vblank_wait_e11b84, 0);
+        ab_res("vblank", vblank_wait_lifted, vblank_wait, 0);
+        ab_res("compose mcga", compose_mcga_lifted, compose_mcga, 0);
+        ax = 5;
+        ab_res("mcga dac", compose_mcga_11c0d_lifted, compose_mcga_11c0d, 0);
+        ab_res("locret c27", locret_11c27_lifted, locret_11c27, 0);
+        seg000_1_0d4a = 0x1234; seg000_1_0d4c = 0x56;
+        ab_res("sprst copy", spr_state_copy_b_lifted, spr_state_copy_b, 0);
+        di = 2;
+        ab_res("adpflip mid", adapter_compose_flip_e11c4c_lifted,
+               adapter_compose_flip_e11c4c, 0);
+        ab_res("adpflip 53", adapter_compose_flip_e11c53_lifted,
+               adapter_compose_flip_e11c53, 0);
+        ab_res("adpflip 59", adapter_compose_flip_e11c59_lifted,
+               adapter_compose_flip_e11c59, 0);
+        seg_flip = s0; seg_draw = s1; seg_screen = s2;   /* unpin segs */
+        fprintf(stderr, "  (frame dispatch: lifted vs C, %d checks)\n", checks);
+    }
+
+
     /* ---- status-panel digit patcher: WOUNDS field ds:0xB93F <- byte_29712
      * template lives in the image with literal "XX" placeholders; sub_1BBB9
      * converts al to two ASCII digits and stores at ds:[si]/ds:[si+1]. ---- */

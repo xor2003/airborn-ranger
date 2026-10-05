@@ -977,3 +977,167 @@ void target_pri_decay_c(void){          /* sub_16B56: target heat decay  */
     if (al != 0) return;                /* still cooling                */
     (pri_best)--; ZF = (pri_best == 0); SF = (pri_best >> 7);
 }
+
+/* ---- frame dispatch (seg000:0116..1C5F) — compose/flip/vblank ---------
+ * Adapter-indexed video tails: present_jt / flip_jt / compose_jt /
+ * compose2_jt / clrback_jt all key off word_1D934 (adapter_id). Only the
+ * MCGA bodies (case 3) survive in this build — other cases land in the
+ * deleted-driver gaps and resolve as unresolved far jumps, which the
+ * readable dispatch preserves verbatim via func_at.
+ */
+void farcall_ptr_a9e_c(void){             /* sub_10116: deferred overlay call */
+    bx = *(dw*)raddr(ds, 0x0A9E);         /* slot id, 0xFFFF = none      */
+    CF = (dd)bx < (dd)0x0FFFF; ZF = (bx == 0x0FFFF);
+    SF = (((dw)(bx - 0x0FFFF)) >> 15);
+    if (bx == 0x0FFFF) return;
+    CF = ((dd)bx << 1) >> 16 & 1; bx <<= 1; ZF = (bx == 0); SF = (bx >> 15);
+    push(ds);
+    patched_trampoline();                 /* call far ptr sub_1E829      */
+    ds = pop();
+    *(dw*)raddr(ds, 0x0A9E) = 0x0FFFF;
+}
+
+void compose_frame_cond_e11962_c(void){   /* adapter==3: clear compose state */
+    dirtyrect_ptr = 0;
+    cframe_e0a3 = 0;
+    cframe_e12f = 0;
+}
+void compose_frame_cond_c(void){          /* sub_11952                     */
+    ax = seg_data; ds = ax;
+    CF = (dd)adapter_id < 3; ZF = (adapter_id == 3);
+    SF = (((dw)(adapter_id - 3)) >> 15);
+    if (adapter_id != 3){ compose_frame_e11983(); return; }
+    compose_frame_cond_e11962_c();
+}
+
+static void compose_present(void){        /* loc_11983: present_jt dispatch */
+    ax = seg_flip; es = ax;
+    di = adapter_id;
+    al = adpt_draw;
+    bx = seg_draw; ds = bx;
+    CF = ((dd)di << 1) >> 16 & 1; di <<= 1; ZF = (di == 0); SF = (di >> 15);
+    { vfn f_ = func_at((dd)0x1a20 + (*(dw*)(((db*)&present_jt)+di)));
+      if (f_) f_(); else fprintf(stderr, "unresolved ind jmp %x\n",
+          (dd)((dd)0x1a20 + (*(dw*)(((db*)&present_jt)+di)))); return; }
+}
+void compose_frame_e11983_c(void){ compose_present(); }
+void compose_frame_c(void){               /* sub_1197D                     */
+    ax = seg_data; ds = ax;
+    compose_present();
+}
+void present_mcga_c(void){                /* jumptable 11999 case 3        */
+    di = 0; si = 0; cx = 0x7D00;
+    while (cx--) { *(dw*)raddr_(es,di) = *(dw*)raddr_(ds,si);
+                   si += DF?-2:2; di += DF?-2:2; }
+    ax = seg_data; ds = ax;
+}
+
+static void flip_tail(void){              /* loc_11B7A                     */
+    ax = seg_data; ds = ax;
+}
+void flip_frame_e11a5c_c(void){           /* tandy page-B path             */
+    blit_sel = 1;
+    adpt_draw = 0x0E6; adpt_flip = 0x0F6;
+    bl = 4; bh = 6;
+    ax = 0x0583;
+    bios_video(ax);
+    flip_tail();
+}
+void flip_mcga_c(void){                   /* jumptable 11A25 case 3        */
+    *(dw*)raddr(ds, 0x0AB7) = 0;
+    es = seg_screen;
+    ax = seg_flip; ds = ax;
+    si = 0; di = 0; CF = 0; OF = 0; ZF = 1; SF = 0;
+    cx = 0x7D00;
+    while (cx--) { *(dw*)raddr_(es,di) = *(dw*)raddr_(ds,si);
+                   si += DF?-2:2; di += DF?-2:2; }
+    flip_tail();
+}
+void flip_frame_e11b7a_c(void){ flip_tail(); }
+void flip_frame_c(void){                  /* sub_11A19                     */
+    ax = seg_data; ds = ax;
+    di = adapter_id;
+    CF = ((dd)di << 1) >> 16 & 1; di <<= 1; ZF = (di == 0); SF = (di >> 15);
+    { vfn f_ = func_at((dd)0x1a20 + (*(dw*)(((db*)&flip_jt)+di)));
+      if (f_) f_(); else fprintf(stderr, "unresolved ind jmp %x\n",
+          (dd)((dd)0x1a20 + (*(dw*)(((db*)&flip_jt)+di)))); return; }
+}
+
+void vblank_wait_e11b84_c(void){          /* loc_11B84: poll status bit 3  */
+    do { al = in(dx); al &= 8; CF = 0; OF = 0; ZF = (al == 0); SF = (al >> 7);
+    } while (al == 0);
+}
+void vblank_wait_c(void){                 /* sub_11B81                     */
+    dx = 0x3DA;
+    vblank_wait_e11b84_c();
+}
+
+void compose_mcga_c(void){                /* border color via DAC pair     */
+    ax = 0x1001; bl = 0;
+    bios_palette();
+}
+void compose_mcga_11c0d_c(void){          /* jumptable 11BC9 case 3        */
+    bx = ax;
+    bx &= 0x0F; CF = 0; OF = 0; ZF = (bx == 0); SF = (bx >> 15);
+    ch = *(db*)raddr(ds, bx + 0x0D8);
+    cl = *(db*)raddr(ds, bx + 0x0C8);
+    dh = *(db*)raddr(ds, bx + 0x0B8);
+    bx = 0;
+    ax = 0x1010;
+    bios_palette();
+}
+void locret_11c27_c(void){}
+
+void spr_state_copy_b_c(void){            /* sub_11B8A                     */
+    clear_backbuf();
+    ax = seg000_1_0d4a;
+    bh = seg000_1_0d4c;
+    sprst_dst = ax;
+    sprst_dstb = bh;
+    set_border_color();
+}
+void set_border_color_c(void){            /* sub_11BBC: compose_jt         */
+    cx = seg_data; ds = cx;
+    di = adapter_id;
+    CF = ((dd)di << 1) >> 16 & 1; di <<= 1; ZF = (di == 0); SF = (di >> 15);
+    { vfn f_ = func_at((dd)0x1a20 + (*(dw*)(((db*)&compose_jt)+di)));
+      if (f_) f_(); else fprintf(stderr, "unresolved ind jmp %x\n",
+          (dd)((dd)0x1a20 + (*(dw*)(((db*)&compose_jt)+di)))); return; }
+}
+void clear_backbuf_c(void){               /* sub_10B43: clrback_jt         */
+    push(ds); push(es);
+    ds = seg_data;
+    ax = seg_screen; es = ax;
+    di = adapter_id;
+    CF = ((dd)di << 1) >> 16 & 1; di <<= 1; ZF = (di == 0); SF = (di >> 15);
+    { vfn f_ = func_at((dd)0x1a20 + (*(dw*)(((db*)&jpt_10b57)+di)));
+      if (f_) f_(); else fprintf(stderr, "unresolved ind jmp %x\n",
+          (dd)((dd)0x1a20 + (*(dw*)(((db*)&jpt_10b57)+di)))); return; }
+}
+
+static void compose2_dispatch(void){      /* loc_11C4C: compose2_jt        */
+    CF = ((dd)di << 1) >> 16 & 1; di <<= 1; ZF = (di == 0); SF = (di >> 15);
+    { vfn f_ = func_at((dd)0x1a20 + (*(dw*)(((db*)&compose2_jt)+di)));
+      if (f_) f_(); else fprintf(stderr, "unresolved ind jmp %x\n",
+          (dd)((dd)0x1a20 + (*(dw*)(((db*)&compose2_jt)+di)))); return; }
+}
+void adapter_compose_flip_e11c4c_c(void){ compose2_dispatch(); }
+void adapter_compose_flip_e11c59_c(void){ /* cases 0,3,4 tail              */
+    compose_frame(); flip_frame();
+}
+void adapter_compose_flip_e11c53_c(void){ /* cases 1,2: double compose     */
+    compose_frame(); flip_frame();
+    adapter_compose_flip_e11c59_c();
+}
+void adapter_compose_flip_c(void){        /* sub_11C28                     */
+    ax = seg_data; ds = ax;
+    di = adapter_id;
+    CF = (dd)di < 3; ZF = (di == 3); SF = (((dw)(di - 3)) >> 15);
+    if (di == 3) return;
+    compose2_dispatch();
+}
+void compose_flip_c(void){                /* sub_11C42                     */
+    ax = seg_data; ds = ax;
+    di = adapter_id;
+    compose2_dispatch();
+}

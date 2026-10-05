@@ -352,7 +352,8 @@ seg000_114_proc:
     /* retn ;~ 01A2:0115 */
     return;
 }
-void farcall_ptr_a9e(void) {
+void farcall_ptr_a9e(void) { farcall_ptr_a9e_c(); }
+void farcall_ptr_a9e_lifted(void) {
     /* mov     bx, ds:0A9Eh ;~ 01A2:0116 */
     bx = *(dw*)raddr(ds,0x0A9E);
     /* cmp     bx, 0FFFFh ;~ 01A2:011A */
@@ -2741,7 +2742,8 @@ void clear_drawbuf(void) {
 }
 
 
-void clear_backbuf(void) {
+void clear_backbuf(void) { clear_backbuf_c(); }
+void clear_backbuf_lifted(void) {
     /* push    ds ;~ 01A2:0B43 */
     push(ds);
     /* push    es ;~ 01A2:0B44 */
@@ -5757,7 +5759,8 @@ tile_row_mcga_e118c6:
     return;
 }
 
-void compose_frame_cond_e11962(void) {
+void compose_frame_cond_e11962(void) { compose_frame_cond_e11962_c(); }
+void compose_frame_cond_e11962_lifted(void) {
     /* mov     word_1DDB0, 0 ;~ 01A2:1962 */
     dirtyrect_ptr = 0;
     /* mov     byte_1E0A3, 0 ;~ 01A2:1968 */
@@ -5767,7 +5770,8 @@ void compose_frame_cond_e11962(void) {
     /* retn ;~ 01A2:1972 */
     return;
 }
-void compose_frame_cond(void) {
+void compose_frame_cond(void) { compose_frame_cond_c(); }
+void compose_frame_cond_lifted(void) {
     /* mov     ax, cs:seg_data ;~ 01A2:1952 */
     ax = seg_data;
     /* mov     ds, ax ;~ 01A2:1956 */
@@ -5789,7 +5793,8 @@ compose_frame_cond_e11962:
     /* retn ;~ 01A2:1972 */
     return;
 }
-void compose_frame_e11983(void) {
+void compose_frame_e11983(void) { compose_frame_e11983_c(); }
+void compose_frame_e11983_lifted(void) {
     /* mov     ax, cs:seg_flip ;~ 01A2:1983 */
     ax = seg_flip;
     /* mov     es, ax ;~ 01A2:1987 */
@@ -5825,7 +5830,8 @@ present_cga:
 
 
 
-void present_mcga(void) {
+void present_mcga(void) { present_mcga_c(); }
+void present_mcga_lifted(void) {
     /* mov     di, 0           ; jumptable 00011999 case 3 ;~ 01A2:19EB */
     di = 0;
     /* mov     si, 0 ;~ 01A2:19EE */
@@ -5842,7 +5848,8 @@ void present_mcga(void) {
     return;
 }
 
-void compose_frame(void) {
+void compose_frame(void) { compose_frame_c(); }
+void compose_frame_lifted(void) {
     /* mov     ax, cs:seg_data ;~ 01A2:197D */
     ax = seg_data;
     /* mov     ds, ax ;~ 01A2:1981 */
@@ -5881,7 +5888,8 @@ present_cga:
     return;
 }
 
-void flip_frame_e11a5c(void) {
+void flip_frame_e11a5c(void) { flip_frame_e11a5c_c(); }
+void flip_frame_e11a5c_lifted(void) {
     /* mov     word_1D937, 1 ;~ 01A2:1A5C */
     blit_sel = 1;
     /* mov     byte_1D939, 0E6h ;~ 01A2:1A62 */
@@ -5909,7 +5917,8 @@ flip_frame_e11b7a:
 }
 
 
-void flip_mcga(void) {
+void flip_mcga(void) { flip_mcga_c(); }
+void flip_mcga_lifted(void) {
     /* mov     word ptr ds:0AB7h, 0 ; jumptable 00011A25 case 3 ;~ 01A2:1AB1 */
     *(dw*)(raddr(ds,0x0AB7)) = 0;
     /* mov     ax, cs:seg_1000E ;~ 01A2:1AB7 */
@@ -5942,7 +5951,8 @@ flip_frame_e11b7a:
 
 
 
-void flip_frame_e11b7a(void) {
+void flip_frame_e11b7a(void) { flip_frame_e11b7a_c(); }
+void flip_frame_e11b7a_lifted(void) {
     /* mov     ax, cs:seg_data ;~ 01A2:1B7A */
     ax = seg_data;
     /* mov     ds, ax ;~ 01A2:1B7E */
@@ -5950,7 +5960,8 @@ void flip_frame_e11b7a(void) {
     /* retn ;~ 01A2:1B80 */
     return;
 }
-void flip_frame(void) {
+void flip_frame(void) { flip_frame_c(); }
+void flip_frame_lifted(void) {
     dd _sa = 0, _sb = 0;
     /* mov     ax, cs:seg_data ;~ 01A2:1A19 */
     ax = seg_data;
@@ -6017,7 +6028,8 @@ flip_frame_e11b7a:
     /* retn ;~ 01A2:1B80 */
     return;
 }
-void vblank_wait_e11b84(void) {
+void vblank_wait_e11b84(void) { vblank_wait_e11b84_c(); }
+void vblank_wait_e11b84_lifted(void) {
 vblank_wait_e11b84:
     do {
         /* in      al, dx          ; Video status bits: ;~ 01A2:1B84 */
@@ -6029,7 +6041,8 @@ vblank_wait_e11b84:
     /* retn ;~ 01A2:1B89 */
     return;
 }
-void vblank_wait(void) {
+void vblank_wait(void) { vblank_wait_c(); }
+void vblank_wait_lifted(void) {
     /* mov     dx, 3DAh ;~ 01A2:1B81 */
     dx = 0x3DA;
 vblank_wait_e11b84:
@@ -6047,7 +6060,8 @@ vblank_wait_e11b84:
 
 
 
-void compose_mcga(void) {
+void compose_mcga(void) { compose_mcga_c(); }
+void compose_mcga_lifted(void) {
     /* mov     ah, 10h ;~ 01A2:1C04 */
     /* mov     al, 1 ;~ 01A2:1C06 */
     ax = 0x1001;
@@ -6058,7 +6072,8 @@ void compose_mcga(void) {
     /* retn ;~ 01A2:1C0C */
     return;
 }
-void compose_mcga_11c0d(void) {
+void compose_mcga_11c0d(void) { compose_mcga_11c0d_c(); }
+void compose_mcga_11c0d_lifted(void) {
     dd _sa = 0, _sb = 0;
     /* mov     bx, ax          ; jumptable 00011BC9 case 3 ;~ 01A2:1C0D */
     bx = ax;
@@ -6083,12 +6098,14 @@ locret_11c27:
     /* retn                    ; jumptable 00011BC9 case 4 ;~ 01A2:1C27 */
     return;
 }
-void locret_11c27(void) {
+void locret_11c27(void) { locret_11c27_c(); }
+void locret_11c27_lifted(void) {
     /* retn                    ; jumptable 00011BC9 case 4 ;~ 01A2:1C27 */
     return;
 }
 
-void spr_state_copy_b(void) {
+void spr_state_copy_b(void) { spr_state_copy_b_c(); }
+void spr_state_copy_b_lifted(void) {
     /* call    sub_10B43 ;~ 01A2:1B8A */
     clear_backbuf();
     /* mov     ax, word_20D4A ;~ 01A2:1B8D */
@@ -6102,7 +6119,8 @@ void spr_state_copy_b(void) {
     /* jmp     short sub_11BBC ;~ 01A2:1B9B */
     set_border_color(); return;
 }
-void set_border_color(void) {
+void set_border_color(void) { set_border_color_c(); }
+void set_border_color_lifted(void) {
     /* mov     cx, cs:seg_data ;~ 01A2:1BBC */
     cx = seg_data;
     /* mov     ds, cx ;~ 01A2:1BC1 */
@@ -6125,7 +6143,8 @@ compose_cga:
     /* retn ;~ 01A2:1BD7 */
     return;
 }
-void adapter_compose_flip_e11c4c(void) {
+void adapter_compose_flip_e11c4c(void) { adapter_compose_flip_e11c4c_c(); }
+void adapter_compose_flip_e11c4c_lifted(void) {
     /* shl     di, 1           ; switch 5 cases ;~ 01A2:1C4C */
     { if (1) { CF = (((dd)di << (1)) >> 16) & 1; di <<= 1; ZF = ((dw)(di) == 0); SF = (((dw)(di)) >> 15); } }
     /* jmp     cs:jpt_11C4E[di] ; switch jump ;~ 01A2:1C4E */
@@ -6143,7 +6162,8 @@ adapter_compose_flip_e11c59:
     /* retn ;~ 01A2:1C5F */
     return;
 }
-void adapter_compose_flip_e11c53(void) {
+void adapter_compose_flip_e11c53(void) { adapter_compose_flip_e11c53_c(); }
+void adapter_compose_flip_e11c53_lifted(void) {
     /* call    sub_1197D       ; jumptable 00011C4E cases 1,2 ;~ 01A2:1C53 */
     compose_frame();
     /* call    sub_11A19 ;~ 01A2:1C56 */
@@ -6156,7 +6176,8 @@ adapter_compose_flip_e11c59:
     /* retn ;~ 01A2:1C5F */
     return;
 }
-void adapter_compose_flip_e11c59(void) {
+void adapter_compose_flip_e11c59(void) { adapter_compose_flip_e11c59_c(); }
+void adapter_compose_flip_e11c59_lifted(void) {
     /* call    sub_1197D       ; jumptable 00011C4E cases 0,3,4 ;~ 01A2:1C59 */
     compose_frame();
     /* call    sub_11A19 ;~ 01A2:1C5C */
@@ -6164,7 +6185,8 @@ void adapter_compose_flip_e11c59(void) {
     /* retn ;~ 01A2:1C5F */
     return;
 }
-void adapter_compose_flip(void) {
+void adapter_compose_flip(void) { adapter_compose_flip_c(); }
+void adapter_compose_flip_lifted(void) {
     /* mov     ax, cs:seg_data ;~ 01A2:1C28 */
     ax = seg_data;
     /* mov     ds, ax ;~ 01A2:1C2C */
@@ -6196,7 +6218,8 @@ adapter_compose_flip_e11c59:
     /* retn ;~ 01A2:1C5F */
     return;
 }
-void compose_flip(void) {
+void compose_flip(void) { compose_flip_c(); }
+void compose_flip_lifted(void) {
     /* mov     ax, cs:seg_data ;~ 01A2:1C42 */
     ax = seg_data;
     /* mov     ds, ax ;~ 01A2:1C46 */
