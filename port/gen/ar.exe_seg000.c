@@ -4221,7 +4221,8 @@ locret_11309:
     /* retn ;~ 01A2:1309 */
     return;
 }
-void rand_next_e11326(void) {
+void rand_next_e11326(void) { rand_next_e11326_c(); }
+void rand_next_e11326_lifted(void) {
     /* rol     word_1D95F, 1 ;~ 01A2:1326 */
     rand_s0 = rol16(rand_s0, 1);
     /* rol     word_1D961, 1 ;~ 01A2:132A */
@@ -4245,7 +4246,8 @@ rand_next_e1133c:
     /* retn ;~ 01A2:1345 */
     return;
 }
-void rand_next_e1133c(void) {
+void rand_next_e1133c(void) { rand_next_e1133c_c(); }
+void rand_next_e1133c_lifted(void) {
     /* mov     ax, word_1D95F ;~ 01A2:133C */
     ax = rand_s0;
     /* xor     ax, word_1D961 ;~ 01A2:133F */
@@ -4257,7 +4259,8 @@ void rand_next_e1133c(void) {
     /* retn ;~ 01A2:1345 */
     return;
 }
-void rand_next(void) {
+void rand_next(void) { rand_next_c(); }
+void rand_next_lifted(void) {
     /* pushf ;~ 01A2:130A */
     pushf();
     /* push    ds ;~ 01A2:130B */
@@ -4344,7 +4347,8 @@ void video_init_once_e11392(void) {
     /* retn ;~ 01A2:1396 */
     return;
 }
-void rand_mul(void) {
+void rand_mul(void) { rand_mul_c(); }
+void rand_mul_lifted(void) {
     /* mov     cl, al ;~ 01A2:1346 */
     cl = al;
     /* call    sub_1130A ;~ 01A2:1348 */
@@ -39264,7 +39268,8 @@ void tile_draw_3f22_lifted(void) {
     /* retn ;~ 01A2:54D6 */
     return;
 }
-void rand_0_22(void) {
+void rand_0_22(void) { rand_0_22_c(); }
+void rand_0_22_lifted(void) {
 sub_154d7:
     /* call    sub_1130A ;~ 01A2:54D7 */
     rand_next();
@@ -60140,7 +60145,8 @@ enemy_spawn_e16e29:
     /* retn ;~ 01A2:6E2A */
     return;
 }
-void rand_tbl_pick_e16e4a(void) {
+void rand_tbl_pick_e16e4a(void) { rand_tbl_pick_e16e4a_c(); }
+void rand_tbl_pick_e16e4a_lifted(void) {
     dd _sa = 0, _sb = 0;
     /* mov     dl, byte_28CC1 ;~ 01A2:6E4A */
     dl = diff_parm;
@@ -60199,7 +60205,8 @@ rand_tbl_pick_e16e77:
     /* retn ;~ 01A2:6E85 */
     return;
 }
-void rand_tbl_pick_e16e65(void) {
+void rand_tbl_pick_e16e65(void) { rand_tbl_pick_e16e65_c(); }
+void rand_tbl_pick_e16e65_lifted(void) {
     /* mov     al, [si-34FDh] ;~ 01A2:6E65 */
     al = *(db*)raddr(ds,si-0x34FD);
 rand_tbl_pick_e16e69:
@@ -60230,7 +60237,8 @@ rand_tbl_pick_e16e77:
     /* retn ;~ 01A2:6E85 */
     return;
 }
-void rand_tbl_pick_e16e69(void) {
+void rand_tbl_pick_e16e69(void) { rand_tbl_pick_e16e69_c(); }
+void rand_tbl_pick_e16e69_lifted(void) {
     /* mov     dl, byte_28CC1 ;~ 01A2:6E69 */
     dl = diff_parm;
     /* xor     dh, dh ;~ 01A2:6E6D */
@@ -60258,7 +60266,8 @@ rand_tbl_pick_e16e77:
     /* retn ;~ 01A2:6E85 */
     return;
 }
-void rand_tbl_pick_e16e77(void) {
+void rand_tbl_pick_e16e77(void) { rand_tbl_pick_e16e77_c(); }
+void rand_tbl_pick_e16e77_lifted(void) {
     /* mov     dl, byte_2998F ;~ 01A2:6E77 */
     dl = scan_a;
     /* xor     dh, dh ;~ 01A2:6E7B */
@@ -60272,7 +60281,8 @@ void rand_tbl_pick_e16e77(void) {
     /* retn ;~ 01A2:6E85 */
     return;
 }
-void rand_tbl_pick_e16e86(void) {
+void rand_tbl_pick_e16e86(void) { rand_tbl_pick_e16e86_c(); }
+void rand_tbl_pick_e16e86_lifted(void) {
     dd _sa = 0, _sb = 0;
     /* and     al, 3 ;~ 01A2:6E86 */
     al &= 3; CF = 0; OF = 0; ZF = ((db)(al) == 0); SF = (((db)(al)) >> 7);
@@ -60348,7 +60358,8 @@ rand_tbl_pick_e16e77:
     /* retn ;~ 01A2:6E85 */
     return;
 }
-void rand_tbl_pick_e16e90(void) {
+void rand_tbl_pick_e16e90(void) { rand_tbl_pick_e16e90_c(); }
+void rand_tbl_pick_e16e90_lifted(void) {
     dd _sa = 0, _sb = 0;
     /* mov     al, [si-34F5h] ;~ 01A2:6E90 */
     al = *(db*)raddr(ds,si-0x34F5);
@@ -60412,7 +60423,8 @@ rand_tbl_pick_e16e77:
     /* retn ;~ 01A2:6E85 */
     return;
 }
-void rand_tbl_pick(void) {
+void rand_tbl_pick(void) { rand_tbl_pick_c(); }
+void rand_tbl_pick_lifted(void) {
     dd _sa = 0, _sb = 0;
     /* mov     dx, si ;~ 01A2:6E2B */
     dx = si;
@@ -160577,13 +160589,15 @@ void mission_init_dispatch(void) {
     /* jmp     cs:jpt_1B475[di] ; switch jump ;~ 01A2:B475 */
     { vfn f_ = func_at((dd)0x1a20 + (*(dw*)(((db*)&mission_jt)+di))); if (f_) f_(); else fprintf(stderr, "unresolved ind jmp %x\n", (dd)((dd)0x1a20 + (*(dw*)(((db*)&mission_jt)+di)))); return; }
 }
-void mapgen_fill_a(void) {
+void mapgen_fill_a(void) { mapgen_fill_a_c(); }
+void mapgen_fill_a_lifted(void) {
     /* mov     byte_2B0C6, 1Fh ;~ 01A2:B47A */
     fill_a_b0c6 = 0x1F;
     /* jmp     short loc_1B486 ;~ 01A2:B47F */
     mapgen_fill_b_e1b486(); return;
 }
-void mapgen_fill_b_e1b486(void) {
+void mapgen_fill_b_e1b486(void) { mapgen_fill_b_e1b486_c(); }
+void mapgen_fill_b_e1b486_lifted(void) {
     /* mov     byte_2B0C7, 20h ; ' ' ;~ 01A2:B486 */
     fill_b_b0c7 = 0x20;
 mapgen_fill_b_e1b48b:
@@ -160613,7 +160627,8 @@ mapgen_fill_b_e1b48b:
     /* retn ;~ 01A2:B4B6 */
     return;
 }
-void mapgen_fill_b_e1b48b(void) {
+void mapgen_fill_b_e1b48b(void) { mapgen_fill_b_e1b48b_c(); }
+void mapgen_fill_b_e1b48b_lifted(void) {
 mapgen_fill_b_e1b48b:
     do {
         /* call    sub_1130A ;~ 01A2:B48B */
@@ -160641,7 +160656,8 @@ mapgen_fill_b_e1b48b:
     /* retn ;~ 01A2:B4B6 */
     return;
 }
-void mapgen_fill_b(void) {
+void mapgen_fill_b(void) { mapgen_fill_b_c(); }
+void mapgen_fill_b_lifted(void) {
     /* mov     byte_2B0C6, 7 ;~ 01A2:B481 */
     fill_a_b0c6 = 7;
 mapgen_fill_b_e1b486:
@@ -163012,7 +163028,8 @@ void grid_cell_mark_lifted(void) {
     /* retn ;~ 01A2:B8C2 */
     return;
 }
-void rand_map_pos(void) {
+void rand_map_pos(void) { rand_map_pos_c(); }
+void rand_map_pos_lifted(void) {
 sub_1b8c3:
     /* mov     al, 1 ;~ 01A2:B8C3 */
     al = 1;

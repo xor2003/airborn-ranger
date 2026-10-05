@@ -4084,3 +4084,168 @@ void rec_row_fetch_e154bc_c(void) {
     tile_draw_3f22();
     bx = pop();
 }
+
+/* ---- rng: LFSR + table pickers ---- */
+
+void rand_next_c(void) {
+    pushf();
+    push(ds);
+    ax = seg_data;
+    ds = ax;
+    CF = (dd)rand_s0 < 0; ZF = rand_s0 == 0; SF = ((dw)(rand_s0 - 0)) >> 15;
+    if (rand_s0 == 0) {
+        push(cx);
+        push(dx);
+        ah = 0;
+        bios_time();
+        ax = dx;
+        dx = pop();
+        cx = pop();
+        rand_s0 = ax;
+    }
+    rand_next_e11326_c();
+}
+void rand_next_e11326_c(void) {
+    rand_s0 = rol16(rand_s0, 1);
+    rand_s1 = rol16(rand_s1, 1);
+    if (CF) {
+        rand_s0 ^= 0x8787; CF = 0; OF = 0; ZF = rand_s0 == 0; SF = rand_s0 >> 15;
+        rand_s1 ^= 0x1D1D; CF = 0; OF = 0; ZF = rand_s1 == 0; SF = rand_s1 >> 15;
+    }
+    rand_next_e1133c_c();
+}
+void rand_next_e1133c_c(void) {
+    ax = rand_s0;
+    ax ^= rand_s1; CF = 0; OF = 0; ZF = ax == 0; SF = ax >> 15;
+    ds = pop();
+    popf();
+}
+
+void rand_mul_c(void) {
+    cl = al;
+    rand_next();
+    ax = (dw)al * cl;
+    al = ah;
+    ah = 0; CF = 0; OF = 0; ZF = 1; SF = 0;
+    al |= al; CF = 0; OF = 0; ZF = al == 0; SF = al >> 7;
+}
+
+void rand_0_22_c(void) {
+    rand_next();
+    ax &= 0x1F; CF = 0; OF = 0; ZF = ax == 0; SF = ax >> 15;
+    CF = (dd)al < 0x17; ZF = al == 0x17; SF = ((db)(al - 0x17)) >> 7;
+    if (al >= 0x17) { rand_0_22_c(); return; }
+}
+
+void rand_map_pos_c(void) {
+    for (;;) {
+        al = 1;
+        cell_by = al;
+        mark_row = al;
+        rand_next();
+        al &= 0x1F; CF = 0; OF = 0; ZF = al == 0; SF = al >> 7;
+        cell_bx = al;
+        mark_col = al;
+        rec_ptr_a = 0x0E3B6;
+        map_rect_write();
+        if (!CF) return;
+    }
+}
+
+static void rtp_tail(void) {   /* e16e69 + e16e77 */
+    dl = diff_parm; dh = 0; CF = 0; OF = 0; ZF = 1; SF = 0;
+    si = dx;
+    dl |= dl; CF = 0; OF = 0; ZF = dl == 0; SF = dl >> 7;
+    if (dl == 0) ax = si;
+    dl = scan_a; dh = 0; CF = 0; OF = 0; ZF = 1; SF = 0;
+    si = dx;
+    dl |= dl; CF = 0; OF = 0; ZF = dl == 0; SF = dl >> 7;
+    *(db*)raddr(ds, si - 0x3DDD) = al;
+}
+void rand_tbl_pick_e16e4a_c(void) {
+    dl = diff_parm; dh = 0; CF = 0; OF = 0; ZF = 1; SF = 0;
+    si = dx;
+    dl |= dl; CF = 0; OF = 0; ZF = dl == 0; SF = dl >> 7;
+    CF = (dd)al < (dd)*(db*)raddr(ds, si - 0x34FD);
+    ZF = al == *(db*)raddr(ds, si - 0x34FD);
+    SF = ((db)(al - *(db*)raddr(ds, si - 0x34FD))) >> 7;
+    if (al >= *(db*)raddr(ds, si - 0x34FD)) {
+        rand_next();
+        CF = (dd)al < 0x80; ZF = al == 0x80; SF = ((db)(al - 0x80)) >> 7;
+        if (al >= 0x80) al = 1;
+        else al = *(db*)raddr(ds, si - 0x34FD);
+    }
+    rtp_tail();
+}
+void rand_tbl_pick_e16e65_c(void) {
+    al = *(db*)raddr(ds, si - 0x34FD);
+    rtp_tail();
+}
+void rand_tbl_pick_e16e69_c(void) { rtp_tail(); }
+void rand_tbl_pick_e16e77_c(void) {
+    dl = scan_a; dh = 0; CF = 0; OF = 0; ZF = 1; SF = 0;
+    si = dx;
+    dl |= dl; CF = 0; OF = 0; ZF = dl == 0; SF = dl >> 7;
+    *(db*)raddr(ds, si - 0x3DDD) = al;
+}
+void rand_tbl_pick_e16e86_c(void) {
+    al &= 3; CF = 0; OF = 0; ZF = al == 0; SF = al >> 7;
+    if (al != 0) {
+        al = *(db*)raddr(ds, si - 0x34F9);
+        rand_tbl_pick_e16e4a_c();
+        return;
+    }
+    rand_tbl_pick_e16e90_c();
+}
+void rand_tbl_pick_e16e90_c(void) {
+    al = *(db*)raddr(ds, si - 0x34F5);
+    rand_tbl_pick_e16e4a_c();
+}
+void rand_tbl_pick_c(void) {
+    dx = si;
+    scan_a = dl;
+    dl = spawn_level;
+    dh = 0; CF = 0; OF = 0; ZF = 1; SF = 0;
+    si = dx;
+    dl |= dl; CF = 0; OF = 0; ZF = dl == 0; SF = dl >> 7;
+    rand_next();
+    CF = (dd)al < (dd)*(db*)raddr(ds, si - 0x3501);
+    ZF = al == *(db*)raddr(ds, si - 0x3501);
+    SF = ((db)(al - *(db*)raddr(ds, si - 0x3501))) >> 7;
+    if (al < *(db*)raddr(ds, si - 0x3501)) {
+        al &= 3; CF = 0; OF = 0; ZF = al == 0; SF = al >> 7;
+        if (al == 0) al = 1;
+        rand_tbl_pick_e16e4a_c();
+        return;
+    }
+    rand_tbl_pick_e16e86_c();
+}
+
+/* ---- mapgen fill: 0x20 retry loops of rand rect placement ---- */
+
+void mapgen_fill_a_c(void) {
+    fill_a_b0c6 = 0x1F;
+    mapgen_fill_b_e1b486_c();
+}
+void mapgen_fill_b_c(void) {
+    fill_a_b0c6 = 7;
+    mapgen_fill_b_e1b486_c();
+}
+void mapgen_fill_b_e1b486_c(void) {
+    fill_b_b0c7 = 0x20;
+    mapgen_fill_b_e1b48b_c();
+}
+void mapgen_fill_b_e1b48b_c(void) {
+    do {
+        rand_next();
+        mgen_12a = 0x1F;
+        rand_next();
+        al &= fill_a_b0c6; CF = 0; OF = 0; ZF = al == 0; SF = al >> 7;
+        mgen_12b = al;
+        rec_ptr_b = 0x0E35D;
+        mgen_127 = 0x0D0;
+        mgen_128 = 0x0D0;
+        mapgen_retry();
+        (fill_b_b0c7)--; ZF = fill_b_b0c7 == 0; SF = fill_b_b0c7 >> 7;
+    } while ((signed char)fill_b_b0c7 >= 0);
+}

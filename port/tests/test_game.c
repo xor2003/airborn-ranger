@@ -1667,6 +1667,62 @@ int main(void){
         fprintf(stderr, "  (mapacc: lifted vs C, %d checks)\n", checks);
     }
 
+    /* ---- rng: LFSR + pickers ------------------------------------------ */
+    {   ss = 0x8000; sp = 0xFFFE;
+        dw dsc = ds;
+        rand_s0 = 0x1234; rand_s1 = 0x5678;
+        ab_res("rand", rand_next_lifted, rand_next, 0);
+        rand_s0 = 0x8000; rand_s1 = 0x0001;   /* high-bit -> xor taps */
+        ab_res("rand tap", rand_next_lifted, rand_next, 0);
+        rand_s0 = 0x7FFF; rand_s1 = 0xFFFF;
+        ab_res("rand 326", rand_next_e11326_lifted, rand_next_e11326, 0);
+        ab_res("rand 33c", rand_next_e1133c_lifted, rand_next_e1133c, 0);
+        al = 9;
+        ab_res("randmul", rand_mul_lifted, rand_mul, 0);
+        rand_s0 = 0x1111; rand_s1 = 0x2222;
+        ab_res("rand022", rand_0_22_lifted, rand_0_22, 0);
+        /* rand_map_pos retries on busy rect; clear a wide strip so the
+         * first (cell_bx,1) placement is likely empty.  The record at
+         * ds:0xE3B6 may be clobbered by earlier sections — plant a
+         * minimal 2x2 record (w,h + 4 payload bytes). */
+        for (int i = 0; i < 0x400; i++)
+            *(db*)raddr_(ds, 0x9736 + 32 + i) = 0;
+        db *rp_rec = (db*)raddr_(ds, 0xE3B6);
+        rp_rec[0] = 2; rp_rec[1] = 2;
+        rp_rec[2] = 0x2d; rp_rec[3] = 0xff;
+        rp_rec[4] = 0xff; rp_rec[5] = 0xff;
+        rand_s0 = 0x4242; rand_s1 = 0x1111;
+        ab_res("randpos", rand_map_pos_lifted, rand_map_pos, 0);
+        /* rand_tbl_pick: spawn_level/diff_parm tables + dst slot */
+        spawn_level = 3; diff_parm = 2;
+        *(db*)raddr_(ds, 3 - 0x3501) = 0x80;
+        *(db*)raddr_(ds, 3 - 0x34FD) = 4;
+        *(db*)raddr_(ds, 3 - 0x34F9) = 0x33;
+        *(db*)raddr_(ds, 3 - 0x34F5) = 0x44;
+        si = 1; al = 0;
+        ab_res("tblpick", rand_tbl_pick_lifted, rand_tbl_pick, 0);
+        si = 7; al = 5;
+        ab_res("tblpick 4a", rand_tbl_pick_e16e4a_lifted, rand_tbl_pick_e16e4a, 0);
+        si = 2;
+        ab_res("tblpick 65", rand_tbl_pick_e16e65_lifted, rand_tbl_pick_e16e65, 0);
+        ab_res("tblpick 69", rand_tbl_pick_e16e69_lifted, rand_tbl_pick_e16e69, 0);
+        ab_res("tblpick 77", rand_tbl_pick_e16e77_lifted, rand_tbl_pick_e16e77, 0);
+        si = 3; al = 0xFF;
+        ab_res("tblpick 86", rand_tbl_pick_e16e86_lifted, rand_tbl_pick_e16e86, 0);
+        si = 3;
+        ab_res("tblpick 90", rand_tbl_pick_e16e90_lifted, rand_tbl_pick_e16e90, 0);
+        /* mapgen_fill loops 0x20 x mapgen_retry -> map_rect_write:
+         * deterministic under identical rand state */
+        rand_s0 = 0x1357; rand_s1 = 0x2468;
+        ab_res("mfill_a", mapgen_fill_a_lifted, mapgen_fill_a, 0);
+        rand_s0 = 0x1357; rand_s1 = 0x2468;
+        ab_res("mfill_b", mapgen_fill_b_lifted, mapgen_fill_b, 0);
+        rand_s0 = 0x1357; rand_s1 = 0x2468; fill_b_b0c7 = 3;
+        ab_res("mfill 48b", mapgen_fill_b_e1b48b_lifted, mapgen_fill_b_e1b48b, 0);
+        ds = dsc;
+        fprintf(stderr, "  (rand+fill: lifted vs C, %d checks)\n", checks);
+    }
+
     /* ---- status-panel digit patcher: WOUNDS field ds:0xB93F <- byte_29712
      * template lives in the image with literal "XX" placeholders; sub_1BBB9
      * converts al to two ASCII digits and stores at ds:[si]/ds:[si+1]. ---- */
