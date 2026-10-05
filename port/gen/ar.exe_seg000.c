@@ -175968,7 +175968,8 @@ mission_case2_e1c7b0:
     /* retn ;~ 01A2:C7CF */
     return;
 }
-void mission_case11(void) {
+void mission_case11(void) { mission_case11_c(); }
+void mission_case11_lifted(void) {
     dd _sa = 0, _sb = 0;
     /* mov     byte ptr ds:0BE53h, 1 ; jumptable 0001B475 case 11 ;~ 01A2:C7D0 */
     *(db*)raddr(ds,0x0BE53) = 1;
@@ -176105,7 +176106,8 @@ mission_case11_e1c882:
     /* retn ;~ 01A2:C88B */
     return;
 }
-void mission_case11_e1c7d5(void) {
+void mission_case11_e1c7d5(void) { mission_case11_e1c7d5_c(); }
+void mission_case11_e1c7d5_lifted(void) {
     dd _sa = 0, _sb = 0;
 mission_case11_e1c7d5:
     do {
@@ -176240,7 +176242,8 @@ mission_case11_e1c882:
     /* retn ;~ 01A2:C88B */
     return;
 }
-void mission_case11_e1c814(void) {
+void mission_case11_e1c814(void) { mission_case11_e1c814_c(); }
+void mission_case11_e1c814_lifted(void) {
     dd _sa = 0, _sb = 0;
     /* mov     ds:0E3C3h, al ;~ 01A2:C814 */
     *(db*)raddr(ds,0x0E3C3) = al;
@@ -176329,7 +176332,8 @@ mission_case11_e1c882:
     /* retn ;~ 01A2:C88B */
     return;
 }
-void mission_case11_e1c826(void) {
+void mission_case11_e1c826(void) { mission_case11_e1c826_c(); }
+void mission_case11_e1c826_lifted(void) {
     dd _sa = 0, _sb = 0;
 mission_case11_e1c826:
     do {
@@ -176406,7 +176410,8 @@ mission_case11_e1c882:
     /* retn ;~ 01A2:C88B */
     return;
 }
-void mission_case11_e1c855(void) {
+void mission_case11_e1c855(void) { mission_case11_e1c855_c(); }
+void mission_case11_e1c855_lifted(void) {
 mission_case11_e1c855:
     do {
         /* mov     word ptr ds:9730h, 0E683h ;~ 01A2:C855 */
@@ -176445,7 +176450,8 @@ mission_case11_e1c882:
     /* retn ;~ 01A2:C88B */
     return;
 }
-void mission_case11_e1c878(void) {
+void mission_case11_e1c878(void) { mission_case11_e1c878_c(); }
+void mission_case11_e1c878_lifted(void) {
 mission_case11_e1c878:
     do {
         /* pop     ds ;~ 01A2:C878 */
@@ -176485,7 +176491,8 @@ mission_case11_e1c855:
         /* jmp     short loc_1C878 ;~ 01A2:C873 */
     } while (1);
 }
-void mission_case11_e1c882(void) {
+void mission_case11_e1c882(void) { mission_case11_e1c882_c(); }
+void mission_case11_e1c882_lifted(void) {
 mission_case11_e1c882:
     do {
         do {
@@ -176526,7 +176533,8 @@ mission_case11_e1c878:
         *(dw*)(raddr(ds,0x0E2A4)) = 1;
     } while (1);
 }
-void mission_case5(void) {
+void mission_case5(void) { mission_case5_c(); }
+void mission_case5_lifted(void) {
     dd _sa = 0, _sb = 0;
     /* mov     al, ds:0BE41h   ; jumptable 0001B475 case 5 ;~ 01A2:C88C */
     al = *(db*)raddr(ds,0x0BE41);
@@ -176672,7 +176680,8 @@ mission_case5_e1c94a:
     /* retn ;~ 01A2:C95A */
     return;
 }
-void mission_case5_e1c894(void) {
+void mission_case5_e1c894(void) { mission_case5_e1c894_c(); }
+void mission_case5_e1c894_lifted(void) {
     dd _sa = 0, _sb = 0;
 mission_case5_e1c894:
     do {
@@ -176812,7 +176821,8 @@ mission_case5_e1c94a:
     /* retn ;~ 01A2:C95A */
     return;
 }
-void mission_case5_e1c8d1(void) {
+void mission_case5_e1c8d1(void) { mission_case5_e1c8d1_c(); }
+void mission_case5_e1c8d1_lifted(void) {
     dd _sa = 0, _sb = 0;
 mission_case5_e1c8d1:
     do {
@@ -176911,7 +176921,8 @@ mission_case5_e1c94a:
     /* retn ;~ 01A2:C95A */
     return;
 }
-void mission_case5_e1c8ea(void) {
+void mission_case5_e1c8ea(void) { mission_case5_e1c8ea_c(); }
+void mission_case5_e1c8ea_lifted(void) {
 mission_case5_e1c8ea:
     do {
         /* mov     byte ptr ds:0E3C3h, 1Fh ;~ 01A2:C8EA */
@@ -176993,7 +177004,8 @@ mission_case5_e1c94a:
     /* retn ;~ 01A2:C95A */
     return;
 }
-void mission_case5_e1c8ef(void) {
+void mission_case5_e1c8ef(void) { mission_case5_e1c8ef_c(); }
+void mission_case5_e1c8ef_lifted(void) {
 mission_case5_e1c8ef:
     do {
         do {
@@ -177077,7 +177089,8 @@ mission_case5_e1c8ea:
         *(db*)raddr(ds,0x0E3C3) = 0x1F;
     } while (1);
 }
-void mission_case5_e1c8fe(void) {
+void mission_case5_e1c8fe(void) { mission_case5_e1c8fe_c(); }
+void mission_case5_e1c8fe_lifted(void) {
 mission_case5_e1c8fe:
     do {
         /* mov     word ptr ds:9730h, 0E5C1h ;~ 01A2:C8FE */
@@ -177159,7 +177172,8 @@ mission_case5_e1c8ef:
     /* jmp     short loc_1C904 ;~ 01A2:C8FC */
     goto mission_case5_e1c904;
 }
-void mission_case5_e1c904(void) {
+void mission_case5_e1c904(void) { mission_case5_e1c904_c(); }
+void mission_case5_e1c904_lifted(void) {
 mission_case5_e1c904:
     do {
         /* call    sub_1B8E2 ;~ 01A2:C904 */
@@ -177243,7 +177257,8 @@ mission_case5_e1c8fe:
         *(dw*)(raddr(ds,0x9730)) = 0x0E5C1;
     } while (1);
 }
-void mission_case5_e1c91f(void) {
+void mission_case5_e1c91f(void) { mission_case5_e1c91f_c(); }
+void mission_case5_e1c91f_lifted(void) {
 mission_case5_e1c91f:
     do {
         do {
@@ -177286,7 +177301,8 @@ mission_case5_e1c94a:
     /* retn ;~ 01A2:C95A */
     return;
 }
-void mission_case5_e1c94a(void) {
+void mission_case5_e1c94a(void) { mission_case5_e1c94a_c(); }
+void mission_case5_e1c94a_lifted(void) {
 mission_case5_e1c94a:
     do {
         do {

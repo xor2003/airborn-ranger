@@ -1897,20 +1897,31 @@ int main(void){
         ab_res("fill_8 87d", mapgen_fill_8_e1b87d_lifted, mapgen_fill_8_e1b87d, 0);
         rand_s0 = 0x1357; rand_s1 = 0x2468; fill_8_b132 = 7; fill_8_b131 = 0x38;
         ab_res("fill_8 89f", mapgen_fill_8_e1b89f_lifted, mapgen_fill_8_e1b89f, 0);
-        /* mission_case7/case8: jumptable cases — record ptrs at
-         * ds:0xE432/0xE443/0xE5D8/0xE5C4/0xE683 all get the 2x2 record;
-         * ds:0xBE41 is the repeat count, ds:0xE2A4 the es-wrap flag.
-         * Successful map_rect_write fills map cells with record bytes
-         * (ab_res restores only within one call), so the 32x64 cell map
-         * (row*32+col at ds:0x9736) must be re-cleared before every
-         * retry-driven case or the placement loops starve. */
-        for (int i = 0; i < 6; i++) {
-            dw rofs[] = { 0xE432, 0xE443, 0xE5D8, 0xE5C4, 0xE683, 0xE3B6 };
-            db *r7 = (db*)raddr_(ds, rofs[i]);
-            r7[0] = 2; r7[1] = 2;
-            r7[2] = 0x2d; r7[3] = 0xff; r7[4] = 0xff; r7[5] = 0xff;
-        }
-#define clrmap() do { for (int i = 0; i < 0x800; i++) *(db*)raddr_(ds, 0x9736 + i) = 0; } while (0)
+        /* mission_case7/8/11/5: jumptable cases — all records get the
+         * minimal 2x2 record; ds:0xBE41 is the repeat count, ds:0xE2A4
+         * the es-wrap flag.  Successful map_rect_write fills map cells
+         * AND obj_alloc/mapgen_* write object records over the
+         * ds:0xE2xx-0xE6xx region (ab_res restores only within one
+         * call), so the cell map AND the records must be re-planted
+         * before every case or the placement loops starve. */
+        /* Record offsets are packed 3-14 bytes apart — a uniform 2x2
+         * record would overlap the next descriptor (e.g. E5C1+3=E5C4).
+         * Size each to fit its gap: {ofs, w, h}. */
+#define clrmc() do { \
+        for (int i = 0; i < 0x800; i++) *(db*)raddr_(ds, 0x9736 + i) = 0; \
+        static const dw rofs[][3] = { \
+            {0xE432,2,2}, {0xE443,2,2}, {0xE5D8,2,2}, {0xE5C4,2,2}, \
+            {0xE683,1,1}, {0xE3B6,2,2}, {0xE5A2,2,2}, {0xE591,2,2}, \
+            {0xE5B0,1,2}, {0xE5B4,2,2}, {0xE5BE,1,1}, {0xE5C1,1,1}, \
+            {0xE2B9,2,2} }; \
+        for (int i = 0; i < 13; i++) { \
+            db *r7 = (db*)raddr_(ds, rofs[i][0]); \
+            r7[0] = (db)rofs[i][1]; r7[1] = (db)rofs[i][2]; \
+            for (int j = 0; j < (int)rofs[i][1] * (int)rofs[i][2]; j++) \
+                r7[2 + j] = (j == 0) ? 0x2d : 0xff; \
+        } \
+    } while (0)
+#define clrmap() clrmc()
         clrmap();
         *(db*)raddr_(ds, 0x0BE41) = 1;
         *(dw*)raddr_(ds, 0x0E2A4) = 0;
@@ -1947,6 +1958,87 @@ int main(void){
         clrmap();
         *(db*)raddr_(ds, 0x0E605) = 2;
         ab_res("case8 9de", mission_case8_e1c9de_lifted, mission_case8_e1c9de, 0);
+        /* case11: same shape — E5A2 top row, E591 reps, E683 sweep */
+        clrmap();
+        *(db*)raddr_(ds, 0x0BE41) = 1;
+        *(dw*)raddr_(ds, 0x0E2A4) = 0;
+        rand_s0 = 0x1357; rand_s1 = 0x2468;
+        ab_res("case11", mission_case11_lifted, mission_case11, 0);
+        clrmap();
+        *(db*)raddr_(ds, 0x0BE41) = 1;
+        *(dw*)raddr_(ds, 0x0E2A4) = 0;
+        rand_s0 = 0x1357; rand_s1 = 0x2468;
+        ab_res("case11 7d5", mission_case11_e1c7d5_lifted, mission_case11_e1c7d5, 0);
+        clrmap();
+        al = 0x12;                            /* e3c3/be33 value */
+        *(db*)raddr_(ds, 0x0BE41) = 1;
+        *(dw*)raddr_(ds, 0x0E2A4) = 0;
+        rand_s0 = 0x1357; rand_s1 = 0x2468;
+        ab_res("case11 814", mission_case11_e1c814_lifted, mission_case11_e1c814, 0);
+        clrmap();
+        *(db*)raddr_(ds, 0x0E603) = 1;
+        *(dw*)raddr_(ds, 0x0E2A4) = 0;
+        rand_s0 = 0x1357; rand_s1 = 0x2468;
+        ab_res("case11 826", mission_case11_e1c826_lifted, mission_case11_e1c826, 0);
+        clrmap();
+        *(db*)raddr_(ds, 0x0E603) = 2;
+        *(dw*)raddr_(ds, 0x0E2A4) = 0;
+        ab_res("case11 855", mission_case11_e1c855_lifted, mission_case11_e1c855, 0);
+        clrmap();
+        *(db*)raddr_(ds, 0x0E603) = 1;
+        sp = 0xFFFE; push(ds);               /* e1c878 pops ds first */
+        ab_res("case11 878", mission_case11_e1c878_lifted, mission_case11_e1c878, 0);
+        clrmap();
+        *(db*)raddr_(ds, 0x0E603) = 1;
+        *(dw*)raddr_(ds, 0x0E2A4) = 0;
+        ab_res("case11 882", mission_case11_e1c882_lifted, mission_case11_e1c882, 0);
+        /* case5: E5B0 rep, E5B4 sweep, E5BE/E5C1 grid, E2B9 rep+spawn */
+        clrmap();
+        *(db*)raddr_(ds, 0x0BE41) = 0;
+        *(dw*)raddr_(ds, 0x0E2A4) = 0;
+        rand_s0 = 0x1357; rand_s1 = 0x2468;
+        ab_res("case5", mission_case5_lifted, mission_case5, 0);
+        clrmap();
+        *(db*)raddr_(ds, 0x0E604) = 1;
+        *(dw*)raddr_(ds, 0x0E2A4) = 0;
+        rand_s0 = 0x1357; rand_s1 = 0x2468;
+        ab_res("case5 894", mission_case5_e1c894_lifted, mission_case5_e1c894, 0);
+        clrmap();
+        *(db*)raddr_(ds, 0x0E3C3) = 3; *(db*)raddr_(ds, 0x0E3C4) = 8;
+        *(dw*)raddr_(ds, 0x0E2A4) = 0;
+        rand_s0 = 0x1357; rand_s1 = 0x2468;
+        ab_res("case5 8d1", mission_case5_e1c8d1_lifted, mission_case5_e1c8d1, 0);
+        clrmap();
+        *(db*)raddr_(ds, 0x0E3C4) = 9; *(db*)raddr_(ds, 0x0E604) = 1;
+        *(dw*)raddr_(ds, 0x0E2A4) = 0;
+        rand_s0 = 0x1357; rand_s1 = 0x2468;
+        ab_res("case5 8ea", mission_case5_e1c8ea_lifted, mission_case5_e1c8ea, 0);
+        clrmap();
+        *(db*)raddr_(ds, 0x0E3C3) = 1; *(db*)raddr_(ds, 0x0E3C4) = 9;
+        *(db*)raddr_(ds, 0x0E604) = 1;
+        *(dw*)raddr_(ds, 0x0E2A4) = 0;
+        rand_s0 = 0x1357; rand_s1 = 0x2468;
+        ab_res("case5 8ef", mission_case5_e1c8ef_lifted, mission_case5_e1c8ef, 0);
+        clrmap();
+        *(db*)raddr_(ds, 0x0E3C3) = 0; *(db*)raddr_(ds, 0x0E3C4) = 9;
+        *(db*)raddr_(ds, 0x0E604) = 1;
+        rand_s0 = 0x1357; rand_s1 = 0x2468;
+        ab_res("case5 8fe", mission_case5_e1c8fe_lifted, mission_case5_e1c8fe, 0);
+        clrmap();
+        *(db*)raddr_(ds, 0x0E3C3) = 1; *(db*)raddr_(ds, 0x0E3C4) = 9;
+        *(db*)raddr_(ds, 0x0E604) = 1;
+        rand_s0 = 0x1357; rand_s1 = 0x2468;
+        ab_res("case5 904", mission_case5_e1c904_lifted, mission_case5_e1c904, 0);
+        clrmap();
+        *(db*)raddr_(ds, 0x0E604) = 1;
+        *(dw*)raddr_(ds, 0x0E2A4) = 0;
+        rand_s0 = 0x1357; rand_s1 = 0x2468;
+        ab_res("case5 91f", mission_case5_e1c91f_lifted, mission_case5_e1c91f, 0);
+        clrmap();
+        *(db*)raddr_(ds, 0x0E604) = 0;
+        *(dw*)raddr_(ds, 0x0E2A4) = 0;
+        rand_s0 = 0x1357; rand_s1 = 0x2468;
+        ab_res("case5 94a", mission_case5_e1c94a_lifted, mission_case5_e1c94a, 0);
 #undef clrmap
         ds = dsc;
         fprintf(stderr, "  (mission leaf: lifted vs C, %d checks)\n", checks);
