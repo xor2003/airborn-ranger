@@ -715,3 +715,265 @@ void mode_call_c(void){                 /* sub_10834 — ds:0194 indexed   */
       if ((short)(sp - sp_) > 0) { sp = sp_; return; } }
     CF = 0;
 }
+
+/* ---------- render pacing (sub_14ACD family) ----------
+ * render_tick is the combat frame pump: a down-counter paces renders
+ * (reloaded from stage_parm_b), the body composes + flips one frame,
+ * and the tail drains the int-1Ch tick budget before reloading
+ * timer_cnt from stage_parm_a — floored at 1 tick (lift.py pacing
+ * floor; a 0 reload would free-run the battle ~1500x too fast).    */
+
+static void render_body(void){          /* loc_14ADD: compose + flip    */
+    compose_gate = 1;
+    compose_frame_cond();
+    video_bufs_setup();
+    hud_weapon_update();
+    fx_overlay_fill();
+    flip_frame();
+    mcga_dirty_update();
+    compose_gate = 0;
+    farcall_ptr_a9e();
+}
+
+static void render_wait(void){          /* loc_14AFE: drain + reload    */
+    do {
+        CF = 0; ZF = ((dw)(timer_cnt) == 0); SF = (((dw)(timer_cnt)) >> 15);
+    } while (timer_cnt != 0);
+    ax = stage_parm_a;
+    timer_cnt = ax ? ax : 1;            /* pacing floor — never 0 */
+}
+
+void render_tick_c(void){               /* sub_14ACD */
+    (ot0a_tick_65ac)++;
+    ZF = (ot0a_tick_65ac == 0); SF = (ot0a_tick_65ac >> 15);
+    (render_cnt)--;
+    ZF = (render_cnt == 0); SF = (render_cnt >> 15);
+    if ((short)render_cnt >= 0) return; /* still pacing — skip frame    */
+    ax = stage_parm_b;
+    render_cnt = ax;
+    render_body();
+    render_wait();
+}
+
+void redraw_frame_c(void){              /* sub_14ADD: unconditional      */
+    render_body();
+    render_wait();
+}
+
+void redraw_frame_e14afe_c(void){       /* loc_14AFE: wait tail only     */
+    render_wait();
+}
+
+/* ---------- hit-flash timer (sub_16D73) ----------
+ * hit_flash counts down per tick; flash_period = 0x1E while flashing,
+ * 0xFF (idle sentinel) when it hits 0.                             */
+
+void hitflash_dec_e16d84_c(void){       /* loc_16D84: store period       */
+    flash_period = al;
+}
+
+void hitflash_dec_e16d7e_c(void){       /* loc_16D7E: dec + active period */
+    (hit_flash)--; ZF = (hit_flash == 0); SF = (hit_flash >> 7);
+    al = 0x1E;
+    hitflash_dec_e16d84_c();
+}
+
+void hitflash_dec_c(void){              /* sub_16D73 */
+    al = hit_flash;
+    al |= al; CF = 0; OF = 0; ZF = (al == 0); SF = (al >> 7);
+    if (al == 0){ al = 0xFF; hitflash_dec_e16d84_c(); return; }
+    hitflash_dec_e16d7e_c();
+}
+
+/* ---------- object slot tables (sub_160E6 family) ----------
+ * The object system is columnar: slot i's fields live at
+ * ds:(i - TABLE_OFF) & 0xFFFF across ~50 byte tables — type byte at
+ * ds:0xBE8D+i, weights at ds:0xC8A7+i, alive flag at ds:0xC487+i.   */
+
+void find_free_slot_b_e160e9_c(void){   /* loc_160E9: scan loop head     */
+    for (;;){
+        al = *(db*)raddr(ds, si - 0x4173);
+        al |= al; CF = 0; OF = 0; ZF = (al == 0); SF = (al >> 7);
+        if (al == 0){ CF = 0; return; }              /* free: si = index  */
+        (si)++; ZF = (si == 0); SF = (si >> 15);
+        CF = (dd)si < 0x22; ZF = ((dw)(si - 0x22) == 0); SF = (((dw)(si - 0x22)) >> 15);
+        if (si >= 0x22){ CF = 1; return; }           /* all 34 slots used */
+    }
+}
+
+void find_free_slot_b_c(void){          /* sub_160E6 */
+    si = 0;
+    find_free_slot_b_e160e9_c();
+}
+
+void find_free_slot_b_e160f9_c(void){   /* loc_160F9: found tail         */
+    CF = 0;
+}
+
+void obj_rec_clear_c(void){             /* sub_160FB: clear slot record  */
+    static const dw zoffs[47] = {       /* fields zeroed                 */
+        0x4173,0x4151,0x412F,0x4085,0x4063,0x4041,0x401F,0x3FFD,
+        0x3FDB,0x3FB9,0x3F97,0x3F75,0x3F53,0x3F31,0x3F0F,0x3EED,
+        0x3ECB,0x3EA9,0x3E87,0x3E65,0x3E43,0x3E21,0x3DFF,0x3DDD,
+        0x3DBB,0x3D99,0x3D77,0x3D55,0x3CEF,0x3CCD,0x3CAB,0x3C89,
+        0x410D,0x40EB,0x40C9,0x40A7,0x3C45,0x3C23,0x3B79,0x3B57,
+        0x3B35,0x3B13,0x3AF1,0x3ACF,0x3AAD,0x3A8B,0x3A69 };
+    static const dw foffs[3] = { 0x3D33, 0x3D11, 0x3C67 };  /* 0xFF marks */
+    unsigned i;
+    al = 0;
+    for (i = 0; i < 47; i++) *(db*)raddr(ds, si - zoffs[i]) = al;
+    al = 0xFF;
+    for (i = 0; i < 3; i++)  *(db*)raddr(ds, si - foffs[i]) = al;
+}
+
+void obj_tick_all_c(void){              /* sub_1891A: per-type dispatch  */
+    bx = 0;
+    do {
+        otick_a7a8 = bx;
+        al = *(db*)raddr(ds, bx - 0x4173);           /* slot type byte   */
+        al |= al; CF = 0; OF = 0; ZF = (al == 0); SF = (al >> 7);
+        if (al != 0){
+            ah = 0; CF = 0; OF = 0; ZF = 1; SF = 0;
+            CF = (((dd)ax << 1) >> 16) & 1; ax <<= 1;
+            ZF = (ax == 0); SF = (ax >> 15);
+            si = ax;
+            { vfn f_ = func_at((dd)RES_CSBASE + *(dw*)(((db*)&objtype_tbl) + si));
+              dw sp_ = sp;
+              if (f_) f_();
+              else fprintf(stderr, "unresolved ind call %x\n",
+                           (dd)(RES_CSBASE + *(dw*)(((db*)&objtype_tbl) + si)));
+              if ((short)(sp - sp_) > 0){ sp = sp_; return; } }
+            CF = (dd)bx < (dd)otick_a7a8;
+            ZF = ((dw)(bx - otick_a7a8) == 0); SF = (((dw)(bx - otick_a7a8)) >> 15);
+            if (bx != otick_a7a8){                 /* callee moved the slot */
+                al = *(db*)raddr(ds, bx - 0x4173);
+                ah = 0; CF = 0; OF = 0; ZF = 1; SF = 0;
+                otick_d8ea = ax;
+                si = otick_a7a8;
+                al = *(db*)raddr(ds, si - 0x4173);
+                otick_d8ec = ax;
+                pushf(); push(ax);
+                keytest_d0 = ax;
+                ax = 0x4F;
+                nullsub_4();                        /* debug hook (dead)   */
+                ax = pop(); popf();
+            }
+            bx = otick_a7a8;
+        }
+        (bx)++; ZF = (bx == 0); SF = (bx >> 15);
+        CF = (dd)bx < 0x22; ZF = ((dw)(bx - 0x22) == 0); SF = (((dw)(bx - 0x22)) >> 15);
+    } while (bx < 0x22);
+}
+
+void obj_alive_mark_e16b8b_c(void){     /* loc_16B8B: set alive flag     */
+    al = *(db*)raddr(ds, bx - 0x3B79);
+    al |= al; CF = 0; OF = 0; ZF = (al == 0); SF = (al >> 7);
+    if (al != 0) return;
+    screen_state = 0x1E;
+    al = 1;
+    *(db*)raddr(ds, bx - 0x3B79) = al;
+}
+
+void obj_alive_mark_c(void){            /* sub_16B72: map/deadzone gates */
+    al = map_kind;
+    CF = (dd)al < 0x0B; ZF = ((db)(al - 0x0B) == 0); SF = (((db)(al - 0x0B)) >> 7);
+    if (al != 0x0B) return;
+    al = *(db*)raddr(ds, bx - 0x3FFD);
+    CF = (dd)al < 0xEE; ZF = ((db)(al - 0xEE) == 0); SF = (((db)(al - 0xEE)) >> 7);
+    if (al >= 0xEE) return;
+    CF = (dd)bx < 0; ZF = ((dw)(bx - 0) == 0); SF = (((dw)(bx - 0)) >> 15);
+    if (bx == 0) wounds = 5;
+    obj_alive_mark_e16b8b_c();
+}
+
+/* ---------- AI weight/difficulty (sub_16D4E family) ----------
+ * slot_weight_sum: ax = sum over si=5..0 of count[si]*weight[si]
+ * (count table ds:[si-0x376B], weight table ds:[si-0x3759]); the
+ * 16-bit accumulate runs as al + carry into ah.  Epilogue stores
+ * weight_sum and returns ax = sum>>3.                              */
+
+static void wsum_accum(void){           /* loc_16D5D: cx-folded add      */
+    do {
+        { dd t_ = (dd)al + *(db*)raddr(ds, si - 0x3759);
+          CF = t_ > 0xFF; al = t_; ZF = (al == 0); SF = (al >> 7); }
+        { dd t_ = (dd)ah + CF;
+          CF = t_ > 0xFF; ah = t_; ZF = (ah == 0); SF = (ah >> 7); }
+    } while (--cx != 0);
+}
+
+static void wsum_epi(void){             /* loc_16D69: store + /8         */
+    weight_sum = ax;
+    CF = ax & 1; ax >>= 1; ZF = (ax == 0); SF = (ax >> 15);
+    CF = ax & 1; ax >>= 1; ZF = (ax == 0); SF = (ax >> 15);
+    CF = ax & 1; ax >>= 1; ZF = (ax == 0); SF = (ax >> 15);
+}
+
+static void wsum_outer(void){           /* loc_16D53: per-slot iter      */
+    for (;;){
+        cl = *(db*)raddr(ds, si - 0x376B);
+        cx &= 0x0FF; CF = 0; OF = 0; ZF = (cx == 0); SF = (cx >> 15);
+        if (cx != 0) wsum_accum();
+        (si)--; ZF = (si == 0); SF = (si >> 15);
+        if ((short)si < 0){ wsum_epi(); return; }
+    }
+}
+
+void slot_weight_sum_c(void){           /* sub_16D4E */
+    si = 5;
+    ax = 0; CF = 0; OF = 0; ZF = 1; SF = 0;
+    wsum_outer();
+}
+void slot_weight_sum_e16d53_c(void){ wsum_outer(); }    /* mid: own si/ax */
+void slot_weight_sum_e16d5d_c(void){                    /* mid: inner      */
+    wsum_accum();
+    (si)--; ZF = (si == 0); SF = (si >> 15);
+    if ((short)si < 0){ wsum_epi(); return; }
+    wsum_outer();
+}
+void slot_weight_sum_e16d66_c(void){                    /* mid: dec point  */
+    (si)--; ZF = (si == 0); SF = (si >> 15);
+    if ((short)si < 0){ wsum_epi(); return; }
+    wsum_outer();
+}
+
+void ai_param_fetch_c(void){            /* sub_16D13: difficulty params  */
+    slot_weight_sum();
+    *(db*)(&scan_id) = al;              /* live-population estimate     */
+    al = wounds;
+    CF = (((dd)al << 1) >> 8) & 1; al <<= 1; ZF = (al == 0); SF = (al >> 7);
+    { dd t_ = (dd)al + *(db*)&scan_id; CF = t_ > 0xFF; al = t_;
+      ZF = (al == 0); SF = (al >> 7); }
+    CF = (dd)al < 5; ZF = ((db)(al - 5) == 0); SF = (((db)(al - 5)) >> 7);
+    if (al >= 5) al = 5;                /* clamp 0..5                   */
+    CF = (((dd)al << 1) >> 8) & 1; al <<= 1; ZF = (al == 0); SF = (al >> 7);
+    dl = diff_parm;
+    dh = 0; CF = 0; OF = 0; ZF = 1; SF = 0;
+    si = dx;
+    dl |= dl; CF = 0; OF = 0; ZF = (dl == 0); SF = (dl >> 7);
+    CF = (dd)si < 2; ZF = ((dw)(si - 2) == 0); SF = (((dw)(si - 2)) >> 15);
+    if (si < 2){                        /* easy levels get +0xC bias    */
+        dd t_ = (dd)al + 0x0C; CF = t_ > 0xFF; al = t_;
+        ZF = (al == 0); SF = (al >> 7);
+    }
+    ah = 0; CF = 0; OF = 0; ZF = 1; SF = 0;
+    si = ax;
+    ax = *(dw*)raddr(ds, si - 0x331B);  /* param tables: ds:0xCCE5+i    */
+    ai_parm_b = ax;
+    ax = *(dw*)raddr(ds, si - 0x3303);  /*                 ds:0xCCFD+i  */
+    ai_parm_a = ax;
+}
+
+void target_pri_decay_c(void){          /* sub_16B56: target heat decay  */
+    al = pri_best;
+    al |= al; CF = 0; OF = 0; ZF = (al == 0); SF = (al >> 7);
+    if ((signed char)al < 0){           /* wrapped negative: clamp      */
+        al = 0;
+        pri_best = al;
+        al |= al; CF = 0; OF = 0; ZF = 1; SF = 0;
+    }
+    if (ZF) return;                     /* no live target               */
+    al = cool_gate;
+    al |= al; CF = 0; OF = 0; ZF = (al == 0); SF = (al >> 7);
+    if (al != 0) return;                /* still cooling                */
+    (pri_best)--; ZF = (pri_best == 0); SF = (pri_best >> 7);
+}

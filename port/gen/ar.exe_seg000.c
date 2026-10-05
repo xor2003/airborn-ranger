@@ -25154,7 +25154,8 @@ post_mission_loop_e14ac3:
         /* jmp     loc_14A22 ;~ 01A2:4ACA */
     } while (1);
 }
-void redraw_frame_e14afe(void) {
+void redraw_frame_e14afe(void) { redraw_frame_e14afe_c(); }
+void redraw_frame_e14afe_lifted(void) {
     dd _sa = 0, _sb = 0;
 redraw_frame_e14afe:
     do {
@@ -25176,7 +25177,8 @@ void locret_14b0b(void) {
     /* retn ;~ 01A2:4B0B */
     return;
 }
-void render_tick(void) {
+void render_tick(void) { render_tick_c(); }
+void render_tick_lifted(void) {
     dd _sa = 0, _sb = 0;
     /* inc     word_265AC ;~ 01A2:4ACD */
     (ot0a_tick_65ac)++; ZF = ((dw)(ot0a_tick_65ac) == 0); SF = (((dw)(ot0a_tick_65ac)) >> 15);
@@ -25225,7 +25227,8 @@ locret_14b0b:
     /* retn ;~ 01A2:4B0B */
     return;
 }
-void redraw_frame(void) {
+void redraw_frame(void) { redraw_frame_c(); }
+void redraw_frame_lifted(void) {
     dd _sa = 0, _sb = 0;
     /* mov     word_1DDB2, 1 ;~ 01A2:4ADD */
     compose_gate = 1;
@@ -51368,7 +51371,8 @@ void char_route_e160d6(void) {
     /* retn ;~ 01A2:60DC */
     return;
 }
-void find_free_slot_b_e160e9(void) {
+void find_free_slot_b_e160e9(void) { find_free_slot_b_e160e9_c(); }
+void find_free_slot_b_e160e9_lifted(void) {
 find_free_slot_b_e160e9:
     /* mov     al, [si-4173h] ;~ 01A2:60E9 */
     al = *(db*)raddr(ds,si-0x4173);
@@ -51393,7 +51397,8 @@ find_free_slot_b_e160f9:
     /* retn ;~ 01A2:60FA */
     return;
 }
-void find_free_slot_b_e160f9(void) {
+void find_free_slot_b_e160f9(void) { find_free_slot_b_e160f9_c(); }
+void find_free_slot_b_e160f9_lifted(void) {
     /* clc ;~ 01A2:60F9 */
     CF = 0;
     /* retn ;~ 01A2:60FA */
@@ -51492,7 +51497,8 @@ seg000_606a_proc_e160d6:
     /* retn ;~ 01A2:60DC */
     return;
 }
-void find_free_slot_b(void) {
+void find_free_slot_b(void) { find_free_slot_b_c(); }
+void find_free_slot_b_lifted(void) {
     /* mov     si, 0 ;~ 01A2:60E6 */
     si = 0;
 find_free_slot_b_e160e9:
@@ -51519,7 +51525,8 @@ find_free_slot_b_e160f9:
     /* retn ;~ 01A2:60FA */
     return;
 }
-void obj_rec_clear(void) {
+void obj_rec_clear(void) { obj_rec_clear_c(); }
+void obj_rec_clear_lifted(void) {
     /* mov     al, 0 ;~ 01A2:60FB */
     al = 0;
     /* mov     [si-4173h], al ;~ 01A2:60FD */
@@ -57926,7 +57933,8 @@ void locret_16b71(void) {
     /* retn ;~ 01A2:6B71 */
     return;
 }
-void target_pri_decay(void) {
+void target_pri_decay(void) { target_pri_decay_c(); }
+void target_pri_decay_lifted(void) {
     dd _sa = 0, _sb = 0;
     /* mov     al, pri_best ;~ 01A2:6B56 */
     al = pri_best;
@@ -57958,7 +57966,8 @@ locret_16b71:
     /* retn ;~ 01A2:6B71 */
     return;
 }
-void obj_alive_mark_e16b8b(void) {
+void obj_alive_mark_e16b8b(void) { obj_alive_mark_e16b8b_c(); }
+void obj_alive_mark_e16b8b_lifted(void) {
     dd _sa = 0, _sb = 0;
     /* mov     al, [bx-3B79h] ;~ 01A2:6B8B */
     al = *(db*)raddr(ds,bx-0x3B79);
@@ -57982,7 +57991,8 @@ void locret_16b9f(void) {
     /* retn ;~ 01A2:6B9F */
     return;
 }
-void obj_alive_mark(void) {
+void obj_alive_mark(void) { obj_alive_mark_c(); }
+void obj_alive_mark_lifted(void) {
     dd _sa = 0, _sb = 0;
     /* mov     al, byte_2AA63 ;~ 01A2:6B72 */
     al = map_kind;
@@ -59355,7 +59365,8 @@ void ai_param_fetch_e16d3b(void) {
     /* retn ;~ 01A2:6D4D */
     return;
 }
-void ai_param_fetch(void) {
+void ai_param_fetch(void) { ai_param_fetch_c(); }
+void ai_param_fetch_lifted(void) {
     dd _sa = 0, _sb = 0;
     /* call    sub_16D4E ;~ 01A2:6D13 */
     slot_weight_sum();
@@ -59410,7 +59421,8 @@ ai_param_fetch_e16d3b:
     /* retn ;~ 01A2:6D4D */
     return;
 }
-void slot_weight_sum_e16d53(void) {
+void slot_weight_sum_e16d53(void) { slot_weight_sum_e16d53_c(); }
+void slot_weight_sum_e16d53_lifted(void) {
 slot_weight_sum_e16d53:
     do {
         /* mov     cl, [si-376Bh] ;~ 01A2:6D53 */
@@ -59444,7 +59456,8 @@ slot_weight_sum_e16d66:
     /* retn ;~ 01A2:6D72 */
     return;
 }
-void slot_weight_sum_e16d5d(void) {
+void slot_weight_sum_e16d5d(void) { slot_weight_sum_e16d5d_c(); }
+void slot_weight_sum_e16d5d_lifted(void) {
 slot_weight_sum_e16d5d:
     do {
         do {
@@ -59480,7 +59493,8 @@ slot_weight_sum_e16d53:
         } while (cx == 0);
     } while (1);
 }
-void slot_weight_sum_e16d66(void) {
+void slot_weight_sum_e16d66(void) { slot_weight_sum_e16d66_c(); }
+void slot_weight_sum_e16d66_lifted(void) {
 slot_weight_sum_e16d66:
     do {
         do {
@@ -59516,7 +59530,8 @@ slot_weight_sum_e16d5d:
         } while (--cx != 0);
     } while (1);
 }
-void slot_weight_sum(void) {
+void slot_weight_sum(void) { slot_weight_sum_c(); }
+void slot_weight_sum_lifted(void) {
     /* mov     si, 5 ;~ 01A2:6D4E */
     si = 5;
     /* xor     ax, ax ;~ 01A2:6D51 */
@@ -59554,7 +59569,8 @@ slot_weight_sum_e16d66:
     /* retn ;~ 01A2:6D72 */
     return;
 }
-void hitflash_dec_e16d7e(void) {
+void hitflash_dec_e16d7e(void) { hitflash_dec_e16d7e_c(); }
+void hitflash_dec_e16d7e_lifted(void) {
     /* dec     hit_flash ;~ 01A2:6D7E */
     (hit_flash)--; ZF = ((db)(hit_flash) == 0); SF = (((db)(hit_flash)) >> 7);
     /* mov     al, 1Eh ;~ 01A2:6D82 */
@@ -59565,13 +59581,15 @@ hitflash_dec_e16d84:
     /* retn ;~ 01A2:6D87 */
     return;
 }
-void hitflash_dec_e16d84(void) {
+void hitflash_dec_e16d84(void) { hitflash_dec_e16d84_c(); }
+void hitflash_dec_e16d84_lifted(void) {
     /* mov     flash_period, al ;~ 01A2:6D84 */
     flash_period = al;
     /* retn ;~ 01A2:6D87 */
     return;
 }
-void hitflash_dec(void) {
+void hitflash_dec(void) { hitflash_dec_c(); }
+void hitflash_dec_lifted(void) {
     dd _sa = 0, _sb = 0;
     /* mov     al, hit_flash ;~ 01A2:6D73 */
     al = hit_flash;
@@ -106241,7 +106259,8 @@ obj_tick_all_e1895c:
         bx = otick_a7a8;
     } while (1);
 }
-void obj_tick_all(void) {
+void obj_tick_all(void) { obj_tick_all_c(); }
+void obj_tick_all_lifted(void) {
     /* mov     bx, 0 ;~ 01A2:891A */
     bx = 0;
 obj_tick_all_e1891d:

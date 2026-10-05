@@ -148,9 +148,28 @@ static void ab_res(const char *nm, void(*lifted)(void), void(*now)(void), int fe
              !memcmp(ab_a_r, ab_b_r, sizeof ab_a_r) &&
              !memcmp(ab_a_g, ab_b_g, sizeof ab_a_g) &&
              cfa == CF && zfa == ZF && sfa == SF && ofa == OF;
-    if (!ok)
-        fprintf(stderr, "  res-ab %s: cf %d/%d zf %d/%d sf %d/%d of %d/%d\n",
-                nm, cfa, CF, zfa, ZF, sfa, SF, ofa, OF);
+    if (!ok) {
+        static const char *rn[8] = {"eax","ebx","ecx","edx","esi","edi","esp","ebp"};
+        static const char *sn[4] = {"cs","ds","es","ss"};
+        long d = -1, nd = 0;
+        for (long i = 0; i < (long)sizeof mem; i++)
+            if (ab_a[i] != mem[i]) { if (d < 0) d = i; nd++; }
+        fprintf(stderr, "  res-ab %s: cf %d/%d zf %d/%d sf %d/%d of %d/%d mem@0x%lx n=%ld",
+                nm, cfa, CF, zfa, ZF, sfa, SF, ofa, OF, d, nd);
+        if (d >= 0) {
+            fprintf(stderr, " [");
+            for (long i = d; i < (long)sizeof mem && i < d + 8; i++)
+                if (ab_a[i] != mem[i]) fprintf(stderr, " %lx:%02x/%02x", i, ab_a[i], mem[i]);
+            fprintf(stderr, " ]");
+        }
+        for (int i = 0; i < 8; i++)
+            if (ab_a_r[i] != ab_b_r[i])
+                fprintf(stderr, " %s=%x/%x", rn[i], ab_a_r[i], ab_b_r[i]);
+        for (int i = 0; i < 4; i++)
+            if (ab_a_g[i] != ab_b_g[i])
+                fprintf(stderr, " %s=%x/%x", sn[i], ab_a_g[i], ab_b_g[i]);
+        fprintf(stderr, "\n");
+    }
     CHECK(ok);
     if (feed & 0x10){ bx = res_handle; ah = 0x3e; dos_close(); }
 }
@@ -629,6 +648,110 @@ int main(void){
             ab_res("mode_call", mode_call_lifted, mode_call, 0);
         }
         fprintf(stderr, "  (palette/dispatch: lifted vs C, %d checks)\n", checks);
+    }
+
+    /* ---- render pump + object slots + AI params: lifted vs C --------
+     * Columnar object tables: type byte ds:0xBE8D+i, count ds:0xC895+i,
+     * weight ds:0xC8A7+i, alive flag ds:0xC487+i, gate ds:0xC005+i.
+     * render_tick callees are all real procs — A/B compares their
+     * combined effect; timer_cnt=0 makes the drain loop exit.        */
+    {
+        ds = seg_data;
+        /* render pump: render_cnt>0 skips the frame, <=0 renders     */
+        timer_cnt = 0;
+        render_cnt = 3; ot0a_tick_65ac = 0;
+        ab_res("render skip", render_tick_lifted, render_tick, 0);
+        render_cnt = 0; ot0a_tick_65ac = 0;
+        ab_res("render fire", render_tick_lifted, render_tick, 0);
+        stage_parm_a = 7; timer_cnt = 0;
+        ab_res("redraw", redraw_frame_lifted, redraw_frame, 0);
+        timer_cnt = 0;                  /* reload leaves stage_parm_a  */
+        ab_res("redraw tail", redraw_frame_e14afe_lifted, redraw_frame_e14afe, 0);
+
+        /* hit flash: 0 -> period 0xFF, n -> dec + period 0x1E        */
+        hit_flash = 3;
+        ab_res("hitflash", hitflash_dec_lifted, hitflash_dec, 0);
+        hit_flash = 0;
+        ab_res("hitflash 0", hitflash_dec_lifted, hitflash_dec, 0);
+        hit_flash = 9;
+        ab_res("hitf mid", hitflash_dec_e16d7e_lifted, hitflash_dec_e16d7e, 0);
+        al = 0x42;
+        ab_res("hitf tail", hitflash_dec_e16d84_lifted, hitflash_dec_e16d84, 0);
+
+        /* slot scan: all-free / hole@3 / full                        */
+        memset(raddr_(ds, 0xBE8D), 0, 0x22);
+        ab_res("slot free", find_free_slot_b_lifted, find_free_slot_b, 0);
+        memset(raddr_(ds, 0xBE8D), 7, 0x22);
+        *(db*)raddr_(ds, 0xBE8D + 3) = 0;
+        ab_res("slot hole", find_free_slot_b_lifted, find_free_slot_b, 0);
+        memset(raddr_(ds, 0xBE8D), 9, 0x22);
+        ab_res("slot full", find_free_slot_b_lifted, find_free_slot_b, 0);
+        memset(raddr_(ds, 0xBE8D), 0, 0x22);
+        memset(raddr_(ds, 0xBE8D), 5, 5);
+        si = 0x10;
+        ab_res("slot mid", find_free_slot_b_e160e9_lifted, find_free_slot_b_e160e9, 0);
+        ab_res("slot clc", find_free_slot_b_e160f9_lifted, find_free_slot_b_e160f9, 0);
+
+        /* obj_rec_clear: fill the record columns with 0xAA first     */
+        memset(raddr_(ds, 0xBEDD), 0xAA, 0x80A);
+        si = 0x50;
+        ab_res("obj clear", obj_rec_clear_lifted, obj_rec_clear, 0);
+
+        /* obj_tick_all: empty slots vs type-1/2 dispatch             */
+        memset(raddr_(ds, 0xBE8D), 0, 0x22);
+        ab_res("tick empty", obj_tick_all_lifted, obj_tick_all, 0);
+        *(db*)raddr_(ds, 0xBE8D) = 1;
+        *(db*)raddr_(ds, 0xBE8F) = 2;
+        ab_res("tick live", obj_tick_all_lifted, obj_tick_all, 0);
+        memset(raddr_(ds, 0xBE8D), 0, 0x22);
+
+        /* obj_alive_mark: map/deadzone/bx gates then the flag set    */
+        map_kind = 0x0B; bx = 4;
+        *(db*)raddr_(ds, (dw)(4 - 0x3FFD)) = 0x10;   /* <0xEE passes    */
+        *(db*)raddr_(ds, (dw)(4 - 0x3B79)) = 0;      /* not marked      */
+        ab_res("alive mark", obj_alive_mark_lifted, obj_alive_mark, 0);
+        bx = 0;
+        ab_res("alive bx0", obj_alive_mark_lifted, obj_alive_mark, 0);
+        map_kind = 5;
+        ab_res("alive map!", obj_alive_mark_lifted, obj_alive_mark, 0);
+        bx = 4; *(db*)raddr_(ds, (dw)(4 - 0x3B79)) = 1;
+        ab_res("alive mid", obj_alive_mark_e16b8b_lifted, obj_alive_mark_e16b8b, 0);
+
+        /* slot_weight_sum: counts ds:0xC895+i, weights ds:0xC8A7+i   */
+        { static const db cnt[6] = {2,0,3,1,0,4}, wgt[6] = {10,20,30,40,50,60};
+          memcpy(raddr_(ds, 0xC895), cnt, 6);
+          memcpy(raddr_(ds, 0xC8A7), wgt, 6); }
+        ab_res("wsum", slot_weight_sum_lifted, slot_weight_sum, 0);
+        si = 2; ax = 0x100;
+        ab_res("wsum mid", slot_weight_sum_e16d53_lifted, slot_weight_sum_e16d53, 0);
+        si = 1; cx = 3; ax = 0;
+        ab_res("wsum acc", slot_weight_sum_e16d5d_lifted, slot_weight_sum_e16d5d, 0);
+        si = 3; ax = 7;
+        ab_res("wsum dec", slot_weight_sum_e16d66_lifted, slot_weight_sum_e16d66, 0);
+
+        /* ai_param_fetch: wounds/difficulty sweeps; param word tables
+         * at ds:0xCCE5+si and ds:0xCCFD+si (si = 2*clamped_level)    */
+        for (int i = 0; i < 14; i++){
+            *(dw*)raddr_(ds, 0xCCE5 + i*2) = 0x100 + i;
+            *(dw*)raddr_(ds, 0xCCFD + i*2) = 0x200 + i;
+        }
+        wounds = 3; diff_parm = 1;                       /* easy: +0xC  */
+        ab_res("ai easy", ai_param_fetch_lifted, ai_param_fetch, 0);
+        wounds = 0; diff_parm = 4;
+        ab_res("ai hard", ai_param_fetch_lifted, ai_param_fetch, 0);
+        wounds = 40; diff_parm = 2;                      /* clamp path  */
+        ab_res("ai clamp", ai_param_fetch_lifted, ai_param_fetch, 0);
+
+        /* target_pri_decay: positive/negative/zero × cooldown gate   */
+        pri_best = 5; cool_gate = 0;
+        ab_res("pri dec", target_pri_decay_lifted, target_pri_decay, 0);
+        pri_best = 5; cool_gate = 1;
+        ab_res("pri cool", target_pri_decay_lifted, target_pri_decay, 0);
+        pri_best = 0x80; cool_gate = 0;
+        ab_res("pri neg", target_pri_decay_lifted, target_pri_decay, 0);
+        pri_best = 0; cool_gate = 0;
+        ab_res("pri zero", target_pri_decay_lifted, target_pri_decay, 0);
+        fprintf(stderr, "  (render/objsys/ai: lifted vs C, %d checks)\n", checks);
     }
 
     /* ---- status-panel digit patcher: WOUNDS field ds:0xB93F <- byte_29712

@@ -149,6 +149,25 @@ void pal_upload_mcga_e10421_c(void); void pal_upload_mcga_e10421_lifted(void);
 void rec_walk_e10491_c(void); void rec_walk_e10491_lifted(void);
 void glyph_conv_dispatch_c(void); void glyph_conv_dispatch_lifted(void);
 void mode_call_c(void); void mode_call_lifted(void);
+void render_tick_c(void); void render_tick_lifted(void);
+void redraw_frame_c(void); void redraw_frame_lifted(void);
+void redraw_frame_e14afe_c(void); void redraw_frame_e14afe_lifted(void);
+void hitflash_dec_c(void); void hitflash_dec_lifted(void);
+void hitflash_dec_e16d7e_c(void); void hitflash_dec_e16d7e_lifted(void);
+void hitflash_dec_e16d84_c(void); void hitflash_dec_e16d84_lifted(void);
+void find_free_slot_b_c(void); void find_free_slot_b_lifted(void);
+void find_free_slot_b_e160e9_c(void); void find_free_slot_b_e160e9_lifted(void);
+void find_free_slot_b_e160f9_c(void); void find_free_slot_b_e160f9_lifted(void);
+void obj_rec_clear_c(void); void obj_rec_clear_lifted(void);
+void obj_tick_all_c(void); void obj_tick_all_lifted(void);
+void obj_alive_mark_c(void); void obj_alive_mark_lifted(void);
+void obj_alive_mark_e16b8b_c(void); void obj_alive_mark_e16b8b_lifted(void);
+void slot_weight_sum_c(void); void slot_weight_sum_lifted(void);
+void slot_weight_sum_e16d53_c(void); void slot_weight_sum_e16d53_lifted(void);
+void slot_weight_sum_e16d5d_c(void); void slot_weight_sum_e16d5d_lifted(void);
+void slot_weight_sum_e16d66_c(void); void slot_weight_sum_e16d66_lifted(void);
+void ai_param_fetch_c(void); void ai_param_fetch_lifted(void);
+void target_pri_decay_c(void); void target_pri_decay_lifted(void);
 
 /* env-gated trace (M2C_TRACE=1) */
 extern int rt_trace;

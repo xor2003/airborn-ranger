@@ -510,6 +510,29 @@ REWRITES = {
     # mode-call dispatch (seg000:0797..083F)
     'glyph_conv_dispatch': 'glyph_conv_dispatch_c',
     'mode_call': 'mode_call_c',
+    # render pacing pump (seg000:4ACD..4B0B)
+    'render_tick': 'render_tick_c',
+    'redraw_frame': 'redraw_frame_c',
+    'redraw_frame_e14afe': 'redraw_frame_e14afe_c',
+    # hit-flash timer (seg000:6D73..6D87)
+    'hitflash_dec': 'hitflash_dec_c',
+    'hitflash_dec_e16d7e': 'hitflash_dec_e16d7e_c',
+    'hitflash_dec_e16d84': 'hitflash_dec_e16d84_c',
+    # object slot tables + per-type tick dispatch (seg000:60E6..61C7, 891A..8966, 6B72..6B9F)
+    'find_free_slot_b': 'find_free_slot_b_c',
+    'find_free_slot_b_e160e9': 'find_free_slot_b_e160e9_c',
+    'find_free_slot_b_e160f9': 'find_free_slot_b_e160f9_c',
+    'obj_rec_clear': 'obj_rec_clear_c',
+    'obj_tick_all': 'obj_tick_all_c',
+    'obj_alive_mark': 'obj_alive_mark_c',
+    'obj_alive_mark_e16b8b': 'obj_alive_mark_e16b8b_c',
+    # AI weight/difficulty params (seg000:6D4E..6D72, 6D13..6D4D, 6B56..6B71)
+    'slot_weight_sum': 'slot_weight_sum_c',
+    'slot_weight_sum_e16d53': 'slot_weight_sum_e16d53_c',
+    'slot_weight_sum_e16d5d': 'slot_weight_sum_e16d5d_c',
+    'slot_weight_sum_e16d66': 'slot_weight_sum_e16d66_c',
+    'ai_param_fetch': 'ai_param_fetch_c',
+    'target_pri_decay': 'target_pri_decay_c',
 }
 # Commit 4366e7c removed the gfx driver-selection menu ('1'..'5' getch
 # loop → forced MCGA pick) by hand-editing the generated file, so every
