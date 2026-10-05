@@ -1141,3 +1141,177 @@ void compose_flip_c(void){                /* sub_11C42                     */
     di = adapter_id;
     compose2_dispatch();
 }
+
+/* ---- clip/dirty scan (seg000:26B9..3996) — MCGA draw-path setup ------
+ * video_bufs_setup walks clip_jt[adapter]; only the MCGA clip scan
+ * (clip_go_mcga, case 3) survives in this build. It sweeps 32 rect-reg
+ * slots (rectreg_base 0x1F..0) probing column tables at ds:0xF1F/0xF23
+ * against bit masks at ds:0xDD5; hit slots feed clip_rest_mcga/_b which
+ * paint the strip. mcga_dirty_update walks dirtyrect_ptr through the
+ * per-rect column tables and rep-movsw's each run draw->flip.
+ */
+void video_bufs_init_c(void){             /* sub_11643: bufsel_jt        */
+    ax = seg_data; ds = ax;
+    di = adapter_id;
+    CF = ((dd)di << 1) >> 16 & 1; di <<= 1; ZF = (di == 0); SF = (di >> 15);
+    { vfn f_ = func_at((dd)0x1a20 + (*(dw*)(((db*)&bufsel_jt)+di)));
+      if (f_) f_(); else fprintf(stderr, "unresolved ind jmp %x\n",
+          (dd)((dd)0x1a20 + (*(dw*)(((db*)&bufsel_jt)+di)))); return; }
+}
+
+static void clip_dispatch(void){          /* loc_126C9: clip_jt          */
+    ax = seg_data; ds = ax;
+    di = adapter_id;
+    CF = ((dd)di << 1) >> 16 & 1; di <<= 1; ZF = (di == 0); SF = (di >> 15);
+    { vfn f_ = func_at((dd)0x1a20 + (*(dw*)(((db*)&clip_jt)+di)));
+      if (f_) f_(); else fprintf(stderr, "unresolved ind jmp %x\n",
+          (dd)((dd)0x1a20 + (*(dw*)(((db*)&clip_jt)+di)))); return; }
+}
+void video_bufs_setup_e126c9_c(void){ clip_dispatch(); }
+void video_bufs_setup_c(void){            /* sub_126B9                   */
+    blitdst_a = seg_flip;
+    ax = seg_draw;
+    blitdst_b = ax;
+    clip_dispatch();
+}
+
+static void clip_mcga_iter(void){         /* loc_13047: probe one slot   */
+    si = rectreg_base;
+    bx = si; cl = 3;
+    if (cl){ CF = (bx >> (cl-1)) & 1; bx >>= cl; ZF = (bx == 0); SF = (bx >> 15); }
+    si &= 7; CF = 0; OF = 0; ZF = (si == 0); SF = (si >> 15);
+    al = *(db*)raddr(ds, bx + 0x0F1F);
+    al &= *(db*)raddr(ds, si + 0x0DD5);
+    CF = 0; OF = 0; ZF = (al == 0); SF = (al >> 7);
+    if (al == 0) return;
+    dl = *(db*)raddr(ds, bx + 0x0F23);
+    dl &= *(db*)raddr(ds, si + 0x0DD5);
+    CF = 0; OF = 0; ZF = (dl == 0); SF = (dl >> 7);
+    si = rectreg_base;
+    bl = *(db*)raddr(ds, si + 0x0EFF);
+    bl |= bl; CF = 0; OF = 0; ZF = (bl == 0); SF = (bl >> 7);
+    if ((signed char)bl < 0) return;
+    if (bl == 0) return;
+    clip_f = bl;
+    bl = *(db*)raddr(ds, si + 0x0EDF);
+    bh = 0; CF = 0; OF = 0; ZF = 1; SF = 0;
+    CF = ((dd)bx << 1) >> 16 & 1; bx <<= 1; ZF = (bx == 0); SF = (bx >> 15);
+    ax = *(dw*)raddr(ds, bx + 0x1356);
+    clip_base = ax;
+    al = *(db*)raddr(ds, si + 0x0E7F);
+    ah = *(db*)raddr(ds, si + 0x0E9F);
+    { CF = (ax >> 0) & 1; ax = (short)ax >> 1; ZF = (ax == 0); SF = (ax >> 15); }
+    bl = *(db*)raddr(ds, si + 0x0EBF);
+    bh = 0; CF = 0; OF = 0; ZF = 1; SF = 0;
+    cl = *(db*)raddr(ds, si + 0x0E3F);
+    ch = *(db*)raddr(ds, si + 0x0E5F);
+    CF = (dd)cx < (dd)0x200; ZF = ((dw)(cx - 0x200) == 0);
+    SF = (((dw)(cx - 0x200)) >> 15);
+    if (cx >= 0x200) return;
+    bp = cx;
+    dl |= dl; CF = 0; OF = 0; ZF = (dl == 0); SF = (dl >> 7);
+    if (dl == 0){ clip_rest_mcga(); return; }
+    clip_rest_mcga_b();
+}
+static void clip_mcga_scan(void){         /* loc_130B3: dec + loop       */
+    for (;;){
+        (rectreg_base)--; ZF = (rectreg_base == 0); SF = (rectreg_base >> 15);
+        if ((short)rectreg_base < 0) return;
+        clip_mcga_iter();
+    }
+}
+void clip_go_mcga_c(void){                /* jumptable 126D5 case 3      */
+    rectreg_base = 0x1F;
+    rectreg_off = 0;
+    CF = (dd)blit_sel < (dd)0; ZF = (blit_sel == 0); SF = (blit_sel >> 15);
+    if (blit_sel != 0) rectreg_off = 0x20;
+    for (;;){
+        clip_mcga_iter();
+        (rectreg_base)--; ZF = (rectreg_base == 0); SF = (rectreg_base >> 15);
+        if ((short)rectreg_base < 0) return;
+    }
+}
+void clip_go_mcga_e13047_c(void){         /* mid: iter + scan            */
+    for (;;){
+        clip_mcga_iter();
+        (rectreg_base)--; ZF = (rectreg_base == 0); SF = (rectreg_base >> 15);
+        if ((short)rectreg_base < 0) return;
+    }
+}
+void clip_go_mcga_e130b0_c(void){         /* mid: rest_b then scan       */
+    clip_rest_mcga_b();
+    clip_mcga_scan();
+}
+void clip_go_mcga_e130b3_c(void){         /* mid: bare dec+loop          */
+    clip_mcga_scan();
+}
+
+static void mcga_dirty_row(void){         /* loc_13943: one rect         */
+    di = dirtyrect_ptr;
+    al = *(db*)raddr(ds, di + 0x1223);
+    ah = *(db*)raddr(ds, di + 0x12AF);
+    si = ax;
+    dl = *(db*)raddr(ds, di + 0x0F67);
+    dh = 0; CF = 0; OF = 0; ZF = 1; SF = 0;
+    al = *(db*)raddr(ds, di + 0x0FF3);
+    blitgo_c = al;
+    al = *(db*)raddr(ds, di + 0x107F);
+    ah = *(db*)raddr(ds, di + 0x110B);
+    bl = *(db*)raddr(ds, di + 0x1197);
+    bh = 0; CF = 0; OF = 0; ZF = 1; SF = 0;
+    CF = ((dd)bx << 1) >> 16 & 1; bx <<= 1; ZF = (bx == 0); SF = (bx >> 15);
+    cx = seg_flip; es = cx;
+    do {                                  /* loc_13975: blit runs        */
+        di = *(dw*)raddr(ds, bx + 0x0BD5);
+        ds = seg_draw;
+        { dd t_ = (dd)di + (dd)ax; CF = t_ > 0xFFFF; di = t_;
+          ZF = (di == 0); SF = (di >> 15); }
+        cx = dx;
+        while (cx--) { *(dw*)raddr_(es,di) = *(dw*)raddr_(ds,si);
+                       si += DF?-2:2; di += DF?-2:2; }
+        { dd t_ = (dd)bx + (dd)2; CF = t_ > 0xFFFF; bx = t_;
+          ZF = (bx == 0); SF = (bx >> 15); }
+        bx &= 0x1FF; CF = 0; OF = 0; ZF = (bx == 0); SF = (bx >> 15);
+        ds = seg_data;
+        (blitgo_c)--; ZF = (blitgo_c == 0); SF = (blitgo_c >> 7);
+    } while (blitgo_c != 0);
+}
+static void mcga_dirty_scan(void){        /* loc_1393C: dec + loop       */
+    for (;;){
+        (dirtyrect_ptr)--; ZF = (dirtyrect_ptr == 0); SF = (dirtyrect_ptr >> 15);
+        if ((short)dirtyrect_ptr < 0) return;
+        mcga_dirty_row();
+    }
+}
+void mcga_dirty_update_c(void){           /* sub_13930                   */
+    ax = seg_data;
+    CF = (dd)adapter_id < 3; ZF = (adapter_id == 3);
+    SF = (((dw)(adapter_id - 3)) >> 15);
+    if (adapter_id != 3) return;
+    mcga_dirty_scan();
+}
+void mcga_dirty_update_e1393c_c(void){ mcga_dirty_scan(); }
+void mcga_dirty_update_e13943_c(void){    /* mid: row then scan          */
+    for (;;){
+        mcga_dirty_row();
+        (dirtyrect_ptr)--; ZF = (dirtyrect_ptr == 0); SF = (dirtyrect_ptr >> 15);
+        if ((short)dirtyrect_ptr < 0) return;
+    }
+}
+void mcga_dirty_update_e13975_c(void){    /* mid: inner run then scan    */
+    do {
+        di = *(dw*)raddr(ds, bx + 0x0BD5);
+        ds = seg_draw;
+        { dd t_ = (dd)di + (dd)ax; CF = t_ > 0xFFFF; di = t_;
+          ZF = (di == 0); SF = (di >> 15); }
+        cx = dx;
+        while (cx--) { *(dw*)raddr_(es,di) = *(dw*)raddr_(ds,si);
+                       si += DF?-2:2; di += DF?-2:2; }
+        { dd t_ = (dd)bx + (dd)2; CF = t_ > 0xFFFF; bx = t_;
+          ZF = (bx == 0); SF = (bx >> 15); }
+        bx &= 0x1FF; CF = 0; OF = 0; ZF = (bx == 0); SF = (bx >> 15);
+        ds = seg_data;
+        (blitgo_c)--; ZF = (blitgo_c == 0); SF = (blitgo_c >> 7);
+    } while (blitgo_c != 0);
+    mcga_dirty_scan();
+}

@@ -556,6 +556,17 @@ REWRITES = {
     'adapter_compose_flip_e11c59': 'adapter_compose_flip_e11c59_c',
     'adapter_compose_flip': 'adapter_compose_flip_c',
     'compose_flip': 'compose_flip_c',
+    'video_bufs_init': 'video_bufs_init_c',
+    'video_bufs_setup': 'video_bufs_setup_c',
+    'video_bufs_setup_e126c9': 'video_bufs_setup_e126c9_c',
+    'clip_go_mcga': 'clip_go_mcga_c',
+    'clip_go_mcga_e13047': 'clip_go_mcga_e13047_c',
+    'clip_go_mcga_e130b0': 'clip_go_mcga_e130b0_c',
+    'clip_go_mcga_e130b3': 'clip_go_mcga_e130b3_c',
+    'mcga_dirty_update': 'mcga_dirty_update_c',
+    'mcga_dirty_update_e1393c': 'mcga_dirty_update_e1393c_c',
+    'mcga_dirty_update_e13943': 'mcga_dirty_update_e13943_c',
+    'mcga_dirty_update_e13975': 'mcga_dirty_update_e13975_c',
 }
 # Commit 4366e7c removed the gfx driver-selection menu ('1'..'5' getch
 # loop → forced MCGA pick) by hand-editing the generated file, so every

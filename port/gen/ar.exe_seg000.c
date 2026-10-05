@@ -5403,7 +5403,8 @@ void bufsel_mcga(void) {
 
 
 
-void video_bufs_init(void) {
+void video_bufs_init(void) { video_bufs_init_c(); }
+void video_bufs_init_lifted(void) {
     dd _sa = 0, _sb = 0;
     /* mov     ax, cs:seg_data ;~ 01A2:1643 */
     ax = seg_data;
@@ -9350,7 +9351,8 @@ void blit_dst_patch(void) {
     /* jmp     short loc_126C9 ;~ 01A2:26AC */
     video_bufs_setup_e126c9(); return;
 }
-void video_bufs_setup_e126c9(void) {
+void video_bufs_setup_e126c9(void) { video_bufs_setup_e126c9_c(); }
+void video_bufs_setup_e126c9_lifted(void) {
     dd _sa = 0, _sb = 0;
     /* mov     ax, cs:seg_data ;~ 01A2:26C9 */
     ax = seg_data;
@@ -9465,7 +9467,8 @@ clip_go_cga_e12764:
 
 
 
-void video_bufs_setup(void) {
+void video_bufs_setup(void) { video_bufs_setup_c(); }
+void video_bufs_setup_lifted(void) {
     dd _sa = 0, _sb = 0;
     /* mov     ax, cs:seg_flip ;~ 01A2:26B9 */
     /* mov     cs:word_126DA, ax ;~ 01A2:26BD */
@@ -9686,7 +9689,8 @@ void locret_12dbe(void) {
     return;
 }
 
-void clip_go_mcga(void) {
+void clip_go_mcga(void) { clip_go_mcga_c(); }
+void clip_go_mcga_lifted(void) {
     dd _sa = 0, _sb = 0;
     /* mov     word_1DDB9, 1Fh ; jumptable 000126D5 case 3 ;~ 01A2:302E */
     rectreg_base = 0x1F;
@@ -9788,7 +9792,8 @@ clip_go_mcga_e130b3:
     /* retn ;~ 01A2:30B9 */
     return;
 }
-void clip_go_mcga_e13047(void) {
+void clip_go_mcga_e13047(void) { clip_go_mcga_e13047_c(); }
+void clip_go_mcga_e13047_lifted(void) {
     dd _sa = 0, _sb = 0;
 clip_go_mcga_e13047:
     do {
@@ -9880,7 +9885,8 @@ clip_go_mcga_e130b3:
     /* retn ;~ 01A2:30B9 */
     return;
 }
-void clip_go_mcga_e130b0(void) {
+void clip_go_mcga_e130b0(void) { clip_go_mcga_e130b0_c(); }
+void clip_go_mcga_e130b0_lifted(void) {
     dd _sa = 0, _sb = 0;
 clip_go_mcga_e130b0:
     do {
@@ -9972,7 +9978,8 @@ clip_go_mcga_e13047:
     /* jmp     short loc_130B3 ;~ 01A2:30AE */
     goto clip_go_mcga_e130b3;
 }
-void clip_go_mcga_e130b3(void) {
+void clip_go_mcga_e130b3(void) { clip_go_mcga_e130b3_c(); }
+void clip_go_mcga_e130b3_lifted(void) {
     dd _sa = 0, _sb = 0;
 clip_go_mcga_e130b3:
     do {
@@ -14934,7 +14941,8 @@ blitflag_go_tandy_e136ff:
     /* jmp     short loc_136A1 ;~ 01A2:3705 */
     goto blitflag_go_tandy_e136a1;
 }
-void mcga_dirty_update_e1393c(void) {
+void mcga_dirty_update_e1393c(void) { mcga_dirty_update_e1393c_c(); }
+void mcga_dirty_update_e1393c_lifted(void) {
     dd _sa = 0, _sb = 0;
 mcga_dirty_update_e1393c:
     do {
@@ -15003,7 +15011,8 @@ mcga_dirty_update_e13975:
         /* jmp     short loc_1393C ;~ 01A2:3996 */
     } while (1);
 }
-void mcga_dirty_update_e13943(void) {
+void mcga_dirty_update_e13943(void) { mcga_dirty_update_e13943_c(); }
+void mcga_dirty_update_e13943_lifted(void) {
     dd _sa = 0, _sb = 0;
 mcga_dirty_update_e13943:
     do {
@@ -15071,7 +15080,8 @@ mcga_dirty_update_e1393c:
     /* retn ;~ 01A2:3942 */
     return;
 }
-void mcga_dirty_update_e13975(void) {
+void mcga_dirty_update_e13975(void) { mcga_dirty_update_e13975_c(); }
+void mcga_dirty_update_e13975_lifted(void) {
     dd _sa = 0, _sb = 0;
 mcga_dirty_update_e13975:
     do {
@@ -15141,7 +15151,8 @@ mcga_dirty_update_e13943:
         es = cx;
     } while (1);
 }
-void mcga_dirty_update(void) {
+void mcga_dirty_update(void) { mcga_dirty_update_c(); }
+void mcga_dirty_update_lifted(void) {
     dd _sa = 0, _sb = 0;
     /* mov     ax, cs:seg_data ;~ 01A2:3930 */
     ax = seg_data;

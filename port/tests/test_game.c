@@ -818,6 +818,79 @@ int main(void){
         fprintf(stderr, "  (frame dispatch: lifted vs C, %d checks)\n", checks);
     }
 
+    /* ---- clip/dirty scan: video_bufs_setup -> clip_jt, clip_go_mcga
+     * rectreg sweep, mcga_dirty_update rect walk. Column tables live at
+     * ds:0xDD5 (bit masks), 0xF1F/0xF23 (column bytes), 0xE../0x13..
+     * record fields; empty tables exercise the early-out scan, a rigged
+     * slot exercises the hit path (cx>=0x200 skips the rest_* fill).  */
+    {
+        dw s0 = seg_flip, s1 = seg_draw, s2 = seg_screen;
+        seg_flip = 0x9000; seg_draw = 0x9800; seg_screen = 0xA000;
+        for (int i = 0; i < 5; i++){
+            adapter_id = i;
+            ab_res("bufinit", video_bufs_init_lifted, video_bufs_init, 0);
+            ab_res("bufsetup", video_bufs_setup_lifted, video_bufs_setup, 0);
+            ab_res("buf mid", video_bufs_setup_e126c9_lifted,
+                   video_bufs_setup_e126c9, 0);
+        }
+        /* bufsel_mcga set seg_flip=seg_draw+0x1000 etc — repin scratch */
+        seg_flip = 0x9000; seg_draw = 0x9800; seg_screen = 0xA000;
+
+        /* clip_go_mcga: empty mask bytes -> pure 32-slot dec scan     */
+        memset(raddr_(ds, 0x0F1F), 0, 0x20);
+        memset(raddr_(ds, 0x0F23), 0, 0x20);
+        *(db*)raddr_(ds, 0x0DD5 + 0) = 0xFF;      /* bit-mask table      */
+        adapter_id = 3; blit_sel = 0;
+        ab_res("clip mcga", clip_go_mcga_lifted, clip_go_mcga, 0);
+        blit_sel = 1;
+        ab_res("clip sel1", clip_go_mcga_lifted, clip_go_mcga, 0);
+        blit_sel = 0; rectreg_base = 5;
+        ab_res("clip mid47", clip_go_mcga_e13047_lifted,
+               clip_go_mcga_e13047, 0);
+        rectreg_base = 3;
+        ab_res("clip midb0", clip_go_mcga_e130b0_lifted,
+               clip_go_mcga_e130b0, 0);
+        rectreg_base = 2;
+        ab_res("clip midb3", clip_go_mcga_e130b3_lifted,
+               clip_go_mcga_e130b3, 0);
+        /* hit path: mask&column nonzero, gate byte positive, cx>=0x200
+         * so the rest_* scanline fills stay out of the test           */
+        rectreg_base = 0; blit_sel = 0;
+        *(db*)raddr_(ds, 0x0F1F) = 0xFF;
+        *(db*)raddr_(ds, 0x0F23) = 0x00;
+        *(db*)raddr_(ds, 0x0DD5) = 0x01;
+        *(db*)raddr_(ds, 0x0EFF) = 1;
+        *(db*)raddr_(ds, 0x0E5F) = 2;             /* ch=2 -> cx=0x200    */
+        ab_res("clip hit", clip_go_mcga_lifted, clip_go_mcga, 0);
+        *(db*)raddr_(ds, 0x0F1F) = 0;
+
+        /* mcga_dirty_update: adapter gate, then 1-rect 2-run blit     */
+        adapter_id = 0; dirtyrect_ptr = 1;
+        ab_res("dirty gate", mcga_dirty_update_lifted, mcga_dirty_update, 0);
+        adapter_id = 3; dirtyrect_ptr = 0;
+        ab_res("dirty empty", mcga_dirty_update_lifted, mcga_dirty_update, 0);
+        dirtyrect_ptr = 1;
+        *(db*)raddr_(ds, 0x1223) = 0x00; *(db*)raddr_(ds, 0x12AF) = 0x10;
+        *(db*)raddr_(ds, 0x0F67) = 2;                      /* width      */
+        *(db*)raddr_(ds, 0x0FF3) = 2;                      /* run count  */
+        *(db*)raddr_(ds, 0x107F) = 0; *(db*)raddr_(ds, 0x110B) = 0;
+        *(db*)raddr_(ds, 0x1197) = 0;                      /* row idx    */
+        ab_res("dirty 1", mcga_dirty_update_lifted, mcga_dirty_update, 0);
+        ab_res("dirty mid3c", mcga_dirty_update_e1393c_lifted,
+               mcga_dirty_update_e1393c, 0);
+        dirtyrect_ptr = 1;
+        ab_res("dirty mid43", mcga_dirty_update_e13943_lifted,
+               mcga_dirty_update_e13943, 0);
+        /* e13975 enters mid-run: bx/ax/si/dx/es/blitgo_c preset       */
+        bx = 0; ax = 0; si = 0x1000; dx = 2; blitgo_c = 1;
+        es = seg_flip; dirtyrect_ptr = 0;
+        ab_res("dirty mid75", mcga_dirty_update_e13975_lifted,
+               mcga_dirty_update_e13975, 0);
+        seg_flip = s0; seg_draw = s1; seg_screen = s2;
+        fprintf(stderr, "  (clip/dirty: lifted vs C, %d checks)\n", checks);
+    }
+
+
 
     /* ---- status-panel digit patcher: WOUNDS field ds:0xB93F <- byte_29712
      * template lives in the image with literal "XX" placeholders; sub_1BBB9

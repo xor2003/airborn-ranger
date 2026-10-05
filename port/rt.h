@@ -191,6 +191,17 @@ void adapter_compose_flip_e11c53_c(void); void adapter_compose_flip_e11c53_lifte
 void adapter_compose_flip_e11c59_c(void); void adapter_compose_flip_e11c59_lifted(void);
 void adapter_compose_flip_c(void); void adapter_compose_flip_lifted(void);
 void compose_flip_c(void); void compose_flip_lifted(void);
+void video_bufs_init_c(void); void video_bufs_init_lifted(void);
+void video_bufs_setup_c(void); void video_bufs_setup_lifted(void);
+void video_bufs_setup_e126c9_c(void); void video_bufs_setup_e126c9_lifted(void);
+void clip_go_mcga_c(void); void clip_go_mcga_lifted(void);
+void clip_go_mcga_e13047_c(void); void clip_go_mcga_e13047_lifted(void);
+void clip_go_mcga_e130b0_c(void); void clip_go_mcga_e130b0_lifted(void);
+void clip_go_mcga_e130b3_c(void); void clip_go_mcga_e130b3_lifted(void);
+void mcga_dirty_update_c(void); void mcga_dirty_update_lifted(void);
+void mcga_dirty_update_e1393c_c(void); void mcga_dirty_update_e1393c_lifted(void);
+void mcga_dirty_update_e13943_c(void); void mcga_dirty_update_e13943_lifted(void);
+void mcga_dirty_update_e13975_c(void); void mcga_dirty_update_e13975_lifted(void);
 
 /* env-gated trace (M2C_TRACE=1) */
 extern int rt_trace;
