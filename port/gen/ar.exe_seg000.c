@@ -57486,7 +57486,8 @@ obj_px_step_e169b1:
     /* retn ;~ 01A2:69B5 */
     return;
 }
-void cam_pan_detect_e169de(void) {
+void cam_pan_detect_e169de(void) { cam_pan_detect_e169de_c(); }
+void cam_pan_detect_e169de_lifted(void) {
     dd _sa = 0, _sb = 0;
     /* dec     cam_org_x ;~ 01A2:69DE */
     (cam_org_x)--; ZF = ((dw)(cam_org_x) == 0); SF = (((dw)(cam_org_x)) >> 15);
@@ -57541,7 +57542,8 @@ scroll_nop:
     /* retn ;~ 01A2:6A1C */
     return;
 }
-void cam_pan_detect_e169e5(void) {
+void cam_pan_detect_e169e5(void) { cam_pan_detect_e169e5_c(); }
+void cam_pan_detect_e169e5_lifted(void) {
     dd _sa = 0, _sb = 0;
     /* mov     ax, word_2967D ;~ 01A2:69E5 */
     ax = cam_tgt_y;
@@ -57591,7 +57593,8 @@ scroll_nop:
     /* retn ;~ 01A2:6A1C */
     return;
 }
-void cam_pan_detect_e16a07(void) {
+void cam_pan_detect_e16a07(void) { cam_pan_detect_e16a07_c(); }
+void cam_pan_detect_e16a07_lifted(void) {
     /* or      si, 1 ;~ 01A2:6A07 */
     si |= 1; CF = 0; OF = 0; ZF = ((dw)(si) == 0); SF = (((dw)(si)) >> 15);
     /* test    byte ptr word_2967D, 4 ;~ 01A2:6A0A */
@@ -57611,7 +57614,8 @@ scroll_nop:
     /* retn ;~ 01A2:6A1C */
     return;
 }
-void scroll_nop(void) {
+void scroll_nop(void) { scroll_nop_c(); }
+void scroll_nop_lifted(void) {
     /* mov     ax, si ;~ 01A2:6A15 */
     ax = si;
     /* mov     byte_2967A, al ;~ 01A2:6A17 */
@@ -57621,7 +57625,8 @@ void scroll_nop(void) {
     /* retn ;~ 01A2:6A1C */
     return;
 }
-void cam_pan_detect(void) {
+void cam_pan_detect(void) { cam_pan_detect_c(); }
+void cam_pan_detect_lifted(void) {
     dd _sa = 0, _sb = 0;
     /* and     word_2967B, 0FFFCh ;~ 01A2:69B6 */
     cam_tgt_x &= 0x0FFFC; CF = 0; OF = 0; ZF = ((dw)(cam_tgt_x) == 0); SF = (((dw)(cam_tgt_x)) >> 15);
@@ -57759,7 +57764,8 @@ sub_16a26:
     /* retn ;~ 01A2:6A59 */
     return;
 }
-void snap_to_cell(void) {
+void snap_to_cell(void) { snap_to_cell_c(); }
+void snap_to_cell_lifted(void) {
     dd _sa = 0, _sb = 0;
     /* sub     bx, bx ;~ 01A2:6A26 */
     { dd t_ = (dd)bx - (dd)bx; CF = (dd)bx < (dd)bx; bx = t_; ZF = ((dw)(bx) == 0); SF = (((dw)(bx)) >> 15); }
@@ -57944,7 +57950,8 @@ void sprite_reset(void) {
     /* retn ;~ 01A2:6B1D */
     return;
 }
-void cam_pan_apply(void) {
+void cam_pan_apply(void) { cam_pan_apply_c(); }
+void cam_pan_apply_lifted(void) {
     /* push    bx ;~ 01A2:6B1E */
     push(bx);
     /* push    si ;~ 01A2:6B1F */
@@ -106433,7 +106440,8 @@ void nullsub_7(void) {
     /* retn ;~ 01A2:8967 */
     return;
 }
-void clamp_obj_pos_e1898a(void) {
+void clamp_obj_pos_e1898a(void) { clamp_obj_pos_e1898a_c(); }
+void clamp_obj_pos_e1898a_lifted(void) {
     dd _sa = 0, _sb = 0;
     /* mov     al, 60h ; '`' ;~ 01A2:898A */
     al = 0x60;
@@ -106501,7 +106509,8 @@ locret_189e1:
     /* retn ;~ 01A2:89E1 */
     return;
 }
-void clamp_obj_pos_e18991(void) {
+void clamp_obj_pos_e18991(void) { clamp_obj_pos_e18991_c(); }
+void clamp_obj_pos_e18991_lifted(void) {
     dd _sa = 0, _sb = 0;
     /* mov     al, 40h ; '@' ;~ 01A2:8991 */
     al = 0x40;
@@ -106567,7 +106576,8 @@ locret_189e1:
     /* retn ;~ 01A2:89E1 */
     return;
 }
-void clamp_obj_pos_e18996(void) {
+void clamp_obj_pos_e18996(void) { clamp_obj_pos_e18996_c(); }
+void clamp_obj_pos_e18996_lifted(void) {
     dd _sa = 0, _sb = 0;
     /* mov     al, [bx-4085h] ;~ 01A2:8996 */
     al = *(db*)raddr(ds,bx-0x4085);
@@ -106628,7 +106638,8 @@ locret_189e1:
     /* retn ;~ 01A2:89E1 */
     return;
 }
-void clamp_obj_pos_e189aa(void) {
+void clamp_obj_pos_e189aa(void) { clamp_obj_pos_e189aa_c(); }
+void clamp_obj_pos_e189aa_lifted(void) {
     dd _sa = 0, _sb = 0;
     /* mov     al, [bx-4063h] ;~ 01A2:89AA */
     al = *(db*)raddr(ds,bx-0x4063);
@@ -106674,7 +106685,8 @@ locret_189e1:
     /* retn ;~ 01A2:89E1 */
     return;
 }
-void clamp_obj_pos_e189ce(void) {
+void clamp_obj_pos_e189ce(void) { clamp_obj_pos_e189ce_c(); }
+void clamp_obj_pos_e189ce_lifted(void) {
     dd _sa = 0, _sb = 0;
     /* cmp     ax, 78h ; 'x' ;~ 01A2:89CE */
     CF = (dd)ax < (dd)0x78; ZF = ((dw)((ax) - (0x78)) == 0); SF = (((dw)((ax) - (0x78))) >> 15);
@@ -106698,7 +106710,8 @@ void locret_189e1(void) {
     /* retn ;~ 01A2:89E1 */
     return;
 }
-void clamp_obj_pos(void) {
+void clamp_obj_pos(void) { clamp_obj_pos_c(); }
+void clamp_obj_pos_lifted(void) {
     dd _sa = 0, _sb = 0;
     /* mov     al, [bx-4085h] ;~ 01A2:8968 */
     al = *(db*)raddr(ds,bx-0x4085);
@@ -156607,7 +156620,8 @@ locret_1ac96:
     /* retn ;~ 01A2:AC96 */
     return;
 }
-void view_pan_step_e1aca5(void) {
+void view_pan_step_e1aca5(void) { view_pan_step_e1aca5_c(); }
+void view_pan_step_e1aca5_lifted(void) {
     dd _sa = 0, _sb = 0;
 view_pan_step_e1aca5:
     do {
@@ -156721,7 +156735,8 @@ view_pan_step_e1ad0d:
     /* retn ;~ 01A2:AD15 */
     return;
 }
-void view_pan_step_e1acb2(void) {
+void view_pan_step_e1acb2(void) { view_pan_step_e1acb2_c(); }
+void view_pan_step_e1acb2_lifted(void) {
     dd _sa = 0, _sb = 0;
 view_pan_step_e1acb2:
     do {
@@ -156822,7 +156837,8 @@ view_pan_step_e1ad0d:
     /* retn ;~ 01A2:AD15 */
     return;
 }
-void view_pan_step_e1acbd(void) {
+void view_pan_step_e1acbd(void) { view_pan_step_e1acbd_c(); }
+void view_pan_step_e1acbd_lifted(void) {
     dd _sa = 0, _sb = 0;
     /* mov     al, byte_2A9CA ;~ 01A2:ACBD */
     al = drift_flag;
@@ -156912,7 +156928,8 @@ view_pan_step_e1ad0d:
     /* retn ;~ 01A2:AD15 */
     return;
 }
-void view_pan_step_e1acd6(void) {
+void view_pan_step_e1acd6(void) { view_pan_step_e1acd6_c(); }
+void view_pan_step_e1acd6_lifted(void) {
     dd _sa = 0, _sb = 0;
     /* test    al, 4 ;~ 01A2:ACD6 */
     CF = 0; OF = 0; ZF = ((db)((al & 4)) == 0); SF = (((db)((al & 4))) >> 7);
@@ -156960,7 +156977,8 @@ view_pan_step_e1ad0d:
     /* retn ;~ 01A2:AD15 */
     return;
 }
-void view_pan_step_e1acdb(void) {
+void view_pan_step_e1acdb(void) { view_pan_step_e1acdb_c(); }
+void view_pan_step_e1acdb_lifted(void) {
     dd _sa = 0, _sb = 0;
     /* cmp     bx, 8 ;~ 01A2:ACDB */
     CF = (dd)bx < (dd)8; ZF = ((dw)((bx) - (8)) == 0); SF = (((dw)((bx) - (8))) >> 15);
@@ -157000,7 +157018,8 @@ view_pan_step_e1ad0d:
     /* retn ;~ 01A2:AD15 */
     return;
 }
-void view_pan_step_e1ace3(void) {
+void view_pan_step_e1ace3(void) { view_pan_step_e1ace3_c(); }
+void view_pan_step_e1ace3_lifted(void) {
     dd _sa = 0, _sb = 0;
     /* cmp     bx, 118h ;~ 01A2:ACE3 */
     CF = (dd)bx < (dd)0x118; ZF = ((dw)((bx) - (0x118)) == 0); SF = (((dw)((bx) - (0x118))) >> 15);
@@ -157030,7 +157049,8 @@ view_pan_step_e1ad0d:
     /* retn ;~ 01A2:AD15 */
     return;
 }
-void view_pan_step_e1acec(void) {
+void view_pan_step_e1acec(void) { view_pan_step_e1acec_c(); }
+void view_pan_step_e1acec_lifted(void) {
     /* mov     byte ptr word_1DCFF, bl ;~ 01A2:ACEC */
     *(db*)(&dpar_2) = bl;
     /* mov     byte ptr word_1DD1F, bh ;~ 01A2:ACF0 */
@@ -157049,7 +157069,8 @@ view_pan_step_e1ad0d:
     /* retn ;~ 01A2:AD15 */
     return;
 }
-void view_pan_step_e1acfb(void) {
+void view_pan_step_e1acfb(void) { view_pan_step_e1acfb_c(); }
+void view_pan_step_e1acfb_lifted(void) {
     dd _sa = 0, _sb = 0;
     /* mov     bl, byte ptr word_1DD3F ;~ 01A2:ACFB */
     bl = *(db*)(&dpar_4);
@@ -157077,7 +157098,8 @@ view_pan_step_e1ad0d:
     /* retn ;~ 01A2:AD15 */
     return;
 }
-void view_pan_step_e1ad09(void) {
+void view_pan_step_e1ad09(void) { view_pan_step_e1ad09_c(); }
+void view_pan_step_e1ad09_lifted(void) {
     /* mov     byte ptr word_1DD3F, bl ;~ 01A2:AD09 */
     *(db*)(&dpar_4) = bl;
 view_pan_step_e1ad0d:
@@ -157090,7 +157112,8 @@ view_pan_step_e1ad0d:
     /* retn ;~ 01A2:AD15 */
     return;
 }
-void view_pan_step_e1ad0d(void) {
+void view_pan_step_e1ad0d(void) { view_pan_step_e1ad0d_c(); }
+void view_pan_step_e1ad0d_lifted(void) {
     /* mov     bx, 0 ;~ 01A2:AD0D */
     bx = 0;
     /* mov     al, 0 ;~ 01A2:AD10 */
@@ -157100,7 +157123,8 @@ void view_pan_step_e1ad0d(void) {
     /* retn ;~ 01A2:AD15 */
     return;
 }
-void view_pan_step(void) {
+void view_pan_step(void) { view_pan_step_c(); }
+void view_pan_step_lifted(void) {
     dd _sa = 0, _sb = 0;
     /* inc     byte_2A9D8 ;~ 01A2:AC97 */
     (view_pan_a9d8)++; ZF = ((db)(view_pan_a9d8) == 0); SF = (((db)(view_pan_a9d8)) >> 7);
@@ -158974,7 +158998,8 @@ map_exit_probe_e1af56:
     /* retn ;~ 01A2:AF62 */
     return;
 }
-void obj_lookup_word(void) {
+void obj_lookup_word(void) { obj_lookup_word_c(); }
+void obj_lookup_word_lifted(void) {
     dd _sa = 0, _sb = 0;
     /* xor     ah, ah ;~ 01A2:AF63 */
     ah = 0; CF = 0; OF = 0; ZF = 1; SF = 0;

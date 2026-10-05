@@ -2750,3 +2750,329 @@ void cellgfx_mcga_e1b172_c(void) {
 void cellgfx_mcga_e1b177_c(void) {
     cellgfx_rows();
 }
+
+/* ---- camera pan: target snap, pan-flag detect, view drift/input --- */
+void scroll_nop_c(void) {                /* loc_16A15: store pan flags*/
+    ax = si;
+    pan_flags = al;
+    al |= al; CF = 0; OF = 0; ZF = (al == 0); SF = (al >> 7);
+}
+static void pan_y_cmp(void) {            /* e169e5: y-axis compare     */
+    ax = cam_tgt_y;
+    CF = ax & 1; ax = (short)ax >> 1;
+    ZF = (ax == 0); SF = (ax >> 15);
+    CF = ax & 1; ax = (short)ax >> 1;
+    ZF = (ax == 0); SF = (ax >> 15);
+    dw oldy = cam_px_y;
+    CF = (dd)ax < (dd)oldy; ZF = (ax == oldy);
+    SF = ((dw)(ax - oldy) >> 15);
+    cam_px_y = ax;
+    if (ax != oldy) {
+        if ((short)ax >= (short)oldy) {
+            si |= 2; CF = 0; OF = 0; ZF = (si == 0); SF = (si >> 15);
+            CF = 0; OF = 0;
+            ZF = ((*(db*)(&cam_tgt_y) & 4) == 0);
+            SF = ((*(db*)(&cam_tgt_y) & 4) >> 7);
+            if ((*(db*)(&cam_tgt_y) & 4) != 0) { scroll_nop_c(); return; }
+            (cam_9681)++; ZF = (cam_9681 == 0); SF = (cam_9681 >> 15);
+            scroll_nop_c(); return;
+        }
+        cam_pan_detect_e16a07_c();
+        return;
+    }
+    scroll_nop_c();
+}
+void cam_pan_detect_c(void) {            /* sub_169B6: pan flag build  */
+    cam_tgt_x &= 0x0FFFC; CF = 0; OF = 0;
+    ZF = (cam_tgt_x == 0); SF = (cam_tgt_x >> 15);
+    cam_tgt_y &= 0x0FFFC; CF = 0; OF = 0;
+    ZF = (cam_tgt_y == 0); SF = (cam_tgt_y >> 15);
+    si = 0;
+    ax = cam_tgt_x;
+    CF = ax & 1; ax = (short)ax >> 1;
+    ZF = (ax == 0); SF = (ax >> 15);
+    CF = ax & 1; ax = (short)ax >> 1;
+    ZF = (ax == 0); SF = (ax >> 15);
+    dw oldx = cam_px_x;
+    CF = (dd)ax < (dd)oldx; ZF = (ax == oldx);
+    SF = ((dw)(ax - oldx) >> 15);
+    cam_px_x = ax;
+    if (ax != oldx) {
+        if ((short)ax >= (short)oldx) {
+            si = 8;
+            (cam_org_x)++; ZF = (cam_org_x == 0); SF = (cam_org_x >> 15);
+        } else {
+            cam_pan_detect_e169de_c();
+            return;
+        }
+    }
+    pan_y_cmp();
+}
+void cam_pan_detect_e169de_c(void) {     /* x pan left: org--, si=4    */
+    (cam_org_x)--; ZF = (cam_org_x == 0); SF = (cam_org_x >> 15);
+    si = 4;
+    pan_y_cmp();
+}
+void cam_pan_detect_e169e5_c(void) {
+    pan_y_cmp();
+}
+void cam_pan_detect_e16a07_c(void) {     /* y pan up: si|=1, subtile   */
+    si |= 1; CF = 0; OF = 0; ZF = (si == 0); SF = (si >> 15);
+    CF = 0; OF = 0;
+    ZF = ((*(db*)(&cam_tgt_y) & 4) == 0);
+    SF = ((*(db*)(&cam_tgt_y) & 4) >> 7);
+    if ((*(db*)(&cam_tgt_y) & 4) != 0) {
+        (cam_9681)--; ZF = (cam_9681 == 0); SF = (cam_9681 >> 15);
+    }
+    scroll_nop_c();
+}
+static void clamp_y_tail(void) {         /* e189aa: y window clamp     */
+    al = *(db*)raddr(ds, bx - 0x4063);
+    ah = *(db*)raddr(ds, bx - 0x401F);
+    { dd t_ = (dd)ax - (dd)cam_tgt_y; CF = (dd)ax < (dd)cam_tgt_y;
+      ax = t_; ZF = (ax == 0); SF = (ax >> 15); }
+    rec_ptr_a = ax;
+    CF = (dd)ax < (dd)0x58; ZF = (ax == 0x58);
+    SF = ((dw)(ax - 0x58) >> 15);
+    if ((short)ax <= (short)0x58) {
+        al = *(db*)raddr(ds, bx - 0x4063);
+        ah = *(db*)raddr(ds, bx - 0x401F);
+        { dd t_ = (dd)ax - (dd)0x58; CF = (dd)ax < (dd)0x58; ax = t_;
+          ZF = (ax == 0); SF = (ax >> 15); }
+        cam_tgt_y = ax;
+        return;
+    }
+    CF = (dd)ax < (dd)0x78; ZF = (ax == 0x78);
+    SF = ((dw)(ax - 0x78) >> 15);
+    if ((short)ax < (short)0x78) return;
+    al = *(db*)raddr(ds, bx - 0x4063);
+    ah = *(db*)raddr(ds, bx - 0x401F);
+    { dd t_ = (dd)ax - (dd)0x78; CF = (dd)ax < (dd)0x78; ax = t_;
+      ZF = (ax == 0); SF = (ax >> 15); }
+    cam_tgt_y = ax;
+}
+static void clamp_x_fix(void) {          /* e18996: x adjust + y tail  */
+    al = *(db*)raddr(ds, bx - 0x4085);
+    { dd t_ = (dd)al - (dd)*(db*)(&rec_ptr_a);
+      CF = (dd)al < (dd)*(db*)(&rec_ptr_a); al = t_;
+      ZF = (al == 0); SF = (al >> 7); }
+    *(db*)(&cam_tgt_x) = al;
+    al = *(db*)raddr(ds, bx - 0x4041);
+    { dd t_ = (dd)al - (dd)0 - CF; CF = (dd)al < (dd)0 + CF; al = t_;
+      ZF = (al == 0); SF = (al >> 7); }
+    *(db*)(((db*)&cam_tgt_x) + 1) = al;
+    clamp_y_tail();
+}
+void clamp_obj_pos_c(void) {             /* sub_18968: cam window      */
+    al = *(db*)raddr(ds, bx - 0x4085);
+    { dd t_ = (dd)al - (dd)*(db*)(&cam_tgt_x);
+      CF = (dd)al < (dd)*(db*)(&cam_tgt_x); al = t_;
+      ZF = (al == 0); SF = (al >> 7); }
+    *(db*)(&rec_ptr_a) = al;
+    al = *(db*)raddr(ds, bx - 0x4041);
+    { dd t_ = (dd)al - (dd)*(db*)(((db*)&cam_tgt_x) + 1) - CF;
+      CF = (dd)al < (dd)*(db*)(((db*)&cam_tgt_x) + 1) + CF; al = t_;
+      ZF = (al == 0); SF = (al >> 7); }
+    if ((signed char)(al) < 0) {
+        al = 0x40; *(db*)(&rec_ptr_a) = al;
+    } else if (al != 0) {
+        al = 0x60; *(db*)(&rec_ptr_a) = al;
+    } else {
+        al = *(db*)(&rec_ptr_a);
+        CF = (dd)al < (dd)0x40; ZF = (al == 0x40);
+        SF = ((db)(al - 0x40) >> 7);
+        if (al < 0x40) {
+            al = 0x40; *(db*)(&rec_ptr_a) = al;
+        } else {
+            CF = (dd)al < (dd)0x60; ZF = (al == 0x60);
+            SF = ((db)(al - 0x60) >> 7);
+            if (al < 0x60) { clamp_y_tail(); return; }
+            al = 0x60; *(db*)(&rec_ptr_a) = al;
+        }
+    }
+    clamp_x_fix();
+}
+void clamp_obj_pos_e1898a_c(void) {
+    al = 0x60; *(db*)(&rec_ptr_a) = al;
+    clamp_x_fix();
+}
+void clamp_obj_pos_e18991_c(void) {
+    al = 0x40; *(db*)(&rec_ptr_a) = al;
+    clamp_x_fix();
+}
+void clamp_obj_pos_e18996_c(void) {
+    clamp_x_fix();
+}
+void clamp_obj_pos_e189aa_c(void) {
+    clamp_y_tail();
+}
+void clamp_obj_pos_e189ce_c(void) {      /* y over-window fix          */
+    CF = (dd)ax < (dd)0x78; ZF = (ax == 0x78);
+    SF = ((dw)(ax - 0x78) >> 15);
+    if ((short)ax < (short)0x78) return;
+    al = *(db*)raddr(ds, bx - 0x4063);
+    ah = *(db*)raddr(ds, bx - 0x401F);
+    { dd t_ = (dd)ax - (dd)0x78; CF = (dd)ax < (dd)0x78; ax = t_;
+      ZF = (ax == 0); SF = (ax >> 15); }
+    cam_tgt_y = ax;
+}
+void snap_to_cell_c(void) {              /* sub_16A26: grid snap       */
+    { dd t_ = (dd)bx - (dd)bx; CF = (dd)bx < (dd)bx; bx = t_;
+      ZF = (bx == 0); SF = (bx >> 15); }
+    clamp_obj_pos();
+    ax = cam_tgt_x;
+    ax &= 0x0FFFC; CF = 0; OF = 0; ZF = (ax == 0); SF = (ax >> 15);
+    cam_tgt_x = ax;
+    cam_9676 = ax;
+    cl = 2;
+    if (cl) {
+        CF = (ax >> (cl - 1)) & 1; ax = (short)ax >> cl;
+        ZF = (ax == 0); SF = (ax >> 15);
+    }
+    cam_org_x = ax;
+    cam_px_x = ax;
+    ax = cam_tgt_y;
+    ax &= 0x0FFFC; CF = 0; OF = 0; ZF = (ax == 0); SF = (ax >> 15);
+    cam_tgt_y = ax;
+    cam_9678 = ax;
+    CF = ax & 1; ax = (short)ax >> 1; ZF = (ax == 0); SF = (ax >> 15);
+    CF = ax & 1; ax = (short)ax >> 1; ZF = (ax == 0); SF = (ax >> 15);
+    cam_px_y = ax;
+    CF = ax & 1; ax = (short)ax >> 1; ZF = (ax == 0); SF = (ax >> 15);
+    cam_9681 = ax;
+}
+void cam_pan_apply_c(void) {             /* sub_16B1E: snap+set+clear  */
+    push(bx);
+    push(si);
+    snap_to_cell();
+    sprite_param_set();
+    pan_flags = 0;
+    si = pop();
+    bx = pop();
+}
+void obj_lookup_word_c(void) {           /* sub_1AF63: word tbl store  */
+    ah = 0; CF = 0; OF = 0; ZF = 1; SF = 0;
+    CF = (((dd)ax << 1) >> 16) & 1; ax <<= 1;
+    ZF = (ax == 0); SF = (ax >> 15);
+    si = ax;
+    ax = *(dw*)raddr(ds, si - 0x2468);
+    *(db*)raddr(ds, bx + 0x0E3F) = al;
+    *(db*)raddr(ds, bx + 0x0E5F) = ah;
+}
+
+/* ---- view pan step: parity delta shift + input/drift pan ---------- */
+static void pan_shift_odd(void) {        /* e1aca5: -246E->-2471 x3    */
+    do {
+        al = *(db*)raddr(ds, si - 0x246E);
+        *(db*)raddr(ds, si - 0x2471) = al;
+        (si)--; ZF = (si == 0); SF = (si >> 15);
+    } while ((short)(si) >= 0);
+}
+static void pan_shift_even(void) {       /* e1acb2: -246B->-2471 x3    */
+    do {
+        al = *(db*)raddr(ds, si - 0x246B);
+        *(db*)raddr(ds, si - 0x2471) = al;
+        (si)--; ZF = (si == 0); SF = (si >> 15);
+    } while ((short)(si) >= 0);
+}
+static void pan_finish(void) {           /* e1ad0d                     */
+    bx = 0;
+    al = 0;
+    obj_lookup_word();
+}
+static void pan_clamp_store(void) {      /* e1acdb..ecec               */
+    CF = (dd)bx < (dd)8; ZF = (bx == 8);
+    SF = ((dw)(bx - 8) >> 15);
+    if (bx < 8) bx = 8;
+    CF = (dd)bx < (dd)0x118; ZF = (bx == 0x118);
+    SF = ((dw)(bx - 0x118) >> 15);
+    if (bx >= 0x118) bx = 0x118;
+    *(db*)(&dpar_2) = bl;
+    *(db*)(&dpar_3) = bh;
+    *(db*)(&dpar_4) = 0x46;
+    pan_finish();
+}
+static void pan_drift_step(void) {       /* e1acfb: drift advance      */
+    bl = *(db*)(&dpar_4);
+    { dd t_ = (dd)bl + (dd)4; CF = t_ > 0xFF; bl = t_;
+      ZF = (bl == 0); SF = (bl >> 7); }
+    CF = (dd)bl < (dd)0x0C8; ZF = (bl == 0x0C8);
+    SF = ((db)(bl - 0x0C8) >> 7);
+    if (bl >= 0x0C8) bl = 0x0C8;
+    *(db*)(&dpar_4) = bl;
+    pan_finish();
+}
+static void pan_input(void) {            /* e1acbd: input-mask pan     */
+    al = drift_flag;
+    al |= al; CF = 0; OF = 0; ZF = (al == 0); SF = (al >> 7);
+    if (al != 0) { pan_drift_step(); return; }
+    al = *(db*)(&input_mask);
+    bl = *(db*)(&dpar_2);
+    bh = *(db*)(&dpar_3);
+    CF = 0; OF = 0; ZF = ((al & 8) == 0); SF = ((al & 8) >> 7);
+    if ((al & 8) == 0) {
+        (bx)++; ZF = (bx == 0); SF = (bx >> 15);
+        pan_clamp_store(); return;
+    }
+    CF = 0; OF = 0; ZF = ((al & 4) == 0); SF = ((al & 4) >> 7);
+    if ((al & 4) == 0) {
+        (bx)--; ZF = (bx == 0); SF = (bx >> 15);
+    }
+    pan_clamp_store();
+}
+void view_pan_step_c(void) {             /* sub_1AC97: parity+pan      */
+    (view_pan_a9d8)++; ZF = (view_pan_a9d8 == 0);
+    SF = (view_pan_a9d8 >> 7);
+    si = 2;
+    al = view_pan_a9d8;
+    al &= 1; CF = 0; OF = 0; ZF = (al == 0); SF = (al >> 7);
+    if (al == 0) pan_shift_even();
+    else pan_shift_odd();
+    pan_input();
+}
+void view_pan_step_e1aca5_c(void) {
+    pan_shift_odd();
+    pan_input();
+}
+void view_pan_step_e1acb2_c(void) {
+    pan_shift_even();
+    pan_input();
+}
+void view_pan_step_e1acbd_c(void) {
+    pan_input();
+}
+void view_pan_step_e1acd6_c(void) {
+    CF = 0; OF = 0; ZF = ((al & 4) == 0); SF = ((al & 4) >> 7);
+    if ((al & 4) == 0) {
+        (bx)--; ZF = (bx == 0); SF = (bx >> 15);
+    }
+    pan_clamp_store();
+}
+void view_pan_step_e1acdb_c(void) {
+    pan_clamp_store();
+}
+void view_pan_step_e1ace3_c(void) {
+    CF = (dd)bx < (dd)0x118; ZF = (bx == 0x118);
+    SF = ((dw)(bx - 0x118) >> 15);
+    if (bx >= 0x118) bx = 0x118;
+    *(db*)(&dpar_2) = bl;
+    *(db*)(&dpar_3) = bh;
+    *(db*)(&dpar_4) = 0x46;
+    pan_finish();
+}
+void view_pan_step_e1acec_c(void) {
+    *(db*)(&dpar_2) = bl;
+    *(db*)(&dpar_3) = bh;
+    *(db*)(&dpar_4) = 0x46;
+    pan_finish();
+}
+void view_pan_step_e1acfb_c(void) {
+    pan_drift_step();
+}
+void view_pan_step_e1ad09_c(void) {
+    *(db*)(&dpar_4) = bl;
+    pan_finish();
+}
+void view_pan_step_e1ad0d_c(void) {
+    pan_finish();
+}

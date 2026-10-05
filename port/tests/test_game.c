@@ -1297,6 +1297,113 @@ int main(void){
                 checks);
     }
 
+    /* ---- camera pan: target snap, pan-flag detect, view drift/input,
+     * clamp_obj_pos window clamp, obj_lookup_word field store. ------- */
+    {
+        ss = 0x8000; sp = 0xFFFE;
+        ds = seg_data;
+        /* cam_pan_detect: x/y quarter-px compare -> pan_flags bits    */
+        cam_tgt_x = 0x0200; cam_tgt_y = 0x0180;
+        cam_px_x = 0x80; cam_px_y = 0x60; cam_org_x = 0x80;
+        cam_9681 = 0x30; si = 0;
+        ab_res("pandetect", cam_pan_detect_lifted, cam_pan_detect, 0);
+        cam_tgt_x = 0x0100; cam_tgt_y = 0x0200;
+        cam_px_x = 0x80; cam_px_y = 0x60; cam_org_x = 0x80;
+        cam_9681 = 0x30; si = 0;
+        ab_res("pandetect l", cam_pan_detect_lifted, cam_pan_detect, 0);
+        cam_tgt_x = 0x0244; cam_tgt_y = 0x0184;   /* subtile bit set   */
+        cam_px_x = 0x80; cam_px_y = 0x60;
+        ab_res("pandetect st", cam_pan_detect_lifted, cam_pan_detect, 0);
+        cam_tgt_x = 0x0080; cam_px_x = 0x80;
+        ab_res("pandetect =x", cam_pan_detect_lifted, cam_pan_detect, 0);
+        ab_res("pandet xdec", cam_pan_detect_e169de_lifted,
+               cam_pan_detect_e169de, 0);
+        ab_res("pandet y", cam_pan_detect_e169e5_lifted,
+               cam_pan_detect_e169e5, 0);
+        ab_res("pandet ydec", cam_pan_detect_e16a07_lifted,
+               cam_pan_detect_e16a07, 0);
+        si = 0x0B;
+        ab_res("scrollnop", scroll_nop_lifted, scroll_nop, 0);
+        /* clamp_obj_pos: obj x/y at ds:[bx-...] vs cam_tgt window     */
+        bx = 0x5000;
+        *(db*)raddr_(ds, bx - 0x4085) = 0x50;
+        *(db*)raddr_(ds, bx - 0x4041) = 0;
+        *(db*)raddr_(ds, bx - 0x4063) = 0x60;
+        *(db*)raddr_(ds, bx - 0x401F) = 0;
+        cam_tgt_x = 0x0100; cam_tgt_y = 0x0080;
+        ab_res("clamp", clamp_obj_pos_lifted, clamp_obj_pos, 0);
+        *(db*)raddr_(ds, bx - 0x4085) = 0x20;  /* obj below window     */
+        cam_tgt_x = 0x0100;
+        ab_res("clamp lo", clamp_obj_pos_lifted, clamp_obj_pos, 0);
+        *(db*)raddr_(ds, bx - 0x4085) = 0xF0;  /* obj above window     */
+        ab_res("clamp hi", clamp_obj_pos_lifted, clamp_obj_pos, 0);
+        *(db*)raddr_(ds, bx - 0x4063) = 0x10;
+        ab_res("clamp ylo", clamp_obj_pos_lifted, clamp_obj_pos, 0);
+        ab_res("clamp 98a", clamp_obj_pos_e1898a_lifted,
+               clamp_obj_pos_e1898a, 0);
+        ab_res("clamp 991", clamp_obj_pos_e18991_lifted,
+               clamp_obj_pos_e18991, 0);
+        *(db*)&rec_ptr_a = 0x50;
+        ab_res("clamp 996", clamp_obj_pos_e18996_lifted,
+               clamp_obj_pos_e18996, 0);
+        ab_res("clamp 9aa", clamp_obj_pos_e189aa_lifted,
+               clamp_obj_pos_e189aa, 0);
+        ax = 0x90;
+        ab_res("clamp 9ce", clamp_obj_pos_e189ce_lifted,
+               clamp_obj_pos_e189ce, 0);
+        /* snap_to_cell: clamp + 4px grid snap + derived org/px/row    */
+        bx = 0x5000;
+        *(db*)raddr_(ds, bx - 0x4085) = 0x50;
+        *(db*)raddr_(ds, bx - 0x4041) = 0;
+        *(db*)raddr_(ds, bx - 0x4063) = 0x60;
+        *(db*)raddr_(ds, bx - 0x401F) = 0;
+        cam_tgt_x = 0x0123; cam_tgt_y = 0x00AB;
+        ab_res("snapcell", snap_to_cell_lifted, snap_to_cell, 0);
+        ab_res("panapply", cam_pan_apply_lifted, cam_pan_apply, 0);
+        /* view_pan_step: parity shift + input/drift pan               */
+        view_pan_a9d8 = 0; drift_flag = 0; input_mask = 0x08;
+        *(db*)&dpar_2 = 0x40; *(db*)&dpar_3 = 0; *(db*)&dpar_4 = 0x10;
+        bx = 0x5000;
+        ab_res("panstep", view_pan_step_lifted, view_pan_step, 0);
+        view_pan_a9d8 = 1; input_mask = 0x04;
+        ab_res("panstep odd", view_pan_step_lifted, view_pan_step, 0);
+        drift_flag = 1; *(db*)&dpar_4 = 0xC0;
+        ab_res("panstep drift", view_pan_step_lifted, view_pan_step, 0);
+        si = 2;
+        ab_res("panstep a5", view_pan_step_e1aca5_lifted,
+               view_pan_step_e1aca5, 0);
+        si = 2;
+        ab_res("panstep b2", view_pan_step_e1acb2_lifted,
+               view_pan_step_e1acb2, 0);
+        drift_flag = 0;
+        ab_res("panstep bd", view_pan_step_e1acbd_lifted,
+               view_pan_step_e1acbd, 0);
+        al = 0x04; bx = 0x20;
+        ab_res("panstep d6", view_pan_step_e1acd6_lifted,
+               view_pan_step_e1acd6, 0);
+        bx = 4;
+        ab_res("panstep db", view_pan_step_e1acdb_lifted,
+               view_pan_step_e1acdb, 0);
+        bx = 0x200;
+        ab_res("panstep e3", view_pan_step_e1ace3_lifted,
+               view_pan_step_e1ace3, 0);
+        bx = 0x50;
+        ab_res("panstep ec", view_pan_step_e1acec_lifted,
+               view_pan_step_e1acec, 0);
+        *(db*)&dpar_4 = 0x60;
+        ab_res("panstep fb", view_pan_step_e1acfb_lifted,
+               view_pan_step_e1acfb, 0);
+        bl = 0x70;
+        ab_res("panstep 09", view_pan_step_e1ad09_lifted,
+               view_pan_step_e1ad09, 0);
+        bx = 0x5000;
+        ab_res("panstep 0d", view_pan_step_e1ad0d_lifted,
+               view_pan_step_e1ad0d, 0);
+        al = 4; bx = 0x5000;
+        ab_res("objlookup", obj_lookup_word_lifted, obj_lookup_word, 0);
+        fprintf(stderr, "  (campan: lifted vs C, %d checks)\n", checks);
+    }
+
     /* ---- status-panel digit patcher: WOUNDS field ds:0xB93F <- byte_29712
      * template lives in the image with literal "XX" placeholders; sub_1BBB9
      * converts al to two ASCII digits and stores at ds:[si]/ds:[si+1]. ---- */
