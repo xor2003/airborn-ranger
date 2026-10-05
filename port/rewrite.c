@@ -393,3 +393,186 @@ void write_res_file_c(void){
     if (CF){ res_load_fail(); return; }
     write_res_file_e1092f_c();
 }
+
+/* ---- overlay EXEC loader (seg000:3A94..3BC0) -------------------------
+ * load_overlay(bx = index into ds:0x19E2 name table):
+ *   probe-max alloc -> alloc whole free span -> EXEC-load the overlay
+ *   image into it -> build the 5-byte call table at ds:0x1990 from the
+ *   overlay's own header -> SETBLOCK to the exact size -> ax = ovl seg.
+ * Every error prints a $-string then exits via e13baa (exit+free loop).
+ * ------------------------------------------------------------------ */
+
+/* e13baa: desperate exit — try EXIT(al=0); if the port's exit somehow
+ * returns, free es and retry after printing the free-fail message. */
+void load_overlay_e13baa_c(void){
+    for (;;){
+        ax = 0x4C00;
+        dos_exit_code();
+        es = ax;
+        ah = 0x49;
+        dos_free();
+        if (!CF) return;
+        dx = 0x1ADD;
+        ah = 9;
+        dos_print_string();
+    }
+}
+
+/* e13b9e: success tail — restore ds/es and hand back the overlay seg. */
+void load_overlay_e13b9e_c(void){
+    ax = seg_data;
+    ds = ax;
+    es = ax;
+    ax = ovl_e840;
+}
+
+/* e13b85: SETBLOCK(es = ovl seg, bx + 0xA paras); fail -> print + exit. */
+void load_overlay_e13b85_c(void){
+    { dd t_ = (dd)bx + (dd)0x0A; CF = t_ > 0xFFFF; bx = t_;
+      ZF = (bx == 0); SF = (bx >> 15); }
+    ah = 0x4A;
+    cx = ovl_e840;
+    es = cx;
+    dos_resize();
+    if (CF){
+        dx = 0x1AB2;
+        ah = 9;
+        dos_print_string();
+        load_overlay_e13baa_c();
+        return;
+    }
+    load_overlay_e13b9e_c();
+}
+
+/* e13b46: table-fill loop — cx entries {off = es:[si], seg = di} into
+ * ds:bx+1/+3 (5-byte stride); then size check vs the free-para probe. */
+void load_overlay_e13b46_c(void){
+    do {
+        ax = *(dw*)raddr(es, si);
+        *(dw*)raddr(ds, bx + 1) = ax;
+        *(dw*)raddr(ds, bx + 3) = di;
+        { dd t_ = (dd)si + (dd)2; CF = t_ > 0xFFFF; si = t_;
+          ZF = (si == 0); SF = (si >> 15); }
+        { dd t_ = (dd)bx + (dd)5; CF = t_ > 0xFFFF; bx = t_;
+          ZF = (bx == 0); SF = (bx >> 15); }
+    } while (--cx != 0);
+    /* needed paras = (es:[0x1E] + es:[0x20]) >> 4 vs probed free span */
+    di = 0x1E;
+    bx = *(dw*)raddr(es, di);
+    CF = (bx >> 3) & 1; bx >>= 4; ZF = (bx == 0); SF = (bx >> 15);
+    di = 0x20;
+    cx = *(dw*)raddr(es, di);
+    CF = (cx >> 3) & 1; cx >>= 4; ZF = (cx == 0); SF = (cx >> 15);
+    { dd t_ = (dd)bx + (dd)cx; CF = t_ > 0xFFFF; bx = t_;
+      ZF = (bx == 0); SF = (bx >> 15); }
+    CF = (dd)bx < (dd)ovl_e842;
+    ZF = ((dw)(bx - ovl_e842) == 0); SF = (((dw)(bx - ovl_e842)) >> 15);
+    if ((short)bx > (short)ovl_e842){
+        dx = 0x1A8D;
+        ah = 9;
+        dos_print_string();
+        load_overlay_e13baa_c();
+        return;
+    }
+    load_overlay_e13b85_c();
+}
+
+/* e13b12: post-EXEC restore — ss:sp were clobbered by EXEC — then seed
+ * the table cursor (bx = 0x1990 + es:[0x1C]*5, cx = es:[0x22],
+ * si = 0x24, di = es:[0x18] = overlay code seg). */
+void load_overlay_e13b12_c(void){
+    sp = ovl_3a90;
+    ds = seg_data;
+    ss = ovl_3a92;
+    ax = ovl_e840;
+    es = ax;
+    bx = 0x1990;
+    di = 0x1C;
+    ax = *(dw*)raddr(es, di);
+    dl = 5;
+    ax = (dw)al * dl;                       /* mul dl — count*5 */
+    { dd t_ = (dd)bx + (dd)ax; CF = t_ > 0xFFFF; bx = t_;
+      ZF = (bx == 0); SF = (bx >> 15); }
+    cx = *(dw*)raddr(es, 0x22);
+    si = 0x24;
+    di = 0x18;
+    di = *(dw*)raddr(es, di);
+    load_overlay_e13b46_c();
+}
+
+/* e13af9: EXEC error != 2 — code 8 gets the format msg, rest generic. */
+void load_overlay_e13b08_c(void){
+    dx = 0x1A69;
+    ah = 9;
+    dos_print_string();
+    load_overlay_e13baa_c();
+}
+void load_overlay_e13af9_c(void){
+    CF = (dd)ax < (dd)8;
+    ZF = ((dw)(ax - 8) == 0); SF = (((dw)(ax - 8)) >> 15);
+    if (ax != 8){ load_overlay_e13b08_c(); return; }
+    dx = 0x1A4A;
+    ah = 9;
+    dos_print_string();
+    load_overlay_e13baa_c();
+}
+
+/* e13aca: EXEC(AL=3) the name popped off the stack into the alloc'd
+ * block — param block at ds:0x19C4 gets {loadseg, relf} = ovl seg;
+ * EXEC clobbers ss:sp so save/restore them via ovl_3a92/ovl_3a90. */
+void load_overlay_e13aca_c(void){
+    ovl_e840 = ax;
+    ovl_e844 = ax;
+    ovl_e846 = ax;
+    bx = 0x19C4;
+    ax = 0x4B03;
+    dx = pop();
+    ovl_3a90 = sp;
+    cx = ss;
+    ovl_3a92 = cx;
+    dos_exec();
+    if (!CF){ load_overlay_e13b12_c(); return; }
+    CF = (dd)ax < (dd)2;
+    ZF = ((dw)(ax - 2) == 0); SF = (((dw)(ax - 2)) >> 15);
+    if (ax != 2){ load_overlay_e13af9_c(); return; }
+    dx = 0x1A37;
+    ah = 9;
+    dos_print_string();
+    load_overlay_e13baa_c();
+}
+
+/* e13ab6: real ALLOC of the probed size (bx paras). */
+void load_overlay_e13ab6_c(void){
+    ah = 0x48;
+    ovl_e842 = bx;
+    dos_alloc();
+    if (CF){
+        dx = 0x1A01;
+        ah = 9;
+        dos_print_string();
+        load_overlay_e13baa_c();
+        return;
+    }
+    load_overlay_e13aca_c();
+}
+
+void load_overlay_c(void){
+    ax = seg_data;
+    ds = ax;
+    es = ax;
+    CF = (((dd)bx << 1) >> 16) & 1; bx <<= 1;
+    ZF = (bx == 0); SF = (bx >> 15);
+    dx = *(dw*)raddr(ds, bx + 0x19E2);      /* name ptr for index bx */
+    push(dx);
+    ah = 0x48;
+    bx = 0xFFFF;                            /* probe: alloc all paras */
+    dos_alloc();                            /* must fail -> bx = max  */
+    if (!CF){                               /* impossible success   */
+        dx = 0x19E6;
+        ah = 9;
+        dos_print_string();
+        load_overlay_e13baa_c();
+        return;
+    }
+    load_overlay_e13ab6_c();
+}

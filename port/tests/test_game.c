@@ -19,6 +19,8 @@
 #include <string.h>
 #include <dirent.h>
 #include <stdlib.h>
+#include <unistd.h>
+#include <sys/wait.h>
 
 static int fails, checks;
 #define CHECK(cond) do{ checks++; if(!(cond)){ fails++; \
@@ -151,6 +153,154 @@ static void ab_res(const char *nm, void(*lifted)(void), void(*now)(void), int fe
                 nm, cfa, CF, zfa, ZF, sfa, SF, ofa, OF);
     CHECK(ok);
     if (feed & 0x10){ bx = res_handle; ah = 0x3e; dos_close(); }
+}
+
+/* ---- overlay-loader A/B ----------------------------------------------
+ * Every load_overlay error tail lands on e13baa -> dos_exit_code ->
+ * rt_exit -> exit(), so the impls can't run in-process here. Each impl
+ * instead runs in a forked child: guest state is rebuilt in the child,
+ * an atexit handler dumps mem + regs + flags + host-side DOS state
+ * (allocator frontier, block lists, overlay map) to $M2C_ABDUMP, and
+ * the parent compares the two dumps + exit codes byte-for-byte.
+ * Children that return normally exit(0x5a) — the atexit dump still
+ * runs, and the exit code records which path the impl took.          */
+static void ab_dump(void){
+    const char *p = getenv("M2C_ABDUMP"); if (!p) return;
+    FILE *f = fopen(p, "wb"); if (!f) return;
+    struct { dd r[8]; dw g[4], fl; struct dos_snap s; } d;
+    memset(&d, 0, sizeof d);            /* pad bytes must be deterministic */
+    ab_grab(d.r, d.g);
+    d.fl = CF | (ZF << 1) | (SF << 2) | (OF << 3);
+    dos_snap_get(&d.s);
+    fwrite(mem, 1, sizeof mem, f);
+    fwrite(&d, 1, sizeof d, f);
+    fclose(f);
+}
+
+/* minimal MZ fixture: 32-byte header + body carrying the game's own
+ * overlay header (code seg @+0x18, count @+0x1C, sizes @+0x1E/+0x20,
+ * table count @+0x22, table offs @+0x24). */
+static void mk_ovl_mz(const char *path, dw f18, dw f1c, dw f1e,
+                      dw f20, dw f22, const dw *offs, int n){
+    db mz[0x60]; memset(mz, 0, sizeof mz);
+    mz[0] = 'M'; mz[1] = 'Z';
+    *(dw*)(mz + 8)    = 2;              /* hdr size = 2 paras = 32B  */
+    *(dw*)(mz + 6)    = 1;              /* 1 relocation entry        */
+    *(dw*)(mz + 0x18) = 0x1c;           /* reloc table offset        */
+    *(dw*)(mz + 0x1c) = 0x0004;         /* entry: seg 0, off 4       */
+    db *b = mz + 0x20;
+    *(dw*)(b + 0x18) = f18; *(dw*)(b + 0x1c) = f1c;
+    *(dw*)(b + 0x1e) = f1e; *(dw*)(b + 0x20) = f20; *(dw*)(b + 0x22) = f22;
+    for (int i = 0; i < n; i++) *(dw*)(b + 0x24 + i*2) = offs[i];
+    *(dw*)(b + 4) = 7;                  /* reloc target word         */
+    FILE *f = fopen(path, "wb"); fwrite(mz, 1, sizeof mz, f); fclose(f);
+}
+
+enum { OVL_OK, OVL_NOFILE, OVL_BADMZ, OVL_TOOBIG, OVL_MID_AB6,
+       OVL_MID_AB6F, OVL_MID_ACA2, OVL_MID_ACA8, OVL_MID_AF9,
+       OVL_MID_B08, OVL_MID_B12, OVL_MID_B46, OVL_MID_B85,
+       OVL_MID_B9E, OVL_MID_BAA };
+/* rebuild deterministic guest state inside the forked child — the image
+ * must be real: the error $-strings live in it (dos_print_string walks
+ * to '$' — a zeroed image sends it off the end of mem[]). */
+static void ovl_prep(int v){
+    mem_load_image();
+    mem_apply_fixups();
+    eax = ebx = ecx = edx = esi = edi = esp = ebp = 0;
+    cs = ds = es = ss = seg_data;
+    CF = ZF = SF = OF = 0; sp = 0x0ffe;
+    struct dos_snap s; memset(&s, 0, sizeof s);
+    s.alloc_next = 0x80000; dos_snap_set(&s);
+    strcpy((char*)raddr_(seg_data, 0x40), "/tmp/ar_ovl_ok.exe");
+    mem_ww((dd)seg_data * 16 + 0x19E2, 0x40);   /* name table [0] */
+    bx = 0;
+    switch (v){
+    case OVL_NOFILE:
+        strcpy((char*)raddr_(seg_data, 0x40), "/tmp/ar_ovl_gone.exe");
+        break;
+    case OVL_BADMZ:
+        strcpy((char*)raddr_(seg_data, 0x40), "/tmp/ar_ovl_badmz.exe");
+        break;
+    case OVL_TOOBIG:                     /* shrink free pool so the size
+                                          * check (16-bit sizes) can fire */
+        s.alloc_next = 0x98000; dos_snap_set(&s);
+        strcpy((char*)raddr_(seg_data, 0x40), "/tmp/ar_ovl_big.exe");
+        break;
+    case OVL_MID_AB6:                    /* e13ab6: alloc succeeds    */
+        bx = 0x1000; push(0x40); break;
+    case OVL_MID_AB6F:                   /* e13ab6: alloc too big     */
+        bx = 0x9000; push(0x40); break;
+    case OVL_MID_ACA2:                   /* e13aca: EXEC missing file */
+        ax = 0x8000; push(0x40);
+        strcpy((char*)raddr_(seg_data, 0x40), "/tmp/ar_ovl_gone.exe");
+        break;
+    case OVL_MID_ACA8:                   /* e13aca: EXEC bad MZ       */
+        ax = 0x8000; push(0x40);
+        strcpy((char*)raddr_(seg_data, 0x40), "/tmp/ar_ovl_badmz.exe");
+        break;
+    case OVL_MID_AF9:                    /* e13af9: code 8            */
+        ax = 8; break;
+    case OVL_MID_B08:                    /* e13b08: generic code      */
+        ax = 1; break;
+    case OVL_MID_B12: {                  /* post-EXEC restore + table */
+        db *o = &mem[0x90000];
+        *(dw*)(o + 0x18) = 0x0300;       /* overlay code seg          */
+        *(dw*)(o + 0x1c) = 0x0000;       /* existing table entries    */
+        *(dw*)(o + 0x1e) = 0x0060;       /* sizes -> 6+4 = 10 paras   */
+        *(dw*)(o + 0x20) = 0x0040;
+        *(dw*)(o + 0x22) = 0x0002;       /* 2 new table entries       */
+        *(dw*)(o + 0x24) = 0x1111; *(dw*)(o + 0x26) = 0x2222;
+        ovl_3a90 = 0x0ffe; ovl_3a92 = ss;
+        ovl_e840 = 0x9000; ovl_e842 = 0x2000;
+        break; }
+    case OVL_MID_B46: {                  /* table-loop entry          */
+        db *o = &mem[0x90000];
+        *(dw*)(o + 0x1e) = 0x0060; *(dw*)(o + 0x20) = 0x0040;
+        *(dw*)(o + 0x24) = 0x1111; *(dw*)(o + 0x26) = 0x2222;
+        cx = 2; si = 0x24; bx = 0x1990; di = 0x0300;
+        es = 0x9000; ovl_e840 = 0x9000; ovl_e842 = 0x2000;
+        break; }
+    case OVL_MID_B85:                    /* setblock tail             */
+        bx = 0x10; ovl_e840 = 0x9000; break;
+    case OVL_MID_B9E:                    /* trivial success tail      */
+        ovl_e840 = 0x9000; break;
+    default: break;                      /* OVL_OK / OVL_MID_BAA      */
+    }
+}
+
+static void ab_ovl(const char *nm, vfn lif, vfn now, int variant){
+    char pa[80], pb[80]; int ec[2] = { -1, -1 };
+    snprintf(pa, sizeof pa, "/tmp/ab_ovl_a.bin");
+    snprintf(pb, sizeof pb, "/tmp/ab_ovl_b.bin");
+    for (int i = 0; i < 2; i++){
+        setenv("M2C_ABDUMP", i ? pb : pa, 1);
+        pid_t p = fork();
+        if (p == 0){ ovl_prep(variant); (i ? now : lif)(); exit(0x5a); }
+        int st = 0; waitpid(p, &st, 0);
+        if (WIFEXITED(st)) ec[i] = WEXITSTATUS(st);
+        else if (WIFSIGNALED(st)) ec[i] = -WTERMSIG(st);
+    }
+    FILE *fa = fopen(pa, "rb"), *fb = fopen(pb, "rb");
+    int same = fa && fb; long firstdiff = -1;
+    if (same){
+        db ba[4096], bb[4096]; size_t ra, rb; long off = 0;
+        for (;;){
+            ra = fread(ba, 1, sizeof ba, fa); rb = fread(bb, 1, sizeof bb, fb);
+            if (ra != rb || memcmp(ba, bb, ra)){
+                same = 0;
+                if (ra == rb) for (size_t k = 0; k < ra; k++)
+                    if (ba[k] != bb[k]){ firstdiff = off + (long)k; break; }
+                break;
+            }
+            off += (long)ra;
+            if (!ra) break;
+        }
+    }
+    if (fa) fclose(fa); if (fb) fclose(fb);
+    if (ec[0] != ec[1] || !same)
+        fprintf(stderr, "  ovl-ab %s: exit %d/%d, dumps %s (first @%lx)\n",
+                nm, ec[0], ec[1], same ? "equal" : "DIFFER", firstdiff);
+    CHECK(ec[0] == ec[1]); CHECK(same);
 }
 
 int main(void){
@@ -428,6 +578,35 @@ int main(void){
     CHECK(mem[(ds<<4)+0xB964] == '0' && mem[(ds<<4)+0xB965] == '0');
     al = 42; si = 0xB930; fmt_2digit();           /* CARBINE MAGS slot */
     CHECK(mem[(ds<<4)+0xB930] == '4' && mem[(ds<<4)+0xB931] == '2');
+
+    /* ---- overlay loader: lifted vs C, forked A/B (error paths exit) ---- */
+    atexit(ab_dump);
+    {   dw offs[2] = { 0x1111, 0x2222 };
+        mk_ovl_mz("/tmp/ar_ovl_ok.exe", 0x0300, 0, 0x0060, 0x0040, 2, offs, 2);
+        FILE *f = fopen("/tmp/ar_ovl_badmz.exe", "wb");
+        fwrite("NOPE!!", 1, 6, f); fclose(f);
+        mk_ovl_mz("/tmp/ar_ovl_big.exe", 0x0300, 0, 0x8000, 0x8000, 2, offs, 2);
+        ab_ovl("load_overlay", load_overlay_lifted, load_overlay, OVL_OK);
+        ab_ovl("ovl missing", load_overlay_lifted, load_overlay, OVL_NOFILE);
+        ab_ovl("ovl badmz", load_overlay_lifted, load_overlay, OVL_BADMZ);
+        ab_ovl("ovl toobig", load_overlay_lifted, load_overlay, OVL_TOOBIG);
+        ab_ovl("ovl ab6 ok", load_overlay_e13ab6_lifted, load_overlay_e13ab6, OVL_MID_AB6);
+        ab_ovl("ovl ab6 fail", load_overlay_e13ab6_lifted, load_overlay_e13ab6, OVL_MID_AB6F);
+        ab_ovl("ovl aca ax2", load_overlay_e13aca_lifted, load_overlay_e13aca, OVL_MID_ACA2);
+        ab_ovl("ovl aca ax8", load_overlay_e13aca_lifted, load_overlay_e13aca, OVL_MID_ACA8);
+        ab_ovl("ovl af9 ax8", load_overlay_e13af9_lifted, load_overlay_e13af9, OVL_MID_AF9);
+        ab_ovl("ovl af9 ax1", load_overlay_e13af9_lifted, load_overlay_e13af9, OVL_MID_B08);
+        ab_ovl("ovl b08", load_overlay_e13b08_lifted, load_overlay_e13b08, OVL_MID_B08);
+        ab_ovl("ovl b12", load_overlay_e13b12_lifted, load_overlay_e13b12, OVL_MID_B12);
+        ab_ovl("ovl b46", load_overlay_e13b46_lifted, load_overlay_e13b46, OVL_MID_B46);
+        ab_ovl("ovl b85", load_overlay_e13b85_lifted, load_overlay_e13b85, OVL_MID_B85);
+        ab_ovl("ovl b9e", load_overlay_e13b9e_lifted, load_overlay_e13b9e, OVL_MID_B9E);
+        ab_ovl("ovl baa", load_overlay_e13baa_lifted, load_overlay_e13baa, OVL_MID_BAA);
+        unsetenv("M2C_ABDUMP");
+        remove("/tmp/ar_ovl_ok.exe"); remove("/tmp/ar_ovl_badmz.exe");
+        remove("/tmp/ar_ovl_big.exe"); remove("/tmp/ab_ovl_a.bin"); remove("/tmp/ab_ovl_b.bin");
+        fprintf(stderr, "  (overlay chain: lifted vs C, %d checks)\n", checks);
+    }
 
     fprintf(stderr, "test_game: %d checks, %d failures\n", checks, fails);
     return fails ? 1 : 0;

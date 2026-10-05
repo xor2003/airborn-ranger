@@ -75,6 +75,11 @@ void rt_pump_events(void);
 void rt_script_feed(void);          /* scripted-key step — mem-only, timer-safe */
 dw rt_kbd_port60(void);
 void rt_test_kpush(dw v);           /* test hook: queue one BIOS-buffer key */
+/* test hook: snapshot/restore host-side DOS state (allocator + overlay map) */
+struct dos_snap { dd alloc_next, tnd_base, tnd_cbase; dw tnd_cseg;
+                  int nablk, nfblk; dd ablk[64][2], fblk[64][2]; };
+void dos_snap_get(struct dos_snap *);
+void dos_snap_set(const struct dos_snap *);
 /* key-mapping menu overlay (input.c); video.c draws it */
 void rt_kmap_frame(void);
 void rt_kmap_exclusive(void);
@@ -125,6 +130,16 @@ void mode_rec_load_c(void); void mode_rec_load_lifted(void);
 void write_res_file_c(void); void write_res_file_lifted(void);
 void write_res_file_e1092d_c(void); void write_res_file_e1092d_lifted(void);
 void write_res_file_e1092f_c(void); void write_res_file_e1092f_lifted(void);
+void load_overlay_c(void); void load_overlay_lifted(void);
+void load_overlay_e13ab6_c(void); void load_overlay_e13ab6_lifted(void);
+void load_overlay_e13aca_c(void); void load_overlay_e13aca_lifted(void);
+void load_overlay_e13af9_c(void); void load_overlay_e13af9_lifted(void);
+void load_overlay_e13b08_c(void); void load_overlay_e13b08_lifted(void);
+void load_overlay_e13b12_c(void); void load_overlay_e13b12_lifted(void);
+void load_overlay_e13b46_c(void); void load_overlay_e13b46_lifted(void);
+void load_overlay_e13b85_c(void); void load_overlay_e13b85_lifted(void);
+void load_overlay_e13b9e_c(void); void load_overlay_e13b9e_lifted(void);
+void load_overlay_e13baa_c(void); void load_overlay_e13baa_lifted(void);
 
 /* env-gated trace (M2C_TRACE=1) */
 extern int rt_trace;

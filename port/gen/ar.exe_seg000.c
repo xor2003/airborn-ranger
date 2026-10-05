@@ -17098,7 +17098,8 @@ sprtab_init_a_e13a7b:
     /* retn ;~ 01A2:3A86 */
     return;
 }
-void load_overlay_e13ab6(void) {
+void load_overlay_e13ab6(void) { load_overlay_e13ab6_c(); }
+void load_overlay_e13ab6_lifted(void) {
     dd _sa = 0, _sb = 0;
     /* mov     ah, 48h ; 'H' ;~ 01A2:3AB6 */
     ah = 0x48;
@@ -17328,7 +17329,8 @@ locret_13bc0:
     /* retn ;~ 01A2:3BC0 */
     return;
 }
-void load_overlay_e13aca(void) {
+void load_overlay_e13aca(void) { load_overlay_e13aca_c(); }
+void load_overlay_e13aca_lifted(void) {
     dd _sa = 0, _sb = 0;
     /* mov     word_1E840, ax ;~ 01A2:3ACA */
     ovl_e840 = ax;
@@ -17540,7 +17542,8 @@ locret_13bc0:
     /* retn ;~ 01A2:3BC0 */
     return;
 }
-void load_overlay_e13af9(void) {
+void load_overlay_e13af9(void) { load_overlay_e13af9_c(); }
+void load_overlay_e13af9_lifted(void) {
     dd _sa = 0, _sb = 0;
     /* cmp     ax, 8 ;~ 01A2:3AF9 */
     CF = (dd)ax < (dd)8; ZF = ((dw)((ax) - (8)) == 0); SF = (((dw)((ax) - (8))) >> 15);
@@ -17593,7 +17596,8 @@ locret_13bc0:
     /* retn ;~ 01A2:3BC0 */
     return;
 }
-void load_overlay_e13b08(void) {
+void load_overlay_e13b08(void) { load_overlay_e13b08_c(); }
+void load_overlay_e13b08_lifted(void) {
     /* mov     dx, 1A69h ;~ 01A2:3B08 */
     dx = 0x1A69;
     /* mov     ah, 9 ;~ 01A2:3B0B */
@@ -17629,7 +17633,8 @@ locret_13bc0:
     /* retn ;~ 01A2:3BC0 */
     return;
 }
-void load_overlay_e13b12(void) {
+void load_overlay_e13b12(void) { load_overlay_e13b12_c(); }
+void load_overlay_e13b12_lifted(void) {
     /* mov     sp, cs:word_13A90 ;~ 01A2:3B12 */
     sp = ovl_3a90;
     /* mov     ax, cs:seg_data ;~ 01A2:3B17 */
@@ -17776,7 +17781,8 @@ locret_13bc0:
     /* retn ;~ 01A2:3BC0 */
     return;
 }
-void load_overlay_e13b46(void) {
+void load_overlay_e13b46(void) { load_overlay_e13b46_c(); }
+void load_overlay_e13b46_lifted(void) {
 load_overlay_e13b46:
     do {
         /* mov     ax, es:[si] ;~ 01A2:3B46 */
@@ -17890,7 +17896,8 @@ locret_13bc0:
     /* retn ;~ 01A2:3BC0 */
     return;
 }
-void load_overlay_e13b85(void) {
+void load_overlay_e13b85(void) { load_overlay_e13b85_c(); }
+void load_overlay_e13b85_lifted(void) {
     /* add     bx, 0Ah ;~ 01A2:3B85 */
     { dd t_ = (dd)bx + (dd)0x0A; CF = t_ > 0xFFFF; bx = t_; ZF = ((dw)(bx) == 0); SF = (((dw)(bx)) >> 15); }
     /* mov     ah, 4Ah ; 'J' ;~ 01A2:3B88 */
@@ -17950,7 +17957,8 @@ locret_13bc0:
     /* retn ;~ 01A2:3BC0 */
     return;
 }
-void load_overlay_e13b9e(void) {
+void load_overlay_e13b9e(void) { load_overlay_e13b9e_c(); }
+void load_overlay_e13b9e_lifted(void) {
     /* mov     ax, cs:seg_data ;~ 01A2:3B9E */
     ax = seg_data;
     /* mov     ds, ax ;~ 01A2:3BA2 */
@@ -17962,7 +17970,8 @@ void load_overlay_e13b9e(void) {
     /* retn ;~ 01A2:3BA9 */
     return;
 }
-void load_overlay_e13baa(void) {
+void load_overlay_e13baa(void) { load_overlay_e13baa_c(); }
+void load_overlay_e13baa_lifted(void) {
 load_overlay_e13baa:
     do {
         /* mov     ax, 4C00h ;~ 01A2:3BAA */
@@ -18024,7 +18033,8 @@ load_overlay_e13baa:
         dos_exit_code();
     } while (1);
 }
-void load_overlay(void) { rt_tracef("load_overlay");
+void load_overlay(void) { rt_tracef("load_overlay"); load_overlay_c(); }
+void load_overlay_lifted(void) {
     dd _sa = 0, _sb = 0;
     /* mov     ax, cs:seg_data ;~ 01A2:3A94 */
     ax = seg_data;

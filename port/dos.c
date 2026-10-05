@@ -173,6 +173,20 @@ void dos_resize(void){         /* AH=4Ah ES=seg BX=new paras */
     if (getenv("M2C_MEMTRACE")) fprintf(stderr,"setblock %x -> %x paras\n", b, bx);
     CF=0;
 }
+/* test-only: expose the static allocator + overlay-map state so A/B
+ * harnesses can snapshot/restore it across lifted vs readable runs. */
+void dos_snap_get(struct dos_snap *s){
+    s->alloc_next = alloc_next; s->tnd_base = tnd_base;
+    s->tnd_cbase = tnd_cbase; s->tnd_cseg = tnd_cseg;
+    s->nablk = nablk; s->nfblk = nfblk;
+    memcpy(s->ablk, ablk, sizeof ablk); memcpy(s->fblk, fblk, sizeof fblk);
+}
+void dos_snap_set(const struct dos_snap *s){
+    alloc_next = s->alloc_next; tnd_base = s->tnd_base;
+    tnd_cbase = s->tnd_cbase; tnd_cseg = s->tnd_cseg;
+    nablk = s->nablk; nfblk = s->nfblk;
+    memcpy(ablk, s->ablk, sizeof ablk); memcpy(fblk, s->fblk, sizeof fblk);
+}
 void dos_exec(void){           /* AH=4Bh AL=03h — overlay load (TANDYSND.EXE) */
     if (al != 3){ CF=1; ax=1; return; }
     dw loadseg = *(dw*)raddr_(es,bx);

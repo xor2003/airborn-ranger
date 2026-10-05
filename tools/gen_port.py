@@ -489,6 +489,16 @@ REWRITES = {
     'write_res_file': 'write_res_file_c',
     'write_res_file_e1092d': 'write_res_file_e1092d_c',
     'write_res_file_e1092f': 'write_res_file_e1092f_c',
+    'load_overlay': 'load_overlay_c',
+    'load_overlay_e13ab6': 'load_overlay_e13ab6_c',
+    'load_overlay_e13aca': 'load_overlay_e13aca_c',
+    'load_overlay_e13af9': 'load_overlay_e13af9_c',
+    'load_overlay_e13b08': 'load_overlay_e13b08_c',
+    'load_overlay_e13b12': 'load_overlay_e13b12_c',
+    'load_overlay_e13b46': 'load_overlay_e13b46_c',
+    'load_overlay_e13b85': 'load_overlay_e13b85_c',
+    'load_overlay_e13b9e': 'load_overlay_e13b9e_c',
+    'load_overlay_e13baa': 'load_overlay_e13baa_c',
 }
 # Commit 4366e7c removed the gfx driver-selection menu ('1'..'5' getch
 # loop → forced MCGA pick) by hand-editing the generated file, so every
