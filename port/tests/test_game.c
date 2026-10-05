@@ -1775,6 +1775,37 @@ int main(void){
         rand_s0 = 0x1357; rand_s1 = 0x2468;
         *(db*)raddr_(ds, 0x0E574) = 3;
         ab_res("mgen_obj", mapgen_obj_lifted, mapgen_obj, 0);
+        /* mapgen_test/retry: rec_ptr_b slot table -> word rec ptrs at
+         * +0x14+2k all plant the same 2x2 record; mgen bounds small */
+        for (int k = 0; k < 12; k++)
+            *(dw*)raddr_(ds, 0xE35D + 0x14 + 2 * k) = 0xE3B6;
+        rec_ptr_b = 0xE35D;
+        mgen_12a = 2; mgen_12b = 2; mgen_127 = 0x40; mgen_128 = 0x40;
+        rand_s0 = 0x1357; rand_s1 = 0x2468;
+        ab_res("mgen retry", mapgen_retry_lifted, mapgen_retry, 0);
+        rand_s0 = 0x1357; rand_s1 = 0x2468; retry_b126 = 0x10; retry_b129 = 4;
+        ab_res("mgen r70b", mapgen_retry_e1b70b_lifted, mapgen_retry_e1b70b, 0);
+        rand_s0 = 0x1357; rand_s1 = 0x2468; retry_b126 = 3; retry_b129 = 1;
+        ab_res("mgen r72d", mapgen_retry_e1b72d_lifted, mapgen_retry_e1b72d, 0);
+        rand_s0 = 0x1357; rand_s1 = 0x2468;
+        ab_res("mgen r738", mapgen_retry_e1b738_lifted, mapgen_retry_e1b738, 0);
+        retry_b129 = 2;
+        ab_res("mgen test", mapgen_test_lifted, mapgen_test, 0);
+        /* obj_alloc: find_free_slot scans the slot table — clear flags */
+        for (int i = 0; i < 0x300; i++)
+            *(db*)raddr_(ds, 0xBE8D - 0x4085 + i) = 0;
+        al = 0x16;
+        ab_res("obj_alloc", obj_alloc_lifted, obj_alloc, 0);
+        ab_res("obj_alloc f7", obj_alloc_e1b9f7_lifted, obj_alloc_e1b9f7, 0);
+        /* mapgen_emit: si slot 0..3, emit cursor b0d3/b0d4 */
+        mgen_b0cb = 1; mgen_b0ca = 0; mgen_b0d3 = 4; mgen_b0d4 = 2;
+        rand_s0 = 0x1357; rand_s1 = 0x2468;
+        ab_res("mgen emit", mapgen_emit_lifted, mapgen_emit, 0);
+        si = 2; mgen_b0d3 = 4; mgen_b0d4 = 2;
+        rand_s0 = 0x1357; rand_s1 = 0x2468;
+        ab_res("mgen e581", mapgen_emit_e1b581_lifted, mapgen_emit_e1b581, 0);
+        mgen_b0cb = 2; mgen_b0d3 = 4; mgen_b0d4 = 2;
+        ab_res("mgen e5ca", mapgen_emit_e1b5ca_lifted, mapgen_emit_e1b5ca, 0);
         ds = dsc;
         fprintf(stderr, "  (mission leaf: lifted vs C, %d checks)\n", checks);
     }

@@ -161100,7 +161100,8 @@ mapgen_place_a_e1b555:
     /* retn ;~ 01A2:B561 */
     return;
 }
-void mapgen_emit_e1b581(void) {
+void mapgen_emit_e1b581(void) { mapgen_emit_e1b581_c(); }
+void mapgen_emit_e1b581_lifted(void) {
     dd _sa = 0, _sb = 0;
     /* mov     word_2B0CD, si ;~ 01A2:B581 */
     mgen_b0cd = si;
@@ -161179,7 +161180,8 @@ mapgen_emit_e1b5ca:
     /* retn ;~ 01A2:B5EF */
     return;
 }
-void mapgen_emit_e1b5ca(void) {
+void mapgen_emit_e1b5ca(void) { mapgen_emit_e1b5ca_c(); }
+void mapgen_emit_e1b5ca_lifted(void) {
     dd _sa = 0, _sb = 0;
     /* mov     si, word_2B0CB ;~ 01A2:B5CA */
     si = mgen_b0cb;
@@ -161208,7 +161210,8 @@ void mapgen_emit_e1b5ca(void) {
     /* retn ;~ 01A2:B5EF */
     return;
 }
-void mapgen_emit(void) {
+void mapgen_emit(void) { mapgen_emit_c(); }
+void mapgen_emit_lifted(void) {
     dd _sa = 0, _sb = 0;
 sub_1b562:
     /* call    sub_1130A ;~ 01A2:B562 */
@@ -162116,7 +162119,8 @@ mapgen_pick_e_e1b6e3:
     /* retn ;~ 01A2:B6FB */
     return;
 }
-void mapgen_retry_e1b70b(void) {
+void mapgen_retry_e1b70b(void) { mapgen_retry_e1b70b_c(); }
+void mapgen_retry_e1b70b_lifted(void) {
 mapgen_retry_e1b70b:
     /* call    sub_1130A ;~ 01A2:B70B */
     rand_next();
@@ -162161,7 +162165,8 @@ locret_1b740:
     /* retn ;~ 01A2:B740 */
     return;
 }
-void mapgen_retry_e1b72d(void) {
+void mapgen_retry_e1b72d(void) { mapgen_retry_e1b72d_c(); }
+void mapgen_retry_e1b72d_lifted(void) {
 mapgen_retry_e1b72d:
     do {
         do {
@@ -162207,7 +162212,8 @@ mapgen_retry_e1b70b:
         retry_b129 = al;
     } while (1);
 }
-void mapgen_retry_e1b738(void) {
+void mapgen_retry_e1b738(void) { mapgen_retry_e1b738_c(); }
+void mapgen_retry_e1b738_lifted(void) {
     /* mov     byte_2B129, 3 ;~ 01A2:B738 */
     retry_b129 = 3;
     /* call    sub_1B741 ;~ 01A2:B73D */
@@ -162220,7 +162226,8 @@ void locret_1b740(void) {
     /* retn ;~ 01A2:B740 */
     return;
 }
-void mapgen_retry(void) {
+void mapgen_retry(void) { mapgen_retry_c(); }
+void mapgen_retry_lifted(void) {
     /* mov     byte_2B126, 10h ;~ 01A2:B6FC */
     retry_b126 = 0x10;
     /* mov     byte_2B129, 4 ;~ 01A2:B701 */
@@ -162277,7 +162284,8 @@ void locret_1b7c2(void) {
     /* retn ;~ 01A2:B7C2 */
     return;
 }
-void mapgen_test(void) {
+void mapgen_test(void) { mapgen_test_c(); }
+void mapgen_test_lifted(void) {
     dd _sa = 0, _sb = 0;
     /* mov     dl, byte_2B129 ;~ 01A2:B741 */
     dl = retry_b129;
@@ -163587,13 +163595,15 @@ map_cell_read_e1b9b7:
     /* retn ;~ 01A2:B9B8 */
     return;
 }
-void obj_alloc_e1b9f7(void) {
+void obj_alloc_e1b9f7(void) { obj_alloc_e1b9f7_c(); }
+void obj_alloc_e1b9f7_lifted(void) {
     /* stc ;~ 01A2:B9F7 */
     CF = 1;
     /* retn ;~ 01A2:B9F8 */
     return;
 }
-void obj_alloc(void) {
+void obj_alloc(void) { obj_alloc_c(); }
+void obj_alloc_lifted(void) {
     /* mov     byte_2B11D, al ;~ 01A2:B9B9 */
     oalloc_b11d = al;
     /* call    sub_1BA04 ;~ 01A2:B9BC */

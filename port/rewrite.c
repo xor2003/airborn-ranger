@@ -4438,3 +4438,240 @@ void mapgen_obj_c(void) {
     { dd t_ = (dd)al + (dd)2; CF = t_ > 0xFF; al = t_; ZF = al == 0; SF = al >> 7; }
     *(db*)raddr(ds, 0x0E577) = al;
 }
+
+/* ---- mapgen core: bounded retry loop, test+place, obj alloc, emit ---- */
+
+void mapgen_retry_e1b70b_c(void);
+void mapgen_retry_c(void) {
+    retry_b126 = 0x10;
+    retry_b129 = 4;
+    mapgen_test();
+    if (CF) { return; }
+    mapgen_retry_e1b70b_c();
+}
+void mapgen_retry_e1b70b_c(void) {
+    rand_next();
+    CF = (dd)al < (dd)mgen_127; ZF = ((db)(al - mgen_127) == 0);
+    SF = (((db)(al - mgen_127)) >> 7);
+    if (al < mgen_127) {
+        retry_b129 = 0;
+        rand_next();
+        CF = (dd)al < (dd)mgen_128; ZF = ((db)(al - mgen_128) == 0);
+        SF = (((db)(al - mgen_128)) >> 7);
+        if (al < mgen_128) {
+            al &= 1; CF = 0; OF = 0; ZF = al == 0; SF = al >> 7;
+            (al)++; ZF = al == 0; SF = al >> 7;
+            { dd t_ = (dd)al + (dd)retry_b129; CF = t_ > 0xFF; al = t_;
+              ZF = al == 0; SF = al >> 7; }
+            retry_b129 = al;
+        }
+        mapgen_test();
+        if (!CF) {
+            (retry_b126)--; ZF = retry_b126 == 0; SF = retry_b126 >> 7;
+            if (retry_b126 != 0) { mapgen_retry_e1b70b_c(); return; }
+        }
+    }
+    retry_b129 = 3;
+    mapgen_test();
+}
+void mapgen_retry_e1b72d_c(void) {
+    for (;;) {
+        for (;;) {
+            mapgen_test();
+            if (!CF) {
+                (retry_b126)--; ZF = retry_b126 == 0; SF = retry_b126 >> 7;
+                if (retry_b126 != 0) goto l70b;
+            }
+l738:
+            retry_b129 = 3;
+            mapgen_test();
+            return;
+l70b:
+            rand_next();
+            CF = (dd)al < (dd)mgen_127; ZF = ((db)(al - mgen_127) == 0);
+            SF = (((db)(al - mgen_127)) >> 7);
+            if (al >= mgen_127) goto l738;
+            retry_b129 = 0;
+            rand_next();
+            CF = (dd)al < (dd)mgen_128; ZF = ((db)(al - mgen_128) == 0);
+            SF = (((db)(al - mgen_128)) >> 7);
+            if (al < mgen_128) break;
+        }
+        al &= 1; CF = 0; OF = 0; ZF = al == 0; SF = al >> 7;
+        (al)++; ZF = al == 0; SF = al >> 7;
+        { dd t_ = (dd)al + (dd)retry_b129; CF = t_ > 0xFF; al = t_;
+          ZF = al == 0; SF = al >> 7; }
+        retry_b129 = al;
+    }
+}
+void mapgen_retry_e1b738_c(void) {
+    retry_b129 = 3;
+    mapgen_test();
+}
+
+/* mapgen_test: compute (bx,by) from rec_ptr_b slot retry_b129, write the
+ *  word-rec at [retry_b129*2+0x14], accumulate dims into mgen_12a/12b */
+void mapgen_test_c(void) {
+    dl = retry_b129;
+    dh = 0; CF = 0; OF = 0; ZF = 1; SF = 0;
+    si = dx;
+    dl |= dl; CF = 0; OF = 0; ZF = dl == 0; SF = dl >> 7;
+    bp = rec_ptr_b;
+    al = *(db*)raddr(ds, bp + si);
+    al |= al; CF = 0; OF = 0; ZF = al == 0; SF = al >> 7;
+    { dd t_ = (dd)al + (dd)mgen_12a; CF = t_ > 0xFF; al = t_;
+      ZF = al == 0; SF = al >> 7; }
+    cell_bx = al;
+    al = 5;
+    { dd t_ = (dd)al + (dd)retry_b129; CF = t_ > 0xFF; al = t_;
+      ZF = al == 0; SF = al >> 7; }
+    ah = 0; CF = 0; OF = 0; ZF = 1; SF = 0;
+    si = ax;
+    bp = rec_ptr_b;
+    al = *(db*)raddr(ds, bp + si);
+    al |= al; CF = 0; OF = 0; ZF = al == 0; SF = al >> 7;
+    { dd t_ = (dd)al + (dd)mgen_12b; CF = t_ > 0xFF; al = t_;
+      ZF = al == 0; SF = al >> 7; }
+    cell_by = al;
+    al = retry_b129;
+    { if (1) { CF = (((dd)al << 1) >> 8) & 1; al <<= 1;
+      ZF = al == 0; SF = al >> 7; } }
+    { dd t_ = (dd)al + (dd)0x14; CF = t_ > 0xFF; al = t_;
+      ZF = al == 0; SF = al >> 7; }
+    ah = 0; CF = 0; OF = 0; ZF = 1; SF = 0;
+    si = ax;
+    bp = rec_ptr_b;
+    ax = *(dw*)raddr(ds, bp + si);
+    rec_ptr_a = ax;
+    map_rect_write();
+    if (CF) { return; }
+    al = retry_b129;
+    { dd t_ = (dd)al + (dd)0x0A; CF = t_ > 0xFF; al = t_;
+      ZF = al == 0; SF = al >> 7; }
+    ah = 0; CF = 0; OF = 0; ZF = 1; SF = 0;
+    si = ax;
+    bp = rec_ptr_b;
+    al = *(db*)raddr(ds, bp + si);
+    al |= al; CF = 0; OF = 0; ZF = al == 0; SF = al >> 7;
+    { dd t_ = (dd)al + (dd)mgen_12a; CF = t_ > 0xFF; al = t_;
+      ZF = al == 0; SF = al >> 7; }
+    mgen_12a = al;
+    al = retry_b129;
+    { dd t_ = (dd)al + (dd)0x0F; CF = t_ > 0xFF; al = t_;
+      ZF = al == 0; SF = al >> 7; }
+    ah = 0; CF = 0; OF = 0; ZF = 1; SF = 0;
+    si = ax;
+    bp = rec_ptr_b;
+    al = *(db*)raddr(ds, bp + si);
+    al |= al; CF = 0; OF = 0; ZF = al == 0; SF = al >> 7;
+    { dd t_ = (dd)al + (dd)mgen_12b; CF = t_ > 0xFF; al = t_;
+      ZF = al == 0; SF = al >> 7; }
+    mgen_12b = al;
+    CF = 0;
+}
+
+void obj_alloc_c(void) {
+    oalloc_b11d = al;
+    find_free_slot();
+    if (!CF) {
+        clear_obj_slot();
+        *(db*)raddr(ds, si - 0x4085) = cellpx_a6b0;
+        *(db*)raddr(ds, si - 0x4041) = cellpx_a6b1;
+        *(db*)raddr(ds, si - 0x4063) = cellpx_a6b2;
+        *(db*)raddr(ds, si - 0x401F) = cellpx_a6b3;
+        *(db*)raddr(ds, si - 0x3CCD) = oalloc_a6b4;
+        *(db*)raddr(ds, si - 0x3CAB) = oalloc_a6b5;
+        al = oalloc_b11d;
+        *(db*)raddr(ds, si - 0x4173) = al;
+        CF = 0;
+        return;
+    }
+    CF = 1;
+}
+void obj_alloc_e1b9f7_c(void) { CF = 1; }
+
+/* mapgen_emit: rand gate <0xB0, quarter-tile toggle, place rec, track
+ * running b0d3/b0d4 emit cursor; tail writes the final rec */
+void mapgen_emit_e1b581_c(void);
+void mapgen_emit_e1b5ca_c(void);
+void mapgen_emit_c(void) {
+    rand_next();
+    CF = (dd)al < (dd)0x0B0; ZF = ((db)(al - 0x0B0) == 0);
+    SF = (((db)(al - 0x0B0)) >> 7);
+    if (al < 0x0B0) {
+        si = mgen_b0cb;
+        al = mgen_b0ca;
+        al |= al; CF = 0; OF = 0; ZF = al == 0; SF = al >> 7;
+        if (al == 0) {
+            rand_next();
+            CF = (dd)al < (dd)0x80; ZF = ((db)(al - 0x80) == 0);
+            SF = (((db)(al - 0x80)) >> 7);
+            if (al < 0x80) {
+                si ^= 3; CF = 0; OF = 0; ZF = si == 0; SF = si >> 15;
+                si &= 3; CF = 0; OF = 0; ZF = si == 0; SF = si >> 15;
+            }
+        }
+        mapgen_emit_e1b581_c();
+        if (!CF) {
+            si = mgen_b0cd;
+            mgen_b0cb = si;
+            al = mgen_b0d3;
+            { dd t_ = (dd)al + (dd)*(db*)raddr(ds, si - 0x1D9B); CF = t_ > 0xFF;
+              al = t_; ZF = al == 0; SF = al >> 7; }
+            mgen_b0d3 = al;
+            al = mgen_b0d4;
+            { dd t_ = (dd)al + (dd)*(db*)raddr(ds, si - 0x1D97); CF = t_ > 0xFF;
+              al = t_; ZF = al == 0; SF = al >> 7; }
+            mgen_b0d4 = al;
+            mapgen_emit_c(); return;
+        }
+    }
+    mapgen_emit_e1b5ca_c();
+}
+void mapgen_emit_e1b581_c(void) {
+    mgen_b0cd = si;
+    mgen_b0ca = 0;
+    al = mgen_b0d3;
+    { dd t_ = (dd)al + (dd)*(db*)raddr(ds, si - 0x1DA3); CF = t_ > 0xFF;
+      al = t_; ZF = al == 0; SF = al >> 7; }
+    cell_bx = al;
+    al = mgen_b0d4;
+    { dd t_ = (dd)al + (dd)*(db*)raddr(ds, si - 0x1D9F); CF = t_ > 0xFF;
+      al = t_; ZF = al == 0; SF = al >> 7; }
+    cell_by = al;
+    { if (1) { CF = (((dd)si << 1) >> 16) & 1; si <<= 1;
+      ZF = si == 0; SF = si >> 15; } }
+    ax = *(dw*)raddr(ds, si - 0x1D8B);
+    rec_ptr_a = ax;
+    map_rect_write();
+    if (!CF) {
+        si = mgen_b0cd;
+        mgen_b0cb = si;
+        al = mgen_b0d3;
+        { dd t_ = (dd)al + (dd)*(db*)raddr(ds, si - 0x1D9B); CF = t_ > 0xFF;
+          al = t_; ZF = al == 0; SF = al >> 7; }
+        mgen_b0d3 = al;
+        al = mgen_b0d4;
+        { dd t_ = (dd)al + (dd)*(db*)raddr(ds, si - 0x1D97); CF = t_ > 0xFF;
+          al = t_; ZF = al == 0; SF = al >> 7; }
+        mgen_b0d4 = al;
+        mapgen_emit(); return;
+    }
+    mapgen_emit_e1b5ca_c();
+}
+void mapgen_emit_e1b5ca_c(void) {
+    si = mgen_b0cb;
+    al = *(db*)raddr(ds, si - 0x1D93);
+    { dd t_ = (dd)al + (dd)mgen_b0d3; CF = t_ > 0xFF; al = t_;
+      ZF = al == 0; SF = al >> 7; }
+    cell_bx = al;
+    al = mgen_b0d4;
+    { dd t_ = (dd)al + (dd)*(db*)raddr(ds, si - 0x1D8F); CF = t_ > 0xFF;
+      al = t_; ZF = al == 0; SF = al >> 7; }
+    cell_by = al;
+    { if (1) { CF = (((dd)si << 1) >> 16) & 1; si <<= 1;
+      ZF = si == 0; SF = si >> 15; } }
+    ax = *(dw*)raddr(ds, si - 0x1D83);
+    rec_ptr_a = ax;
+    map_rect_write();
+}
