@@ -9,6 +9,7 @@
 #   mem_addr(sym) = 0x1a20 + mapseg_para*16 + map_off
 #   runtime segment value of a segment = (0x1a20 + mapstart) >> 4
 import re, os, glob
+from collections import Counter
 
 AR = '/home/xor/games/airborn'
 
@@ -79,31 +80,77 @@ DCOMP_MEMBER = {
     'word_24e79': 'prev',     'byte_24e7b': 'first',
 }
 
-# --- port/dseg.h: the data-segment layout as a real struct -------------
+# --- port/dseg.h: the data-segment layout as real structs ------------
 # Symbols were historically `*(volatile T*)&mem[A]` aliases — a flat blob.
 # The struct overlays mem[] one-to-one (offsetof == flat addr) so every
-# define becomes a typed field access: `seg_data` -> `DSEG->v_seg_data`.
+# define becomes a typed field access: `seg_data` -> `DSEG->seg.v_10000`.
 # Field names keep the *map* name (v_-prefixed, lowercase): they stay
 # stable when names.map renames semantics, and can never collide with an
 # object-like macro (the token after -> must not be a macro name).
-# Generated _Static_asserts pin every field to its address.
+#
+# Contiguous runs of >=3 fields become nested structs — named after the
+# dominant semantic prefix (cam/mst/pri/...) or g_<addr> when unnamed.
+# Every field stays an individual member (no array collapsing): each
+# generated _Static_assert pins a leaf field to its address.
 CODERE = re.compile(r'(sub_|loc_|locret_|nullsub_|start$|entry|.*_proc$)')
 flat_syms = sorted(
     ((n, a, symtype.get(n, guess_type(n))) for n, p, o, a in syms
      if not CODERE.match(n) and n.lower() not in DSREL),
     key=lambda s: s[1])
 sem_of = {n: NAMEMAP[n] for n, _, _ in flat_syms if n in NAMEMAP}
+SZ = {'db': 1, 'dw': 2, 'dd': 4}
+
+# contiguous runs (no padding between fields)
+runs = []
+for n, a, t in flat_syms:
+    if runs and a == runs[-1][-1][1] + SZ[runs[-1][-1][2]]:
+        runs[-1].append((n, a, t))
+    else:
+        runs.append([(n, a, t)])
+
+# member path table: raw sym name -> accessor inside ar_dseg
+# (flat: 'v_name', grouped: 'grp.v_name')
+path_of = {}
+groups = {}      # first-addr -> (name, [members])
+used_gnames = set()
+for r in runs:
+    if len(r) < 3:
+        for n, a, t in r:
+            path_of[n] = f'v_{n.lower()}'
+        continue
+    # dominant semantic prefix names the group when it repeats
+    pref = Counter(sem_of[n].split('_')[0] for n, _, _ in r if n in sem_of)
+    gname = pref.most_common(1)[0][0] if pref and pref.most_common(1)[0][1] >= 2 \
+        else f'g_{r[0][1]:x}'
+    if gname in used_gnames:
+        gname = f'{gname}_{r[0][1]:x}'
+    used_gnames.add(gname)
+    for n, a, t in r:
+        path_of[n] = f'{gname}.v_{n.lower()}'
+    groups[r[0][1]] = (gname, r)
+
 with open(os.path.join(OUT, 'dseg.h'), 'w') as d:
     d.write('// data-segment layout overlaid on mem[] (generated)\n'
             '#pragma once\n#include <stddef.h>\n\n'
             '#pragma pack(push, 1)\nstruct ar_dseg {\n')
     prev_end = 0
-    for n, a, t in flat_syms:
-        if a > prev_end:
-            d.write(f'    db _pad_{prev_end:x}[0x{a - prev_end:x}];\n')
-        sem = f'  {sem_of[n]}' if n in sem_of else ''
-        d.write(f'    {t} v_{n.lower()}; /* 0x{a:x}{sem} */\n')
-        prev_end = a + {'db': 1, 'dw': 2, 'dd': 4}[t]
+    for r in runs:
+        a0 = r[0][1]
+        if a0 > prev_end:
+            d.write(f'    db _pad_{prev_end:x}[0x{a0 - prev_end:x}];\n')
+        if a0 in groups:
+            gname, members = groups[a0]
+            d.write(f'    struct {{ /* 0x{a0:x} */\n')
+            for n, a, t in members:
+                sem = f'  {sem_of[n]}' if n in sem_of else ''
+                d.write(f'        {t} v_{n.lower()}; /* 0x{a:x}{sem} */\n')
+            d.write(f'    }} {gname};\n')
+            prev_end = r[-1][1] + SZ[r[-1][2]]
+        else:
+            for n, a, t in r:
+                sem = f'  {sem_of[n]}' if n in sem_of else ''
+                d.write(f'    {t} v_{n.lower()}; /* 0x{a:x}{sem} */\n')
+                prev_end = a + SZ[t]
     d.write('};\n\n'
             '/* decompress_res scratch at ds:7FF0 — ds-relative (see\n'
             ' * gen_port.py DSREL note), so it gets its own overlay. */\n'
@@ -116,12 +163,12 @@ with open(os.path.join(OUT, 'dseg.h'), 'w') as d:
             '#define DSEG  ((volatile struct ar_dseg *)mem)\n'
             '#define DCOMP ((volatile struct dcomp_state*)raddr_(ds,0x7ff0))\n\n')
     for n, a, t in flat_syms:
-        d.write(f'_Static_assert(offsetof(struct ar_dseg, v_{n.lower()}) '
+        d.write(f'_Static_assert(offsetof(struct ar_dseg, {path_of[n]}) '
                 f'== 0x{a:x}, "{n}");\n')
     for raw, semn in sorted(DCOMP_MEMBER.items(), key=lambda kv: DSREL[kv[0]]):
         d.write(f'_Static_assert(offsetof(struct dcomp_state, {semn}) '
                 f'== 0x{DSREL[raw] - 0x7ff0:x}, "{raw}");\n')
-print(f'dseg.h: {len(flat_syms)} fields')
+print(f'dseg.h: {len(flat_syms)} fields, {len(groups)} groups')
 
 # --- port/data_syms.h ---
 w = open(os.path.join(OUT, 'data_syms.h'), 'w')
@@ -134,7 +181,7 @@ for name, para, off, addr in syms:
     if name.lower() in DSREL:
         w.write(f'#define {name} (DCOMP->v_{name.lower()})\n')
     else:
-        w.write(f'#define {name} (DSEG->v_{name.lower()})\n')
+        w.write(f'#define {name} (DSEG->{path_of[name]})\n')
     emitted.add(name)
 # externs without a map entry (dummy arrays etc) -> keep as real vars.
 # Case-insensitive alias first: fake-C lowercases symbol names (word_1D934 ->
@@ -163,7 +210,7 @@ for ln in open(os.path.join(AR, 'lifted', 'lifted_data.h')):
                 if hn.lower() in DSREL:
                     w.write(f'#define {n} (DCOMP->v_{hn.lower()}) /* ds-rel alias {hn} */\n')
                 else:
-                    w.write(f'#define {n} (DSEG->v_{hn.lower()}) /* alias {hn} */\n')
+                    w.write(f'#define {n} (DSEG->{path_of[hn]}) /* alias {hn} */\n')
         else:
             extra.append(m.groups())
             w.write(f'extern {t} {n};\n')
