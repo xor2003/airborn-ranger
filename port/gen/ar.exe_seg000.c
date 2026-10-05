@@ -170579,7 +170579,8 @@ mission_case6_e1c26e:
     /* retn ;~ 01A2:C2A7 */
     return;
 }
-void mission_case9(void) {
+void mission_case9(void) { mission_case9_c(); }
+void mission_case9_lifted(void) {
     dd _sa = 0, _sb = 0;
 mission_case9:
     do {
@@ -170772,7 +170773,8 @@ mission_case9_e1c384:
     /* retn ;~ 01A2:C3A3 */
     return;
 }
-void mission_case9_e1c316(void) {
+void mission_case9_e1c316(void) { mission_case9_e1c316_c(); }
+void mission_case9_e1c316_lifted(void) {
     dd _sa = 0, _sb = 0;
 mission_case9_e1c316:
     do {
@@ -170885,7 +170887,8 @@ mission_case9_e1c384:
     /* retn ;~ 01A2:C3A3 */
     return;
 }
-void mission_case9_e1c324(void) {
+void mission_case9_e1c324(void) { mission_case9_e1c324_c(); }
+void mission_case9_e1c324_lifted(void) {
     dd _sa = 0, _sb = 0;
 mission_case9_e1c324:
     do {
@@ -170998,7 +171001,8 @@ mission_case9_e1c316:
     /* jmp     short loc_1C329 ;~ 01A2:C322 */
     goto mission_case9_e1c329;
 }
-void mission_case9_e1c329(void) {
+void mission_case9_e1c329(void) { mission_case9_e1c329_c(); }
+void mission_case9_e1c329_lifted(void) {
     dd _sa = 0, _sb = 0;
 mission_case9_e1c329:
     do {
@@ -171113,7 +171117,8 @@ mission_case9_e1c324:
         { dd t_ = (dd)al + (dd)5; CF = t_ > 0xFF; al = t_; ZF = ((db)(al) == 0); SF = (((db)(al)) >> 7); }
     } while (1);
 }
-void mission_case9_e1c359(void) {
+void mission_case9_e1c359(void) { mission_case9_e1c359_c(); }
+void mission_case9_e1c359_lifted(void) {
     /* pop     ds ;~ 01A2:C359 */
     ds = pop();
     /* mov     ds:0E244h, ax ;~ 01A2:C35A */
@@ -171170,7 +171175,8 @@ mission_case9_e1c384:
     /* retn ;~ 01A2:C3A3 */
     return;
 }
-void mission_case9_e1c361(void) {
+void mission_case9_e1c361(void) { mission_case9_e1c361_c(); }
+void mission_case9_e1c361_lifted(void) {
     /* mov     al, ds:0BE33h ;~ 01A2:C361 */
     al = *(db*)raddr(ds,0x0BE33);
     /* mov     ds:0E3C3h, al ;~ 01A2:C364 */
@@ -171220,7 +171226,8 @@ mission_case9_e1c384:
     /* retn ;~ 01A2:C3A3 */
     return;
 }
-void mission_case9_e1c37f(void) {
+void mission_case9_e1c37f(void) { mission_case9_e1c37f_c(); }
+void mission_case9_e1c37f_lifted(void) {
     /* mov     byte ptr ds:0E56Ah, 10h ;~ 01A2:C37F */
     *(db*)raddr(ds,0x0E56A) = 0x10;
 mission_case9_e1c384:
@@ -171248,7 +171255,8 @@ mission_case9_e1c384:
     /* retn ;~ 01A2:C3A3 */
     return;
 }
-void mission_case9_e1c384(void) {
+void mission_case9_e1c384(void) { mission_case9_e1c384_c(); }
+void mission_case9_e1c384_lifted(void) {
 mission_case9_e1c384:
     do {
         /* call    sub_1130A ;~ 01A2:C384 */

@@ -1914,8 +1914,9 @@ int main(void){
             {0xE683,1,1}, {0xE3B6,2,2}, {0xE5A2,2,2}, {0xE591,2,2}, \
             {0xE5B0,1,2}, {0xE5B4,2,2}, {0xE5BE,1,1}, {0xE5C1,1,1}, \
             {0xE2B9,2,2}, {0xE1F8,2,2}, {0xE399,2,2}, {0xE41E,2,2}, \
-            {0xE451,2,2}, {0xE52A,2,2}, {0xE530,2,2} }; \
-        for (int i = 0; i < 19; i++) { \
+            {0xE451,2,2}, {0xE52A,2,2}, {0xE530,2,2}, {0xE53A,2,2}, \
+            {0xE548,2,2}, {0xE2B3,2,2} }; \
+        for (int i = 0; i < 22; i++) { \
             db *r7 = (db*)raddr_(ds, rofs[i][0]); \
             r7[0] = (db)rofs[i][1]; r7[1] = (db)rofs[i][2]; \
             for (int j = 0; j < (int)rofs[i][1] * (int)rofs[i][2]; j++) \
@@ -2108,6 +2109,60 @@ int main(void){
         *(db*)raddr_(ds, 0x0E55A) = 3;
         rand_s0 = 0x1357; rand_s1 = 0x2468;
         ab_res("case6 26e", mission_case6_e1c26e_lifted, mission_case6_e1c26e, 0);
+        /* case9: E53A head + linked obj pair, E548 pick loop, E2B3
+           single, E1F8 scatter */
+        clrmap();
+        *(dw*)raddr_(ds, 0x0E2A4) = 0;
+        /* seed matters here: when the head col lands on 30 the
+         * maprect_apply write goes OOB and rand_map_pos stamps a stray
+         * cell that can box in the E548 -4 target -> faithful infinite
+         * retry in BOTH impls.  0x1234/0x5678 gives head col 24. */
+        rand_s0 = 0x1234; rand_s1 = 0x5678;
+        ab_res("case9", mission_case9_lifted, mission_case9, 0);
+        clrmap();
+        *(db*)raddr_(ds, 0x0E569) = 0x10;
+        *(db*)raddr_(ds, 0x0E56A) = 4;
+        *(db*)raddr_(ds, 0x0BE33) = 5;
+        *(db*)raddr_(ds, 0x0BE34) = 2;
+        *(dw*)raddr_(ds, 0x0E2A4) = 0;
+        rand_s0 = 0x1357; rand_s1 = 0x2468;
+        ab_res("case9 316", mission_case9_e1c316_lifted, mission_case9_e1c316, 0);
+        clrmap();
+        *(db*)raddr_(ds, 0x0E569) = 0x10;
+        *(db*)raddr_(ds, 0x0E56A) = 4;
+        *(db*)raddr_(ds, 0x0BE33) = 5;
+        *(db*)raddr_(ds, 0x0BE34) = 2;
+        *(dw*)raddr_(ds, 0x0E2A4) = 0;
+        rand_s0 = 0x1357; rand_s1 = 0x2468;
+        ab_res("case9 324", mission_case9_e1c324_lifted, mission_case9_e1c324, 0);
+        clrmap();
+        *(db*)raddr_(ds, 0x0E56A) = 4;
+        *(db*)raddr_(ds, 0x0E569) = 0x10;
+        *(db*)raddr_(ds, 0x0BE33) = 5;
+        *(db*)raddr_(ds, 0x0BE34) = 2;
+        *(dw*)raddr_(ds, 0x0E2A4) = 0;
+        al = 8;
+        rand_s0 = 0x1357; rand_s1 = 0x2468;
+        ab_res("case9 329", mission_case9_e1c329_lifted, mission_case9_e1c329, 0);
+        clrmap();
+        ss = 0x8000; sp = 0xFFFE;
+        push(ds); ax = 0x77;
+        *(db*)raddr_(ds, 0x0BE33) = 5;
+        *(db*)raddr_(ds, 0x0BE34) = 2;
+        rand_s0 = 0x1357; rand_s1 = 0x2468;
+        ab_res("case9 359", mission_case9_e1c359_lifted, mission_case9_e1c359, 0);
+        clrmap();
+        *(db*)raddr_(ds, 0x0BE33) = 5;
+        *(db*)raddr_(ds, 0x0BE34) = 2;
+        rand_s0 = 0x1357; rand_s1 = 0x2468;
+        ab_res("case9 361", mission_case9_e1c361_lifted, mission_case9_e1c361, 0);
+        clrmap();
+        rand_s0 = 0x1357; rand_s1 = 0x2468;
+        ab_res("case9 37f", mission_case9_e1c37f_lifted, mission_case9_e1c37f, 0);
+        clrmap();
+        *(db*)raddr_(ds, 0x0E56A) = 3;
+        rand_s0 = 0x1357; rand_s1 = 0x2468;
+        ab_res("case9 384", mission_case9_e1c384_lifted, mission_case9_e1c384, 0);
 #undef clrmap
         ds = dsc;
         fprintf(stderr, "  (mission leaf: lifted vs C, %d checks)\n", checks);

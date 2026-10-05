@@ -6008,3 +6008,187 @@ void mission_case6_e1c266_c(void) {
 void mission_case6_e1c26e_c(void) {
     m6_col_loop();
 }
+
+/* ---- mission_case9 ---- */
+/* case9: E53A at rand col/row saved to e569/e56a, two linked obj 0x10,
+   maprect_apply patch; E548 placed at e569-4 or +5 (rand&4 pick) +
+   obj 0x11; es-wrap; single E2B3 at (be33, be34+2) + obj_spawn(6);
+   then 17 E1F8 scatter writes. */
+static void m9_scatter(void) {           /* e1c384 */
+    do {
+        rand_next();
+        al &= 0x1F; CF = 0; OF = 0; ZF = al == 0; SF = al >> 7;
+        *(db*)raddr(ds, 0x0E3C3) = al;
+        rand_next();
+        al &= 7; CF = 0; OF = 0; ZF = al == 0; SF = al >> 7;
+        *(db*)raddr(ds, 0x0E3C4) = al;
+        *(dw*)(raddr(ds, 0x9730)) = 0x0E1F8;
+        map_rect_write();
+        (*(db*)raddr(ds, 0x0E56A))--;
+        ZF = *(db*)raddr(ds, 0x0E56A) == 0;
+        SF = *(db*)raddr(ds, 0x0E56A) >> 7;
+    } while ((signed char)*(db*)raddr(ds, 0x0E56A) >= 0);
+}
+static void m9_from37f(void) {           /* e1c37f */
+    *(db*)raddr(ds, 0x0E56A) = 0x10;
+    m9_scatter();
+}
+static void m9_from361(void) {           /* e1c361 */
+    al = *(db*)raddr(ds, 0x0BE33);
+    *(db*)raddr(ds, 0x0E3C3) = al;
+    al = *(db*)raddr(ds, 0x0BE34);
+    { dd t_ = (dd)al + (dd)2; CF = t_ > 0xFF; al = t_;
+      ZF = al == 0; SF = al >> 7; }
+    *(db*)raddr(ds, 0x0E3C4) = al;
+    *(dw*)(raddr(ds, 0x9730)) = 0x0E2B3;
+    map_rect_write();
+    if (!CF) {
+        al = 6;
+        obj_spawn();
+    }
+    m9_from37f();
+}
+static void m9_popblk(void) {            /* e1c359 */
+    ds = pop();
+    *(dw*)(raddr(ds, 0x0E244)) = ax;
+    (*(dw*)raddr(ds, 0x0E2A4))++;
+    ZF = *(dw*)raddr(ds, 0x0E2A4) == 0;
+    SF = *(dw*)raddr(ds, 0x0E2A4) >> 15;
+}
+static void m9_wrap(void) {
+    CF = (dd)*(dw*)raddr(ds, 0x0E2A4) < (dd)0;
+    ZF = (dw)(*(dw*)raddr(ds, 0x0E2A4) - 0) == 0;
+    SF = (dw)(*(dw*)raddr(ds, 0x0E2A4) - 0) >> 15;
+    if (*(dw*)raddr(ds, 0x0E2A4) == 0) {
+        es = seg_draw;
+        push(ds);
+        m9_popblk();
+    }
+}
+static void m9_spawn_tail(void) {        /* obj 0x11 + wrap + e361 tail */
+    al = 6;
+    cell_to_px();
+    al = 0x11;
+    obj_alloc();
+    m9_wrap();
+    m9_from361();
+}
+static void m9_write548(void) {          /* e1c329 */
+    *(db*)raddr(ds, 0x0E3C3) = al;
+    al = *(db*)raddr(ds, 0x0E56A);
+    *(db*)raddr(ds, 0x0E3C4) = al;
+    *(dw*)(raddr(ds, 0x9730)) = 0x0E548;
+    map_rect_write();
+}
+static void m9_sub4(void) {
+    al = *(db*)raddr(ds, 0x0E569);
+    { dd t_ = (dd)al - (dd)4; CF = (dd)al < (dd)4; al = t_;
+      ZF = al == 0; SF = al >> 7; }
+}
+static void m9_add5(void) {
+    al = *(db*)raddr(ds, 0x0E569);
+    { dd t_ = (dd)al + (dd)5; CF = t_ > 0xFF; al = t_;
+      ZF = al == 0; SF = al >> 7; }
+}
+void mission_case9_c(void) {
+    do {
+        rand_next();
+        al &= 0x1F; CF = 0; OF = 0; ZF = al == 0; SF = al >> 7;
+        *(db*)raddr(ds, 0x0E3C3) = al;
+        *(db*)raddr(ds, 0x0E569) = al;
+        rand_next();
+        al &= 3; CF = 0; OF = 0; ZF = al == 0; SF = al >> 7;
+        (al)++;
+        ZF = al == 0; SF = al >> 7;
+        *(db*)raddr(ds, 0x0E3C4) = al;
+        *(db*)raddr(ds, 0x0E56A) = al;
+        *(dw*)(raddr(ds, 0x9730)) = 0x0E53A;
+        map_rect_write();
+    } while (CF);
+    al = 4;
+    cell_to_px();
+    al = 0x10;
+    obj_alloc();
+    *(dw*)(raddr(ds, 0x0E56B)) = si;
+    al = 5;
+    cell_to_px();
+    al = 0x10;
+    obj_alloc();
+    al = 1;
+    *(db*)raddr(ds, si - 0x3DFF) = al;
+    ax = *(dw*)raddr(ds, 0x0E56B);
+    *(db*)raddr(ds, si - 0x3CEF) = al;
+    *(dw*)(raddr(ds, 0x0E56B)) = si;
+    si = ax;
+    ax = *(dw*)raddr(ds, 0x0E56B);
+    *(db*)raddr(ds, si - 0x3CEF) = al;
+    al = *(db*)raddr(ds, 0x0E3C3);
+    (al)++;
+    ZF = al == 0; SF = al >> 7;
+    *(db*)raddr(ds, 0x0E3C3) = al;
+    *(db*)raddr(ds, 0x0BE33) = al;
+    al = *(db*)raddr(ds, 0x0E3C4);
+    { dd t_ = (dd)al + (dd)3; CF = t_ > 0xFF; al = t_;
+      ZF = al == 0; SF = al >> 7; }
+    *(db*)raddr(ds, 0x0E3C4) = al;
+    *(db*)raddr(ds, 0x0BE34) = al;
+    maprect_apply();
+    mission_case9_e1c316_c();
+}
+void mission_case9_e1c316_c(void) {
+    do {
+        rand_next();
+        al &= 4; CF = 0; OF = 0; ZF = al == 0; SF = al >> 7;
+        if (al != 0)
+            m9_sub4();
+        else
+            m9_add5();
+        m9_write548();
+    } while (CF);
+    m9_spawn_tail();
+}
+void mission_case9_e1c324_c(void) {
+    for (;;) {
+        m9_add5();
+        for (;;) {
+            m9_write548();
+            if (!CF) {
+                m9_spawn_tail();
+                return;
+            }
+            rand_next();
+            al &= 4; CF = 0; OF = 0; ZF = al == 0; SF = al >> 7;
+            if (al == 0)
+                break;
+            m9_sub4();
+        }
+    }
+}
+void mission_case9_e1c329_c(void) {
+    for (;;) {
+        m9_write548();
+        if (!CF) {
+            m9_spawn_tail();
+            return;
+        }
+        rand_next();
+        al &= 4; CF = 0; OF = 0; ZF = al == 0; SF = al >> 7;
+        if (al != 0)
+            m9_sub4();
+        else
+            m9_add5();
+    }
+}
+void mission_case9_e1c359_c(void) {
+    m9_popblk();
+    m9_from361();
+}
+void mission_case9_e1c361_c(void) {
+    m9_from361();
+}
+void mission_case9_e1c37f_c(void) {
+    m9_from37f();
+}
+void mission_case9_e1c384_c(void) {
+    m9_scatter();
+}
