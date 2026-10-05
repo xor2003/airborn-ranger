@@ -4675,3 +4675,345 @@ void mapgen_emit_e1b5ca_c(void) {
     rec_ptr_a = ax;
     map_rect_write();
 }
+
+/* ---- mapgen place/pick family ---- */
+/* place_a: sweep rows b0d0 = 0,8,...,0x38; at each pick a random column
+   (rand&0xF + rand&7), write record 0xE2BF, then emit the four related
+   shapes via table offsets at ds:si-0x1DAB / ds:si-0x1DA7. */
+static void mgen_place_a_emit4(void) {
+    do {
+        dl = mgena_b0cf;
+        dh = 0; CF = 0; OF = 0; ZF = 1; SF = 0;
+        si = dx;
+        dl |= dl; CF = 0; OF = 0; ZF = (dl == 0); SF = dl >> 7;
+        al = mgena_b0d1;
+        { dd t_ = (dd)al + (dd)*(db*)raddr(ds, si - 0x1DAB); CF = t_ > 0xFF;
+          al = t_; ZF = al == 0; SF = al >> 7; }
+        mgen_b0d3 = al;
+        al = mgena_b0d2;
+        { dd t_ = (dd)al + (dd)*(db*)raddr(ds, si - 0x1DA7); CF = t_ > 0xFF;
+          al = t_; ZF = al == 0; SF = al >> 7; }
+        mgen_b0d4 = al;
+        mgen_b0cb = si;
+        al = 0;
+        mgen_b0ca = al;
+        mapgen_emit();
+        (mgena_b0cf)--; ZF = mgena_b0cf == 0; SF = mgena_b0cf >> 7;
+    } while ((signed char)mgena_b0cf >= 0);
+}
+static void mgen_place_a_iter(void) {
+    rand_next();
+    al &= 0x0F; CF = 0; OF = 0; ZF = al == 0; SF = al >> 7;
+    cell_bx = al;
+    rand_next();
+    al &= 7; CF = 0; OF = 0; ZF = al == 0; SF = al >> 7;
+    { dd t_ = (dd)al + (dd)cell_bx; CF = t_ > 0xFF; al = t_;
+      ZF = al == 0; SF = al >> 7; }
+    cell_bx = al;
+    mgena_b0d1 = al;
+    al = mgena_b0d0;
+    cell_by = al;
+    mgena_b0d2 = al;
+    rec_ptr_a = 0x0E2BF;
+    map_rect_write();
+}
+void mapgen_place_a_c(void) {
+    mgena_b0d0 = 0;
+    mapgen_place_a_e1b4f5_c();
+}
+void mapgen_place_a_e1b4f5_c(void) {
+    do {
+        mgen_place_a_iter();
+        if (!CF) {
+            mgena_b0cf = 3;
+            mgen_place_a_emit4();
+        }
+        al = mgena_b0d0;
+        { dd t_ = (dd)al + (dd)8; CF = t_ > 0xFF; al = t_;
+          ZF = al == 0; SF = al >> 7; }
+        mgena_b0d0 = al;
+        CF = (dd)al < (dd)0x40; ZF = (db)(al - 0x40) == 0;
+        SF = (db)(al - 0x40) >> 7;
+    } while (al < 0x40);
+}
+void mapgen_place_a_e1b525_c(void) {
+    for (;;) {
+        mgen_place_a_emit4();
+        for (;;) {
+            al = mgena_b0d0;
+            { dd t_ = (dd)al + (dd)8; CF = t_ > 0xFF; al = t_;
+              ZF = al == 0; SF = al >> 7; }
+            mgena_b0d0 = al;
+            CF = (dd)al < (dd)0x40; ZF = (db)(al - 0x40) == 0;
+            SF = (db)(al - 0x40) >> 7;
+            if (al >= 0x40) return;
+            mgen_place_a_iter();
+            if (!CF) { mgena_b0cf = 3; break; }
+        }
+    }
+}
+void mapgen_place_a_e1b555_c(void) {
+    for (;;) {
+        for (;;) {
+            al = mgena_b0d0;
+            { dd t_ = (dd)al + (dd)8; CF = t_ > 0xFF; al = t_;
+              ZF = al == 0; SF = al >> 7; }
+            mgena_b0d0 = al;
+            CF = (dd)al < (dd)0x40; ZF = (db)(al - 0x40) == 0;
+            SF = (db)(al - 0x40) >> 7;
+            if (al >= 0x40) return;
+            mgen_place_a_iter();
+            if (!CF) break;
+        }
+        mgena_b0cf = 3;
+        mgen_place_a_emit4();
+    }
+}
+
+/* pick_b: rows b115 = 8,11,...,0x3B; per row up to 3 attempts (b117 = 2
+   down to 0) each trying successive random x/y jiggles of record 0xE1F8
+   until map_rect_write fails or retries run out. */
+static void mgen_pick_b_place(void) {
+    for (;;) {
+        cell_by = mgenb_b116;
+        ax = 0x0E1F8;
+        rec_ptr_a = ax;
+        map_rect_write();
+        if (CF) break;
+        rand_next();
+        ax &= 7; CF = 0; OF = 0; ZF = ax == 0; SF = ax >> 15;
+        si = ax;
+        al = *(db*)raddr(ds, si - 0x1D7B);
+        { dd t_ = (dd)al + (dd)cell_bx; CF = t_ > 0xFF; al = t_;
+          ZF = al == 0; SF = al >> 7; }
+        al &= 0x1F; CF = 0; OF = 0; ZF = al == 0; SF = al >> 7;
+        cell_bx = al;
+        al = mgenb_b116;
+        { dd t_ = (dd)al + (dd)*(db*)raddr(ds, si - 0x1D73); CF = t_ > 0xFF;
+          al = t_; ZF = al == 0; SF = al >> 7; }
+        mgenb_b116 = al;
+    }
+}
+static void mgen_pick_b_try(void) {
+    rand_next();
+    al &= 0x1F; CF = 0; OF = 0; ZF = al == 0; SF = al >> 7;
+    cell_bx = al;
+    al = mgenb_b115;
+    mgenb_b116 = al;
+    mgen_pick_b_place();
+    (mgenb_b117)--; ZF = mgenb_b117 == 0; SF = mgenb_b117 >> 7;
+}
+void mapgen_pick_b_c(void) {
+    mgenb_b115 = 8;
+    mapgen_pick_b_e1b5f5_c();
+}
+void mapgen_pick_b_e1b5f5_c(void) {
+    do {
+        mgenb_b117 = 2;
+        do {
+            mgen_pick_b_try();
+        } while ((signed char)mgenb_b117 >= 0);
+        al = mgenb_b115;
+        { dd t_ = (dd)al + (dd)3; CF = t_ > 0xFF; al = t_;
+          ZF = al == 0; SF = al >> 7; }
+        mgenb_b115 = al;
+        CF = (dd)al < (dd)0x40; ZF = (db)(al - 0x40) == 0;
+        SF = (db)(al - 0x40) >> 7;
+    } while (al < 0x40);
+}
+void mapgen_pick_b_e1b5fa_c(void) {
+    for (;;) {
+        do {
+            mgen_pick_b_try();
+        } while ((signed char)mgenb_b117 >= 0);
+        al = mgenb_b115;
+        { dd t_ = (dd)al + (dd)3; CF = t_ > 0xFF; al = t_;
+          ZF = al == 0; SF = al >> 7; }
+        mgenb_b115 = al;
+        CF = (dd)al < (dd)0x40; ZF = (db)(al - 0x40) == 0;
+        SF = (db)(al - 0x40) >> 7;
+        if (al >= 0x40) return;
+        mgenb_b117 = 2;
+    }
+}
+void mapgen_pick_b_e1b608_c(void) {
+    for (;;) {
+        mgen_pick_b_place();
+        (mgenb_b117)--; ZF = mgenb_b117 == 0; SF = mgenb_b117 >> 7;
+        if ((signed char)mgenb_b117 < 0) {
+            al = mgenb_b115;
+            { dd t_ = (dd)al + (dd)3; CF = t_ > 0xFF; al = t_;
+              ZF = al == 0; SF = al >> 7; }
+            mgenb_b115 = al;
+            CF = (dd)al < (dd)0x40; ZF = (db)(al - 0x40) == 0;
+            SF = (db)(al - 0x40) >> 7;
+            if (al >= 0x40) return;
+            mgenb_b117 = 2;
+        }
+        rand_next();
+        al &= 0x1F; CF = 0; OF = 0; ZF = al == 0; SF = al >> 7;
+        cell_bx = al;
+        al = mgenb_b115;
+        mgenb_b116 = al;
+    }
+}
+void mapgen_pick_b_e1b63a_c(void) {
+    for (;;) {
+        (mgenb_b117)--; ZF = mgenb_b117 == 0; SF = mgenb_b117 >> 7;
+        if ((signed char)mgenb_b117 < 0) {
+            al = mgenb_b115;
+            { dd t_ = (dd)al + (dd)3; CF = t_ > 0xFF; al = t_;
+              ZF = al == 0; SF = al >> 7; }
+            mgenb_b115 = al;
+            CF = (dd)al < (dd)0x40; ZF = (db)(al - 0x40) == 0;
+            SF = (db)(al - 0x40) >> 7;
+            if (al >= 0x40) return;
+            mgenb_b117 = 2;
+        }
+        rand_next();
+        al &= 0x1F; CF = 0; OF = 0; ZF = al == 0; SF = al >> 7;
+        cell_bx = al;
+        al = mgenb_b115;
+        mgenb_b116 = al;
+        mgen_pick_b_place();
+    }
+}
+
+/* place_c: args al/bl/si = start row / per-row count / record ptr.
+   Rows b118 = al..0x3E; per row write the record b119 times at random x. */
+static void mgen_place_c_row(void) {
+    do {
+        rand_next();
+        al &= 0x1F; CF = 0; OF = 0; ZF = al == 0; SF = al >> 7;
+        cell_bx = al;
+        cell_by = mgenc_b118;
+        ax = mgenc_b11b;
+        rec_ptr_a = ax;
+        map_rect_write();
+        (mgenc_b11a)--; ZF = mgenc_b11a == 0; SF = mgenc_b11a >> 7;
+    } while (mgenc_b11a != 0);
+}
+void mapgen_place_c_c(void) {
+    mgenc_b118 = al;
+    mgenc_b119 = bl;
+    mgenc_b11b = si;
+    mapgen_place_c_e1b658_c();
+}
+void mapgen_place_c_e1b658_c(void) {
+    do {
+        mgenc_b11a = mgenc_b119;
+        mgen_place_c_row();
+        al = mgenc_b118;
+        { dd t_ = (dd)al + (dd)1; CF = t_ > 0xFF; al = t_;
+          ZF = al == 0; SF = al >> 7; }
+        mgenc_b118 = al;
+        CF = (dd)al < (dd)0x3F; ZF = (db)(al - 0x3F) == 0;
+        SF = (db)(al - 0x3F) >> 7;
+    } while (al < 0x3F);
+}
+void mapgen_place_c_e1b65e_c(void) {
+    for (;;) {
+        mgen_place_c_row();
+        al = mgenc_b118;
+        { dd t_ = (dd)al + (dd)1; CF = t_ > 0xFF; al = t_;
+          ZF = al == 0; SF = al >> 7; }
+        mgenc_b118 = al;
+        CF = (dd)al < (dd)0x3F; ZF = (db)(al - 0x3F) == 0;
+        SF = (db)(al - 0x3F) >> 7;
+        if (al >= 0x3F) return;
+        mgenc_b11a = mgenc_b119;
+    }
+}
+
+/* place_d: same shape as place_c but per-row loop is signed (jns) and
+   row limit is 0x40. */
+static void mgen_place_d_row(void) {
+    do {
+        rand_next();
+        al &= 0x1F; CF = 0; OF = 0; ZF = al == 0; SF = al >> 7;
+        cell_bx = al;
+        cell_by = mgend_b11e;
+        ax = mgend_b121;
+        rec_ptr_a = ax;
+        map_rect_write();
+        (mgend_b120)--; ZF = mgend_b120 == 0; SF = mgend_b120 >> 7;
+    } while ((signed char)mgend_b120 >= 0);
+}
+void mapgen_place_d_c(void) {
+    mgend_b11e = al;
+    mgend_b11f = bl;
+    mgend_b121 = si;
+    mapgen_place_d_e1b693_c();
+}
+void mapgen_place_d_e1b693_c(void) {
+    do {
+        mgend_b120 = mgend_b11f;
+        mgen_place_d_row();
+        al = mgend_b11e;
+        (al)++; ZF = al == 0; SF = al >> 7;
+        mgend_b11e = al;
+        CF = (dd)al < (dd)0x40; ZF = (db)(al - 0x40) == 0;
+        SF = (db)(al - 0x40) >> 7;
+    } while (al < 0x40);
+}
+void mapgen_place_d_e1b699_c(void) {
+    for (;;) {
+        mgen_place_d_row();
+        al = mgend_b11e;
+        (al)++; ZF = al == 0; SF = al >> 7;
+        mgend_b11e = al;
+        CF = (dd)al < (dd)0x40; ZF = (db)(al - 0x40) == 0;
+        SF = (db)(al - 0x40) >> 7;
+        if (al >= 0x40) return;
+        mgend_b120 = mgend_b11f;
+    }
+}
+
+/* pick_e: emit 0x1E objects (b123 = 6..0x23) through mapgen_retry with a
+   random spawn level (rand&0x1F - 5, floored at 0). */
+void mapgen_pick_e_c(void) {
+    rec_ptr_b = 0x0E313;
+    mgen_127 = 0x0C0;
+    mgen_128 = 0x0E0;
+    pick_e_b123 = 6;
+    mapgen_pick_e_e1b6d8_c();
+}
+void mapgen_pick_e_e1b6d8_c(void) {
+    do {
+        rand_next();
+        al &= 0x1F; CF = 0; OF = 0; ZF = al == 0; SF = al >> 7;
+        { dd t_ = (dd)al - (dd)5; CF = (dd)al < (dd)5; al = t_;
+          ZF = al == 0; SF = al >> 7; }
+        if (CF) al = 0;
+        mgen_12a = al;
+        al = pick_e_b123;
+        mgen_12b = al;
+        mapgen_retry();
+        al = pick_e_b123;
+        (al)++; ZF = al == 0; SF = al >> 7;
+        pick_e_b123 = al;
+        CF = (dd)al < (dd)0x24; ZF = (db)(al - 0x24) == 0;
+        SF = (db)(al - 0x24) >> 7;
+    } while (al < 0x24);
+}
+void mapgen_pick_e_e1b6e3_c(void) {
+    for (;;) {
+        do {
+            mgen_12a = al;
+            al = pick_e_b123;
+            mgen_12b = al;
+            mapgen_retry();
+            al = pick_e_b123;
+            (al)++; ZF = al == 0; SF = al >> 7;
+            pick_e_b123 = al;
+            CF = (dd)al < (dd)0x24; ZF = (db)(al - 0x24) == 0;
+            SF = (db)(al - 0x24) >> 7;
+            if (al >= 0x24) return;
+            rand_next();
+            al &= 0x1F; CF = 0; OF = 0; ZF = al == 0; SF = al >> 7;
+            { dd t_ = (dd)al - (dd)5; CF = (dd)al < (dd)5; al = t_;
+              ZF = al == 0; SF = al >> 7; }
+        } while (!CF);
+        al = 0;
+    }
+}

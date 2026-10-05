@@ -1806,6 +1806,72 @@ int main(void){
         ab_res("mgen e581", mapgen_emit_e1b581_lifted, mapgen_emit_e1b581, 0);
         mgen_b0cb = 2; mgen_b0d3 = 4; mgen_b0d4 = 2;
         ab_res("mgen e5ca", mapgen_emit_e1b5ca_lifted, mapgen_emit_e1b5ca, 0);
+        /* place/pick family: bounded sweeps over the cleared map strip.
+         * place_a writes the fixed 0xE2BF record + 4 emits per row;
+         * pick_b jiggles record 0xE1F8; place_c/d take row/count/rec
+         * args; pick_e drives mapgen_retry through its 0xE313 table. */
+        db *pa_rec = (db*)raddr_(ds, 0xE2BF);     /* place_a record */
+        pa_rec[0] = 2; pa_rec[1] = 2;
+        pa_rec[2] = 0x2d; pa_rec[3] = 0xff;
+        pa_rec[4] = 0xff; pa_rec[5] = 0xff;
+        db *pb_rec = (db*)raddr_(ds, 0xE1F8);     /* pick_b record */
+        pb_rec[0] = 2; pb_rec[1] = 2;
+        pb_rec[2] = 0x2d; pb_rec[3] = 0xff;
+        pb_rec[4] = 0xff; pb_rec[5] = 0xff;
+        db *pe_rec = (db*)raddr_(ds, 0xE3B6);     /* pick_e/place_c/d rec */
+        pe_rec[0] = 2; pe_rec[1] = 2;
+        pe_rec[2] = 0x2d; pe_rec[3] = 0xff;
+        pe_rec[4] = 0xff; pe_rec[5] = 0xff;
+        rand_s0 = 0x1357; rand_s1 = 0x2468;
+        ab_res("place_a", mapgen_place_a_lifted, mapgen_place_a, 0);
+        rand_s0 = 0x1357; rand_s1 = 0x2468; mgena_b0d0 = 0x30;
+        ab_res("place_a f5", mapgen_place_a_e1b4f5_lifted, mapgen_place_a_e1b4f5, 0);
+        rand_s0 = 0x1357; rand_s1 = 0x2468;
+        mgena_b0cf = 1; mgena_b0d0 = 0x38; mgena_b0d1 = 5; mgena_b0d2 = 0x10;
+        ab_res("place_a 525", mapgen_place_a_e1b525_lifted, mapgen_place_a_e1b525, 0);
+        rand_s0 = 0x1357; rand_s1 = 0x2468; mgena_b0d0 = 0x30;
+        ab_res("place_a 555", mapgen_place_a_e1b555_lifted, mapgen_place_a_e1b555, 0);
+        rand_s0 = 0x1357; rand_s1 = 0x2468;
+        ab_res("pick_b", mapgen_pick_b_lifted, mapgen_pick_b, 0);
+        rand_s0 = 0x1357; rand_s1 = 0x2468; mgenb_b115 = 0x3D;
+        ab_res("pick_b 5f5", mapgen_pick_b_e1b5f5_lifted, mapgen_pick_b_e1b5f5, 0);
+        rand_s0 = 0x1357; rand_s1 = 0x2468; mgenb_b115 = 0x3D; mgenb_b117 = 1;
+        ab_res("pick_b 5fa", mapgen_pick_b_e1b5fa_lifted, mapgen_pick_b_e1b5fa, 0);
+        rand_s0 = 0x1357; rand_s1 = 0x2468;
+        mgenb_b115 = 0x3D; mgenb_b116 = 8; mgenb_b117 = 0;
+        ab_res("pick_b 608", mapgen_pick_b_e1b608_lifted, mapgen_pick_b_e1b608, 0);
+        rand_s0 = 0x1357; rand_s1 = 0x2468;
+        mgenb_b115 = 0x3D; mgenb_b117 = 1;
+        ab_res("pick_b 63a", mapgen_pick_b_e1b63a_lifted, mapgen_pick_b_e1b63a, 0);
+        rand_s0 = 0x1357; rand_s1 = 0x2468;
+        al = 0x3E; bl = 2; si = 0xE3B6;
+        ab_res("place_c", mapgen_place_c_lifted, mapgen_place_c, 0);
+        rand_s0 = 0x1357; rand_s1 = 0x2468;
+        mgenc_b118 = 0x3E; mgenc_b119 = 2; mgenc_b11b = 0xE3B6;
+        ab_res("place_c 658", mapgen_place_c_e1b658_lifted, mapgen_place_c_e1b658, 0);
+        rand_s0 = 0x1357; rand_s1 = 0x2468;
+        mgenc_b118 = 0x3E; mgenc_b119 = 2; mgenc_b11a = 1; mgenc_b11b = 0xE3B6;
+        ab_res("place_c 65e", mapgen_place_c_e1b65e_lifted, mapgen_place_c_e1b65e, 0);
+        rand_s0 = 0x1357; rand_s1 = 0x2468;
+        al = 0x3E; bl = 0; si = 0xE3B6;
+        ab_res("place_d", mapgen_place_d_lifted, mapgen_place_d, 0);
+        rand_s0 = 0x1357; rand_s1 = 0x2468;
+        mgend_b11e = 0x3F; mgend_b11f = 0; mgend_b121 = 0xE3B6;
+        ab_res("place_d 693", mapgen_place_d_e1b693_lifted, mapgen_place_d_e1b693, 0);
+        rand_s0 = 0x1357; rand_s1 = 0x2468;
+        mgend_b11e = 0x3F; mgend_b11f = 0; mgend_b120 = 0; mgend_b121 = 0xE3B6;
+        ab_res("place_d 699", mapgen_place_d_e1b699_lifted, mapgen_place_d_e1b699, 0);
+        /* pick_e table at ds:0xE313: byte bases at +0..+9, word record
+         * ptrs at +0x14+2k — plant the same 2x2 record in every slot */
+        for (int k = 0; k < 12; k++)
+            *(dw*)raddr_(ds, 0xE313 + 0x14 + 2 * k) = 0xE3B6;
+        rand_s0 = 0x1357; rand_s1 = 0x2468;
+        ab_res("pick_e", mapgen_pick_e_lifted, mapgen_pick_e, 0);
+        rand_s0 = 0x1357; rand_s1 = 0x2468; rec_ptr_b = 0xE313; pick_e_b123 = 0x22;
+        ab_res("pick_e 6d8", mapgen_pick_e_e1b6d8_lifted, mapgen_pick_e_e1b6d8, 0);
+        rand_s0 = 0x1357; rand_s1 = 0x2468;
+        rec_ptr_b = 0xE313; pick_e_b123 = 0x23; al = 5;
+        ab_res("pick_e 6e3", mapgen_pick_e_e1b6e3_lifted, mapgen_pick_e_e1b6e3, 0);
         ds = dsc;
         fprintf(stderr, "  (mission leaf: lifted vs C, %d checks)\n", checks);
     }

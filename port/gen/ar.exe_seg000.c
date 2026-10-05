@@ -160738,7 +160738,8 @@ void cell_to_px_lifted(void) {
     /* retn ;~ 01A2:B4EF */
     return;
 }
-void mapgen_place_a_e1b4f5(void) {
+void mapgen_place_a_e1b4f5(void) { mapgen_place_a_e1b4f5_c(); }
+void mapgen_place_a_e1b4f5_lifted(void) {
     dd _sa = 0, _sb = 0;
 mapgen_place_a_e1b4f5:
     do {
@@ -160827,7 +160828,8 @@ mapgen_place_a_e1b555:
     /* retn ;~ 01A2:B561 */
     return;
 }
-void mapgen_place_a_e1b525(void) {
+void mapgen_place_a_e1b525(void) { mapgen_place_a_e1b525_c(); }
+void mapgen_place_a_e1b525_lifted(void) {
     dd _sa = 0, _sb = 0;
 mapgen_place_a_e1b525:
     do {
@@ -160918,7 +160920,8 @@ mapgen_place_a_e1b4f5:
         mgena_b0cf = 3;
     } while (1);
 }
-void mapgen_place_a_e1b555(void) {
+void mapgen_place_a_e1b555(void) { mapgen_place_a_e1b555_c(); }
+void mapgen_place_a_e1b555_lifted(void) {
     dd _sa = 0, _sb = 0;
 mapgen_place_a_e1b555:
     do {
@@ -161009,7 +161012,8 @@ mapgen_place_a_e1b525:
         } while ((signed char)(mgena_b0cf) >= 0);
     } while (1);
 }
-void mapgen_place_a(void) {
+void mapgen_place_a(void) { mapgen_place_a_c(); }
+void mapgen_place_a_lifted(void) {
     dd _sa = 0, _sb = 0;
     /* mov     byte_2B0D0, 0 ;~ 01A2:B4F0 */
     mgena_b0d0 = 0;
@@ -161321,7 +161325,8 @@ mapgen_emit_e1b5ca:
     /* retn ;~ 01A2:B5EF */
     return;
 }
-void mapgen_pick_b_e1b5f5(void) {
+void mapgen_pick_b_e1b5f5(void) { mapgen_pick_b_e1b5f5_c(); }
+void mapgen_pick_b_e1b5f5_lifted(void) {
     dd _sa = 0, _sb = 0;
 mapgen_pick_b_e1b5f5:
     do {
@@ -161398,7 +161403,8 @@ mapgen_pick_b_e1b63a:
     /* retn ;~ 01A2:B64C */
     return;
 }
-void mapgen_pick_b_e1b5fa(void) {
+void mapgen_pick_b_e1b5fa(void) { mapgen_pick_b_e1b5fa_c(); }
+void mapgen_pick_b_e1b5fa_lifted(void) {
     dd _sa = 0, _sb = 0;
 mapgen_pick_b_e1b5fa:
     do {
@@ -161477,7 +161483,8 @@ mapgen_pick_b_e1b5f5:
         mgenb_b117 = 2;
     } while (1);
 }
-void mapgen_pick_b_e1b608(void) {
+void mapgen_pick_b_e1b608(void) { mapgen_pick_b_e1b608_c(); }
+void mapgen_pick_b_e1b608_lifted(void) {
     dd _sa = 0, _sb = 0;
 mapgen_pick_b_e1b608:
     do {
@@ -161556,7 +161563,8 @@ mapgen_pick_b_e1b5fa:
         mgenb_b116 = al;
     } while (1);
 }
-void mapgen_pick_b_e1b63a(void) {
+void mapgen_pick_b_e1b63a(void) { mapgen_pick_b_e1b63a_c(); }
+void mapgen_pick_b_e1b63a_lifted(void) {
     dd _sa = 0, _sb = 0;
 mapgen_pick_b_e1b63a:
     /* dec     byte_2B117 ;~ 01A2:B63A */
@@ -161633,7 +161641,8 @@ mapgen_pick_b_e1b608:
         /* jmp     short loc_1B608 ;~ 01A2:B638 */
     } while (1);
 }
-void mapgen_pick_b(void) {
+void mapgen_pick_b(void) { mapgen_pick_b_c(); }
+void mapgen_pick_b_lifted(void) {
     dd _sa = 0, _sb = 0;
     /* mov     byte_2B115, 8 ;~ 01A2:B5F0 */
     mgenb_b115 = 8;
@@ -161712,7 +161721,8 @@ mapgen_pick_b_e1b63a:
     /* retn ;~ 01A2:B64C */
     return;
 }
-void mapgen_place_c_e1b658(void) {
+void mapgen_place_c_e1b658(void) { mapgen_place_c_e1b658_c(); }
+void mapgen_place_c_e1b658_lifted(void) {
     dd _sa = 0, _sb = 0;
 mapgen_place_c_e1b658:
     do {
@@ -161756,7 +161766,8 @@ mapgen_place_c_e1b65e:
     /* retn ;~ 01A2:B687 */
     return;
 }
-void mapgen_place_c_e1b65e(void) {
+void mapgen_place_c_e1b65e(void) { mapgen_place_c_e1b65e_c(); }
+void mapgen_place_c_e1b65e_lifted(void) {
     dd _sa = 0, _sb = 0;
 mapgen_place_c_e1b65e:
     do {
@@ -161802,7 +161813,8 @@ mapgen_place_c_e1b658:
         mgenc_b11a = al;
     } while (1);
 }
-void mapgen_place_c(void) {
+void mapgen_place_c(void) { mapgen_place_c_c(); }
+void mapgen_place_c_lifted(void) {
     dd _sa = 0, _sb = 0;
     /* mov     byte_2B118, al ;~ 01A2:B64D */
     mgenc_b118 = al;
@@ -161852,7 +161864,8 @@ mapgen_place_c_e1b65e:
     /* retn ;~ 01A2:B687 */
     return;
 }
-void mapgen_place_d_e1b693(void) {
+void mapgen_place_d_e1b693(void) { mapgen_place_d_e1b693_c(); }
+void mapgen_place_d_e1b693_lifted(void) {
     dd _sa = 0, _sb = 0;
 mapgen_place_d_e1b693:
     do {
@@ -161896,7 +161909,8 @@ mapgen_place_d_e1b699:
     /* retn ;~ 01A2:B6C2 */
     return;
 }
-void mapgen_place_d_e1b699(void) {
+void mapgen_place_d_e1b699(void) { mapgen_place_d_e1b699_c(); }
+void mapgen_place_d_e1b699_lifted(void) {
     dd _sa = 0, _sb = 0;
 mapgen_place_d_e1b699:
     do {
@@ -161942,7 +161956,8 @@ mapgen_place_d_e1b693:
         mgend_b120 = al;
     } while (1);
 }
-void mapgen_place_d(void) {
+void mapgen_place_d(void) { mapgen_place_d_c(); }
+void mapgen_place_d_lifted(void) {
     dd _sa = 0, _sb = 0;
     /* mov     byte_2B11E, al ;~ 01A2:B688 */
     mgend_b11e = al;
@@ -161992,7 +162007,8 @@ mapgen_place_d_e1b699:
     /* retn ;~ 01A2:B6C2 */
     return;
 }
-void mapgen_pick_e_e1b6d8(void) {
+void mapgen_pick_e_e1b6d8(void) { mapgen_pick_e_e1b6d8_c(); }
+void mapgen_pick_e_e1b6d8_lifted(void) {
     dd _sa = 0, _sb = 0;
 mapgen_pick_e_e1b6d8:
     do {
@@ -162031,7 +162047,8 @@ mapgen_pick_e_e1b6e3:
     /* retn ;~ 01A2:B6FB */
     return;
 }
-void mapgen_pick_e_e1b6e3(void) {
+void mapgen_pick_e_e1b6e3(void) { mapgen_pick_e_e1b6e3_c(); }
+void mapgen_pick_e_e1b6e3_lifted(void) {
     dd _sa = 0, _sb = 0;
 mapgen_pick_e_e1b6e3:
     do {
@@ -162072,7 +162089,8 @@ mapgen_pick_e_e1b6d8:
         al = 0;
     } while (1);
 }
-void mapgen_pick_e(void) {
+void mapgen_pick_e(void) { mapgen_pick_e_c(); }
+void mapgen_pick_e_lifted(void) {
     dd _sa = 0, _sb = 0;
     /* mov     word_265B2, 0E313h ;~ 01A2:B6C3 */
     rec_ptr_b = 0x0E313;
