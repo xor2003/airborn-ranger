@@ -5749,3 +5749,262 @@ void mission_case5_e1c94a_c(void) {
         m5_wrap_once();
     }
 }
+
+/* ---- mission_case4 ---- */
+/* case4: E41E at random col row0, obj 0x1B + rand_map_pos; be41+4 reps of
+   E451 at rand cols row 6 + obj_spawn(6); an E399 row-6 sweep on cols
+   0..0x1F; es-wrap one-shot; then 0x0C reps of E1F8 at row 5. */
+static void m4_spawn_loop(void) {        /* e1c03e */
+    do {
+        do {
+            rand_next();
+            al &= 0x1F; CF = 0; OF = 0; ZF = al == 0; SF = al >> 7;
+            *(db*)raddr(ds, 0x0E3C3) = al;
+            *(db*)raddr(ds, 0x0E3C4) = 6;
+            ax = 0x0E451;
+            *(dw*)(raddr(ds, 0x9730)) = ax;
+            map_rect_write();
+        } while (CF);
+        al = 6;
+        obj_spawn();
+        (*(db*)raddr(ds, 0x0E450))--;
+        ZF = *(db*)raddr(ds, 0x0E450) == 0;
+        SF = *(db*)raddr(ds, 0x0E450) >> 7;
+    } while ((signed char)*(db*)raddr(ds, 0x0E450) >= 0);
+    al = 0x1F;
+    *(db*)raddr(ds, 0x0E450) = al;
+}
+static void m4_sweep(void) {             /* e1c066 */
+    do {
+        al = *(db*)raddr(ds, 0x0E450);
+        *(db*)raddr(ds, 0x0E3C3) = al;
+        *(db*)raddr(ds, 0x0E3C4) = 6;
+        ax = 0x0E399;
+        *(dw*)(raddr(ds, 0x9730)) = ax;
+        map_rect_write();
+        (*(db*)raddr(ds, 0x0E450))--;
+        ZF = *(db*)raddr(ds, 0x0E450) == 0;
+        SF = *(db*)raddr(ds, 0x0E450) >> 7;
+    } while ((signed char)*(db*)raddr(ds, 0x0E450) >= 0);
+}
+static void m4_beep(void) {              /* e1c098: dead error path */
+    do {
+        speaker_beep();
+        read_key();
+    } while (1);
+}
+static void m4_final_loop(void) {        /* e1c0ab */
+    do {
+        rand_next();
+        al &= 0x1F; CF = 0; OF = 0; ZF = al == 0; SF = al >> 7;
+        *(db*)raddr(ds, 0x0E3C3) = al;
+        *(db*)raddr(ds, 0x0E3C4) = 5;
+        ax = 0x0E1F8;
+        *(dw*)(raddr(ds, 0x9730)) = ax;
+        map_rect_write();
+        (*(db*)raddr(ds, 0x0E450))--;
+        ZF = *(db*)raddr(ds, 0x0E450) == 0;
+        SF = *(db*)raddr(ds, 0x0E450) >> 7;
+    } while ((signed char)*(db*)raddr(ds, 0x0E450) >= 0);
+}
+static void m4_after_sweep(void) {       /* e2a4 wrap + e1c0a0 tail */
+    CF = (dd)*(dw*)raddr(ds, 0x0E2A4) < (dd)0;
+    ZF = (dw)(*(dw*)raddr(ds, 0x0E2A4) - 0) == 0;
+    SF = (dw)(*(dw*)raddr(ds, 0x0E2A4) - 0) >> 15;
+    if (*(dw*)raddr(ds, 0x0E2A4) == 0) {
+        es = seg_draw;
+        push(ds);
+        ds = pop();
+        CF = (dd)ax < (dd)0;
+        ZF = (dw)(ax - 0) == 0;
+        SF = (dw)(ax - 0) >> 15;
+        if (ax == 0)
+            m4_beep();
+    }
+    *(dw*)(raddr(ds, 0x0E2A4)) = 1;
+    al = 0x0C;
+    *(db*)raddr(ds, 0x0E450) = al;
+    m4_final_loop();
+}
+void mission_case4_c(void) {
+    *(db*)raddr(ds, 0x0E3CD) = 0;
+    al = 0;
+    *(db*)raddr(ds, 0x0E3C4) = al;
+    rand_next();
+    al &= 0x0F; CF = 0; OF = 0; ZF = al == 0; SF = al >> 7;
+    { dd t_ = (dd)al + (dd)8; CF = t_ > 0xFF; al = t_;
+      ZF = al == 0; SF = al >> 7; }
+    *(db*)raddr(ds, 0x0E3C3) = al;
+    ax = 0x0E41E;
+    *(dw*)(raddr(ds, 0x9730)) = ax;
+    map_rect_write();
+    al = 0x38;
+    *(db*)raddr(ds, 0x0D834) = al;
+    *(db*)raddr(ds, 0x0D835) = al;
+    al = 5;
+    cell_to_px();
+    al = 0x1B;
+    obj_alloc();
+    rand_map_pos();
+    al = *(db*)raddr(ds, 0x0BE41);
+    { dd t_ = (dd)al + (dd)4; CF = t_ > 0xFF; al = t_;
+      ZF = al == 0; SF = al >> 7; }
+    *(db*)raddr(ds, 0x0E450) = al;
+    mission_case4_e1c03e_c();
+}
+void mission_case4_e1c03e_c(void) {
+    m4_spawn_loop();
+    m4_sweep();
+    m4_after_sweep();
+}
+void mission_case4_e1c066_c(void) {
+    m4_sweep();
+    m4_after_sweep();
+}
+void mission_case4_e1c092_c(void) {
+    ds = pop();
+    CF = (dd)ax < (dd)0;
+    ZF = (dw)(ax - 0) == 0;
+    SF = (dw)(ax - 0) >> 15;
+    if (ax == 0)
+        m4_beep();
+    *(dw*)(raddr(ds, 0x0E2A4)) = 1;
+    al = 0x0C;
+    *(db*)raddr(ds, 0x0E450) = al;
+    m4_final_loop();
+}
+void mission_case4_e1c098_c(void) {
+    m4_beep();
+}
+void mission_case4_e1c0a0_c(void) {
+    *(dw*)(raddr(ds, 0x0E2A4)) = 1;
+    al = 0x0C;
+    *(db*)raddr(ds, 0x0E450) = al;
+    m4_final_loop();
+}
+void mission_case4_e1c0ab_c(void) {
+    m4_final_loop();
+}
+
+/* ---- mission_case6 ---- */
+/* case6: e558=6..0 si-table placements of E530 (col e55a+[si-1AA5],
+   row [si-1A9E]) spawning obj 0x0F on success; es-wrap storing ax at
+   e244 + e2a4++; then be41 reps of E52A at (rand&6)+e55a+4 row 0 with
+   obj 0x0E, ending in rand_map_pos. */
+static void m6_place214(void) {          /* e1c214 body */
+    si = *(dw*)raddr(ds, 0x0E558);
+    al = *(db*)raddr(ds, 0x0E55A);
+    { dd t_ = (dd)al + (dd)*(db*)raddr(ds, si - 0x1AA5); CF = t_ > 0xFF;
+      al = t_; ZF = al == 0; SF = al >> 7; }
+    *(db*)raddr(ds, 0x0E3C3) = al;
+    al = *(db*)raddr(ds, si - 0x1A9E);
+    *(db*)raddr(ds, 0x0E3C4) = al;
+    al = 0x38;
+    *(db*)raddr(ds, 0x0D834) = al;
+    *(db*)raddr(ds, 0x0D835) = al;
+    *(dw*)(raddr(ds, 0x9730)) = 0x0E530;
+    map_rect_write();
+}
+static void m6_spawn214(void) {
+    al = 3;
+    cell_to_px();
+    al = 0x0F;
+    obj_alloc();
+}
+static void m6_wrap(void) {
+    CF = (dd)*(dw*)raddr(ds, 0x0E2A4) < (dd)0;
+    ZF = (dw)(*(dw*)raddr(ds, 0x0E2A4) - 0) == 0;
+    SF = (dw)(*(dw*)raddr(ds, 0x0E2A4) - 0) >> 15;
+    if (*(dw*)raddr(ds, 0x0E2A4) == 0) {
+        es = seg_draw;
+        push(ds);
+        ds = pop();
+        *(dw*)(raddr(ds, 0x0E244)) = ax;
+        (*(dw*)raddr(ds, 0x0E2A4))++;
+        ZF = *(dw*)raddr(ds, 0x0E2A4) == 0;
+        SF = *(dw*)raddr(ds, 0x0E2A4) >> 15;
+    }
+}
+static void m6_col_loop(void) {          /* e1c26e loop + rand_map_pos */
+    do {
+        do {
+            rand_next();
+            al &= 6; CF = 0; OF = 0; ZF = al == 0; SF = al >> 7;
+            { dd t_ = (dd)al + (dd)*(db*)raddr(ds, 0x0E55A);
+              CF = t_ > 0xFF; al = t_; ZF = al == 0; SF = al >> 7; }
+            { dd t_ = (dd)al + (dd)4; CF = t_ > 0xFF; al = t_;
+              ZF = al == 0; SF = al >> 7; }
+            *(db*)raddr(ds, 0x0E3C3) = al;
+            *(db*)raddr(ds, 0x0E3C4) = 0;
+            al = 0x38;
+            *(db*)raddr(ds, 0x0D834) = al;
+            *(db*)raddr(ds, 0x0D835) = al;
+            *(dw*)(raddr(ds, 0x9730)) = 0x0E52A;
+            map_rect_write();
+        } while (CF);
+        al = 2;
+        cell_to_px();
+        al = 0x0E;
+        obj_alloc();
+        (*(dw*)raddr(ds, 0x0E558))--;
+        ZF = *(dw*)raddr(ds, 0x0E558) == 0;
+        SF = *(dw*)raddr(ds, 0x0E558) >> 15;
+    } while ((short)*(dw*)raddr(ds, 0x0E558) >= 0);
+    rand_map_pos();
+}
+static void m6_col_setup(void) {         /* e1c266 */
+    al = *(db*)raddr(ds, 0x0BE41);
+    ah = 0; CF = 0; OF = 0; ZF = 1; SF = 0;
+    *(dw*)(raddr(ds, 0x0E558)) = ax;
+    m6_col_loop();
+}
+void mission_case6_c(void) {
+    *(db*)raddr(ds, 0x0BE59) = 1;
+    rand_next();
+    al &= 0x0F; CF = 0; OF = 0; ZF = al == 0; SF = al >> 7;
+    *(db*)raddr(ds, 0x0E55A) = al;
+    *(dw*)(raddr(ds, 0x0E558)) = 6;
+    mission_case6_e1c214_c();
+}
+void mission_case6_e1c214_c(void) {
+    do {
+        m6_place214();
+        if (!CF)
+            m6_spawn214();
+        (*(dw*)raddr(ds, 0x0E558))--;
+        ZF = *(dw*)raddr(ds, 0x0E558) == 0;
+        SF = *(dw*)raddr(ds, 0x0E558) >> 15;
+    } while ((short)*(dw*)raddr(ds, 0x0E558) >= 0);
+    m6_wrap();
+    m6_col_setup();
+}
+void mission_case6_e1c246_c(void) {
+    for (;;) {
+        do {
+            (*(dw*)raddr(ds, 0x0E558))--;
+            ZF = *(dw*)raddr(ds, 0x0E558) == 0;
+            SF = *(dw*)raddr(ds, 0x0E558) >> 15;
+            if ((short)*(dw*)raddr(ds, 0x0E558) < 0) {
+                m6_wrap();
+                m6_col_setup();
+                return;
+            }
+            m6_place214();
+        } while (CF);
+        m6_spawn214();
+    }
+}
+void mission_case6_e1c25e_c(void) {
+    ds = pop();
+    *(dw*)(raddr(ds, 0x0E244)) = ax;
+    (*(dw*)raddr(ds, 0x0E2A4))++;
+    ZF = *(dw*)raddr(ds, 0x0E2A4) == 0;
+    SF = *(dw*)raddr(ds, 0x0E2A4) >> 15;
+    m6_col_setup();
+}
+void mission_case6_e1c266_c(void) {
+    m6_col_setup();
+}
+void mission_case6_e1c26e_c(void) {
+    m6_col_loop();
+}

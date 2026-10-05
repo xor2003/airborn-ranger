@@ -169082,7 +169082,8 @@ mission_case1_e1bfce:
     /* retn ;~ 01A2:C003 */
     return;
 }
-void mission_case4(void) {
+void mission_case4(void) { mission_case4_c(); }
+void mission_case4_lifted(void) {
     dd _sa = 0, _sb = 0;
     /* mov     al, 0           ; jumptable 0001B475 case 4 ;~ 01A2:C004 */
     /* mov     ds:0E3CDh, al ;~ 01A2:C006 */
@@ -169244,7 +169245,8 @@ mission_case4_e1c0ab:
     /* retn ;~ 01A2:C0C7 */
     return;
 }
-void mission_case4_e1c03e(void) {
+void mission_case4_e1c03e(void) { mission_case4_e1c03e_c(); }
+void mission_case4_e1c03e_lifted(void) {
     dd _sa = 0, _sb = 0;
 mission_case4_e1c03e:
     do {
@@ -169361,7 +169363,8 @@ mission_case4_e1c0ab:
     /* retn ;~ 01A2:C0C7 */
     return;
 }
-void mission_case4_e1c066(void) {
+void mission_case4_e1c066(void) { mission_case4_e1c066_c(); }
+void mission_case4_e1c066_lifted(void) {
     dd _sa = 0, _sb = 0;
 mission_case4_e1c066:
     do {
@@ -169442,7 +169445,8 @@ mission_case4_e1c0ab:
     /* retn ;~ 01A2:C0C7 */
     return;
 }
-void mission_case4_e1c092(void) {
+void mission_case4_e1c092(void) { mission_case4_e1c092_c(); }
+void mission_case4_e1c092_lifted(void) {
     dd _sa = 0, _sb = 0;
     /* pop     ds ;~ 01A2:C092 */
     ds = pop();
@@ -169492,7 +169496,8 @@ mission_case4_e1c0ab:
     /* retn ;~ 01A2:C0C7 */
     return;
 }
-void mission_case4_e1c098(void) {
+void mission_case4_e1c098(void) { mission_case4_e1c098_c(); }
+void mission_case4_e1c098_lifted(void) {
 mission_case4_e1c098:
     do {
         /* call    sub_10B99 ;~ 01A2:C098 */
@@ -169502,7 +169507,8 @@ mission_case4_e1c098:
         /* jmp     short loc_1C098 ;~ 01A2:C09E */
     } while (1);
 }
-void mission_case4_e1c0a0(void) {
+void mission_case4_e1c0a0(void) { mission_case4_e1c0a0_c(); }
+void mission_case4_e1c0a0_lifted(void) {
     dd _sa = 0, _sb = 0;
     /* mov     word ptr ds:0E2A4h, 1 ;~ 01A2:C0A0 */
     *(dw*)(raddr(ds,0x0E2A4)) = 1;
@@ -169536,7 +169542,8 @@ mission_case4_e1c0ab:
     /* retn ;~ 01A2:C0C7 */
     return;
 }
-void mission_case4_e1c0ab(void) {
+void mission_case4_e1c0ab(void) { mission_case4_e1c0ab_c(); }
+void mission_case4_e1c0ab_lifted(void) {
     dd _sa = 0, _sb = 0;
 mission_case4_e1c0ab:
     do {
@@ -170040,7 +170047,8 @@ void mission6_populate_lifted(void) {
     /* retn ;~ 01A2:C200 */
     return;
 }
-void mission_case6(void) {
+void mission_case6(void) { mission_case6_c(); }
+void mission_case6_lifted(void) {
     dd _sa = 0, _sb = 0;
     /* mov     byte ptr ds:0BE59h, 1 ; jumptable 0001B475 case 6 ;~ 01A2:C201 */
     *(db*)raddr(ds,0x0BE59) = 1;
@@ -170166,7 +170174,8 @@ mission_case6_e1c26e:
     /* retn ;~ 01A2:C2A7 */
     return;
 }
-void mission_case6_e1c214(void) {
+void mission_case6_e1c214(void) { mission_case6_e1c214_c(); }
+void mission_case6_e1c214_lifted(void) {
     dd _sa = 0, _sb = 0;
 mission_case6_e1c214:
     do {
@@ -170282,7 +170291,8 @@ mission_case6_e1c26e:
     /* retn ;~ 01A2:C2A7 */
     return;
 }
-void mission_case6_e1c246(void) {
+void mission_case6_e1c246(void) { mission_case6_e1c246_c(); }
+void mission_case6_e1c246_lifted(void) {
     dd _sa = 0, _sb = 0;
 mission_case6_e1c246:
     do {
@@ -170400,7 +170410,8 @@ mission_case6_e1c214:
         obj_alloc();
     } while (1);
 }
-void mission_case6_e1c25e(void) {
+void mission_case6_e1c25e(void) { mission_case6_e1c25e_c(); }
+void mission_case6_e1c25e_lifted(void) {
     dd _sa = 0, _sb = 0;
     /* pop     ds ;~ 01A2:C25E */
     ds = pop();
@@ -170462,7 +170473,8 @@ mission_case6_e1c26e:
     /* retn ;~ 01A2:C2A7 */
     return;
 }
-void mission_case6_e1c266(void) {
+void mission_case6_e1c266(void) { mission_case6_e1c266_c(); }
+void mission_case6_e1c266_lifted(void) {
     dd _sa = 0, _sb = 0;
     /* mov     al, ds:0BE41h ;~ 01A2:C266 */
     al = *(db*)raddr(ds,0x0BE41);
@@ -170517,7 +170529,8 @@ mission_case6_e1c26e:
     /* retn ;~ 01A2:C2A7 */
     return;
 }
-void mission_case6_e1c26e(void) {
+void mission_case6_e1c26e(void) { mission_case6_e1c26e_c(); }
+void mission_case6_e1c26e_lifted(void) {
     dd _sa = 0, _sb = 0;
 mission_case6_e1c26e:
     do {

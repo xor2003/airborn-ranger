@@ -1913,12 +1913,17 @@ int main(void){
             {0xE432,2,2}, {0xE443,2,2}, {0xE5D8,2,2}, {0xE5C4,2,2}, \
             {0xE683,1,1}, {0xE3B6,2,2}, {0xE5A2,2,2}, {0xE591,2,2}, \
             {0xE5B0,1,2}, {0xE5B4,2,2}, {0xE5BE,1,1}, {0xE5C1,1,1}, \
-            {0xE2B9,2,2} }; \
-        for (int i = 0; i < 13; i++) { \
+            {0xE2B9,2,2}, {0xE1F8,2,2}, {0xE399,2,2}, {0xE41E,2,2}, \
+            {0xE451,2,2}, {0xE52A,2,2}, {0xE530,2,2} }; \
+        for (int i = 0; i < 19; i++) { \
             db *r7 = (db*)raddr_(ds, rofs[i][0]); \
             r7[0] = (db)rofs[i][1]; r7[1] = (db)rofs[i][2]; \
             for (int j = 0; j < (int)rofs[i][1] * (int)rofs[i][2]; j++) \
                 r7[2 + j] = (j == 0) ? 0x2d : 0xff; \
+        } \
+        for (int i = 0; i < 7; i++) { \
+            *(db*)raddr_(ds, 0xE55B + i) = (db)(i * 2); \
+            *(db*)raddr_(ds, 0xE562 + i) = (db)(i * 8); \
         } \
     } while (0)
 #define clrmap() clrmc()
@@ -2039,6 +2044,70 @@ int main(void){
         *(dw*)raddr_(ds, 0x0E2A4) = 0;
         rand_s0 = 0x1357; rand_s1 = 0x2468;
         ab_res("case5 94a", mission_case5_e1c94a_lifted, mission_case5_e1c94a, 0);
+        /* case4: E41E hq, E451 spawn reps, E399 sweep, E1F8 final loop */
+        clrmap();
+        *(db*)raddr_(ds, 0x0BE41) = 1;
+        *(dw*)raddr_(ds, 0x0E2A4) = 0;
+        rand_s0 = 0x1357; rand_s1 = 0x2468;
+        ab_res("case4", mission_case4_lifted, mission_case4, 0);
+        clrmap();
+        *(db*)raddr_(ds, 0x0E450) = 2;
+        *(dw*)raddr_(ds, 0x0E2A4) = 0;
+        rand_s0 = 0x1357; rand_s1 = 0x2468;
+        ab_res("case4 03e", mission_case4_e1c03e_lifted, mission_case4_e1c03e, 0);
+        clrmap();
+        *(db*)raddr_(ds, 0x0E450) = 4;
+        *(dw*)raddr_(ds, 0x0E2A4) = 0;
+        rand_s0 = 0x1357; rand_s1 = 0x2468;
+        ab_res("case4 066", mission_case4_e1c066_lifted, mission_case4_e1c066, 0);
+        clrmap();
+        ss = 0x8000; sp = 0xFFFE;
+        push(ds); ax = 0x1234;
+        *(dw*)raddr_(ds, 0x0E2A4) = 0;
+        rand_s0 = 0x1357; rand_s1 = 0x2468;
+        ab_res("case4 092", mission_case4_e1c092_lifted, mission_case4_e1c092, 0);
+        /* e1c098 is the infinite speaker_beep/read_key error loop — untestable */
+        clrmap();
+        rand_s0 = 0x1357; rand_s1 = 0x2468;
+        ab_res("case4 0a0", mission_case4_e1c0a0_lifted, mission_case4_e1c0a0, 0);
+        clrmap();
+        *(db*)raddr_(ds, 0x0E450) = 2;
+        rand_s0 = 0x1357; rand_s1 = 0x2468;
+        ab_res("case4 0ab", mission_case4_e1c0ab_lifted, mission_case4_e1c0ab, 0);
+        /* case6: E530 si-table placements, E52A col reps, rand_map_pos */
+        clrmap();
+        *(db*)raddr_(ds, 0x0BE41) = 1;
+        *(dw*)raddr_(ds, 0x0E2A4) = 0;
+        rand_s0 = 0x1357; rand_s1 = 0x2468;
+        ab_res("case6", mission_case6_lifted, mission_case6, 0);
+        clrmap();
+        *(dw*)raddr_(ds, 0x0E558) = 2;
+        *(db*)raddr_(ds, 0x0E55A) = 3;
+        *(dw*)raddr_(ds, 0x0E2A4) = 0;
+        rand_s0 = 0x1357; rand_s1 = 0x2468;
+        ab_res("case6 214", mission_case6_e1c214_lifted, mission_case6_e1c214, 0);
+        clrmap();
+        *(dw*)raddr_(ds, 0x0E558) = 2;
+        *(db*)raddr_(ds, 0x0E55A) = 3;
+        *(db*)raddr_(ds, 0x0BE41) = 1;
+        *(dw*)raddr_(ds, 0x0E2A4) = 0;
+        rand_s0 = 0x1357; rand_s1 = 0x2468;
+        ab_res("case6 246", mission_case6_e1c246_lifted, mission_case6_e1c246, 0);
+        clrmap();
+        ss = 0x8000; sp = 0xFFFE;
+        push(ds); ax = 0x77;
+        *(db*)raddr_(ds, 0x0BE41) = 1;
+        rand_s0 = 0x1357; rand_s1 = 0x2468;
+        ab_res("case6 25e", mission_case6_e1c25e_lifted, mission_case6_e1c25e, 0);
+        clrmap();
+        *(db*)raddr_(ds, 0x0BE41) = 1;
+        rand_s0 = 0x1357; rand_s1 = 0x2468;
+        ab_res("case6 266", mission_case6_e1c266_lifted, mission_case6_e1c266, 0);
+        clrmap();
+        *(dw*)raddr_(ds, 0x0E558) = 1;
+        *(db*)raddr_(ds, 0x0E55A) = 3;
+        rand_s0 = 0x1357; rand_s1 = 0x2468;
+        ab_res("case6 26e", mission_case6_e1c26e_lifted, mission_case6_e1c26e, 0);
 #undef clrmap
         ds = dsc;
         fprintf(stderr, "  (mission leaf: lifted vs C, %d checks)\n", checks);
